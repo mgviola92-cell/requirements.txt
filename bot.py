@@ -892,15 +892,30 @@ def sticker_spam_filter(message):
 # 🛡️ END OF GROUP MANAGEMENT SYSTEM
 # =========================================================
 
-print("ဘော့ အလုပ်လုပ်နေပါပြီ။")
+from flask import Flask
+import threading
 
-while True:
-    try:
-        bot.infinity_polling(
-            timeout=30,
-            long_polling_timeout=30
-        )
-    except Exception as e:
-        print(f"⚠️ Connection Error: {e}")
-        print("🔄 Telegram ကို ပြန်ချိတ်နေပါတယ်...")
-        time.sleep(10)
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot server is running!"
+
+def run_bot():
+    print("ဘော့ အလုပ်လုပ်နေပါပြီ။")
+    while True:
+        try:
+            bot.infinity_polling(
+                timeout=30,
+                long_polling_timeout=30
+            )
+        except Exception as e:
+            print(f"⚠️ Connection Error: {e}")
+            print("🔄 Telegram ကို ပြန်ချိတ်နေပါတယ်...")
+            time.sleep(10)
+
+threading.Thread(target=run_bot, daemon=True).start()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
