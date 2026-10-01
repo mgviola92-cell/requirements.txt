@@ -6,7 +6,7 @@ import os
 import threading
 from telebot.types import ChatPermissions
 
-BOT_TOKEN = os.getenv("8956351614:AAFtAaY7qxcFufuFoxraPBcRku40PpgVwAA")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ကိုယ်ပေါ်စေချင်တဲ့ အီမိုဂျီများကို ဒီထဲမှာ စိုက်ကြိုက် ပြောင်းလဲနိုင်ပါတယ်
