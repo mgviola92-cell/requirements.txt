@@ -1696,7 +1696,7 @@ def eight_ball_command(message):
 
 
 # =========================================================
-# 4. GUESS
+# 4. GUESS - MULTIPLAYER
 # =========================================================
 
 guess_games = {}
@@ -1705,18 +1705,36 @@ guess_games = {}
 @bot.message_handler(commands=["guess", "ခန့်မှန်း"])
 def guess_command(message):
 
+    if message.chat.type not in ["group", "supergroup"]:
+        reply_game_message(
+            message,
+            "❌ Group ထဲမှာပဲ Guess Game ကစားလို့ရပါတယ်။"
+        )
+        return
+
     delay_delete_message(
         message.chat.id,
         message.message_id,
         GAME_DELETE_TIME
     )
 
-    key = (
-        message.chat.id,
-        message.from_user.id
-    )
+    # Game တစ်ခုကို Group တစ်ခုအတွက်ပဲထားမယ်
+    chat_id = message.chat.id
 
-    guess_games[key] = {
+    # လက်ရှိ game ရှိပြီးသားဆိုရင် အသစ်မစ
+    if chat_id in guess_games:
+
+        reply_game_message(
+            message,
+            "🎯 Guess Game ကစားနေပြီးသားပါ။\n\n"
+            "👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရပါတယ်။\n"
+            "🏆 တစ်ယောက်မှန်သွားရင် Game ပြီးပါပြီ။"
+        )
+
+        return
+
+    # Game အသစ်
+    guess_games[chat_id] = {
 
         "number": random.randint(
             1,
@@ -1733,7 +1751,9 @@ def guess_command(message):
         "🎯 GUESS GAME စပြီ!\n\n"
         "1 ကနေ 100 အတွင်းက number "
         "တစ်ခု ငါရွေးထားပြီ။\n\n"
-        "🔢 မင်းခန့်မှန်းတဲ့ number ကို ပို့ပါ။"
+        "👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရတယ်။\n"
+        "🔢 1 ကနေ 100 အတွင်းက number ပို့ပါ။\n\n"
+        "🏆 အရင်ဆုံးမှန်တဲ့သူက Winner!"
     )
 
 
@@ -1744,12 +1764,11 @@ def guess_command(message):
 )
 def guess_number(message):
 
-    key = (
-        message.chat.id,
-        message.from_user.id
-    )
+    chat_id = message.chat.id
 
-    if key not in guess_games:
+    # ဒီ Group မှာ Guess Game မရှိရင်
+    # ပုံမှန် number message အနေနဲ့ပဲထားမယ်
+    if chat_id not in guess_games:
         return
 
     try:
@@ -1771,31 +1790,60 @@ def guess_number(message):
 
         return
 
-    # User guess message ကို 2 minutes နောက်ဖျက်
+    # Guess message ကို ဖျက်မယ်
     delay_delete_message(
         message.chat.id,
         message.message_id,
         GAME_DELETE_TIME
     )
 
-    game = guess_games[key]
+    game = guess_games[chat_id]
 
+    # Group တစ်ခုလုံးရဲ့ total attempts
     game["tries"] += 1
 
     target = game["number"]
 
+    # =====================================================
+    # CORRECT
+    # =====================================================
+
     if number == target:
+
+        winner = message.from_user
+
+        # Username ရှိရင် username ပြမယ်
+        if winner.username:
+
+            winner_display = f"@{winner.username}"
+
+        else:
+
+            # Username မရှိရင် clickable mention
+            winner_name = winner.first_name or "Winner"
+
+            winner_display = (
+                f"<a href='tg://user?id={winner.id}'>"
+                f"{winner_name}"
+                f"</a>"
+            )
 
         reply_game_message(
             message,
             f"🎯 CORRECT!\n\n"
             f"🏆 Number က {target} ပါ!\n"
-            f"📊 {game['tries']} ကြိမ်နဲ့ မှန်သွားပြီ!"
+            f"📊 {game['tries']} ကြိမ်နဲ့ မှန်သွားပြီ!\n\n"
+            f"👑 Winner — {winner_display}"
         )
 
-        del guess_games[key]
+        # Game ပြီးသွားပြီ
+        del guess_games[chat_id]
 
         return
+
+    # =====================================================
+    # TOO LOW
+    # =====================================================
 
     if number < target:
 
@@ -1803,6 +1851,10 @@ def guess_number(message):
             message,
             "📈 ပိုကြီးတဲ့ number ဖြစ်တယ်။"
         )
+
+    # =====================================================
+    # TOO HIGH
+    # =====================================================
 
     else:
 
@@ -1817,7 +1869,6 @@ def guess_number(message):
 # =========================================================
 
 RANDOM_MESSAGES = [
-
     "😂 ဒီနံပါတ်ကို ကံကြမ္မာက ရွေးလိုက်တယ်။",
     "🤣 Random က random ပဲကွာ။",
     "😎 ဒီနေ့ lucky number ဖြစ်နိုင်တယ်။",
@@ -1841,7 +1892,6 @@ RANDOM_MESSAGES = [
 ]
 
 RANDOM_BASE = [
-
     "ကံကြမ္မာက ဒီနံပါတ်ကို ရွေးလိုက်တယ်",
     "ဒီနေ့အတွက် random result က ဒါပဲ",
     "မင်းရဲ့ random number ရောက်လာပြီ",
@@ -1864,21 +1914,17 @@ RANDOM_BASE = [
     "Random machine ရဲ့ decision က ဒါပဲ"
 ]
 
+# Base + Reaction ပေါင်းပြီး message အသစ်တွေ ဖန်တီးမယ်
+GENERATED_RANDOM_MESSAGES = []
+
 for base in RANDOM_BASE:
-
     for reaction in RANDOM_MESSAGES:
-
-        if len(RANDOM_MESSAGES) >= 200:
-            break
-
-        RANDOM_MESSAGES.append(
-            f" {base} — {reaction}"
+        GENERATED_RANDOM_MESSAGES.append(
+            f"{base} — {reaction}"
         )
 
-    if len(RANDOM_MESSAGES) >= 200:
-        break
-
-RANDOM_MESSAGES = RANDOM_MESSAGES[:200]
+# 20 × 20 = 400 ဖြစ်တဲ့အတွက် ပထမ 200 ခုကိုပဲယူမယ်
+RANDOM_MESSAGES = GENERATED_RANDOM_MESSAGES[:200]
 
 
 @bot.message_handler(commands=["random", "ကျပမ်း"])
@@ -1890,14 +1936,9 @@ def random_command(message):
         GAME_DELETE_TIME
     )
 
-    number = random.randint(
-        1,
-        100
-    )
+    number = random.randint(1, 100)
 
-    reaction = random.choice(
-        RANDOM_MESSAGES
-    )
+    reaction = random.choice(RANDOM_MESSAGES)
 
     reply_game_message(
         message,
@@ -1979,7 +2020,7 @@ def id_command(message):
 # 8. ADMINS - 4 MINUTES
 # =========================================================
 
-@bot.message_handler(commands=["admins", "အက်မင်များ"])
+@bot.message_handler(commands=["admins", "အက်မင်"])
 def admins_command(message):
 
     delay_delete_message(
