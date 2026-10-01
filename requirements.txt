@@ -3,3 +3,4 @@ py-tgcalls
 Pyrogram
 tgcrypto
 yt-dlp
+flask
