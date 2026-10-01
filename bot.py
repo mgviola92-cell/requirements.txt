@@ -586,7 +586,7 @@ def unmute_user(message):
 # NEW 11 FUNCTIONS - FINAL VERSION
 # =========================================================
 
-GAME_DELETE_TIME = 80
+GAME_DELETE_TIME = 120
 INFO_DELETE_TIME = 180
 WELCOME_DELETE_TIME = 240
 
@@ -857,8 +857,6 @@ def coin_command(message):
                 f"နှစ်ယောက်လုံးက\n"
                 f"🔴 ခေါင်း / 🔵 အမြီး\n"
                 f"ထဲက တစ်ခုရွေးပါ။\n\n"
-                f"🔒 Choice message ကို "
-                f"{GAME_DELETE_TIME} စက္ကန့်နောက် ဖျက်မယ်။\n"
                 f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
             )
 
@@ -1005,8 +1003,6 @@ def coin_command(message):
             f"နှစ်ယောက်လုံးက\n"
             f"🔴 ခေါင်း / 🔵 အမြီး\n"
             f"ထဲက တစ်ခုရွေးပါ။\n\n"
-            f"🔒 Choice message ကို "
-            f"{GAME_DELETE_TIME} စက္ကန့်နောက် ဖျက်မယ်။\n"
             f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
         )
 
@@ -1086,7 +1082,7 @@ def coin_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 1 choice သိမ်းထားပြီ။"
+            "🔒 Player 1 choice ပြီးပြီ။"
         )
 
     # -----------------------------------------------------
@@ -1108,7 +1104,7 @@ def coin_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 2 choice သိမ်းထားပြီ။"
+            "🔒 Player 2 choice ပြီးပြီ။"
         )
 
     # -----------------------------------------------------
@@ -1598,7 +1594,7 @@ def rps_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 1 choice သိမ်းထားပြီ။"
+            "🔒 Player 1 choice ပြီးပြီ။"
         )
 
     # -----------------------------------------------------
@@ -1620,7 +1616,7 @@ def rps_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 2 choice သိမ်းထားပြီ။"
+            "🔒 Player 2 choice ပြီးပြီ။"
         )
 
     # -----------------------------------------------------
@@ -1782,9 +1778,9 @@ def eight_ball_command(message):
 
         reply_game_message(
             message,
-            "🎱 မေးခွန်းထည့်ပြီးမေးဟ လီလား\n\n"
+            "🎱 မေးခွန်းထည့်ပြီးမေးဟ လီလားး\n\n"
             "ဥပမာ\n"
-            "/8ball ဒီနေ့ကံကောင်းမလား?"
+            "/ဗေဒင် ရီးဇားဟောင်းပြန်လာမှာလား?"
         )
 
         return
