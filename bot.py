@@ -582,204 +582,264 @@ def unmute_user(message):
         )
 
 
-# =========================
-# RPS GAME
-# =========================
+# =========================================================
+# NEW 11 FUNCTIONS
+# =========================================================
 
-import random
-import time
+# ---------------------------------------------------------
+# COMMON GAME SETTINGS
+# ---------------------------------------------------------
 
-RPS_CHOICES = ["ကျောက်", "စာရွက်", "ကတ်ကြေး"]
+BOT_START_TIME = time.time()
 
-# Active games
-# game_id -> game information
-rps_games = {}
+# =========================================================
+# 1. COIN FLIP
+# =========================================================
 
+coin_games = {}
 
-def rps_winner(p1, p2):
-    if p1 == p2:
-        return "draw"
-
-    if (
-        (p1 == "ကျောက်" and p2 == "ကတ်ကြေး")
-        or (p1 == "စာရွက်" and p2 == "ကျောက်")
-        or (p1 == "ကတ်ကြေး" and p2 == "စာရွက်")
-    ):
-        return "p1"
-
-    return "p2"
+COIN_ALIASES = {
+    "ခေါင်း": "Heads",
+    "အမြီး": "Tails",
+    "heads": "Heads",
+    "tails": "Tails"
+}
 
 
-def rps_bot_choice():
-    return random.choice(RPS_CHOICES)
+def flip_coin():
+    return random.choice(["Heads", "Tails"])
 
 
-# -------------------------
-# /rps command
-# -------------------------
+def find_coin_games_for_user(chat_id, user):
+    games = []
 
-@bot.message_handler(commands=["rps"])
-def rps_command(message):
+    for game_id, game in coin_games.items():
+
+        if game["chat_id"] != chat_id:
+            continue
+
+        if user.id == game["challenger_id"]:
+            games.append((game_id, game, "challenger"))
+
+        elif game["target_id"] is not None:
+            if user.id == game["target_id"]:
+                games.append((game_id, game, "target"))
+
+        elif (
+            game["target_username"]
+            and user.username
+            and user.username.lower()
+            == game["target_username"].lower()
+        ):
+            games.append((game_id, game, "target"))
+
+    return games
+
+
+@bot.message_handler(commands=["coin"])
+def coin_command(message):
 
     args = message.text.split()
 
-    # /rps only
+    # -----------------------------------------
+    # /coin
+    # -----------------------------------------
+
     if len(args) == 1:
+
         bot.reply_to(
             message,
-            "🎮 RPS ကစားမယ်!\n\n"
+            "🪙 COIN FLIP\n\n"
             "🤖 Bot နဲ့ကစားရန်\n"
-            "/rps ကျောက်\n"
-            "/rps စာရွက်\n"
-            "/rps ကတ်ကြေး\n\n"
+            "/coin ခေါင်း\n"
+            "/coin အမြီး\n\n"
             "👤 သူငယ်ချင်းနဲ့ကစားရန်\n"
-            "/rps @username"
+            "/coin @username\n\n"
+            "👤 Username မရှိရင်\n"
+            "သူ့ message ကို Reply လုပ်ပြီး /coin"
         )
         return
 
-    choice = args[1]
+    choice = args[1].lower()
 
-    # -------------------------
+    # -----------------------------------------
     # Player vs Bot
-    # -------------------------
+    # -----------------------------------------
 
-    if choice in RPS_CHOICES:
+    if choice in COIN_ALIASES:
 
-        player_choice = choice
-        bot_choice = rps_bot_choice()
+        player_choice = COIN_ALIASES[choice]
+        result = flip_coin()
 
-        result = rps_winner(player_choice, bot_choice)
+        if player_choice == result:
 
-        if result == "draw":
-            result_text = "🤝 သရေကျတယ်!"
-
-        elif result == "p1":
-            result_text = "🎉 မင်းနိုင်တယ်!"
+            result_text = "🎉 မင်းမှန်တယ်!"
 
         else:
-            result_text = "🤖 Bot နိုင်သွားပြီ!"
+
+            result_text = "😂 မမှန်ဘူး!"
 
         bot.reply_to(
             message,
-            f"🎮 Rock Paper Scissors\n\n"
+            f"🪙 COIN FLIP\n\n"
             f"👤 မင်း — {player_choice}\n"
-            f"🤖 Bot — {bot_choice}\n\n"
+            f"🪙 Coin — {result}\n\n"
             f"{result_text}"
         )
+
         return
 
-    # -------------------------
+    # -----------------------------------------
     # Player vs Player
-    # -------------------------
+    # -----------------------------------------
 
     if choice.startswith("@"):
 
-        target_username = choice[1:].lower()
-
-        if not target_username:
-            bot.reply_to(message, "❌ Username ထည့်ပေးပါ။")
-            return
-
-        challenger_id = message.from_user.id
-        chat_id = message.chat.id
-
-        game_id = f"{chat_id}_{challenger_id}_{target_username}"
-
-        # Same game already exists
-        if game_id in rps_games:
+        if message.chat.type not in [
+            "group",
+            "supergroup"
+        ]:
             bot.reply_to(
                 message,
-                "⚠️ ဒီလူနဲ့ RPS game တစ်ခု ရှိပြီးသားပါ။"
+                "❌ လူချင်း Coin ကစားတာကို Group ထဲမှာပဲ သုံးပါ။"
             )
             return
 
-        rps_games[game_id] = {
-            "chat_id": chat_id,
-            "challenger_id": challenger_id,
-            "target_username": target_username,
-            "challenger_choice": None,
-            "target_choice": None,
+        target_username = choice[1:].strip().lower()
+
+        if not target_username:
+
+            bot.reply_to(
+                message,
+                "❌ Username ထည့်ပေးပါ။"
+            )
+            return
+
+        challenger = message.from_user
+
+        if (
+            challenger.username
+            and challenger.username.lower()
+            == target_username
+        ):
+            bot.reply_to(
+                message,
+                "😂 ကိုယ့်ကိုယ်ကို challenge လုပ်လို့မရဘူး။"
+            )
+            return
+
+        # Same challenger already has an active game
+        for game in coin_games.values():
+
+            if (
+                game["chat_id"] == message.chat.id
+                and game["challenger_id"] == challenger.id
+            ):
+                bot.reply_to(
+                    message,
+                    "⚠️ မင်းမှာ Coin game တစ်ခု ရှိပြီးသားပါ။\n"
+                    "အရင် game ပြီးအောင်ကစားပါ။"
+                )
+                return
+
+        game_id = (
+            f"coin_{message.chat.id}_"
+            f"{challenger.id}_"
+            f"{target_username}"
+        )
+
+        coin_games[game_id] = {
+
+            "chat_id": message.chat.id,
+
+            "challenger_id": challenger.id,
+
             "target_id": None,
+
+            "target_username": target_username,
+
+            "challenger_choice": None,
+
+            "target_choice": None,
+
             "created": time.time()
         }
 
         bot.reply_to(
             message,
-            f"🥊 RPS Challenge!\n\n"
-            f"👤 @{message.from_user.username or 'Player'}\n"
+            f"🪙 COIN CHALLENGE!\n\n"
+            f"👤 {challenger.first_name}\n"
             f"⚔️ vs @{target_username}\n\n"
             f"နှစ်ယောက်လုံးက\n"
-            f"ကျောက် / စာရွက် / ကတ်ကြေး\n"
-            f"ထဲက တစ်ခုကို chat ထဲပို့ပါ။\n\n"
-            f"🔒 နှစ်ယောက်လုံးရွေးပြီးမှ result ပြမယ်!"
+            f"🟢 ခေါင်း / 🔵 အမြီး\n"
+            f"ထဲက တစ်ခု ပို့ပါ။\n\n"
+            f"🔒 Choice ကို ချက်ချင်းဖျက်ပြီး\n"
+            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်!"
         )
+
         return
 
-    # Invalid input
     bot.reply_to(
         message,
-        "❌ မမှန်တဲ့ command ပါ။\n\n"
-        "/rps ကျောက်\n"
-        "/rps စာရွက်\n"
-        "/rps ကတ်ကြေး\n"
-        "သို့မဟုတ်\n"
-        "/rps @username"
+        "❌ Command မမှန်ပါ။\n\n"
+        "/coin ခေါင်း\n"
+        "/coin အမြီး\n"
+        "/coin @username"
     )
 
 
-# -------------------------
-# Player choices
-# -------------------------
-
 @bot.message_handler(
-    func=lambda message: message.text and message.text.strip() in RPS_CHOICES
+    func=lambda message:
+    message.text
+    and message.text.strip().lower()
+    in ["ခေါင်း", "အမြီး", "heads", "tails"]
 )
-def rps_player_choice(message):
+def coin_player_choice(message):
 
-    choice = message.text.strip()
-    user = message.from_user
-    chat_id = message.chat.id
-
-    # Find games in THIS chat only
-    possible_games = []
-
-    for game_id, game in rps_games.items():
-
-        if game["chat_id"] != chat_id:
-            continue
-
-        # Challenger
-        if user.id == game["challenger_id"]:
-            possible_games.append((game_id, game, "challenger"))
-            continue
-
-        # Target
-        username = user.username
-
-        if (
-            username
-            and username.lower() == game["target_username"]
-        ):
-            possible_games.append((game_id, game, "target"))
-
-    # No active game
-    if not possible_games:
+    if message.chat.type not in [
+        "group",
+        "supergroup"
+    ]:
         return
 
-    # If multiple games exist, don't guess which one
-    if len(possible_games) > 1:
-        bot.reply_to(
-            message,
-            "⚠️ မင်းမှာ RPS game အများကြီးရှိနေတယ်။ "
-            "Game တစ်ခုချင်းစီပြီးအောင် အရင်ကစားပါ။"
+    games = find_coin_games_for_user(
+        message.chat.id,
+        message.from_user
+    )
+
+    if not games:
+        return
+
+    # Avoid guessing if user is in multiple games
+    if len(games) > 1:
+        return
+
+    game_id, game, player_type = games[0]
+
+    choice = COIN_ALIASES[
+        message.text.strip().lower()
+    ]
+
+    # -----------------------------------------
+    # DELETE CHOICE MESSAGE IMMEDIATELY
+    # -----------------------------------------
+
+    try:
+
+        bot.delete_message(
+            message.chat.id,
+            message.message_id
         )
-        return
 
-    game_id, game, player_type = possible_games[0]
+    except Exception as e:
 
-    # -------------------------
-    # Challenger choice
-    # -------------------------
+        print(
+            f"⚠️ Coin choice delete failed: {e}"
+        )
+
+    # -----------------------------------------
+    # Challenger
+    # -----------------------------------------
 
     if player_type == "challenger":
 
@@ -788,33 +848,525 @@ def rps_player_choice(message):
 
         game["challenger_choice"] = choice
 
-        bot.reply_to(
-            message,
-            "🔒 မင်းရဲ့ choice ကို သိမ်းထားပြီ။\n"
-            "တစ်ဖက်လူရွေးပြီးမှ result ပြမယ်။"
+        bot.send_message(
+            message.chat.id,
+            "🔒 Player 1 ရဲ့ choice ကို သိမ်းထားပြီ။"
         )
 
-    # -------------------------
-    # Target choice
-    # -------------------------
+    # -----------------------------------------
+    # Target
+    # -----------------------------------------
 
-    elif player_type == "target":
+    else:
 
         if game["target_choice"] is not None:
             return
 
         game["target_choice"] = choice
-        game["target_id"] = user.id
+
+        game["target_id"] = message.from_user.id
+
+        bot.send_message(
+            message.chat.id,
+            "🔒 Player 2 ရဲ့ choice ကို သိမ်းထားပြီ။"
+        )
+
+    # -----------------------------------------
+    # BOTH CHOSE
+    # -----------------------------------------
+
+    if (
+        game["challenger_choice"] is not None
+        and game["target_choice"] is not None
+    ):
+
+        result = flip_coin()
+
+        p1 = game["challenger_choice"]
+        p2 = game["target_choice"]
+
+        p1_correct = p1 == result
+        p2_correct = p2 == result
+
+        if p1_correct and p2_correct:
+
+            winner_text = (
+                "🤝 နှစ်ယောက်လုံးမှန်တယ်!"
+            )
+
+        elif p1_correct:
+
+            winner_text = (
+                "🏆 Challenger နိုင်တယ်!"
+            )
+
+        elif p2_correct:
+
+            winner_text = (
+                "🏆 Target player နိုင်တယ်!"
+            )
+
+        else:
+
+            winner_text = (
+                "😂 နှစ်ယောက်လုံး မမှန်ဘူး!"
+            )
+
+        bot.send_message(
+            message.chat.id,
+            f"🪙 COIN RESULT\n\n"
+            f"👤 Challenger — {p1}\n"
+            f"👤 Target — {p2}\n\n"
+            f"🪙 Coin — {result}\n\n"
+            f"{winner_text}"
+        )
+
+        del coin_games[game_id]
+
+
+# =========================================================
+# 2. RPS
+# =========================================================
+
+rps_games = {}
+
+RPS_ALIASES = {
+
+    "ကျောက်": "ကျောက်",
+
+    "ကျောက်တုံး": "ကျောက်",
+
+    "rock": "ကျောက်",
+
+    "စာရွက်": "စာရွက်",
+
+    "paper": "စာရွက်",
+
+    "ကတ်ကြေး": "ကတ်ကြေး",
+
+    "ကတ်ကြေး": "ကတ်ကြေး",
+
+    "scissors": "ကတ်ကြေး"
+}
+
+
+def rps_winner(player1, player2):
+
+    if player1 == player2:
+        return "draw"
+
+    if (
+        (player1 == "ကျောက်"
+         and player2 == "ကတ်ကြေး")
+        or
+        (player1 == "စာရွက်"
+         and player2 == "ကျောက်")
+        or
+        (player1 == "ကတ်ကြေး"
+         and player2 == "စာရွက်")
+    ):
+        return "p1"
+
+    return "p2"
+
+
+def find_rps_games_for_user(chat_id, user):
+
+    games = []
+
+    for game_id, game in rps_games.items():
+
+        if game["chat_id"] != chat_id:
+            continue
+
+        if user.id == game["challenger_id"]:
+
+            games.append(
+                (game_id, game, "challenger")
+            )
+
+        elif game["target_id"] is not None:
+
+            if user.id == game["target_id"]:
+
+                games.append(
+                    (game_id, game, "target")
+                )
+
+        elif (
+            game["target_username"]
+            and user.username
+            and user.username.lower()
+            == game["target_username"].lower()
+        ):
+
+            games.append(
+                (game_id, game, "target")
+            )
+
+    return games
+
+
+@bot.message_handler(commands=["rps"])
+def rps_command(message):
+
+    args = message.text.split()
+
+    # =====================================================
+    # REPLY -> /rps
+    # =====================================================
+
+    if (
+        len(args) == 1
+        and message.reply_to_message
+    ):
+
+        target = (
+            message.reply_to_message.from_user
+        )
+
+        challenger = message.from_user
+
+        if target.is_bot:
+
+            bot.reply_to(
+                message,
+                "❌ Bot ကို Player vs Player RPS "
+                "challenge လုပ်လို့မရပါ။"
+            )
+            return
+
+        if target.id == challenger.id:
+
+            bot.reply_to(
+                message,
+                "😂 ကိုယ့်ကိုယ်ကို challenge "
+                "လုပ်လို့မရဘူး။"
+            )
+            return
+
+        # Challenger already has a game
+        for game in rps_games.values():
+
+            if (
+                game["chat_id"] == message.chat.id
+                and game["challenger_id"]
+                == challenger.id
+            ):
+
+                bot.reply_to(
+                    message,
+                    "⚠️ မင်းမှာ RPS game ရှိပြီးသားပါ။\n"
+                    "အရင် game ပြီးအောင်ကစားပါ။"
+                )
+                return
+
+        game_id = (
+            f"rps_reply_{message.chat.id}_"
+            f"{challenger.id}_{target.id}"
+        )
+
+        rps_games[game_id] = {
+
+            "chat_id": message.chat.id,
+
+            "challenger_id": challenger.id,
+
+            "target_id": target.id,
+
+            "target_username": None,
+
+            "challenger_choice": None,
+
+            "target_choice": None,
+
+            "created": time.time()
+        }
 
         bot.reply_to(
             message,
-            "🔒 မင်းရဲ့ choice ကို သိမ်းထားပြီ။\n"
-            "နှစ်ယောက်လုံးရွေးပြီးပြီဆို result ပြမယ်။"
+            f"✊ RPS CHALLENGE!\n\n"
+            f"👤 {challenger.first_name}\n"
+            f"⚔️ vs {target.first_name}\n\n"
+            f"ကျောက် / ကျောက်တုံး\n"
+            f"စာရွက် / ကတ်ကြေး\n"
+            f"ထဲက တစ်ခုစီ ပို့ပါ။\n\n"
+            f"🔒 Choice ကို ချက်ချင်းဖျက်မယ်။\n"
+            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်!"
         )
 
-    # -------------------------
-    # Both players selected
-    # -------------------------
+        return
+
+    # =====================================================
+    # /rps ONLY
+    # =====================================================
+
+    if len(args) == 1:
+
+        bot.reply_to(
+            message,
+            "✊ RPS\n\n"
+            "🤖 Bot နဲ့ကစားရန်\n"
+            "/rps ကျောက်\n"
+            "/rps စာရွက်\n"
+            "/rps ကတ်ကြေး\n\n"
+            "👤 Username ရှိရင်\n"
+            "/rps @username\n\n"
+            "👤 Username မရှိရင်\n"
+            "သူ့ message ကို Reply → /rps"
+        )
+
+        return
+
+    choice = args[1].strip()
+
+    # =====================================================
+    # PLAYER VS BOT
+    # =====================================================
+
+    if choice.lower() in RPS_ALIASES:
+
+        player_choice = RPS_ALIASES[
+            choice.lower()
+        ]
+
+        bot_choice = random.choice([
+            "ကျောက်",
+            "စာရွက်",
+            "ကတ်ကြေး"
+        ])
+
+        result = rps_winner(
+            player_choice,
+            bot_choice
+        )
+
+        if result == "draw":
+
+            result_text = "🤝 သရေကျတယ်!"
+
+        elif result == "p1":
+
+            result_text = "🏆 မင်းနိုင်တယ်!"
+
+        else:
+
+            result_text = "🤖 Bot နိုင်တယ်!"
+
+        bot.reply_to(
+            message,
+            f"✊ RPS RESULT\n\n"
+            f"👤 မင်း — {player_choice}\n"
+            f"🤖 Bot — {bot_choice}\n\n"
+            f"{result_text}"
+        )
+
+        return
+
+    # =====================================================
+    # PLAYER VS PLAYER @USERNAME
+    # =====================================================
+
+    if choice.startswith("@"):
+
+        if message.chat.type not in [
+            "group",
+            "supergroup"
+        ]:
+
+            bot.reply_to(
+                message,
+                "❌ လူချင်း RPS ကို Group ထဲမှာပဲ ကစားပါ။"
+            )
+
+            return
+
+        target_username = (
+            choice[1:].strip().lower()
+        )
+
+        if not target_username:
+
+            bot.reply_to(
+                message,
+                "❌ Username ထည့်ပေးပါ။"
+            )
+
+            return
+
+        challenger = message.from_user
+
+        if (
+            challenger.username
+            and challenger.username.lower()
+            == target_username
+        ):
+
+            bot.reply_to(
+                message,
+                "😂 ကိုယ့်ကိုယ်ကို challenge "
+                "လုပ်လို့မရဘူး။"
+            )
+
+            return
+
+        # Challenger already has active game
+        for game in rps_games.values():
+
+            if (
+                game["chat_id"] == message.chat.id
+                and game["challenger_id"]
+                == challenger.id
+            ):
+
+                bot.reply_to(
+                    message,
+                    "⚠️ မင်းမှာ RPS game ရှိပြီးသားပါ။"
+                )
+
+                return
+
+        game_id = (
+            f"rps_username_{message.chat.id}_"
+            f"{challenger.id}_{target_username}"
+        )
+
+        rps_games[game_id] = {
+
+            "chat_id": message.chat.id,
+
+            "challenger_id": challenger.id,
+
+            "target_id": None,
+
+            "target_username": target_username,
+
+            "challenger_choice": None,
+
+            "target_choice": None,
+
+            "created": time.time()
+        }
+
+        bot.reply_to(
+            message,
+            f"✊ RPS CHALLENGE!\n\n"
+            f"👤 {challenger.first_name}\n"
+            f"⚔️ vs @{target_username}\n\n"
+            f"ကျောက် / ကျောက်တုံး\n"
+            f"စာရွက် / ကတ်ကြေး\n"
+            f"ထဲက တစ်ခုစီ ပို့ပါ။\n\n"
+            f"🔒 Choice ကို ချက်ချင်းဖျက်မယ်။\n"
+            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်!"
+        )
+
+        return
+
+    bot.reply_to(
+        message,
+        "❌ RPS command မမှန်ပါ။"
+    )
+
+
+@bot.message_handler(
+    func=lambda message:
+    message.text
+    and message.text.strip().lower()
+    in [
+        "ကျောက်",
+        "ကျောက်တုံး",
+        "rock",
+        "စာရွက်",
+        "paper",
+        "ကတ်ကြေး",
+        "scissors"
+    ]
+)
+def rps_player_choice(message):
+
+    if message.chat.type not in [
+        "group",
+        "supergroup"
+    ]:
+        return
+
+    games = find_rps_games_for_user(
+        message.chat.id,
+        message.from_user
+    )
+
+    if not games:
+        return
+
+    if len(games) > 1:
+        return
+
+    game_id, game, player_type = games[0]
+
+    normalized_choice = RPS_ALIASES[
+        message.text.strip().lower()
+    ]
+
+    # -----------------------------------------
+    # DELETE CHOICE
+    # -----------------------------------------
+
+    try:
+
+        bot.delete_message(
+            message.chat.id,
+            message.message_id
+        )
+
+    except Exception as e:
+
+        print(
+            f"⚠️ RPS choice delete failed: {e}"
+        )
+
+    # -----------------------------------------
+    # Challenger
+    # -----------------------------------------
+
+    if player_type == "challenger":
+
+        if game["challenger_choice"] is not None:
+            return
+
+        game["challenger_choice"] = (
+            normalized_choice
+        )
+
+        bot.send_message(
+            message.chat.id,
+            "🔒 Player 1 ရဲ့ choice ကို သိမ်းထားပြီ။"
+        )
+
+    # -----------------------------------------
+    # Target
+    # -----------------------------------------
+
+    else:
+
+        if game["target_choice"] is not None:
+            return
+
+        game["target_choice"] = (
+            normalized_choice
+        )
+
+        game["target_id"] = (
+            message.from_user.id
+        )
+
+        bot.send_message(
+            message.chat.id,
+            "🔒 Player 2 ရဲ့ choice ကို သိမ်းထားပြီ။"
+        )
+
+    # -----------------------------------------
+    # BOTH CHOSE
+    # -----------------------------------------
 
     if (
         game["challenger_choice"] is not None
@@ -826,52 +1378,674 @@ def rps_player_choice(message):
 
         result = rps_winner(p1, p2)
 
-        challenger_name = game["challenger_id"]
-
-        target_name = (
-            f"@{game['target_username']}"
-        )
-
         if result == "draw":
+
             result_text = "🤝 သရေကျတယ်!"
 
         elif result == "p1":
-            result_text = "🏆 Challenger နိုင်တယ်!"
+
+            result_text = (
+                "🏆 Challenger နိုင်တယ်!"
+            )
 
         else:
-            result_text = "🏆 Target player နိုင်တယ်!"
+
+            result_text = (
+                "🏆 Target player နိုင်တယ်!"
+            )
 
         bot.send_message(
-            chat_id,
-            f"🎮 RPS RESULT\n\n"
+            message.chat.id,
+            f"✊ RPS RESULT\n\n"
             f"👤 Challenger — {p1}\n"
-            f"👤 {target_name} — {p2}\n\n"
+            f"👤 Target — {p2}\n\n"
             f"{result_text}"
         )
 
-        # Delete finished game
         del rps_games[game_id]
 
 
-# -------------------------
-# Clean old RPS games
-# -------------------------
+# =========================================================
+# 3. 8 BALL — 200 RESPONSES
+# =========================================================
 
-def clean_old_rps_games():
+EIGHT_BALL_MESSAGES = [
+
+    "🎱 ဟုတ်တယ်။",
+    "🎱 မဟုတ်ဘူး။",
+    "🎱 ဖြစ်နိုင်တယ်။",
+    "🎱 ဖြစ်နိုင်ချေများတယ်။",
+    "🎱 ဖြစ်နိုင်ချေနည်းတယ်။",
+    "🎱 အခုတော့ မသေချာသေးဘူး။",
+    "🎱 နောက်မှ ပြန်မေး။",
+    "🎱 အချိန်ကပဲ အဖြေပေးလိမ့်မယ်။",
+    "🎱 အခြေအနေကောင်းတယ်။",
+    "🎱 အခြေအနေမကောင်းသေးဘူး။",
+    "🎱 Yes ဘက်ကို ပိုနီးတယ်။",
+    "🎱 No ဘက်ကို ပိုနီးတယ်။",
+    "🎱 မျှော်လင့်လို့ရတယ်။",
+    "🎱 အရမ်းမမျှော်လင့်နဲ့။",
+    "🎱 ကံကောင်းရင် ဖြစ်မယ်။",
+    "🎱 ကံပေါ်မူတည်တယ်။",
+    "🎱 ဒီမေးခွန်းက ခက်တယ်။",
+    "🎱 ငါတောင် မသေချာဘူး။",
+    "🎱 နည်းနည်းစောင့်ကြည့်ဦး။",
+    "🎱 ဒီတစ်ခါတော့ အဖြေက မရှင်းဘူး။"
+]
+
+eight_ball_parts = [
+
+    "မေးခွန်းက စိတ်ဝင်စားစရာပဲ",
+    "အခြေအနေကို ကြည့်ရမယ်",
+    "ကံကြမ္မာက ဆုံးဖြတ်လိမ့်မယ်",
+    "ဒီကိစ္စက မလွယ်ဘူး",
+    "နည်းနည်းစောင့်ကြည့်",
+    "အခုတော့ အချိန်မကျသေးဘူး",
+    "မင်းရဲ့ကံကို စမ်းကြည့်",
+    "ဒီအဖြေကို မှတ်ထား",
+    "အရမ်းမစဉ်းစားနဲ့",
+    "အရမ်းလည်း မျှော်လင့်မထားနဲ့",
+    "ဒီတစ်ခါတော့ ဒီလိုပဲ",
+    "ငါ့ဘောလုံးက ဒီလိုပြောတယ်",
+    "အဖြေက လျှို့ဝှက်နေတယ်",
+    "ကံကြမ္မာက စောင့်နေတယ်",
+    "မေးခွန်းကို ပြန်စဉ်းစားဦး",
+    "ဒီကိစ္စကို အေးအေးဆေးဆေးကြည့်",
+    "အဖြေက မကြာခင်ပေါ်လာမယ်",
+    "အခုတော့ ခန့်မှန်းလို့ပဲရတယ်",
+    "မင်းကံကို မေးကြည့်",
+    "အခြေအနေပြောင်းနိုင်တယ်"
+]
+
+eight_ball_reactions = [
+
+    "😂 ငါလည်း မသေချာဘူး",
+    "🤣 ဒီဘောလုံးတောင် စိတ်ရှုပ်နေပြီ",
+    "😎 ဒီအဖြေကို ယုံချင်ယုံ",
+    "🤨 ငါ့ကိုတော့ မအပြစ်တင်နဲ့",
+    "😂 ထပ်မေးလည်း ဖြစ်နိုင်တယ်",
+    "🤣 မေးခွန်းက ငါ့ကိုတောင် ဒုက္ခပေးတယ်",
+    "😏 အဖြေကတော့ အဲ့လိုပဲ",
+    "🤡 ကံကြမ္မာရဲ့ decision ပဲ",
+    "💀 အဖြေကြားပြီး စိတ်မပျက်နဲ့",
+    "🔥 ဒီအဖြေက နည်းနည်းကြမ်းတယ်",
+    "🙃 ဘာပဲဖြစ်ဖြစ် အဖြေတော့ ရပြီ",
+    "😂 အဲ့ဒါပဲ ငါပြောနိုင်တယ်",
+    "🤣 နောက်တစ်ခါမှ ထပ်မေး",
+    "😈 ဒီအဖြေမှာ နည်းနည်းလျှို့ဝှက်ချက်ရှိတယ်",
+    "🤔 ငါတောင် ပြန်စဉ်းစားနေတယ်",
+    "😎 ဒီနေ့အတွက် ဒီလောက်ပဲ",
+    "😂 မင်းကလည်း မေးခွန်းတွေများတယ်",
+    "🤣 8 Ball ကို မနှိပ်စက်နဲ့",
+    "🗿 အဖြေက အဖြေပါပဲ",
+    "🎯 တိတိကျကျ ပြောလိုက်ပြီ"
+]
+
+for part in eight_ball_parts:
+
+    for reaction in eight_ball_reactions:
+
+        if len(EIGHT_BALL_MESSAGES) >= 200:
+            break
+
+        EIGHT_BALL_MESSAGES.append(
+            f"🎱 {part} — {reaction}"
+        )
+
+    if len(EIGHT_BALL_MESSAGES) >= 200:
+        break
+
+EIGHT_BALL_MESSAGES = (
+    EIGHT_BALL_MESSAGES[:200]
+)
+
+
+@bot.message_handler(commands=["8ball"])
+def eight_ball_command(message):
+
+    parts = message.text.split(
+        maxsplit=1
+    )
+
+    if len(parts) == 1:
+
+        bot.reply_to(
+            message,
+            "🎱 မေးခွန်းထည့်ပေးပါ။\n\n"
+            "ဥပမာ\n"
+            "/8ball ဒီနေ့ကံကောင်းမလား?"
+        )
+
+        return
+
+    answer = random.choice(
+        EIGHT_BALL_MESSAGES
+    )
+
+    bot.reply_to(
+        message,
+        f"🎱 8 BALL\n\n"
+        f"❓ {parts[1]}\n\n"
+        f"{answer}"
+    )
+
+
+# =========================================================
+# 4. GUESS GAME
+# =========================================================
+
+guess_games = {}
+
+
+@bot.message_handler(commands=["guess"])
+def guess_command(message):
+
+    key = (
+        message.chat.id,
+        message.from_user.id
+    )
+
+    guess_games[key] = {
+
+        "number": random.randint(1, 100),
+
+        "tries": 0,
+
+        "created": time.time()
+    }
+
+    bot.reply_to(
+        message,
+        "🎯 GUESS GAME စပြီ!\n\n"
+        "1 ကနေ 100 အတွင်းက number တစ်ခု "
+        "ငါရွေးထားပြီ။\n\n"
+        "🔢 မင်းခန့်မှန်းတဲ့ number ကို ပို့ပါ။\n"
+        "🎯 မှန်အောင် ခန့်မှန်းကြည့်!"
+    )
+
+
+@bot.message_handler(
+    func=lambda message:
+    message.text
+    and message.text.strip().isdigit()
+)
+def guess_number(message):
+
+    key = (
+        message.chat.id,
+        message.from_user.id
+    )
+
+    if key not in guess_games:
+        return
+
+    try:
+
+        number = int(
+            message.text.strip()
+        )
+
+    except:
+
+        return
+
+    if number < 1 or number > 100:
+
+        bot.reply_to(
+            message,
+            "❌ 1 ကနေ 100 အတွင်းက number ပဲ ပို့ပါ။"
+        )
+
+        return
+
+    game = guess_games[key]
+
+    game["tries"] += 1
+
+    target = game["number"]
+
+    if number == target:
+
+        bot.reply_to(
+            message,
+            f"🎯 CORRECT!\n\n"
+            f"🏆 Number က {target} ပါ!\n"
+            f"📊 {game['tries']} ကြိမ်နဲ့ မှန်သွားပြီ!"
+        )
+
+        del guess_games[key]
+
+        return
+
+    if number < target:
+
+        bot.reply_to(
+            message,
+            "📈 ပိုကြီးတဲ့ number ဖြစ်တယ်။"
+        )
+
+    else:
+
+        bot.reply_to(
+            message,
+            "📉 ပိုသေးတဲ့ number ဖြစ်တယ်။"
+        )
+
+
+# =========================================================
+# 5. RANDOM — 1 TO 100 + 200 MESSAGES
+# =========================================================
+
+RANDOM_MESSAGES = [
+
+    "😂 ဒီနံပါတ်ကို ကံကြမ္မာက ရွေးလိုက်တယ်။",
+    "🤣 Random က random ပဲကွာ။",
+    "😎 ဒီနေ့ lucky number ဖြစ်နိုင်တယ်။",
+    "🤨 ဒီ result ကို ဘယ်လိုထင်လဲ?",
+    "😂 ငါလည်း ဘာလို့ဒီနံပါတ်လဲ မသိဘူး။",
+    "🔥 ဒီနံပါတ်က မဆိုးဘူး။",
+    "💀 မြင်ပြီး စိတ်မပျက်နဲ့။",
+    "🤣 Calculator မလိုဘူး၊ မှန်တယ်။",
+    "😏 ကံကြမ္မာရဲ့ ဆုံးဖြတ်ချက်ပဲ။",
+    "🤡 Random ဘုရင်က ဆုံးဖြတ်ပြီးပြီ။",
+    "🙃 ဒီနေ့အတွက် ဒီ result ပဲ။",
+    "😂 ထပ်ခေါ်ချင်ရင် ထပ်ခေါ်။",
+    "😎 ကံကောင်းမယ်ထင်တယ်။",
+    "🤔 အဓိပ္ပါယ်ရှိမရှိတော့ မသိဘူး။",
+    "🤣 မင်းရွေးတာမဟုတ်ဘူး၊ ကံကြမ္မာရွေးတာ။",
+    "😈 ဒီနံပါတ်က နည်းနည်းကြမ်းတယ်။",
+    "🔥 ဒီ result ကို မှတ်ထား။",
+    "😂 Random machine က အလုပ်လုပ်ပြီးပြီ။",
+    "🤣 ဘာပဲဖြစ်ဖြစ် number ရပြီ။",
+    "🎯 ဒီနေ့ရဲ့ random result ပါ။"
+]
+
+random_parts = [
+
+    "ကံကြမ္မာက ဒီနံပါတ်ကို ရွေးလိုက်တယ်",
+    "ဒီနေ့အတွက် random result က ဒါပဲ",
+    "မင်းရဲ့ random number ရောက်လာပြီ",
+    "Number machine က ဆုံးဖြတ်လိုက်ပြီ",
+    "ဒီတစ်ခါ random က ဒီလိုထွက်တယ်",
+    "မင်းရဲ့ကံကို စမ်းကြည့်",
+    "ဒီနေ့ lucky number ဖြစ်နိုင်တယ်",
+    "Random ဘုရင်က ဆုံးဖြတ်ပြီးပြီ",
+    "ဒီနံပါတ်ကို လက်ခံလိုက်",
+    "ကံတရားရဲ့ ဆုံးဖြတ်ချက်က ဒါပဲ",
+    "မင်းအတွက် ဒီနံပါတ်ထွက်လာတယ်",
+    "ဒီနေ့ random result လာပြီ",
+    "ကံက ဒီလိုပြောတယ်",
+    "Random universe က ရွေးလိုက်ပြီ",
+    "ဒီ result ကို မှတ်ထား",
+    "ဒီနံပါတ်နဲ့ ဒီနေ့ဖြတ်သန်း",
+    "ကံစမ်းတဲ့အခါ ဒီလိုပဲ",
+    "Random က မင်းကို မျက်နှာသာပေးတယ်",
+    "ဒီတစ်ခါတော့ ဒီနံပါတ်ပဲ",
+    "Random machine ရဲ့ decision က ဒါပဲ"
+]
+
+for part in random_parts:
+
+    for reaction in RANDOM_MESSAGES:
+
+        if len(RANDOM_MESSAGES) >= 200:
+            break
+
+        RANDOM_MESSAGES.append(
+            f"🎲 {part} — {reaction}"
+        )
+
+    if len(RANDOM_MESSAGES) >= 200:
+        break
+
+RANDOM_MESSAGES = RANDOM_MESSAGES[:200]
+
+
+@bot.message_handler(commands=["random"])
+def random_command(message):
+
+    number = random.randint(1, 100)
+
+    reaction = random.choice(
+        RANDOM_MESSAGES
+    )
+
+    bot.reply_to(
+        message,
+        f"🎲 RANDOM RESULT\n\n"
+        f"🔢 Number — {number}\n\n"
+        f"{reaction}"
+    )
+
+
+# =========================================================
+# 6. RULES
+# =========================================================
+
+@bot.message_handler(commands=["rules"])
+def rules_command(message):
+
+    bot.reply_to(
+        message,
+        "📜 GROUP RULES\n\n"
+        "1️⃣ Spam မလုပ်ရ။\n"
+        "2️⃣ Group ကို မနှောင့်ယှက်ရ။\n"
+        "3️⃣ မလိုအပ်ဘဲ message အများကြီး မပို့ရ။\n"
+        "4️⃣ အခြား members တွေကို လေးစားပါ။\n"
+        "5️⃣ Admin တွေရဲ့ moderation ကို လိုက်နာပါ။\n\n"
+        "🤖 Bot commands တွေကိုလည်း မလွဲသုံးပါနဲ့။"
+    )
+
+
+# =========================================================
+# 7. ID
+# =========================================================
+
+@bot.message_handler(commands=["id"])
+def id_command(message):
+
+    chat_id = message.chat.id
+
+    if message.reply_to_message:
+
+        target = (
+            message.reply_to_message.from_user
+        )
+
+        bot.reply_to(
+            message,
+            f"🆔 USER ID\n"
+            f"<code>{target.id}</code>\n\n"
+            f"💬 CHAT ID\n"
+            f"<code>{chat_id}</code>",
+            parse_mode="HTML"
+        )
+
+        return
+
+    bot.reply_to(
+        message,
+        f"🆔 USER ID\n"
+        f"<code>{message.from_user.id}</code>\n\n"
+        f"💬 CHAT ID\n"
+        f"<code>{chat_id}</code>",
+        parse_mode="HTML"
+    )
+
+
+# =========================================================
+# 8. ADMINS
+# =========================================================
+
+@bot.message_handler(commands=["admins"])
+def admins_command(message):
+
+    if message.chat.type not in [
+        "group",
+        "supergroup"
+    ]:
+
+        bot.reply_to(
+            message,
+            "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။"
+        )
+
+        return
+
+    try:
+
+        admins = bot.get_chat_administrators(
+            message.chat.id
+        )
+
+        lines = [
+            "👮 GROUP ADMINS",
+            ""
+        ]
+
+        for admin in admins:
+
+            user = admin.user
+
+            if user.is_bot:
+                continue
+
+            name = (
+                user.first_name
+                or "Unknown"
+            )
+
+            if user.username:
+
+                lines.append(
+                    f"👤 {name} — @{user.username}"
+                )
+
+            else:
+
+                lines.append(
+                    f"👤 {name}"
+                )
+
+        bot.reply_to(
+            message,
+            "\n".join(lines)
+        )
+
+    except Exception as e:
+
+        print(
+            f"Admins Error: {e}"
+        )
+
+        bot.reply_to(
+            message,
+            "❌ Admin list ယူလို့မရပါဘူး။"
+        )
+
+
+# =========================================================
+# 9. PING
+# =========================================================
+
+@bot.message_handler(commands=["ping"])
+def ping_command(message):
+
+    start = time.time()
+
+    msg = bot.reply_to(
+        message,
+        "🏓 Pinging..."
+    )
+
+    ping_ms = int(
+        (time.time() - start) * 1000
+    )
+
+    try:
+
+        bot.edit_message_text(
+            f"🏓 PONG!\n\n"
+            f"⚡ {ping_ms} ms",
+            message.chat.id,
+            msg.message_id
+        )
+
+    except Exception as e:
+
+        print(
+            f"Ping Edit Error: {e}"
+        )
+
+
+# =========================================================
+# 10. UPTIME
+# =========================================================
+
+@bot.message_handler(commands=["uptime"])
+def uptime_command(message):
+
+    total_seconds = int(
+        time.time() - BOT_START_TIME
+    )
+
+    days = total_seconds // 86400
+
+    remaining = total_seconds % 86400
+
+    hours = remaining // 3600
+
+    remaining %= 3600
+
+    minutes = remaining // 60
+
+    seconds = remaining % 60
+
+    parts = []
+
+    if days:
+        parts.append(
+            f"{days}d"
+        )
+
+    if hours:
+        parts.append(
+            f"{hours}h"
+        )
+
+    if minutes:
+        parts.append(
+            f"{minutes}m"
+        )
+
+    parts.append(
+        f"{seconds}s"
+    )
+
+    bot.reply_to(
+        message,
+        "⏱️ BOT UPTIME\n\n"
+        f"🟢 {' '.join(parts)}"
+    )
+
+
+# =========================================================
+# 11. WELCOME
+# =========================================================
+
+@bot.message_handler(
+    content_types=["new_chat_members"]
+)
+def welcome_new_member(message):
+
+    for user in message.new_chat_members:
+
+        if user.is_bot:
+            continue
+
+        name = (
+            user.first_name
+            or "သူငယ်ချင်း"
+        )
+
+        bot.send_message(
+            message.chat.id,
+            f"👋 Welcome {name}!\n\n"
+            f"🎉 Group ထဲကို ကြိုဆိုပါတယ်။\n"
+            f"📜 /rules နဲ့ Group Rules ကို "
+            f"ကြည့်နိုင်ပါတယ်။"
+        )
+
+
+# =========================================================
+# CLEAN OLD GAMES
+# =========================================================
+
+def clean_new_games():
 
     now = time.time()
 
-    expired_games = []
+    # -------------------------
+    # RPS
+    # -------------------------
+
+    expired_rps = []
 
     for game_id, game in rps_games.items():
 
-        # 5 minutes timeout
         if now - game["created"] > 300:
-            expired_games.append(game_id)
 
-    for game_id in expired_games:
+            expired_rps.append(
+                game_id
+            )
+
+    for game_id in expired_rps:
 
         del rps_games[game_id]
+
+    # -------------------------
+    # COIN
+    # -------------------------
+
+    expired_coin = []
+
+    for game_id, game in coin_games.items():
+
+        if now - game["created"] > 300:
+
+            expired_coin.append(
+                game_id
+            )
+
+    for game_id in expired_coin:
+
+        del coin_games[game_id]
+
+    # -------------------------
+    # GUESS
+    # -------------------------
+
+    expired_guess = []
+
+    for key, game in guess_games.items():
+
+        if now - game["created"] > 600:
+
+            expired_guess.append(
+                key
+            )
+
+    for key in expired_guess:
+
+        del guess_games[key]
+
+
+def new_games_cleanup_loop():
+
+    while True:
+
+        try:
+
+            clean_new_games()
+
+        except Exception as e:
+
+            print(
+                f"Game Cleanup Error: {e}"
+            )
+
+        time.sleep(60)
+
+
+threading.Thread(
+    target=new_games_cleanup_loop,
+    daemon=True
+).start()
+
+
+# =========================================================
+# END OF NEW 11 FUNCTIONS
+# =========================================================
 
 
 # ---------------------------------------------------------
