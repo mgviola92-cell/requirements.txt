@@ -123,7 +123,8 @@ def mention_all_users(message):
 
 @bot.message_handler(commands=['play', 'ဖွင့်'])
 def play_music(message):
-
+    print("🔥 PLAY COMMAND RECEIVED")
+    
     try:
 
         # -----------------------------------------
