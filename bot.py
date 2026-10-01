@@ -529,7 +529,9 @@ def mute_user(message):
 # 🔊 UNMUTE
 # အသုံးပြုပုံ: user message ကို Reply လုပ်ပြီး /unmute
 # ---------------------------------------------------------
-@bot.message_handler(commands=["ဖွင့်လိုက်"])
+@bot.message_handler(
+    func=lambda message: message.text and message.text.startswith("/ဖွင့်လိုက်")
+)
 def unmute_user(message):
 
     if message.chat.type not in ["group", "supergroup"]:
