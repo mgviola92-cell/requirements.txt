@@ -582,6 +582,298 @@ def unmute_user(message):
         )
 
 
+# =========================
+# RPS GAME
+# =========================
+
+import random
+import time
+
+RPS_CHOICES = ["ကျောက်", "စာရွက်", "ကတ်ကြေး"]
+
+# Active games
+# game_id -> game information
+rps_games = {}
+
+
+def rps_winner(p1, p2):
+    if p1 == p2:
+        return "draw"
+
+    if (
+        (p1 == "ကျောက်" and p2 == "ကတ်ကြေး")
+        or (p1 == "စာရွက်" and p2 == "ကျောက်")
+        or (p1 == "ကတ်ကြေး" and p2 == "စာရွက်")
+    ):
+        return "p1"
+
+    return "p2"
+
+
+def rps_bot_choice():
+    return random.choice(RPS_CHOICES)
+
+
+# -------------------------
+# /rps command
+# -------------------------
+
+@bot.message_handler(commands=["rps"])
+def rps_command(message):
+
+    args = message.text.split()
+
+    # /rps only
+    if len(args) == 1:
+        bot.reply_to(
+            message,
+            "🎮 RPS ကစားမယ်!\n\n"
+            "🤖 Bot နဲ့ကစားရန်\n"
+            "/rps ကျောက်\n"
+            "/rps စာရွက်\n"
+            "/rps ကတ်ကြေး\n\n"
+            "👤 သူငယ်ချင်းနဲ့ကစားရန်\n"
+            "/rps @username"
+        )
+        return
+
+    choice = args[1]
+
+    # -------------------------
+    # Player vs Bot
+    # -------------------------
+
+    if choice in RPS_CHOICES:
+
+        player_choice = choice
+        bot_choice = rps_bot_choice()
+
+        result = rps_winner(player_choice, bot_choice)
+
+        if result == "draw":
+            result_text = "🤝 သရေကျတယ်!"
+
+        elif result == "p1":
+            result_text = "🎉 မင်းနိုင်တယ်!"
+
+        else:
+            result_text = "🤖 Bot နိုင်သွားပြီ!"
+
+        bot.reply_to(
+            message,
+            f"🎮 Rock Paper Scissors\n\n"
+            f"👤 မင်း — {player_choice}\n"
+            f"🤖 Bot — {bot_choice}\n\n"
+            f"{result_text}"
+        )
+        return
+
+    # -------------------------
+    # Player vs Player
+    # -------------------------
+
+    if choice.startswith("@"):
+
+        target_username = choice[1:].lower()
+
+        if not target_username:
+            bot.reply_to(message, "❌ Username ထည့်ပေးပါ။")
+            return
+
+        challenger_id = message.from_user.id
+        chat_id = message.chat.id
+
+        game_id = f"{chat_id}_{challenger_id}_{target_username}"
+
+        # Same game already exists
+        if game_id in rps_games:
+            bot.reply_to(
+                message,
+                "⚠️ ဒီလူနဲ့ RPS game တစ်ခု ရှိပြီးသားပါ။"
+            )
+            return
+
+        rps_games[game_id] = {
+            "chat_id": chat_id,
+            "challenger_id": challenger_id,
+            "target_username": target_username,
+            "challenger_choice": None,
+            "target_choice": None,
+            "target_id": None,
+            "created": time.time()
+        }
+
+        bot.reply_to(
+            message,
+            f"🥊 RPS Challenge!\n\n"
+            f"👤 @{message.from_user.username or 'Player'}\n"
+            f"⚔️ vs @{target_username}\n\n"
+            f"နှစ်ယောက်လုံးက\n"
+            f"ကျောက် / စာရွက် / ကတ်ကြေး\n"
+            f"ထဲက တစ်ခုကို chat ထဲပို့ပါ။\n\n"
+            f"🔒 နှစ်ယောက်လုံးရွေးပြီးမှ result ပြမယ်!"
+        )
+        return
+
+    # Invalid input
+    bot.reply_to(
+        message,
+        "❌ မမှန်တဲ့ command ပါ။\n\n"
+        "/rps ကျောက်\n"
+        "/rps စာရွက်\n"
+        "/rps ကတ်ကြေး\n"
+        "သို့မဟုတ်\n"
+        "/rps @username"
+    )
+
+
+# -------------------------
+# Player choices
+# -------------------------
+
+@bot.message_handler(
+    func=lambda message: message.text and message.text.strip() in RPS_CHOICES
+)
+def rps_player_choice(message):
+
+    choice = message.text.strip()
+    user = message.from_user
+    chat_id = message.chat.id
+
+    # Find games in THIS chat only
+    possible_games = []
+
+    for game_id, game in rps_games.items():
+
+        if game["chat_id"] != chat_id:
+            continue
+
+        # Challenger
+        if user.id == game["challenger_id"]:
+            possible_games.append((game_id, game, "challenger"))
+            continue
+
+        # Target
+        username = user.username
+
+        if (
+            username
+            and username.lower() == game["target_username"]
+        ):
+            possible_games.append((game_id, game, "target"))
+
+    # No active game
+    if not possible_games:
+        return
+
+    # If multiple games exist, don't guess which one
+    if len(possible_games) > 1:
+        bot.reply_to(
+            message,
+            "⚠️ မင်းမှာ RPS game အများကြီးရှိနေတယ်။ "
+            "Game တစ်ခုချင်းစီပြီးအောင် အရင်ကစားပါ။"
+        )
+        return
+
+    game_id, game, player_type = possible_games[0]
+
+    # -------------------------
+    # Challenger choice
+    # -------------------------
+
+    if player_type == "challenger":
+
+        if game["challenger_choice"] is not None:
+            return
+
+        game["challenger_choice"] = choice
+
+        bot.reply_to(
+            message,
+            "🔒 မင်းရဲ့ choice ကို သိမ်းထားပြီ။\n"
+            "တစ်ဖက်လူရွေးပြီးမှ result ပြမယ်။"
+        )
+
+    # -------------------------
+    # Target choice
+    # -------------------------
+
+    elif player_type == "target":
+
+        if game["target_choice"] is not None:
+            return
+
+        game["target_choice"] = choice
+        game["target_id"] = user.id
+
+        bot.reply_to(
+            message,
+            "🔒 မင်းရဲ့ choice ကို သိမ်းထားပြီ။\n"
+            "နှစ်ယောက်လုံးရွေးပြီးပြီဆို result ပြမယ်။"
+        )
+
+    # -------------------------
+    # Both players selected
+    # -------------------------
+
+    if (
+        game["challenger_choice"] is not None
+        and game["target_choice"] is not None
+    ):
+
+        p1 = game["challenger_choice"]
+        p2 = game["target_choice"]
+
+        result = rps_winner(p1, p2)
+
+        challenger_name = game["challenger_id"]
+
+        target_name = (
+            f"@{game['target_username']}"
+        )
+
+        if result == "draw":
+            result_text = "🤝 သရေကျတယ်!"
+
+        elif result == "p1":
+            result_text = "🏆 Challenger နိုင်တယ်!"
+
+        else:
+            result_text = "🏆 Target player နိုင်တယ်!"
+
+        bot.send_message(
+            chat_id,
+            f"🎮 RPS RESULT\n\n"
+            f"👤 Challenger — {p1}\n"
+            f"👤 {target_name} — {p2}\n\n"
+            f"{result_text}"
+        )
+
+        # Delete finished game
+        del rps_games[game_id]
+
+
+# -------------------------
+# Clean old RPS games
+# -------------------------
+
+def clean_old_rps_games():
+
+    now = time.time()
+
+    expired_games = []
+
+    for game_id, game in rps_games.items():
+
+        # 5 minutes timeout
+        if now - game["created"] > 300:
+            expired_games.append(game_id)
+
+    for game_id in expired_games:
+
+        del rps_games[game_id]
+
+
 # ---------------------------------------------------------
 # 🚨 BAN WORD + SPAM FILTER
 # ---------------------------------------------------------
