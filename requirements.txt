@@ -2,3 +2,4 @@ pyTelegramBotAPI
 py-tgcalls
 Pyrogram
 tgcrypto
+yt-dlp
