@@ -536,8 +536,21 @@ def unmute_user(message):
         bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
         return
 
-    if not is_admin(message):
-        bot.reply_to(message, "❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်")
+    try:
+        member = bot.get_chat_member(
+            message.chat.id,
+            message.from_user.id
+        )
+
+        if member.status not in ["administrator", "creator"]:
+            bot.reply_to(
+                message,
+                "❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်"
+            )
+            return
+
+    except Exception as e:
+        print(f"Unmute Admin Check Error: {e}")
         return
 
     if not message.reply_to_message:
