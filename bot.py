@@ -1824,10 +1824,9 @@ def guess_command(message):
         GAME_DELETE_TIME
     )
 
-    # Game တစ်ခုကို Group တစ်ခုအတွက်ပဲထားမယ်
     chat_id = message.chat.id
 
-    # လက်ရှိ game ရှိပြီးသားဆိုရင် အသစ်မစ
+    # Game တစ်ခုရှိပြီးသားဆိုရင် အသစ်မစ
     if chat_id in guess_games:
 
         reply_game_message(
@@ -1839,16 +1838,9 @@ def guess_command(message):
 
         return
 
-    # Game အသစ်
     guess_games[chat_id] = {
-
-        "number": random.randint(
-            1,
-            100
-        ),
-
+        "number": random.randint(1, 100),
         "tries": 0,
-
         "created": time.time()
     }
 
@@ -1872,19 +1864,12 @@ def guess_number(message):
 
     chat_id = message.chat.id
 
-    # ဒီ Group မှာ Guess Game မရှိရင်
-    # ပုံမှန် number message အနေနဲ့ပဲထားမယ်
     if chat_id not in guess_games:
         return
 
     try:
-
-        number = int(
-            message.text.strip()
-        )
-
+        number = int(message.text.strip())
     except:
-
         return
 
     if number < 1 or number > 100:
@@ -1896,7 +1881,6 @@ def guess_number(message):
 
         return
 
-    # Guess message ကို ဖျက်မယ်
     delay_delete_message(
         message.chat.id,
         message.message_id,
@@ -1905,7 +1889,6 @@ def guess_number(message):
 
     game = guess_games[chat_id]
 
-    # Group တစ်ခုလုံးရဲ့ total attempts
     game["tries"] += 1
 
     target = game["number"]
@@ -1918,18 +1901,13 @@ def guess_number(message):
 
         winner = message.from_user
 
-        # Username ရှိရင် @username
-if winner.username:
-    winner_display = f"@{winner.username}"
-else:
-    # Username မရှိရင် Telegram First Name
-    winner_display = winner.first_name or "Unknown User"
+        # Username ရှိရင် @username ပြမယ်
+        if winner.username:
+            winner_display = f"@{winner.username}"
 
-            winner_display = (
-                f"<a href='tg://user?id={winner.id}'>"
-                f"{winner_name}"
-                f"</a>"
-            )
+        # Username မရှိရင် First Name ပဲပြမယ်
+        else:
+            winner_display = winner.first_name or "Unknown User"
 
         reply_game_message(
             message,
@@ -1939,7 +1917,6 @@ else:
             f"👑 Winner — {winner_display}"
         )
 
-        # Game ပြီးသွားပြီ
         del guess_games[chat_id]
 
         return
