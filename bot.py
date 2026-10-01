@@ -712,20 +712,24 @@ def find_coin_games_for_user(chat_id, user):
         if game["chat_id"] != chat_id:
             continue
 
+        # Player 1
         if user.id == game["challenger_id"]:
 
             games.append(
                 (game_id, game, "challenger")
             )
 
-        elif game["target_id"] is not None:
+        # Player 2 - ID နဲ့ရှာ
+        elif (
+            game["target_id"] is not None
+            and user.id == game["target_id"]
+        ):
 
-            if user.id == game["target_id"]:
+            games.append(
+                (game_id, game, "target")
+            )
 
-                games.append(
-                    (game_id, game, "target")
-                )
-
+        # Player 2 - Username နဲ့ရှာ
         elif (
             game["target_username"]
             and user.username
@@ -743,7 +747,7 @@ def find_coin_games_for_user(chat_id, user):
 @bot.message_handler(commands=["coin"])
 def coin_command(message):
 
-    # Command message ကို 2 minutes နောက်ဖျက်
+    # Command message ကို 80 sec နောက်ဖျက်
     delay_delete_message(
         message.chat.id,
         message.message_id,
@@ -758,6 +762,109 @@ def coin_command(message):
 
     if len(args) == 1:
 
+        # Reply လုပ်ထားရင် Reply target ကိုယူ
+        if message.reply_to_message:
+
+            target = message.reply_to_message.from_user
+            challenger = message.from_user
+
+            if target.is_bot:
+
+                reply_game_message(
+                    message,
+                    "❌ Bot ကို Coin challenge လုပ်လို့မရပါဘူး။"
+                )
+
+                return
+
+            if target.id == challenger.id:
+
+                reply_game_message(
+                    message,
+                    "😂 ကိုယ့်ကိုယ်ကို challenge လုပ်လို့မရဘူး။"
+                )
+
+                return
+
+            # Group ထဲမှာပဲ User vs User
+            if message.chat.type not in [
+                "group",
+                "supergroup"
+            ]:
+
+                reply_game_message(
+                    message,
+                    "❌ လူချင်း Coin ကစားတာကို "
+                    "Group ထဲမှာပဲ သုံးပါ။"
+                )
+
+                return
+
+            # Challenger မှာ game ရှိပြီးသားလား
+            for game in coin_games.values():
+
+                if (
+                    game["chat_id"] == message.chat.id
+                    and game["challenger_id"]
+                    == challenger.id
+                ):
+
+                    reply_game_message(
+                        message,
+                        "⚠️ မင်းမှာ Coin game "
+                        "တစ်ခုရှိပြီးသားပါ။"
+                    )
+
+                    return
+
+            # Username ရှိရင် သိမ်းမယ်
+            target_username = None
+
+            if target.username:
+                target_username = target.username.lower()
+
+            # Unique game ID
+            game_id = (
+                f"coin_{message.chat.id}_"
+                f"{challenger.id}_{target.id}"
+            )
+
+            coin_games[game_id] = {
+
+                "chat_id": message.chat.id,
+
+                "challenger_id": challenger.id,
+
+                # Reply target ဖြစ်လို့ ID ကို တိုက်ရိုက်သိတယ်
+                "target_id": target.id,
+
+                "target_username": target_username,
+
+                "challenger_choice": None,
+
+                "target_choice": None,
+
+                "created": time.time()
+            }
+
+            target_name = target.first_name or "Player 2"
+
+            reply_game_message(
+                message,
+                f"🪙 COIN CHALLENGE!\n\n"
+                f"👤 {challenger.first_name}\n"
+                f"⚔️ vs {target_name}\n\n"
+                f"နှစ်ယောက်လုံးက\n"
+                f"🔴 ခေါင်း / 🔵 အမြီး\n"
+                f"ထဲက တစ်ခုရွေးပါ။\n\n"
+                f"🔒 Choice message ကို "
+                f"{GAME_DELETE_TIME} စက္ကန့်နောက် ဖျက်မယ်။\n"
+                f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
+            )
+
+            return
+
+        # Reply မဟုတ်ဘူးဆိုရင် Help
         reply_game_message(
             message,
             "🪙 COIN FLIP\n\n"
@@ -766,8 +873,9 @@ def coin_command(message):
             "/coin အမြီး\n\n"
             "👥 သူငယ်ချင်းနဲ့ကစားရန်\n"
             "/coin @username\n\n"
-            "👤 Username မရှိရင်\n"
-            "သူ့ message ကို Reply လုပ်ပြီး /coin"
+            "👤 Username ရှိ/မရှိ မလိုပါဘူး။\n"
+            "သူ့ message ကို Reply လုပ်ပြီး /coin လို့လည်း "
+            "Challenge လုပ်နိုင်ပါတယ်။"
         )
 
         return
@@ -897,7 +1005,8 @@ def coin_command(message):
             f"နှစ်ယောက်လုံးက\n"
             f"🔴 ခေါင်း / 🔵 အမြီး\n"
             f"ထဲက တစ်ခုရွေးပါ။\n\n"
-            f"🔒 ရွေးတဲ့ message ကို ချက်ချင်းဖျက်မယ်။\n"
+            f"🔒 Choice message ကို "
+            f"{GAME_DELETE_TIME} စက္ကန့်နောက် ဖျက်မယ်။\n"
             f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
         )
 
@@ -912,7 +1021,9 @@ def coin_command(message):
         "❌ Coin command မမှန်ပါ။\n\n"
         "/coin ခေါင်း\n"
         "/coin အမြီး\n"
-        "/coin @username"
+        "/coin @username\n\n"
+        "သို့မဟုတ်\n"
+        "သူ့ message ကို Reply လုပ်ပြီး /coin"
     )
 
 
@@ -953,21 +1064,14 @@ def coin_player_choice(message):
     ]
 
     # -----------------------------------------------------
-    # CHOICE MESSAGE = IMMEDIATELY DELETE
+    # CHOICE MESSAGE = 80 SEC နောက်မှ DELETE
     # -----------------------------------------------------
 
-    try:
-
-        bot.delete_message(
-            message.chat.id,
-            message.message_id
-        )
-
-    except Exception as e:
-
-        print(
-            f"Coin Choice Delete Error: {e}"
-        )
+    delay_delete_message(
+        message.chat.id,
+        message.message_id,
+        GAME_DELETE_TIME
+    )
 
     # -----------------------------------------------------
     # PLAYER 1
@@ -996,6 +1100,8 @@ def coin_player_choice(message):
 
         game["target_choice"] = choice
 
+        # Username နဲ့ဝင်လာခဲ့ရင်
+        # အခု user ရဲ့ ID ကိုပါ သိမ်းမယ်
         game["target_id"] = (
             message.from_user.id
         )
@@ -1814,13 +1920,9 @@ def guess_number(message):
 
         # Username ရှိရင် username ပြမယ်
         if winner.username:
-
-            winner_display = f"@{winner.username}"
-
-        else:
-
-            # Username မရှိရင် clickable mention
-            winner_name = winner.first_name or "Winner"
+    winner_display = f"@{winner.username}"
+else:
+    winner_display = winner.first_name or "Unknown User"
 
             winner_display = (
                 f"<a href='tg://user?id={winner.id}'>"
