@@ -1918,10 +1918,11 @@ def guess_number(message):
 
         winner = message.from_user
 
-        # Username ရှိရင် username ပြမယ်
-        if winner.username:
+        # Username ရှိရင် @username
+if winner.username:
     winner_display = f"@{winner.username}"
 else:
+    # Username မရှိရင် Telegram First Name
     winner_display = winner.first_name or "Unknown User"
 
             winner_display = (
