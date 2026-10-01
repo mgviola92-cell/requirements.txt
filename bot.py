@@ -1,4 +1,5 @@
 import telebot
+print("TEST 1 - bot.py started")
 import time
 import random
 import yt_dlp
