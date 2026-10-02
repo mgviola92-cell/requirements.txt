@@ -2458,6 +2458,289 @@ def commands_list(message):
 
 warn_count = {}
 
+# =========================================================
+# 🏆 POINT / RANK SYSTEM
+# =========================================================
+
+player_stats = {}
+
+
+def get_player_stats(chat_id, user_id):
+    key = (chat_id, user_id)
+
+    if key not in player_stats:
+        player_stats[key] = {
+            "points": 0,
+            "games": 0,
+            "wins": 0,
+            "losses": 0,
+            "draws": 0
+        }
+
+    return player_stats[key]
+
+
+def add_game_result(
+    chat_id,
+    user_id,
+    result,
+    points=0
+):
+    stats = get_player_stats(
+        chat_id,
+        user_id
+    )
+
+    stats["games"] += 1
+    stats["points"] += points
+
+    if result == "win":
+        stats["wins"] += 1
+
+    elif result == "loss":
+        stats["losses"] += 1
+
+    elif result == "draw":
+        stats["draws"] += 1
+
+
+def get_rank_title(points):
+
+    if points >= 200:
+        return "👑 LEGEND"
+
+    if points >= 100:
+        return "💎 MASTER"
+
+    if points >= 50:
+        return "🔥 PRO"
+
+    if points >= 20:
+        return "⭐ PLAYER"
+
+    return "🌱 ROOKIE"
+
+
+# =========================================================
+# ⚠️ MANUAL WARN
+# =========================================================
+
+@bot.message_handler(commands=["warn"])
+def manual_warn(message):
+
+    if message.chat.type not in [
+        "group",
+        "supergroup"
+    ]:
+        bot.reply_to(
+            message,
+            "❌ Group ထဲမှာပဲ /warn သုံးလို့ရပါတယ်။"
+        )
+        return
+
+    if not is_admin(message):
+        bot.reply_to(
+            message,
+            "❌ Admin ပဲ /warn သုံးလို့ရပါတယ်။"
+        )
+        return
+
+    if not message.reply_to_message:
+        bot.reply_to(
+            message,
+            "❌ Warn ပေးချင်တဲ့ user message ကို "
+            "Reply လုပ်ပြီး /warn ရိုက်ပါ။"
+        )
+        return
+
+    target = message.reply_to_message.from_user
+
+    if target.is_bot:
+        bot.reply_to(
+            message,
+            "❌ Bot ကို Warn ပေးစရာမလိုပါဘူး။"
+        )
+        return
+
+    if target.id == message.from_user.id:
+        bot.reply_to(
+            message,
+            "❌ ကိုယ့်ကိုယ်ကို Warn ပေးလို့မရပါဘူး။"
+        )
+        return
+
+    key = (
+        message.chat.id,
+        target.id
+    )
+
+    warn_count[key] = (
+        warn_count.get(key, 0) + 1
+    )
+
+    warns = warn_count[key]
+
+    # 3 WARN = BAN
+    if warns >= 3:
+
+        try:
+            bot.ban_chat_member(
+                message.chat.id,
+                target.id
+            )
+
+            del warn_count[key]
+
+            reply_info_message(
+                message,
+                f"🚫 {target.first_name}\n\n"
+                f"⚠️ Warn 3/3 ပြည့်သွားပါပြီ။\n"
+                f"🚫 Ban လုပ်လိုက်ပြီ။"
+            )
+
+        except Exception as e:
+
+            print(
+                f"Manual Warn Ban Error: {e}"
+            )
+
+            bot.reply_to(
+                message,
+                "❌ Ban လုပ်လို့မရပါဘူး။ "
+                "Bot မှာ Ban Users permission ရှိ/မရှိ စစ်ပါ။"
+            )
+
+        return
+
+    reply_info_message(
+        message,
+        f"⚠️ WARN\n\n"
+        f"👤 {target.first_name}\n"
+        f"📊 Warn — {warns}/3"
+    )
+
+
+# =========================================================
+# 👤 PROFILE
+# =========================================================
+
+@bot.message_handler(commands=["profile"])
+def profile_command(message):
+
+    user = message.from_user
+
+    stats = get_player_stats(
+        message.chat.id,
+        user.id
+    )
+
+    rank = get_rank_title(
+        stats["points"]
+    )
+
+    reply_info_message(
+        message,
+        f"👤 PROFILE\n\n"
+        f"👤 {user.first_name}\n"
+        f"🏆 Rank — {rank}\n"
+        f"💰 Points — {stats['points']}\n"
+        f"🎮 Games — {stats['games']}\n"
+        f"🥇 Wins — {stats['wins']}\n"
+        f"❌ Losses — {stats['losses']}\n"
+        f"🤝 Draws — {stats['draws']}"
+    )
+
+
+# =========================================================
+# 🏆 RANK
+# =========================================================
+
+@bot.message_handler(commands=["rank"])
+def rank_command(message):
+
+    chat_id = message.chat.id
+
+    players = []
+
+    for key, stats in player_stats.items():
+
+        saved_chat_id, user_id = key
+
+        if saved_chat_id != chat_id:
+            continue
+
+        players.append(
+            (
+                user_id,
+                stats["points"],
+                stats
+            )
+        )
+
+    players.sort(
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    if not players:
+
+        reply_info_message(
+            message,
+            "🏆 Rank data မရှိသေးပါဘူး။\n"
+            "Game ကစားပြီး Points ရယူပါ။"
+        )
+
+        return
+
+    lines = [
+        "🏆 GROUP RANKING",
+        ""
+    ]
+
+    for index, (
+        user_id,
+        points,
+        stats
+    ) in enumerate(players[:10], 1):
+
+        try:
+            member = bot.get_chat_member(
+                chat_id,
+                user_id
+            )
+
+            name = (
+                member.user.first_name
+                or "Unknown"
+            )
+
+        except:
+
+            name = "Unknown"
+
+        rank = get_rank_title(points)
+
+        lines.append(
+            f"{index}. {name} — "
+            f"{points} pts {rank}"
+        )
+
+    reply_info_message(
+        message,
+        "\n".join(lines)
+    )
+
+
+# =========================================================
+# 🥇 TOP = RANK
+# =========================================================
+
+@bot.message_handler(commands=["top"])
+def top_command(message):
+
+    rank_command(message)
+
+
 # Spam records
 # key = (type, chat_id, user_id)
 # value = [(time, message_id), ...]
