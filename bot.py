@@ -107,6 +107,17 @@ from ui.leaderboard_card import (
     generate_leaderboard_card_bytes,
 )
 
+from games.emoji_guess import (
+    EMOJI_GUESS_TIME,
+    get_random_question,
+    start_emoji_game,
+    get_emoji_game,
+    check_emoji_answer,
+    get_emoji_hint,
+    get_emoji_time_left,
+    end_emoji_game,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
