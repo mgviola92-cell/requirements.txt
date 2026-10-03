@@ -126,6 +126,68 @@ from database.used_questions import (
     reset_used_questions,
 )
 
+# =========================================================
+# 😀 EMOJI GUESS QUESTION SELECTOR
+# Neon used-question + recent-history tracking
+# =========================================================
+
+def get_next_emoji_question(chat_id):
+
+    GAME_TYPE = "emoji_guess"
+    RECENT_LIMIT = 150
+
+    # -----------------------------------------
+    # 1. Current cycle ထဲမှာ မေးပြီးသား IDs
+    # -----------------------------------------
+
+    used_ids = get_used_question_ids(
+        chat_id,
+        GAME_TYPE
+    )
+
+    question = get_random_question(
+        exclude_ids=used_ids
+    )
+
+    if not question:
+        return None
+
+    # -----------------------------------------
+    # 2. get_random_question() က available
+    # မရှိရင် full pool ကို fallback လုပ်တယ်။
+    #
+    # ပြန်ရလာတဲ့ ID က used ထဲရှိနေတယ်ဆို
+    # current pool ကုန်ပြီလို့ဆိုလိုတယ်။
+    # -----------------------------------------
+
+    if question["id"] in used_ids:
+
+        recent_ids = set(
+            get_recent_question_ids(
+                chat_id,
+                GAME_TYPE,
+                limit=RECENT_LIMIT
+            )
+        )
+
+        # Current cycle ကိုပဲ reset
+        # Permanent history မပျက်ဘူး
+        reset_used_questions(
+            chat_id,
+            GAME_TYPE
+        )
+
+        # New cycle မှာ recent 150 ကိုရှောင်
+        question = get_random_question(
+            exclude_ids=recent_ids
+        )
+
+        if not question:
+            return None
+
+    return question
+    
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
