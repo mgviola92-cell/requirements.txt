@@ -66,6 +66,15 @@ from core.keyboards import (
     pagination_keyboard,
 )
 
+from core.permissions import (
+    is_user_admin,
+    can_pin_messages,
+    can_delete_messages,
+    safe_pin_message,
+    safe_unpin_message,
+    safe_delete_message,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
