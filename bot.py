@@ -37,6 +37,16 @@ from core.sessions import (
     can_start_session,
 )
 
+from core.cooldowns import (
+    get_remaining_cooldown,
+    cooldown_ready,
+    set_cooldown,
+    set_random_cooldown,
+    check_and_start_cooldown,
+    check_and_start_random_cooldown,
+    clear_cooldown,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
