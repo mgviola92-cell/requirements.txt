@@ -342,11 +342,13 @@ def add_bonus_points(
             }
 
         log_reward_transaction(
-    chat_id,
-    user_id,
-    points,
-    reason="bonus"
-)
+            chat_id,
+            user_id,
+            points,
+            reason="bonus"
+        )
+
+        return True
         
         return True
 
@@ -408,7 +410,6 @@ def log_reward_transaction(
                         points,
                         reason
                     )
-
                     VALUES (
                         %s,
                         %s,
@@ -422,13 +423,6 @@ def log_reward_transaction(
                     reason
                 ))
 
-        log_reward_transaction(
-    chat_id,
-    user_id,
-    points,
-    reason="bonus"
-)
-        
         return True
 
     except Exception as e:
