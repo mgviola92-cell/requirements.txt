@@ -807,162 +807,253 @@ COIN_ALIASES = {
     "heads": "ခေါင်း",
 
     "အမြီး": "အမြီး",
-    "tails": "အမြီး"
+    "tails": "အမြီး",
 }
 
+
+# =========================================================
+# 🪙 FLIP COIN
+# =========================================================
 
 def flip_coin():
     return random.choice([
         "ခေါင်း",
-        "အမြီး"
+        "အမြီး",
     ])
 
 
-def find_coin_games_for_user(chat_id, user):
+# =========================================================
+# 🔎 FIND ACTIVE COIN GAME FOR USER
+# =========================================================
 
+def find_coin_games_for_user(
+    chat_id,
+    user
+):
     games = []
 
-    for game_id, game in coin_games.items():
-
+    for game_id, game in list(
+        coin_games.items()
+    ):
         if game["chat_id"] != chat_id:
             continue
 
+        # -----------------------------------------
         # Player 1
+        # -----------------------------------------
+
         if user.id == game["challenger_id"]:
-
             games.append(
-                (game_id, game, "challenger")
+                (
+                    game_id,
+                    game,
+                    "challenger",
+                )
             )
+            continue
 
-        # Player 2 - ID နဲ့ရှာ
-        elif (
+        # -----------------------------------------
+        # Player 2 - ID known
+        # -----------------------------------------
+
+        if (
             game["target_id"] is not None
             and user.id == game["target_id"]
         ):
-
             games.append(
-                (game_id, game, "target")
+                (
+                    game_id,
+                    game,
+                    "target",
+                )
             )
+            continue
 
-        # Player 2 - Username နဲ့ရှာ
-        elif (
+        # -----------------------------------------
+        # Player 2 - username challenge
+        # -----------------------------------------
+
+        if (
             game["target_username"]
             and user.username
             and user.username.lower()
             == game["target_username"].lower()
         ):
-
             games.append(
-                (game_id, game, "target")
+                (
+                    game_id,
+                    game,
+                    "target",
+                )
             )
 
     return games
 
 
+# =========================================================
+# 🧹 DOES USER ALREADY HAVE COIN GAME?
+# =========================================================
+
+def user_has_coin_game(
+    chat_id,
+    user_id=None,
+    username=None
+):
+    username = (
+        username.lower()
+        if username
+        else None
+    )
+
+    for game in coin_games.values():
+
+        if game["chat_id"] != chat_id:
+            continue
+
+        if (
+            user_id is not None
+            and (
+                game["challenger_id"] == user_id
+                or game["target_id"] == user_id
+            )
+        ):
+            return True
+
+        if (
+            username
+            and game["target_username"]
+            and game["target_username"].lower()
+            == username
+        ):
+            return True
+
+    return False
+
+
+# =========================================================
+# 🪙 /coin COMMAND
+# =========================================================
+
 @bot.message_handler(commands=["coin"])
 def coin_command(message):
 
-    # Command message ကို 80 sec နောက်ဖျက်
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        GAME_DELETE_TIME,
     )
 
     args = message.text.split()
 
-    # -----------------------------------------------------
+    # =====================================================
     # /coin
-    # -----------------------------------------------------
+    #
+    # Reply -> PvP challenge
+    # No reply -> Help
+    # =====================================================
 
     if len(args) == 1:
 
-        # Reply လုပ်ထားရင် Reply target ကိုယူ
+        # -----------------------------------------
+        # REPLY CHALLENGE
+        # -----------------------------------------
+
         if message.reply_to_message:
 
-            target = message.reply_to_message.from_user
+            target = (
+                message.reply_to_message.from_user
+            )
+
             challenger = message.from_user
 
             if target.is_bot:
-
                 reply_game_message(
                     message,
-                    "❌ Bot ကို Coin challenge လုပ်လို့မရပါဘူး။"
+                    "❌ Bot ကို Coin challenge "
+                    "လုပ်လို့မရပါဘူး။",
                 )
-
                 return
 
             if target.id == challenger.id:
-
                 reply_game_message(
                     message,
-                    "😂 ကိုယ့်ကိုယ်ကို challenge လုပ်လို့မရဘူး။"
+                    "😂 ကိုယ့်ကိုယ်ကို challenge "
+                    "လုပ်လို့မရဘူး။",
                 )
-
                 return
 
-            # Group ထဲမှာပဲ User vs User
-            if message.chat.type not in [
+            if message.chat.type not in (
                 "group",
-                "supergroup"
-            ]:
-
+                "supergroup",
+            ):
                 reply_game_message(
                     message,
                     "❌ လူချင်း Coin ကစားတာကို "
-                    "Group ထဲမှာပဲ သုံးပါ။"
+                    "Group ထဲမှာပဲ သုံးပါ။",
                 )
-
                 return
 
-            # Challenger မှာ game ရှိပြီးသားလား
-            for game in coin_games.values():
+            # -------------------------------------
+            # Player တစ်ယောက်မှာ active Coin
+            # game တစ်ခုထက်ပိုမရှိစေရ
+            # -------------------------------------
 
-                if (
-                    game["chat_id"] == message.chat.id
-                    and game["challenger_id"]
-                    == challenger.id
-                ):
+            if user_has_coin_game(
+                message.chat.id,
+                user_id=challenger.id,
+                username=challenger.username,
+            ):
+                reply_game_message(
+                    message,
+                    "⚠️ မင်းမှာ Coin game "
+                    "တစ်ခုရှိပြီးသားပါ။",
+                )
+                return
 
-                    reply_game_message(
-                        message,
-                        "⚠️ မင်းမှာ Coin game "
-                        "တစ်ခုရှိပြီးသားပါ။"
-                    )
+            if user_has_coin_game(
+                message.chat.id,
+                user_id=target.id,
+                username=target.username,
+            ):
+                reply_game_message(
+                    message,
+                    "⚠️ အဲဒီ Player က Coin game "
+                    "တစ်ခုကစားနေပြီးသားပါ။",
+                )
+                return
 
-                    return
+            target_username = (
+                target.username.lower()
+                if target.username
+                else None
+            )
 
-            # Username ရှိရင် သိမ်းမယ်
-            target_username = None
-
-            if target.username:
-                target_username = target.username.lower()
-
-            # Unique game ID
             game_id = (
                 f"coin_{message.chat.id}_"
-                f"{challenger.id}_{target.id}"
+                f"{challenger.id}_{target.id}_"
+                f"{int(time.time())}"
             )
 
             coin_games[game_id] = {
-
                 "chat_id": message.chat.id,
 
                 "challenger_id": challenger.id,
 
-                # Reply target ဖြစ်လို့ ID ကို တိုက်ရိုက်သိတယ်
                 "target_id": target.id,
 
-                "target_username": target_username,
+                "target_username":
+                    target_username,
 
                 "challenger_choice": None,
-
                 "target_choice": None,
 
-                "created": time.time()
+                "created": time.time(),
             }
 
-            target_name = target.first_name or "Player 2"
+            target_name = (
+                target.first_name
+                or "Player 2"
+            )
 
             reply_game_message(
                 message,
@@ -972,12 +1063,16 @@ def coin_command(message):
                 f"နှစ်ယောက်လုံးက\n"
                 f"🔴 ခေါင်း / 🔵 အမြီး\n"
                 f"ထဲက တစ်ခုရွေးပါ။\n\n"
-                f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
+                f"နှစ်ယောက်လုံးရွေးပြီးမှ "
+                f"Result ပြမယ်။",
             )
 
             return
 
-        # Reply မဟုတ်ဘူးဆိုရင် Help
+        # -----------------------------------------
+        # HELP
+        # -----------------------------------------
+
         reply_game_message(
             message,
             "🪙 COIN FLIP\n\n"
@@ -987,44 +1082,51 @@ def coin_command(message):
             "👥 သူငယ်ချင်းနဲ့ကစားရန်\n"
             "/coin @username\n\n"
             "👤 Username ရှိ/မရှိ မလိုပါဘူး။\n"
-            "သူ့ message ကို Reply လုပ်ပြီး /coin လို့လည်း "
-            "Challenge လုပ်နိုင်ပါတယ်။"
+            "သူ့ message ကို Reply လုပ်ပြီး "
+            "/coin လို့လည်း Challenge "
+            "လုပ်နိုင်ပါတယ်။",
         )
 
         return
 
     choice = args[1].strip().lower()
 
-    # -----------------------------------------------------
-    # COIN VS BOT
-    # -----------------------------------------------------
+    # =====================================================
+    # 🤖 COIN VS BOT
+    # =====================================================
 
     if choice in COIN_ALIASES:
 
-        player_choice = COIN_ALIASES[choice]
+        player_choice = (
+            COIN_ALIASES[choice]
+        )
 
         result = flip_coin()
 
         if player_choice == result:
 
-            result_text = "🎉 မင်းမှန်တယ်!"
+            result_text = (
+                "🎉 မင်းမှန်တယ်! +5 Points"
+            )
 
-            add_game_result(
+            apply_game_result(
                 message.chat.id,
                 message.from_user.id,
+                "coin",
                 "win",
-                points=5
             )
 
         else:
 
-            result_text = "😂 မမှန်ဘူး!"
+            result_text = (
+                "😂 မမှန်ဘူး! -1 Point"
+            )
 
-            add_game_result(
+            apply_game_result(
                 message.chat.id,
                 message.from_user.id,
+                "coin",
                 "loss",
-                points=0
             )
 
         reply_game_message(
@@ -1032,43 +1134,41 @@ def coin_command(message):
             f"🪙 COIN FLIP\n\n"
             f"👤 မင်း — {player_choice}\n"
             f"🪙 Coin — {result}\n\n"
-            f"{result_text}"
+            f"{result_text}",
         )
 
         return
 
-    # -----------------------------------------------------
-    # COIN VS USERNAME
-    # -----------------------------------------------------
+    # =====================================================
+    # 👥 COIN VS @USERNAME
+    # =====================================================
 
     if choice.startswith("@"):
 
-        if message.chat.type not in [
+        if message.chat.type not in (
             "group",
-            "supergroup"
-        ]:
-
+            "supergroup",
+        ):
             reply_game_message(
                 message,
                 "❌ လူချင်း Coin ကစားတာကို "
-                "Group ထဲမှာပဲ သုံးပါ။"
+                "Group ထဲမှာပဲ သုံးပါ။",
             )
-
             return
 
         target_username = (
-            choice[1:].strip().lower()
+            choice[1:]
+            .strip()
+            .lower()
         )
 
         challenger = message.from_user
 
         if not target_username:
-
             reply_game_message(
                 message,
-                "❌ Username ထည့်ပေးပါ။"
+                "❌ Username ထည့်ပေးပါ။",
             )
-
             return
 
         if (
@@ -1076,52 +1176,60 @@ def coin_command(message):
             and challenger.username.lower()
             == target_username
         ):
-
             reply_game_message(
                 message,
                 "😂 ကိုယ့်ကိုယ်ကို challenge "
-                "လုပ်လို့မရဘူး။"
+                "လုပ်လို့မရဘူး။",
             )
-
             return
 
-        # Same challenger already playing
-        for game in coin_games.values():
+        if user_has_coin_game(
+            message.chat.id,
+            user_id=challenger.id,
+            username=challenger.username,
+        ):
+            reply_game_message(
+                message,
+                "⚠️ မင်းမှာ Coin game "
+                "တစ်ခုရှိပြီးသားပါ။",
+            )
+            return
 
-            if (
-                game["chat_id"] == message.chat.id
-                and game["challenger_id"]
-                == challenger.id
-            ):
-
-                reply_game_message(
-                    message,
-                    "⚠️ မင်းမှာ Coin game "
-                    "တစ်ခုရှိပြီးသားပါ။"
-                )
-
-                return
+        if user_has_coin_game(
+            message.chat.id,
+            username=target_username,
+        ):
+            reply_game_message(
+                message,
+                "⚠️ အဲဒီ Player က Coin game "
+                "တစ်ခုကစားနေပြီးသားပါ။",
+            )
+            return
 
         game_id = (
             f"coin_{message.chat.id}_"
-            f"{challenger.id}_{target_username}"
+            f"{challenger.id}_"
+            f"{target_username}_"
+            f"{int(time.time())}"
         )
 
         coin_games[game_id] = {
-
             "chat_id": message.chat.id,
 
-            "challenger_id": challenger.id,
+            "challenger_id":
+                challenger.id,
 
+            # Username challenge ဖြစ်လို့
+            # target ရွေးတဲ့အချိန်မှ ID သိမယ်
             "target_id": None,
 
-            "target_username": target_username,
+            "target_username":
+                target_username,
 
             "challenger_choice": None,
-
             "target_choice": None,
 
-            "created": time.time()
+            "created": time.time(),
         }
 
         reply_game_message(
@@ -1132,14 +1240,15 @@ def coin_command(message):
             f"နှစ်ယောက်လုံးက\n"
             f"🔴 ခေါင်း / 🔵 အမြီး\n"
             f"ထဲက တစ်ခုရွေးပါ။\n\n"
-            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
+            f"နှစ်ယောက်လုံးရွေးပြီးမှ "
+            f"Result ပြမယ်။",
         )
 
         return
 
-    # -----------------------------------------------------
-    # INVALID
-    # -----------------------------------------------------
+    # =====================================================
+    # ❌ INVALID COMMAND
+    # =====================================================
 
     reply_game_message(
         message,
@@ -1148,206 +1257,246 @@ def coin_command(message):
         "/coin အမြီး\n"
         "/coin @username\n\n"
         "သို့မဟုတ်\n"
-        "သူ့ message ကို Reply လုပ်ပြီး /coin"
+        "သူ့ message ကို Reply လုပ်ပြီး /coin",
     )
 
 
+# =========================================================
+# 👤 PLAYER CHOICE HANDLER
+# =========================================================
+
 @bot.message_handler(
     func=lambda message:
-    message.text
-    and message.text.strip().lower()
-    in [
-        "ခေါင်း",
-        "အမြီး",
-        "heads",
-        "tails"
-    ]
+        message.text
+        and message.text.strip().lower()
+        in (
+            "ခေါင်း",
+            "အမြီး",
+            "heads",
+            "tails",
+        )
 )
 def coin_player_choice(message):
 
-    if message.chat.type not in [
+    if message.chat.type not in (
         "group",
-        "supergroup"
-    ]:
+        "supergroup",
+    ):
         return
 
     games = find_coin_games_for_user(
         message.chat.id,
-        message.from_user
+        message.from_user,
     )
 
     if not games:
         return
 
-    if len(games) > 1:
+    # Player ကို active Coin game
+    # တစ်ခုတည်းပဲရှိအောင် အပေါ်မှာ
+    # ကာထားပြီးသား။
+    if len(games) != 1:
         return
 
-    game_id, game, player_type = games[0]
+    game_id, game, player_type = (
+        games[0]
+    )
 
     choice = COIN_ALIASES[
         message.text.strip().lower()
     ]
 
-    # -----------------------------------------------------
-    # CHOICE MESSAGE = 80 SEC နောက်မှ DELETE
-    # -----------------------------------------------------
-
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        GAME_DELETE_TIME,
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # PLAYER 1
-    # -----------------------------------------------------
+    # =====================================================
 
     if player_type == "challenger":
 
-        if game["challenger_choice"] is not None:
+        if (
+            game["challenger_choice"]
+            is not None
+        ):
             return
 
         game["challenger_choice"] = choice
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 1 choice ပြီးပြီ။"
+            "🔒 Player 1 choice ပြီးပြီ။",
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # PLAYER 2
-    # -----------------------------------------------------
+    # =====================================================
 
     else:
 
-        if game["target_choice"] is not None:
+        if (
+            game["target_choice"]
+            is not None
+        ):
             return
 
         game["target_choice"] = choice
 
-        # Username နဲ့ဝင်လာခဲ့ရင်
-        # အခု user ရဲ့ ID ကိုပါ သိမ်းမယ်
+        # Username challenge ဖြစ်ခဲ့ရင်
+        # အခု ID အစစ်ကို သိမ်းမယ်။
         game["target_id"] = (
             message.from_user.id
         )
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 2 choice ပြီးပြီ။"
+            "🔒 Player 2 choice ပြီးပြီ။",
         )
 
-# -----------------------------------------------------
-    # BOTH CHOSE
-    # -----------------------------------------------------
+    # =====================================================
+    # BOTH PLAYERS READY?
+    # =====================================================
 
     if (
-        game["challenger_choice"] is not None
-        and game["target_choice"] is not None
+        game["challenger_choice"]
+        is None
+        or game["target_choice"]
+        is None
     ):
+        return
 
-        result = flip_coin()
+    result = flip_coin()
 
-        p1 = game["challenger_choice"]
-        p2 = game["target_choice"]
+    p1 = game["challenger_choice"]
+    p2 = game["target_choice"]
 
-        p1_correct = (
-            p1 == result
+    p1_correct = (
+        p1 == result
+    )
+
+    p2_correct = (
+        p2 == result
+    )
+
+    # =====================================================
+    # BOTH CORRECT = DRAW
+    # =====================================================
+
+    if p1_correct and p2_correct:
+
+        result_text = (
+            "🤝 နှစ်ယောက်လုံးမှန်တယ်!\n"
+            "Points မတိုး/မနုတ်ပါ။"
         )
 
-        p2_correct = (
-            p2 == result
-        )
-
-        if p1_correct and p2_correct:
-
-            result_text = (
-                "🤝 နှစ်ယောက်လုံးမှန်တယ်!"
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["challenger_id"],
-                "draw",
-                points=0
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["target_id"],
-                "draw",
-                points=0
-            )
-
-        elif p1_correct:
-
-            result_text = (
-                "🏆 Player 1 နိုင်တယ်! +5 Points"
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["challenger_id"],
-                "win",
-                points=5
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["target_id"],
-                "loss",
-                points=1
-            )
-
-        elif p2_correct:
-
-            result_text = (
-                "🏆 Player 2 နိုင်တယ်! +5 Points"
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["challenger_id"],
-                "loss",
-                points=1
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["target_id"],
-                "win",
-                points=5
-            )
-
-        else:
-
-            result_text = (
-                "😂 နှစ်ယောက်လုံး မမှန်ဘူး!"
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["challenger_id"],
-                "loss",
-                points=0
-            )
-
-            add_game_result(
-                message.chat.id,
-                game["target_id"],
-                "loss",
-                points=0
-            )
-
-        send_game_message(
+        apply_game_result(
             message.chat.id,
-            f"🪙 COIN RESULT\n\n"
-            f"👤 Player 1 — {p1}\n"
-            f"👤 Player 2 — {p2}\n\n"
-            f"🪙 Coin — {result}\n\n"
-            f"{result_text}"
+            game["challenger_id"],
+            "coin",
+            "draw",
         )
 
-        del coin_games[game_id]     
+        apply_game_result(
+            message.chat.id,
+            game["target_id"],
+            "coin",
+            "draw",
+        )
+
+    # =====================================================
+    # PLAYER 1 WINS
+    # =====================================================
+
+    elif p1_correct:
+
+        result_text = (
+            "🏆 Player 1 နိုင်တယ်!\n"
+            "Player 1 +5 Points\n"
+            "Player 2 -1 Point"
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["challenger_id"],
+            "coin",
+            "win",
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["target_id"],
+            "coin",
+            "loss",
+        )
+
+    # =====================================================
+    # PLAYER 2 WINS
+    # =====================================================
+
+    elif p2_correct:
+
+        result_text = (
+            "🏆 Player 2 နိုင်တယ်!\n"
+            "Player 2 +5 Points\n"
+            "Player 1 -1 Point"
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["challenger_id"],
+            "coin",
+            "loss",
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["target_id"],
+            "coin",
+            "win",
+        )
+
+    # =====================================================
+    # BOTH WRONG = BOTH LOSE
+    # =====================================================
+
+    else:
+
+        result_text = (
+            "😂 နှစ်ယောက်လုံး မမှန်ဘူး!\n"
+            "နှစ်ယောက်လုံး -1 Point"
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["challenger_id"],
+            "coin",
+            "loss",
+        )
+
+        apply_game_result(
+            message.chat.id,
+            game["target_id"],
+            "coin",
+            "loss",
+        )
+
+    send_game_message(
+        message.chat.id,
+        f"🪙 COIN RESULT\n\n"
+        f"👤 Player 1 — {p1}\n"
+        f"👤 Player 2 — {p2}\n\n"
+        f"🪙 Coin — {result}\n\n"
+        f"{result_text}",
+    )
+
+    coin_games.pop(
+        game_id,
+        None,
+    )     
+
 
 # =========================================================
 # 2. RPS
