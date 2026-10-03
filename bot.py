@@ -2017,24 +2017,63 @@ def guess_number(message):
 # =========================================================
 
 TRIVIA_TIME = 180
+TRIVIA_QUESTION_DELETE_TIME = TRIVIA_TIME + 60
 
 trivia_games = {}
-
+trivia_starting_chats = set()
 trivia_used_questions = set()
-
 trivia_session_token = None
+trivia_lock = threading.Lock()
+
+
+def make_trivia_question_key(source, question_text, correct_answer):
+    return (
+        f"{source}|"
+        f"{str(question_text).strip()}|"
+        f"{str(correct_answer).strip()}"
+    )
+
+
+def delete_trivia_answer_message(message):
+    try:
+        bot.delete_message(
+            message.chat.id,
+            message.message_id
+        )
+    except Exception:
+        pass
+
+
+def send_trivia_result(chat_id, text):
+    try:
+        sent = bot.send_message(
+            chat_id,
+            text
+        )
+
+        delay_delete_message(
+            chat_id,
+            sent.message_id,
+            INFO_DELETE_TIME
+        )
+
+        return sent
+
+    except Exception as e:
+        print(
+            f"Trivia Result Send Error: {e}"
+        )
+        return None
 
 
 # ---------------------------------------------------------
-# TRIVIA - GET SESSION TOKEN
+# SESSION TOKEN
 # ---------------------------------------------------------
 
 def get_trivia_session_token():
-
     global trivia_session_token
 
     try:
-
         url = (
             "https://opentdb.com/"
             "api_token.php?command=request"
@@ -2046,13 +2085,15 @@ def get_trivia_session_token():
         ) as response:
 
             data = json.loads(
-                response.read().decode("utf-8")
+                response.read().decode(
+                    "utf-8"
+                )
             )
 
         if data.get("response_code") == 0:
 
-            trivia_session_token = data.get(
-                "token"
+            trivia_session_token = (
+                data.get("token")
             )
 
             return trivia_session_token
@@ -2063,15 +2104,12 @@ def get_trivia_session_token():
             f"Trivia Token Error: {e}"
         )
 
+    trivia_session_token = None
+
     return None
 
 
-# ---------------------------------------------------------
-# TRIVIA - RESET SESSION TOKEN
-# ---------------------------------------------------------
-
 def reset_trivia_session_token():
-
     global trivia_session_token
 
     if not trivia_session_token:
@@ -2079,8 +2117,10 @@ def reset_trivia_session_token():
 
     try:
 
-        encoded_token = urllib.parse.quote(
-            trivia_session_token
+        encoded_token = (
+            urllib.parse.quote(
+                trivia_session_token
+            )
         )
 
         url = (
@@ -2095,11 +2135,12 @@ def reset_trivia_session_token():
         ) as response:
 
             data = json.loads(
-                response.read().decode("utf-8")
+                response.read().decode(
+                    "utf-8"
+                )
             )
 
         if data.get("response_code") == 0:
-
             return True
 
     except Exception as e:
@@ -2108,133 +2149,182 @@ def reset_trivia_session_token():
             f"Trivia Token Reset Error: {e}"
         )
 
+    trivia_session_token = None
+
     return False
 
 
 # ---------------------------------------------------------
-# TRIVIA - GET ONLINE QUESTION
+# ONLINE QUESTION
 # ---------------------------------------------------------
 
 def get_online_trivia_question():
-
     global trivia_session_token
 
-    try:
+    # Duplicate / token error ဖြစ်ရင်
+    # အများဆုံး 4 ကြိမ် ထပ်စမ်းမယ်
+    for _ in range(4):
 
-        if not trivia_session_token:
+        try:
 
-            get_trivia_session_token()
+            if not trivia_session_token:
+                get_trivia_session_token()
 
-        token_part = ""
+            token_part = ""
 
-        if trivia_session_token:
+            if trivia_session_token:
 
-            token_part = (
-                "&token="
-                + urllib.parse.quote(
-                    trivia_session_token
+                token_part = (
+                    "&token="
+                    + urllib.parse.quote(
+                        trivia_session_token
+                    )
+                )
+
+            url = (
+                "https://opentdb.com/"
+                "api.php?amount=1"
+                "&type=multiple"
+                "&encode=url3986"
+                f"{token_part}"
+            )
+
+            with urllib.request.urlopen(
+                url,
+                timeout=10
+            ) as response:
+
+                data = json.loads(
+                    response.read().decode(
+                        "utf-8"
+                    )
+                )
+
+            response_code = (
+                data.get("response_code")
+            )
+
+            # Invalid Token
+            if response_code == 3:
+
+                trivia_session_token = None
+                get_trivia_session_token()
+
+                continue
+
+            # Questions ကုန်သွားရင်
+            if response_code == 4:
+
+                if not reset_trivia_session_token():
+
+                    trivia_session_token = None
+                    get_trivia_session_token()
+
+                continue
+
+            if response_code != 0:
+                return None
+
+            results = data.get(
+                "results",
+                []
+            )
+
+            if not results:
+                return None
+
+            q = results[0]
+
+            question_text = (
+                html.unescape(
+                    urllib.parse.unquote(
+                        q["question"]
+                    )
                 )
             )
 
-        url = (
-            "https://opentdb.com/"
-            "api.php?amount=1"
-            "&type=multiple"
-            "&encode=url3986"
-            f"{token_part}"
-        )
-
-        with urllib.request.urlopen(
-            url,
-            timeout=10
-        ) as response:
-
-            data = json.loads(
-                response.read().decode("utf-8")
+            correct_answer = (
+                html.unescape(
+                    urllib.parse.unquote(
+                        q["correct_answer"]
+                    )
+                )
             )
 
-        response_code = data.get(
-            "response_code"
-        )
+            incorrect_answers = [
 
-        # Token exhausted
-        if response_code == 4:
+                html.unescape(
+                    urllib.parse.unquote(
+                        answer
+                    )
+                )
 
-            reset_trivia_session_token()
-
-            get_trivia_session_token()
-
-            return get_online_trivia_question()
-
-        if response_code != 0:
-
-            return None
-
-        results = data.get(
-            "results",
-            []
-        )
-
-        if not results:
-
-            return None
-
-        question = results[0]
-
-        question_text = urllib.parse.unquote(
-            question["question"]
-        )
-
-        correct_answer = urllib.parse.unquote(
-            question["correct_answer"]
-        )
-
-        incorrect_answers = [
-            urllib.parse.unquote(answer)
-            for answer in question[
-                "incorrect_answers"
+                for answer in
+                q["incorrect_answers"]
             ]
-        ]
 
-        answers = (
-            incorrect_answers
-            + [correct_answer]
-        )
+            question_key = (
+                make_trivia_question_key(
+                    "online",
+                    question_text,
+                    correct_answer
+                )
+            )
 
-        random.shuffle(answers)
+            # မေးပြီးသား question ဆို
+            # နောက်တစ်ခုထပ်ယူ
+            if (
+                question_key
+                in trivia_used_questions
+            ):
+                continue
 
-        correct_index = answers.index(
-            correct_answer
-        )
+            answers = (
+                incorrect_answers
+                + [correct_answer]
+            )
 
-        question_key = (
-            question_text
-            + "|"
-            + correct_answer
-        )
+            random.shuffle(
+                answers
+            )
 
-        if question_key in trivia_used_questions:
+            correct_index = (
+                answers.index(
+                    correct_answer
+                )
+            )
+
+            return {
+
+                "question":
+                    question_text,
+
+                "answers":
+                    answers,
+
+                "correct_index":
+                    correct_index,
+
+                "question_key":
+                    question_key,
+
+                "source":
+                    "online"
+            }
+
+        except Exception as e:
+
+            print(
+                f"Trivia Online Error: {e}"
+            )
 
             return None
 
-        return {
-            "question": question_text,
-            "answers": answers,
-            "correct_index": correct_index,
-            "source": "online"
-        }
-
-    except Exception as e:
-
-        print(
-            f"Trivia Online Error: {e}"
-        )
-
-        return None
+    return None
 
 
 # ---------------------------------------------------------
-# TRIVIA - LOCAL DATABASE
+# LOCAL DATABASE
 # ---------------------------------------------------------
 
 def load_local_trivia_questions():
@@ -2246,7 +2336,6 @@ def load_local_trivia_questions():
     if not os.path.exists(
         file_path
     ):
-
         return []
 
     try:
@@ -2257,16 +2346,15 @@ def load_local_trivia_questions():
             encoding="utf-8"
         ) as file:
 
-            data = json.load(file)
+            data = json.load(
+                file
+            )
 
-        if not isinstance(
+        if isinstance(
             data,
             list
         ):
-
-            return []
-
-        return data
+            return data
 
     except Exception as e:
 
@@ -2274,12 +2362,8 @@ def load_local_trivia_questions():
             f"Trivia Local DB Error: {e}"
         )
 
-        return []
+    return []
 
-
-# ---------------------------------------------------------
-# TRIVIA - PICK LOCAL QUESTION
-# ---------------------------------------------------------
 
 def get_local_trivia_question():
 
@@ -2288,93 +2372,147 @@ def get_local_trivia_question():
     )
 
     if not questions:
-
         return None
 
-    available = []
+    valid_questions = []
 
-    for question in questions:
+    for item in questions:
 
-        question_key = (
+        if not isinstance(
+            item,
+            dict
+        ):
+            continue
+
+        question_text = (
             str(
-                question.get(
+                item.get(
                     "question",
                     ""
                 )
-            )
-            + "|"
-            + str(
-                question.get(
-                    "correct_index",
-                    ""
-                )
+            ).strip()
+        )
+
+        answers = (
+            item.get(
+                "answers"
             )
         )
 
-        if question_key not in (
-            trivia_used_questions
+        try:
+
+            correct_index = int(
+                item.get(
+                    "correct_index"
+                )
+            )
+
+        except (
+            TypeError,
+            ValueError
         ):
+            continue
 
-            available.append(
-                (
-                    question,
-                    question_key
-                )
+        if not question_text:
+            continue
+
+        if (
+            not isinstance(
+                answers,
+                list
             )
+            or len(answers) != 4
+        ):
+            continue
 
-    if not available:
+        if correct_index not in range(4):
+            continue
 
-        # Local DB အားလုံးကုန်သွားရင်
-        # used list ကို reset လုပ်မယ်
-        trivia_used_questions.clear()
+        answers = [
 
-        available = []
+            str(answer)
 
-        for question in questions:
+            for answer
+            in answers
+        ]
 
-            question_key = (
-                str(
-                    question.get(
-                        "question",
-                        ""
-                    )
-                )
-                + "|"
-                + str(
-                    question.get(
-                        "correct_index",
-                        ""
-                    )
-                )
+        correct_answer = (
+            answers[
+                correct_index
+            ]
+        )
+
+        question_key = (
+            make_trivia_question_key(
+                "local",
+                question_text,
+                correct_answer
             )
+        )
 
-            available.append(
-                (
-                    question,
-                    question_key
-                )
-            )
+        valid_questions.append({
 
-    if not available:
+            "question":
+                question_text,
 
+            "answers":
+                answers,
+
+            "correct_index":
+                correct_index,
+
+            "question_key":
+                question_key,
+
+            "source":
+                "local"
+        })
+
+    if not valid_questions:
         return None
 
-    question, question_key = (
+    available = [
+
+        item
+
+        for item
+        in valid_questions
+
+        if item[
+            "question_key"
+        ]
+        not in trivia_used_questions
+    ]
+
+    # Local question အားလုံး
+    # မေးပြီးသွားရင်
+    # local keys တွေပဲ reset
+    if not available:
+
+        local_keys = {
+
+            item[
+                "question_key"
+            ]
+
+            for item
+            in valid_questions
+        }
+
+        trivia_used_questions.difference_update(
+            local_keys
+        )
+
+        available = (
+            valid_questions
+        )
+
+    return dict(
         random.choice(
             available
         )
     )
 
-    result = dict(question)
-
-    result["source"] = "local"
-
-    return result
-
-
-# ---------------------------------------------------------
-# TRIVIA - GET QUESTION
-# ---------------------------------------------------------
 
 def get_trivia_question():
 
@@ -2383,7 +2521,6 @@ def get_trivia_question():
     )
 
     if question:
-
         return question
 
     print(
@@ -2391,17 +2528,34 @@ def get_trivia_question():
         "Using local database."
     )
 
-    return get_local_trivia_question()
+    return (
+        get_local_trivia_question()
+    )
 
 
 # ---------------------------------------------------------
-# TRIVIA - TRANSLATE TO MYANMAR
+# TRANSLATION
 # ---------------------------------------------------------
 
 def translate_to_myanmar(text):
 
     if not text:
+        return text
 
+    text = str(
+        text
+    )
+
+    # မြန်မာစာ ဖြစ်ပြီးသားဆို
+    # ထပ်ဘာသာမပြန်
+    if any(
+        "\u1000"
+        <= char
+        <= "\u109F"
+
+        for char
+        in text
+    ):
         return text
 
     try:
@@ -2431,11 +2585,12 @@ def translate_to_myanmar(text):
             )
 
         translated = (
-            data
-            .get(
+
+            data.get(
                 "responseData",
                 {}
             )
+
             .get(
                 "translatedText"
             )
@@ -2443,8 +2598,10 @@ def translate_to_myanmar(text):
 
         if translated:
 
-            return html.unescape(
-                translated
+            return (
+                html.unescape(
+                    translated
+                )
             )
 
     except Exception as e:
@@ -2453,50 +2610,44 @@ def translate_to_myanmar(text):
             f"Trivia Translation Error: {e}"
         )
 
-    # Translation မရရင် မူရင်း English
-    # ကိုပဲ ပြန်သုံးမယ်
     return text
 
-
-# ---------------------------------------------------------
-# TRIVIA - TRANSLATE QUESTION
-# ---------------------------------------------------------
 
 def translate_trivia_question(
     question
 ):
 
-    translated_question = (
-        translate_to_myanmar(
-            question["question"]
-        )
+    result = dict(
+        question
     )
-
-    translated_answers = []
-
-    for answer in question["answers"]:
-
-        translated_answers.append(
-            translate_to_myanmar(
-                answer
-            )
-        )
-
-    result = dict(question)
 
     result[
         "question"
-    ] = translated_question
+    ] = translate_to_myanmar(
+        question[
+            "question"
+        ]
+    )
 
     result[
         "answers"
-    ] = translated_answers
+    ] = [
+
+        translate_to_myanmar(
+            answer
+        )
+
+        for answer
+        in question[
+            "answers"
+        ]
+    ]
 
     return result
 
 
 # ---------------------------------------------------------
-# TRIVIA - FORMAT QUESTION
+# FORMAT QUESTION
 # ---------------------------------------------------------
 
 def format_trivia_message(
@@ -2512,9 +2663,13 @@ def format_trivia_message(
     ]
 
     lines = [
+
         "🧠 TRIVIA",
         "",
-        f"❓ {game['question']}",
+
+        f"❓ "
+        f"{game['question']}",
+
         ""
     ]
 
@@ -2523,8 +2678,16 @@ def format_trivia_message(
     ):
 
         lines.append(
-            f"{letters[index]}. {answer}"
+            f"{letters[index]}. "
+            f"{answer}"
         )
+
+    remaining = max(
+        0,
+        int(
+            remaining
+        )
+    )
 
     minutes = (
         remaining // 60
@@ -2535,12 +2698,18 @@ def format_trivia_message(
     )
 
     lines.extend([
+
         "",
+
         f"⏳ အချိန် — "
-        f"{minutes:02d}:{seconds:02d}",
+        f"{minutes:02d}:"
+        f"{seconds:02d}",
+
         "",
+
         "👤 လူတစ်ယောက်ကို "
         "တစ်ခါပဲ ဖြေလို့ရပါတယ်။",
+
         "🏆 ပထမဆုံးအဖြေမှန်သူ "
         "+10 Points"
     ])
@@ -2551,7 +2720,7 @@ def format_trivia_message(
 
 
 # ---------------------------------------------------------
-# TRIVIA - COUNTDOWN
+# COUNTDOWN
 # ---------------------------------------------------------
 
 def trivia_countdown(
@@ -2561,87 +2730,156 @@ def trivia_countdown(
 
     while True:
 
-        game = trivia_games.get(
-            chat_id
-        )
+        current_game = None
 
-        if not game:
+        with trivia_lock:
 
-            return
+            game = (
+                trivia_games.get(
+                    chat_id
+                )
+            )
 
-        if (
-            game["message_id"]
-            != message_id
-        ):
+            if not game:
+                return
 
-            return
+            if (
+                game[
+                    "message_id"
+                ]
+                != message_id
+            ):
+                return
 
-        now = time.time()
+            remaining = int(
+                game[
+                    "end_time"
+                ]
+                - time.time()
+            )
 
-        remaining = int(
-            game["end_time"] - now
-        )
-
-        if remaining <= 0:
-
-            # Game အဖြေမရဘဲ timeout
-            if chat_id in trivia_games:
+            if remaining <= 0:
 
                 current_game = (
                     trivia_games.pop(
-                        chat_id
+                        chat_id,
+                        None
                     )
                 )
 
-                try:
+            else:
 
-                    bot.edit_message_text(
-                        "⏰ TIME UP!\n\n"
-                        "❌ ၃ မိနစ်အတွင်း "
-                        "ဘယ်သူမှ အဖြေမမှန်ပါဘူး။\n\n"
-                        f"✅ အဖြေမှန် — "
-                        f"{current_game['correct_letter']}. "
-                        f"{current_game['answers'][current_game['correct_index']]}\n\n"
-                        "🧠 နောက် Trivia ကို "
-                        "/trivia နဲ့ စနိုင်ပါပြီ။",
-                        chat_id,
-                        message_id
+                game_snapshot = (
+                    dict(
+                        game
                     )
+                )
 
-                except Exception as e:
+                game_snapshot[
+                    "answers"
+                ] = list(
+                    game[
+                        "answers"
+                    ]
+                )
+
+        # ---------------------------------
+        # TIME UP
+        # ---------------------------------
+
+        if current_game is not None:
+
+            try:
+
+                # Question ကို
+                # TIME UP စာအဖြစ်
+                # မပြောင်းဘူး
+                #
+                # Timer 00:00 ပဲထားမယ်
+
+                bot.edit_message_text(
+
+                    format_trivia_message(
+                        current_game,
+                        0
+                    ),
+
+                    chat_id,
+                    message_id
+                )
+
+            except Exception as e:
+
+                if (
+                    "message is not modified"
+                    not in str(e).lower()
+                ):
 
                     print(
-                        f"Trivia Timeout Edit Error: {e}"
+                        "Trivia Final "
+                        f"Timer Error: {e}"
                     )
+
+            # TIME UP ကို
+            # စာအသစ်နဲ့ပို့
+            send_trivia_result(
+
+                chat_id,
+
+                "⏰ TIME UP!\n\n"
+
+                "❌ ၃ မိနစ်အတွင်း "
+                "ဘယ်သူမှ "
+                "အဖြေမမှန်ပါဘူး။\n\n"
+
+                f"✅ အဖြေမှန် — "
+                f"{current_game['correct_letter']}. "
+                f"{current_game['answers'][current_game['correct_index']]}\n\n"
+
+                "🧠 နောက် Trivia ကို "
+                "/trivia နဲ့ စနိုင်ပါပြီ။"
+            )
 
             return
 
-        # 10 စက္ကန့်ခြား update
-        # နောက်ဆုံး 30 sec မှာ 5 sec ခြား
-        if remaining <= 30:
-
-            sleep_time = 5
-
-        else:
-
-            sleep_time = 10
+        # ---------------------------------
+        # TIMER UPDATE
+        # ---------------------------------
 
         try:
 
             bot.edit_message_text(
+
                 format_trivia_message(
-                    game,
+                    game_snapshot,
                     remaining
                 ),
+
                 chat_id,
                 message_id
             )
 
         except Exception as e:
 
-            print(
-                f"Trivia Countdown Error: {e}"
-            )
+            if (
+                "message is not modified"
+                not in str(e).lower()
+            ):
+
+                print(
+                    "Trivia Countdown "
+                    f"Error: {e}"
+                )
+
+        # နောက်ဆုံး 30 sec မှာ
+        # 5 sec ခြား update
+        #
+        # ပုံမှန် 10 sec ခြား
+
+        if remaining <= 30:
+            sleep_time = 5
+        else:
+            sleep_time = 10
 
         time.sleep(
             sleep_time
@@ -2649,13 +2887,17 @@ def trivia_countdown(
 
 
 # ---------------------------------------------------------
-# TRIVIA COMMAND
+# /trivia COMMAND
 # ---------------------------------------------------------
 
 @bot.message_handler(
-    commands=["trivia"]
+    commands=[
+        "trivia"
+    ]
 )
-def trivia_command(message):
+def trivia_command(
+    message
+):
 
     if message.chat.type not in [
         "group",
@@ -2663,27 +2905,73 @@ def trivia_command(message):
     ]:
 
         reply_game_message(
+
             message,
-            "❌ Group ထဲမှာပဲ Trivia "
-            "ကစားလို့ရပါတယ်။"
+
+            "❌ Group ထဲမှာပဲ "
+            "Trivia ကစားလို့ရပါတယ်။"
         )
 
         return
 
-    chat_id = message.chat.id
+    chat_id = (
+        message.chat.id
+    )
 
-    # Question တစ်ခု active ဖြစ်နေပြီဆို
-    # နောက်ထပ် /trivia မစ
-    if chat_id in trivia_games:
+    # /trivia command message ကို
+    # ပုံမှန် game delete time
+    # နဲ့ဖျက်မယ်
+    #
+    # Question ကိုတော့
+    # ဒီ timer မသုံးဘူး
 
-        game = trivia_games[
+    delay_delete_message(
+
+        chat_id,
+        message.message_id,
+        GAME_DELETE_TIME
+    )
+
+    # ---------------------------------
+    # Active game / Starting check
+    # ---------------------------------
+
+    with trivia_lock:
+
+        active_game = (
+            trivia_games.get(
+                chat_id
+            )
+        )
+
+        is_starting = (
             chat_id
-        ]
+            in trivia_starting_chats
+        )
+
+        if (
+            active_game is None
+            and not is_starting
+        ):
+
+            trivia_starting_chats.add(
+                chat_id
+            )
+
+    # ---------------------------------
+    # Game ရှိပြီးသား
+    # ---------------------------------
+
+    if active_game is not None:
 
         remaining = max(
+
             0,
+
             int(
-                game["end_time"]
+                active_game[
+                    "end_time"
+                ]
                 - time.time()
             )
         )
@@ -2697,106 +2985,204 @@ def trivia_command(message):
         )
 
         reply_game_message(
+
             message,
+
             "⚠️ Trivia Game "
             "ကစားနေပြီးသားပါ။\n\n"
+
             f"⏳ ကျန်ချိန် — "
-            f"{minutes:02d}:{seconds:02d}\n\n"
+            f"{minutes:02d}:"
+            f"{seconds:02d}\n\n"
+
             "လက်ရှိမေးခွန်းကိုပဲ "
             "ဖြေပါ။"
         )
 
         return
 
-    question = (
-        get_trivia_question()
-    )
+    # ---------------------------------
+    # Question ယူနေတုန်း
+    # ---------------------------------
 
-    if not question:
+    if is_starting:
 
         reply_game_message(
+
             message,
-            "❌ Trivia question "
-            "ရယူလို့မရသေးပါဘူး။\n"
-            "ခဏနေပြီး ပြန်စမ်းပါ။"
+
+            "⏳ Trivia question "
+            "ယူနေတုန်းပါ။ "
+            "ခဏလေးစောင့်ပါ။"
         )
 
         return
 
-    # Myanmar translation
-    question = (
-        translate_trivia_question(
-            question
-        )
-    )
+    try:
 
-    question_key = (
-        str(
-            question.get(
-                "question",
-                ""
+        # ---------------------------------
+        # Question ယူ
+        # ---------------------------------
+
+        question = (
+            get_trivia_question()
+        )
+
+        if not question:
+
+            reply_game_message(
+
+                message,
+
+                "❌ Trivia question "
+                "ရယူလို့မရသေးပါဘူး။\n"
+
+                "ခဏနေပြီး ပြန်စမ်းပါ။"
+            )
+
+            return
+
+        # ---------------------------------
+        # Myanmar Translation
+        # ---------------------------------
+
+        question = (
+            translate_trivia_question(
+                question
             )
         )
-        + "|"
-        + str(
-            question.get(
-                "correct_index",
-                ""
-            )
-        )
-    )
 
-    trivia_used_questions.add(
-        question_key
-    )
-
-    correct_index = (
-        question["correct_index"]
-    )
-
-    correct_letter = (
-        ["A", "B", "C", "D"]
-        [correct_index]
-    )
-
-    now = time.time()
-
-    end_time = (
-        now + TRIVIA_TIME
-    )
-
-    game = {
-        "question": question["question"],
-        "answers": question["answers"],
-        "correct_index": correct_index,
-        "correct_letter": correct_letter,
-        "end_time": end_time,
-        "attempted_users": set(),
-        "message_id": None,
-        "source": question.get(
-            "source",
-            "unknown"
-        )
-    }
-
-    sent = reply_game_message(
-        message,
-        format_trivia_message(
-            game,
-            TRIVIA_TIME
-        )
-    )
-
-    # reply_game_message က message object
-    # မပြန်တဲ့ version ဖြစ်နိုင်လို့
-    # message ID မရရင် ဒီ game ကို
-    # countdown မသုံးဘဲထားမယ်။
-    if sent is None:
+        # ---------------------------------
+        # Data validation
+        # ---------------------------------
 
         try:
 
-            sent = bot.send_message(
-                chat_id,
+            correct_index = int(
+                question[
+                    "correct_index"
+                ]
+            )
+
+        except (
+            KeyError,
+            TypeError,
+            ValueError
+        ):
+
+            reply_game_message(
+
+                message,
+
+                "❌ Trivia question "
+                "data မမှန်ပါဘူး။ "
+                "ပြန်စမ်းပါ။"
+            )
+
+            return
+
+        answers = (
+            question.get(
+                "answers",
+                []
+            )
+        )
+
+        if (
+            correct_index
+            not in range(4)
+            or len(answers) != 4
+        ):
+
+            reply_game_message(
+
+                message,
+
+                "❌ Trivia answer "
+                "data မပြည့်စုံပါဘူး။ "
+                "ပြန်စမ်းပါ။"
+            )
+
+            return
+
+        correct_letter = (
+
+            [
+                "A",
+                "B",
+                "C",
+                "D"
+            ]
+
+            [
+                correct_index
+            ]
+        )
+
+        # ---------------------------------
+        # Game Data
+        # ---------------------------------
+
+        game = {
+
+            "question":
+                question[
+                    "question"
+                ],
+
+            "answers":
+                answers,
+
+            "correct_index":
+                correct_index,
+
+            "correct_letter":
+                correct_letter,
+
+            "question_key":
+                question.get(
+                    "question_key"
+                ),
+
+            "end_time":
+                time.time()
+                + TRIVIA_TIME,
+
+            "attempted_users":
+                set(),
+
+            "message_id":
+                None,
+
+            "source":
+                question.get(
+                    "source",
+                    "unknown"
+                )
+        }
+
+        # =================================
+        # IMPORTANT FIX
+        # =================================
+        #
+        # ဒီနေရာမှာ
+        # reply_game_message()
+        # လုံးဝ မသုံးရ
+        #
+        # အဲဒါက
+        # GAME_DELETE_TIME = 120
+        # ဖြစ်လို့
+        # Trivia question ကို
+        # 2 မိနစ်မှာ
+        # ဖျက်သွားတယ်
+        # =================================
+
+        try:
+
+            sent = bot.reply_to(
+
+                message,
+
                 format_trivia_message(
                     game,
                     TRIVIA_TIME
@@ -2811,36 +3197,117 @@ def trivia_command(message):
 
             return
 
-    game["message_id"] = (
-        sent.message_id
-    )
+        game[
+            "message_id"
+        ] = sent.message_id
 
-    trivia_games[
-        chat_id
-    ] = game
+        # =================================
+        # Trivia = 3 minutes
+        #
+        # Question message =
+        # 4 minutes မှဖျက်
+        #
+        # ဒါကြောင့်
+        # Game မပြီးခင်
+        # ပျောက်တော့မယ်မဟုတ်ဘူး
+        # =================================
 
-    threading.Thread(
-        target=trivia_countdown,
-        args=(
+        delay_delete_message(
+
             chat_id,
-            sent.message_id
-        ),
-        daemon=True
-    ).start()
+            sent.message_id,
+            TRIVIA_QUESTION_DELETE_TIME
+        )
+
+        # ---------------------------------
+        # Save Game
+        # ---------------------------------
+
+        with trivia_lock:
+
+            # Safety Check
+            # Game နှစ်ခုမဖြစ်အောင်
+
+            if chat_id in trivia_games:
+
+                try:
+
+                    bot.delete_message(
+                        chat_id,
+                        sent.message_id
+                    )
+
+                except Exception:
+                    pass
+
+                return
+
+            trivia_games[
+                chat_id
+            ] = game
+
+            question_key = (
+                game.get(
+                    "question_key"
+                )
+            )
+
+            if question_key:
+
+                trivia_used_questions.add(
+                    question_key
+                )
+
+        # ---------------------------------
+        # Start Countdown
+        # ---------------------------------
+
+        threading.Thread(
+
+            target=
+                trivia_countdown,
+
+            args=(
+                chat_id,
+                sent.message_id
+            ),
+
+            daemon=True
+
+        ).start()
+
+    finally:
+
+        with trivia_lock:
+
+            trivia_starting_chats.discard(
+                chat_id
+            )
 
 
 # ---------------------------------------------------------
-# TRIVIA - ANSWER
+# TRIVIA ANSWER
+# A / B / C / D
 # ---------------------------------------------------------
 
 @bot.message_handler(
     func=lambda message:
-        message.chat.type in [
+
+        message.chat.type
+        in [
             "group",
             "supergroup"
         ]
-        and message.text is not None
-        and message.text.strip().upper()
+
+        and message.text
+        is not None
+
+        and (
+            message.text
+            .strip()
+            .upper()
+        )
+
         in [
             "A",
             "B",
@@ -2851,36 +3318,7 @@ def trivia_command(message):
 def trivia_answer(message):
 
     chat_id = message.chat.id
-
-    if chat_id not in trivia_games:
-
-        return
-
-    game = trivia_games[
-        chat_id
-    ]
-
-    # Game အချိန်ကုန်သွားပြီလား
-    if time.time() >= game["end_time"]:
-
-        return
-
-    user_id = (
-        message.from_user.id
-    )
-
-    # တစ်ယောက် = တစ်ခါပဲ
-    if user_id in game[
-        "attempted_users"
-    ]:
-
-        return
-
-    game[
-        "attempted_users"
-    ].add(
-        user_id
-    )
+    user_id = message.from_user.id
 
     answer = (
         message.text
@@ -2888,20 +3326,98 @@ def trivia_answer(message):
         .upper()
     )
 
-    if answer == game[
-        "correct_letter"
-    ]:
+    winner_game = None
 
-        winner = (
-            message.from_user
+    # ---------------------------------
+    # Answer Check
+    # ---------------------------------
+
+    with trivia_lock:
+
+        game = trivia_games.get(
+            chat_id
         )
 
-        winner_name = (
-            winner.first_name
-            or "Unknown"
+        # Trivia game မရှိရင်
+        # A/B/C/D message ကို
+        # ဒီတိုင်းထားမယ်
+        if not game:
+            return
+
+        # Time up ဖြစ်ပြီးသားဆို
+        # message ကိုလည်း မဖျက်ဘူး
+        if (
+            time.time()
+            >= game["end_time"]
+        ):
+            return
+
+        # ---------------------------------
+        # လူတစ်ယောက် တစ်ခါပဲ
+        # ---------------------------------
+
+        if (
+            user_id
+            in game["attempted_users"]
+        ):
+            # Message မဖျက်ဘူး
+            # Answer ကိုလည်း ထပ်မစစ်ဘူး
+            return
+
+        # ဒီ user ဖြေပြီးပြီလို့မှတ်
+        game["attempted_users"].add(
+            user_id
         )
 
-        # Winner = +10 points
+        # ---------------------------------
+        # Correct Answer Check
+        # ---------------------------------
+
+        if (
+            answer
+            == game["correct_letter"]
+        ):
+
+            # Winner ရသွားပြီဆို
+            # active trivia ကို ပိတ်
+            winner_game = (
+                trivia_games.pop(
+                    chat_id,
+                    None
+                )
+            )
+
+    # =====================================
+    # IMPORTANT
+    #
+    # User ရဲ့ A / B / C / D message ကို
+    # ဒီနေရာမှာ လုံးဝ မဖျက်ဘူး
+    # =====================================
+
+    # မှားတဲ့ answer ဆို
+    # ဘာမှ reply မလုပ်ဘူး
+    # သူ့ A/B/C/D message က group ထဲမှာ
+    # ဒီတိုင်းကျန်နေမယ်
+    if winner_game is None:
+        return
+
+    # ---------------------------------
+    # WINNER
+    # ---------------------------------
+
+    winner = message.from_user
+
+    winner_name = (
+        winner.first_name
+        or "Unknown"
+    )
+
+    # ---------------------------------
+    # +10 Points
+    # ---------------------------------
+
+    try:
+
         add_game_result(
             chat_id,
             winner.id,
@@ -2909,45 +3425,34 @@ def trivia_answer(message):
             points=10
         )
 
-        # Game ပိတ်
-        del trivia_games[
-            chat_id
-        ]
+    except Exception as e:
 
-        try:
-
-            bot.edit_message_text(
-                "🏆 TRIVIA WINNER!\n\n"
-                f"👑 Winner — "
-                f"{winner_name}\n\n"
-                f"✅ အဖြေမှန် — "
-                f"{game['correct_letter']}. "
-                f"{game['answers'][game['correct_index']]}\n\n"
-                "⭐ +10 Points",
-                chat_id,
-                game["message_id"]
-            )
-
-        except Exception as e:
-
-            print(
-                f"Trivia Winner Edit Error: {e}"
-            )
-
-        return
-
-    # မှားရင် တစ်ခါပြီးသွားပြီ
-    try:
-
-        bot.delete_message(
-            chat_id,
-            message.message_id
+        print(
+            f"Trivia Point Error: {e}"
         )
 
-    except:
+    # ---------------------------------
+    # Winner ကို စာအသစ်နဲ့ပို့
+    # Correct answer message ကိုလည်း
+    # မဖျက်ဘူး
+    # ---------------------------------
 
-        pass
+    send_trivia_result(
 
+        chat_id,
+
+        "🏆 TRIVIA WINNER!\n\n"
+
+        f"👑 Winner — "
+        f"{winner_name}\n\n"
+
+        f"✅ အဖြေမှန် — "
+        f"{winner_game['correct_letter']}. "
+        f"{winner_game['answers'][winner_game['correct_index']]}\n\n"
+
+        "⭐ +10 Points"
+    )
+    
 
 # =========================================================
 # 5. RANDOM - 200 RESPONSES
