@@ -84,6 +84,19 @@ from core.asset_manager import (
     asset_exists,
 )
 
+from ui.card_generator import (
+    create_card,
+    open_image,
+    resize_cover,
+    add_background_image,
+    draw_panel,
+    draw_text,
+    draw_progress_bar,
+    paste_image,
+    card_to_bytes,
+    save_card,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
