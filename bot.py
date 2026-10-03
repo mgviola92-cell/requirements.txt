@@ -75,6 +75,15 @@ from core.permissions import (
     safe_delete_message,
 )
 
+from core.asset_manager import (
+    get_asset_path,
+    list_images,
+    random_asset,
+    random_asset_avoiding_recent,
+    count_assets,
+    asset_exists,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
