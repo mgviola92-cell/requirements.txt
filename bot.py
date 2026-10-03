@@ -3867,18 +3867,18 @@ def trivia_answer(message):
 
     try:
 
-        add_game_result(
-            chat_id,
-            winner.id,
-            "win",
-            points=10
-        )
+    apply_game_result(
+        chat_id,
+        winner.id,
+        "trivia",
+        "win",
+    )
 
-    except Exception as e:
+except Exception as e:
 
-        print(
-            f"Trivia Point Error: {e}"
-        )
+    print(
+        f"Trivia Point Error: {e}"
+    )
 
     # ---------------------------------
     # Winner ကို စာအသစ်နဲ့ပို့
