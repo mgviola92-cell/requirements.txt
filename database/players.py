@@ -258,3 +258,91 @@ def initialize_player_stats():
         return True
 
     return False
+
+# =========================================================
+# ⭐ ADD BONUS POINTS
+#
+# Achievement / Daily Challenge / Event / Lucky Drop
+# စတဲ့ non-game rewards အတွက်
+#
+# games / wins / losses / draws မတိုးပါ
+# =========================================================
+
+def add_bonus_points(
+    chat_id,
+    user_id,
+    points
+):
+    if not DATABASE_URL:
+        print(
+            "❌ Bonus Points မသိမ်းနိုင်ပါ။ "
+            "DATABASE_URL မရှိပါ။"
+        )
+        return False
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO player_stats (
+                        chat_id,
+                        user_id,
+                        points,
+                        games,
+                        wins,
+                        losses,
+                        draws
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        GREATEST(0, %s),
+                        0,
+                        0,
+                        0,
+                        0
+                    )
+
+                    ON CONFLICT (
+                        chat_id,
+                        user_id
+                    )
+
+                    DO UPDATE SET
+                        points = GREATEST(
+                            0,
+                            player_stats.points
+                            + EXCLUDED.points
+                        )
+
+                    RETURNING
+                        points,
+                        games,
+                        wins,
+                        losses,
+                        draws
+                """, (
+                    chat_id,
+                    user_id,
+                    points
+                ))
+
+                row = cur.fetchone()
+
+        with player_stats_lock:
+            player_stats[(chat_id, user_id)] = {
+                "points": row[0],
+                "games": row[1],
+                "wins": row[2],
+                "losses": row[3],
+                "draws": row[4]
+            }
+
+        return True
+
+    except Exception as e:
+        print(
+            f"❌ Bonus Point Save Error: {e}"
+        )
+        return False
