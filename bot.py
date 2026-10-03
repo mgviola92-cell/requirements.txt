@@ -1870,22 +1870,33 @@ def eight_ball_command(message):
 
 
 # =========================================================
-# 4. GUESS - MULTIPLAYER
+# 4. GUESS - MULTIPLAYER + RANK / POINT SYSTEM
 # =========================================================
 
 guess_games = {}
 
 
+# ---------------------------------------------------------
+# /guess COMMAND
+# ---------------------------------------------------------
+
 @bot.message_handler(commands=["guess", "ခန့်မှန်း"])
 def guess_command(message):
 
-    if message.chat.type not in ["group", "supergroup"]:
+    # Group ထဲမှာပဲ ကစားခွင့်
+    if message.chat.type not in [
+        "group",
+        "supergroup"
+    ]:
+
         reply_game_message(
             message,
             "❌ Group ထဲမှာပဲ Guess Game ကစားလို့ရပါတယ်။"
         )
+
         return
 
+    # /guess command ကို auto delete
     delay_delete_message(
         message.chat.id,
         message.message_id,
@@ -1894,7 +1905,10 @@ def guess_command(message):
 
     chat_id = message.chat.id
 
-    # Game တစ်ခုရှိပြီးသားဆိုရင် အသစ်မစ
+    # -----------------------------------------------------
+    # Game တစ်ခုရှိပြီးသားလား
+    # -----------------------------------------------------
+
     if chat_id in guess_games:
 
         reply_game_message(
@@ -1906,41 +1920,93 @@ def guess_command(message):
 
         return
 
+    # -----------------------------------------------------
+    # Game အသစ်စ
+    # -----------------------------------------------------
+
     guess_games[chat_id] = {
-        "number": random.randint(1, 100),
-        "tries": 0,
-        "created": time.time()
+
+        "number":
+            random.randint(
+                1,
+                100
+            ),
+
+        "tries":
+            0,
+
+        "created":
+            time.time()
     }
 
     reply_game_message(
         message,
+
         "🎯 GUESS GAME စပြီ!\n\n"
+
         "1 ကနေ 100 အတွင်းက number "
         "တစ်ခု ငါရွေးထားပြီ။\n\n"
-        "👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရတယ်။\n"
-        "🔢 1 ကနေ 100 အတွင်းက number ပို့ပါ။\n\n"
-        "🏆 အရင်ဆုံးမှန်တဲ့သူက Winner!"
+
+        "👥 Group ထဲက ဘယ်သူမဆို "
+        "ဝင်ခန့်မှန်းလို့ရတယ်။\n"
+
+        "🔢 1 ကနေ 100 အတွင်းက "
+        "number ပို့ပါ။\n\n"
+
+        "🏆 အရင်ဆုံးမှန်တဲ့သူက Winner!\n"
+
+        "⭐ Winner = +10 Points"
     )
 
 
+# ---------------------------------------------------------
+# NUMBER ANSWER HANDLER
+# ---------------------------------------------------------
+
 @bot.message_handler(
     func=lambda message:
-    message.text
-    and message.text.strip().isdigit()
+
+        message.text
+        is not None
+
+        and message.text
+        .strip()
+        .isdigit()
 )
 def guess_number(message):
 
     chat_id = message.chat.id
 
+    # Guess game မရှိရင်
+    # ပုံမှန် number message အဖြစ်ထား
     if chat_id not in guess_games:
         return
 
+    # -----------------------------------------------------
+    # Number ပြောင်း
+    # -----------------------------------------------------
+
     try:
-        number = int(message.text.strip())
-    except:
+
+        number = int(
+            message.text.strip()
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
         return
 
-    if number < 1 or number > 100:
+    # -----------------------------------------------------
+    # 1 - 100 Check
+    # -----------------------------------------------------
+
+    if (
+        number < 1
+        or number > 100
+    ):
 
         reply_game_message(
             message,
@@ -1949,48 +2015,101 @@ def guess_number(message):
 
         return
 
+    # User ရဲ့ number message ကို
+    # game delete time နောက်မှဖျက်
     delay_delete_message(
         message.chat.id,
         message.message_id,
         GAME_DELETE_TIME
     )
 
-    game = guess_games[chat_id]
+    # Race safety အတွက်
+    # game ကို ပြန်ယူ
+    game = guess_games.get(
+        chat_id
+    )
 
+    if not game:
+        return
+
+    # Guess count
     game["tries"] += 1
 
     target = game["number"]
 
     # =====================================================
-    # CORRECT
+    # ✅ CORRECT
     # =====================================================
 
     if number == target:
 
-        winner = message.from_user
+        winner = (
+            message.from_user
+        )
 
-        # Username ရှိရင် @username ပြမယ်
+        # Username ရှိရင် @username
         if winner.username:
-            winner_display = f"@{winner.username}"
 
-        # Username မရှိရင် First Name ပဲပြမယ်
+            winner_display = (
+                f"@{winner.username}"
+            )
+
+        # Username မရှိရင် First Name
         else:
-            winner_display = winner.first_name or "Unknown User"
+
+            winner_display = (
+                winner.first_name
+                or "Unknown User"
+            )
+
+        # -------------------------------------------------
+        # 🏆 RANK / POINT SYSTEM
+        # -------------------------------------------------
+
+        try:
+
+            add_game_result(
+                chat_id,
+                winner.id,
+                "win",
+                points=10
+            )
+
+        except Exception as e:
+
+            print(
+                f"Guess Point Error: {e}"
+            )
+
+        # -------------------------------------------------
+        # Winner Result
+        # -------------------------------------------------
 
         reply_game_message(
             message,
-            f"🎯 CORRECT!\n\n"
+
+            "🎯 CORRECT!\n\n"
+
             f"🏆 Number က {target} ပါ!\n"
-            f"📊 {game['tries']} ကြိမ်နဲ့ မှန်သွားပြီ!\n\n"
-            f"👑 Winner — {winner_display}"
+
+            f"📊 {game['tries']} ကြိမ်နဲ့ "
+            "မှန်သွားပြီ!\n\n"
+
+            f"👑 Winner — {winner_display}\n"
+
+            "⭐ +10 Points"
         )
 
-        del guess_games[chat_id]
+        # Game ပိတ်
+        guess_games.pop(
+            chat_id,
+            None
+        )
 
         return
 
     # =====================================================
-    # TOO LOW
+    # 📈 TOO LOW
     # =====================================================
 
     if number < target:
@@ -2001,7 +2120,7 @@ def guess_number(message):
         )
 
     # =====================================================
-    # TOO HIGH
+    # 📉 TOO HIGH
     # =====================================================
 
     else:
