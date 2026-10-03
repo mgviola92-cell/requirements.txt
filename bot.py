@@ -4601,11 +4601,7 @@ def profile_command(message):
 
 
 # =========================================================
-# 🏆 RANK
-# TEMP TEXT VERSION
-#
-# Visual Rank Card ကို UI Phase မှာ
-# Dynamic Image Card အဖြစ် ပြောင်းမည်။
+# 🏆 RANK - VISUAL LEADERBOARD
 # =========================================================
 
 @bot.message_handler(commands=["rank"])
@@ -4614,6 +4610,10 @@ def rank_command(message):
     chat_id = message.chat.id
 
     players = []
+
+    # -----------------------------------------
+    # Player stats snapshot
+    # -----------------------------------------
 
     with player_stats_lock:
 
@@ -4624,10 +4624,7 @@ def rank_command(message):
             if saved_chat_id != chat_id:
                 continue
 
-            # -------------------------------------
-            # 0 Points + 0 Games ဆို Rank ထဲမပြ
-            # -------------------------------------
-
+            # 0 Points + 0 Games player မပြ
             if (
                 stats["points"] <= 0
                 and stats["games"] <= 0
@@ -4637,13 +4634,12 @@ def rank_command(message):
             players.append(
                 (
                     user_id,
-                    stats
+                    stats.copy()
                 )
             )
 
     # -----------------------------------------
-    # Ranking priority:
-    #
+    # Ranking:
     # 1. Points
     # 2. Wins
     # 3. Games
@@ -4662,32 +4658,18 @@ def rank_command(message):
 
         reply_info_message(
             message,
-
             "🏆 Rank data မရှိသေးပါဘူး။\n"
             "Game ကစားပြီး Points ရယူပါ။"
         )
 
         return
 
-    lines = [
+    # Top 10
+    players = players[:10]
 
-        "🏆 GROUP RANKING",
-        ""
-    ]
+    leaderboard_players = []
 
-    medals = {
-        1: "🥇",
-        2: "🥈",
-        3: "🥉"
-    }
-
-    for index, (
-        user_id,
-        stats
-    ) in enumerate(
-        players[:10],
-        1
-    ):
+    for user_id, stats in players:
 
         try:
 
@@ -4705,31 +4687,93 @@ def rank_command(message):
 
             name = "Unknown"
 
-        points = stats[
-            "points"
+        leaderboard_players.append(
+            {
+                "name": name,
+                "points": stats["points"],
+                "wins": stats["wins"],
+                "games": stats["games"],
+            }
+        )
+
+    try:
+
+        # -------------------------------------
+        # Generate visual leaderboard
+        # -------------------------------------
+
+        rank_image = (
+            generate_leaderboard_card_bytes(
+                players=leaderboard_players,
+                title="GROUP RANKING",
+            )
+        )
+
+        rank_image.name = (
+            "group_leaderboard.png"
+        )
+
+        sent = bot.send_photo(
+            chat_id,
+            rank_image,
+            caption="🏆 GROUP RANKING",
+            reply_to_message_id=
+                message.message_id,
+        )
+
+        delay_delete_message(
+            chat_id,
+            sent.message_id,
+            INFO_DELETE_TIME
+        )
+
+    except Exception as e:
+
+        print(
+            f"❌ Leaderboard Card Error: {e}"
+        )
+
+        # -------------------------------------
+        # Image error ဖြစ်ရင် text fallback
+        # -------------------------------------
+
+        lines = [
+            "🏆 GROUP RANKING",
+            ""
         ]
 
-        rank = get_rank_title(
-            points
-        )
+        medals = {
+            1: "🥇",
+            2: "🥈",
+            3: "🥉",
+        }
 
-        icon = medals.get(
-            index,
-            f"{index}."
-        )
+        for index, player in enumerate(
+            leaderboard_players,
+            start=1
+        ):
 
-        lines.append(
-            f"{icon} {name}\n"
-            f"   💰 {points} pts • "
-            f"{rank}\n"
-            f"   🥇 {stats['wins']} Wins • "
-            f"🎮 {stats['games']} Games"
-        )
+            icon = medals.get(
+                index,
+                f"{index}."
+            )
 
-    reply_info_message(
-        message,
-        "\n\n".join(lines)
-    )
+            rank = get_rank_title(
+                player["points"]
+            )
+
+            lines.append(
+                f"{icon} {player['name']}\n"
+                f"💰 {player['points']} pts • "
+                f"{rank}\n"
+                f"🥇 {player['wins']} Wins • "
+                f"🎮 {player['games']} Games"
+            )
+
+        reply_info_message(
+            message,
+            "\n\n".join(lines)
+        )
 
 
 # =========================================================
