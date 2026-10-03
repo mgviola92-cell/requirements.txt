@@ -350,8 +350,6 @@ def add_bonus_points(
 
         return True
         
-        return True
-
     except Exception as e:
         print(
             f"❌ Bonus Point Save Error: {e}"
