@@ -253,11 +253,13 @@ def add_game_result(
 # =========================================================
 
 def initialize_player_stats():
-    if init_player_stats_db():
-        load_player_stats()
-        return True
+    player_ready = init_player_stats_db()
+    reward_ready = init_reward_transactions_db()
 
-    return False
+    if player_ready:
+        load_player_stats()
+
+    return player_ready and reward_ready
 
 # =========================================================
 # ⭐ ADD BONUS POINTS
@@ -339,10 +341,98 @@ def add_bonus_points(
                 "draws": row[4]
             }
 
+        log_reward_transaction(
+    chat_id,
+    user_id,
+    points,
+    reason="bonus"
+)
+        
         return True
 
     except Exception as e:
         print(
             f"❌ Bonus Point Save Error: {e}"
+        )
+        return False
+
+# =========================================================
+# 🧾 REWARD TRANSACTIONS TABLE
+# =========================================================
+
+def init_reward_transactions_db():
+    if not DATABASE_URL:
+        return False
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS reward_transactions (
+                        id BIGSERIAL PRIMARY KEY,
+
+                        chat_id BIGINT NOT NULL,
+                        user_id BIGINT NOT NULL,
+
+                        points INTEGER NOT NULL,
+                        reason TEXT,
+
+                        created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW()
+                    )
+                """)
+
+        print("✅ Reward Transactions Database Ready")
+        return True
+
+    except Exception as e:
+        print(
+            f"❌ Reward Transactions DB Init Error: {e}"
+        )
+        return False
+
+
+def log_reward_transaction(
+    chat_id,
+    user_id,
+    points,
+    reason=None
+):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO reward_transactions (
+                        chat_id,
+                        user_id,
+                        points,
+                        reason
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s
+                    )
+                """, (
+                    chat_id,
+                    user_id,
+                    int(points),
+                    reason
+                ))
+
+        log_reward_transaction(
+    chat_id,
+    user_id,
+    points,
+    reason="bonus"
+)
+        
+        return True
+
+    except Exception as e:
+        print(
+            f"❌ Reward Transaction Log Error: {e}"
         )
         return False
