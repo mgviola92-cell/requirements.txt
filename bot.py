@@ -4441,6 +4441,7 @@ def commands_list(message):
 warn_count = {}
 
 initialize_player_stats()
+init_used_questions_db()
 
 # =========================================================
 # ⚠️ MANUAL WARN
