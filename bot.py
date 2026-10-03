@@ -4040,7 +4040,7 @@ def emoji_guess_command(message):
         return
 
     # -----------------------------------------
-    # Mark question as used
+    # Mark question used
     # -----------------------------------------
 
     mark_question_used(
@@ -4050,7 +4050,7 @@ def emoji_guess_command(message):
     )
 
     # -----------------------------------------
-    # Send main game message
+    # Main question message
     # -----------------------------------------
 
     game_message = bot.send_message(
@@ -4065,9 +4065,9 @@ def emoji_guess_command(message):
         parse_mode="HTML",
     )
 
-    # =========================================
+    # =====================================================
     # ⏳ LIVE COUNTDOWN
-    # =========================================
+    # =====================================================
 
     def update_emoji_countdown():
 
@@ -4120,9 +4120,9 @@ def emoji_guess_command(message):
         replace=True,
     )
 
-    # =========================================
+    # =====================================================
     # 💡 HINT
-    # =========================================
+    # =====================================================
 
     def send_emoji_hint():
 
@@ -4168,9 +4168,9 @@ def emoji_guess_command(message):
         replace=True,
     )
 
-    # =========================================
+    # =====================================================
     # ⏰ TIMEOUT
-    # =========================================
+    # =====================================================
 
     def emoji_timeout():
 
@@ -4193,6 +4193,13 @@ def emoji_guess_command(message):
             "display_answer"
         ]
 
+        # Delete old main question
+        delay_delete_message(
+            chat_id,
+            game_message.message_id,
+            1,
+        )
+
         try:
             result_message = bot.send_message(
                 chat_id,
@@ -4203,6 +4210,7 @@ def emoji_guess_command(message):
                 parse_mode="HTML",
             )
 
+            # Timeout result stays 90 sec
             delay_delete_message(
                 chat_id,
                 result_message.message_id,
@@ -4251,11 +4259,20 @@ def emoji_guess_answer(message):
         message.text,
     )
 
+    # -----------------------------------------
+    # Wrong answer
+    #
+    # IMPORTANT:
+    # မဖျက်ပါ။
+    # Normal chat ကိုပါ မထိပါ။
+    # -----------------------------------------
+
     if result["status"] != "correct":
         return
 
     # -----------------------------------------
-    # Cancel all timers
+    # Correct answer
+    # Stop all timers
     # -----------------------------------------
 
     cancel_task(
@@ -4269,6 +4286,36 @@ def emoji_guess_answer(message):
     cancel_task(
         f"emoji_timeout:{chat_id}"
     )
+
+    # -----------------------------------------
+    # Delete player's correct answer
+    # Random 30–45 sec
+    # -----------------------------------------
+
+    delay_delete_message(
+        chat_id,
+        message.message_id,
+        random.randint(30, 45),
+    )
+
+    # -----------------------------------------
+    # Find main Emoji question message
+    # -----------------------------------------
+
+    try:
+        active_message_id = None
+
+        # Main question message is the most recent
+        # stored Telegram message from this round.
+        # We delete it immediately after winner.
+        active_message_id = getattr(
+            message,
+            "_emoji_game_message_id",
+            None
+        )
+
+    except Exception:
+        active_message_id = None
 
     # -----------------------------------------
     # Winner reward
@@ -4293,7 +4340,7 @@ def emoji_guess_answer(message):
     )
 
     # -----------------------------------------
-    # Result
+    # Winner result
     # -----------------------------------------
 
     try:
