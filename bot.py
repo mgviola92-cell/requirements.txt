@@ -55,6 +55,17 @@ from core.timers import (
     reschedule_task,
 )
 
+from core.keyboards import (
+    single_button,
+    two_buttons,
+    vote_keyboard,
+    accept_decline_keyboard,
+    boss_attack_keyboard,
+    speed_tap_keyboard,
+    claim_keyboard,
+    pagination_keyboard,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
