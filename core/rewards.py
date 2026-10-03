@@ -31,6 +31,12 @@ GAME_REWARDS = {
         "draw": 0
     },
 
+    "emoji_guess": {
+    "win": 10,
+    "loss": 0,
+    "draw": 0
+    },
+    
     "competitive_10": {
         "win": 10,
         "loss": -2,
