@@ -11,6 +11,7 @@ import urllib.request
 import urllib.parse
 from telebot.types import ChatPermissions
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
+from database.db import DATABASE_URL, get_db_connection
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -4163,9 +4164,6 @@ warn_count = {}
 # PHASE 1 FOUNDATION
 # =========================================================
 
-import psycopg
-
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 player_stats = {}
 player_stats_lock = threading.RLock()
@@ -4188,10 +4186,7 @@ def init_player_stats_db():
 
     try:
 
-        with psycopg.connect(
-            DATABASE_URL,
-            connect_timeout=20
-        ) as conn:
+        with get_db_connection() as conn:
 
             with conn.cursor() as cur:
 
@@ -4239,10 +4234,7 @@ def load_player_stats():
 
     try:
 
-        with psycopg.connect(
-            DATABASE_URL,
-            connect_timeout=20
-        ) as conn:
+        with get_db_connection() as conn:
 
             with conn.cursor() as cur:
 
@@ -4392,10 +4384,7 @@ def add_game_result(
 
     try:
 
-        with psycopg.connect(
-            DATABASE_URL,
-            connect_timeout=20
-        ) as conn:
+        with get_db_connection() as conn:
 
             with conn.cursor() as cur:
 
