@@ -1184,7 +1184,7 @@ def coin_player_choice(message):
                 message.chat.id,
                 game["target_id"],
                 "loss",
-                points=0
+                points=1
             )
 
         elif p2_correct:
@@ -1197,7 +1197,7 @@ def coin_player_choice(message):
                 message.chat.id,
                 game["challenger_id"],
                 "loss",
-                points=0
+                points=1
             )
 
             add_game_result(
@@ -4159,6 +4159,7 @@ warn_count = {}
 
 # =========================================================
 # 🏆 POINT / RANK SYSTEM - NEON DATABASE
+# PHASE 1 FOUNDATION
 # =========================================================
 
 import psycopg
@@ -4169,9 +4170,42 @@ player_stats = {}
 player_stats_lock = threading.RLock()
 
 
-# ---------------------------------------------------------
-# DATABASE SETUP
-# ---------------------------------------------------------
+# =========================================================
+# ⚙️ RANK CONFIG
+# =========================================================
+
+RANKS = [
+    {
+        "name": "🌱 ROOKIE",
+        "min_points": 0,
+        "next_points": 20
+    },
+    {
+        "name": "⭐ PLAYER",
+        "min_points": 20,
+        "next_points": 50
+    },
+    {
+        "name": "🔥 PRO",
+        "min_points": 50,
+        "next_points": 100
+    },
+    {
+        "name": "💎 MASTER",
+        "min_points": 100,
+        "next_points": 200
+    },
+    {
+        "name": "👑 LEGEND",
+        "min_points": 200,
+        "next_points": None
+    }
+]
+
+
+# =========================================================
+# 🗄️ DATABASE SETUP
+# =========================================================
 
 def init_player_stats_db():
 
@@ -4195,10 +4229,13 @@ def init_player_stats_db():
 
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS player_stats (
+
                         chat_id BIGINT NOT NULL,
                         user_id BIGINT NOT NULL,
+
                         points INTEGER NOT NULL DEFAULT 0,
                         games INTEGER NOT NULL DEFAULT 0,
+
                         wins INTEGER NOT NULL DEFAULT 0,
                         losses INTEGER NOT NULL DEFAULT 0,
                         draws INTEGER NOT NULL DEFAULT 0,
@@ -4210,9 +4247,7 @@ def init_player_stats_db():
                     )
                 """)
 
-        print(
-            "✅ Player Stats Database Ready"
-        )
+        print("✅ Player Stats Database Ready")
 
         return True
 
@@ -4225,9 +4260,9 @@ def init_player_stats_db():
         return False
 
 
-# ---------------------------------------------------------
-# LOAD DATABASE → RAM
-# ---------------------------------------------------------
+# =========================================================
+# 📥 LOAD DATABASE → RAM
+# =========================================================
 
 def load_player_stats():
 
@@ -4252,7 +4287,6 @@ def load_player_stats():
                         wins,
                         losses,
                         draws
-
                     FROM player_stats
                 """)
 
@@ -4278,7 +4312,8 @@ def load_player_stats():
                     (chat_id, user_id)
                 ] = {
 
-                    "points": points,
+                    "points": max(0, points),
+
                     "games": games,
                     "wins": wins,
                     "losses": losses,
@@ -4297,9 +4332,9 @@ def load_player_stats():
         )
 
 
-# ---------------------------------------------------------
-# GET PLAYER STATS
-# ---------------------------------------------------------
+# =========================================================
+# 👤 GET PLAYER STATS
+# =========================================================
 
 def get_player_stats(
     chat_id,
@@ -4318,6 +4353,7 @@ def get_player_stats(
             player_stats[key] = {
 
                 "points": 0,
+
                 "games": 0,
                 "wins": 0,
                 "losses": 0,
@@ -4327,9 +4363,17 @@ def get_player_stats(
         return player_stats[key]
 
 
-# ---------------------------------------------------------
-# ADD RESULT + SAVE DATABASE
-# ---------------------------------------------------------
+# =========================================================
+# 🎮 ADD GAME RESULT
+#
+# points:
+#   WIN  -> positive points
+#   LOSS -> negative points
+#   DRAW -> usually 0
+#
+# IMPORTANT:
+# Points ဘယ်တော့မှ 0 အောက် မကျနိုင်ပါ။
+# =========================================================
 
 def add_game_result(
     chat_id,
@@ -4359,6 +4403,10 @@ def add_game_result(
 
         return False
 
+    # -----------------------------------------
+    # Result counters
+    # -----------------------------------------
+
     add_win = (
         1 if result == "win"
         else 0
@@ -4376,10 +4424,6 @@ def add_game_result(
 
     try:
 
-        # ---------------------------------
-        # Database ကို အရင် Save
-        # ---------------------------------
-
         with psycopg.connect(
             DATABASE_URL,
             connect_timeout=20
@@ -4392,8 +4436,10 @@ def add_game_result(
 
                         chat_id,
                         user_id,
+
                         points,
                         games,
+
                         wins,
                         losses,
                         draws
@@ -4404,12 +4450,13 @@ def add_game_result(
 
                         %s,
                         %s,
-                        %s,
+
+                        GREATEST(0, %s),
                         1,
+
                         %s,
                         %s,
                         %s
-
                     )
 
                     ON CONFLICT (
@@ -4419,9 +4466,11 @@ def add_game_result(
 
                     DO UPDATE SET
 
-                        points =
+                        points = GREATEST(
+                            0,
                             player_stats.points
-                            + EXCLUDED.points,
+                            + EXCLUDED.points
+                        ),
 
                         games =
                             player_stats.games
@@ -4440,30 +4489,28 @@ def add_game_result(
                             + EXCLUDED.draws
 
                     RETURNING
-
                         points,
                         games,
                         wins,
                         losses,
                         draws
-
                 """, (
 
                     chat_id,
                     user_id,
+
                     points,
+
                     add_win,
                     add_loss,
                     add_draw
-
                 ))
 
                 row = cur.fetchone()
 
-        # ---------------------------------
-        # DB Save အောင်မြင်ပြီးမှ
-        # RAM ကို Update
-        # ---------------------------------
+        # -----------------------------------------
+        # DB အောင်မြင်ပြီးမှ RAM update
+        # -----------------------------------------
 
         with player_stats_lock:
 
@@ -4473,6 +4520,7 @@ def add_game_result(
 
                 "points": row[0],
                 "games": row[1],
+
                 "wins": row[2],
                 "losses": row[3],
                 "draws": row[4]
@@ -4489,34 +4537,117 @@ def add_game_result(
         return False
 
 
-# ---------------------------------------------------------
-# RANK TITLE
-# ---------------------------------------------------------
+# =========================================================
+# 🏆 RANK HELPERS
+# =========================================================
+
+def get_rank_data(points):
+
+    points = max(
+        0,
+        int(points)
+    )
+
+    current_rank = RANKS[0]
+
+    for rank in RANKS:
+
+        if points >= rank["min_points"]:
+            current_rank = rank
+
+        else:
+            break
+
+    return current_rank
+
 
 def get_rank_title(points):
 
-    if points >= 200:
-        return "👑 LEGEND"
-
-    if points >= 100:
-        return "💎 MASTER"
-
-    if points >= 50:
-        return "🔥 PRO"
-
-    if points >= 20:
-        return "⭐ PLAYER"
-
-    return "🌱 ROOKIE"
+    return get_rank_data(
+        points
+    )["name"]
 
 
-# ---------------------------------------------------------
-# BOT START → DATABASE LOAD
-# ---------------------------------------------------------
+def get_rank_progress(points):
+
+    points = max(
+        0,
+        int(points)
+    )
+
+    rank = get_rank_data(
+        points
+    )
+
+    next_points = rank[
+        "next_points"
+    ]
+
+    # LEGEND = max rank
+    if next_points is None:
+
+        return {
+            "current": points,
+            "needed": 0,
+            "percent": 100,
+            "next_rank": None
+        }
+
+    start = rank[
+        "min_points"
+    ]
+
+    total_needed = (
+        next_points - start
+    )
+
+    current_progress = (
+        points - start
+    )
+
+    percent = int(
+        (
+            current_progress
+            / total_needed
+        ) * 100
+    )
+
+    percent = max(
+        0,
+        min(100, percent)
+    )
+
+    next_rank = None
+
+    for item in RANKS:
+
+        if (
+            item["min_points"]
+            == next_points
+        ):
+            next_rank = item["name"]
+            break
+
+    return {
+
+        "current": current_progress,
+
+        "needed": total_needed,
+
+        "percent": percent,
+
+        "next_rank": next_rank
+    }
+
+
+# =========================================================
+# 🚀 BOT START → DATABASE LOAD
+# =========================================================
 
 if init_player_stats_db():
 
     load_player_stats()
+
 
 # =========================================================
 # ⚠️ MANUAL WARN
@@ -4650,6 +4781,10 @@ def profile_command(message):
 
 # =========================================================
 # 🏆 RANK
+# TEMP TEXT VERSION
+#
+# Visual Rank Card ကို UI Phase မှာ
+# Dynamic Image Card အဖြစ် ပြောင်းမည်။
 # =========================================================
 
 @bot.message_handler(commands=["rank"])
@@ -4659,23 +4794,46 @@ def rank_command(message):
 
     players = []
 
-    for key, stats in player_stats.items():
+    with player_stats_lock:
 
-        saved_chat_id, user_id = key
+        for key, stats in player_stats.items():
 
-        if saved_chat_id != chat_id:
-            continue
+            saved_chat_id, user_id = key
 
-        players.append(
-            (
-                user_id,
-                stats["points"],
-                stats
+            if saved_chat_id != chat_id:
+                continue
+
+            # -------------------------------------
+            # 0 Points + 0 Games ဆို Rank ထဲမပြ
+            # -------------------------------------
+
+            if (
+                stats["points"] <= 0
+                and stats["games"] <= 0
+            ):
+                continue
+
+            players.append(
+                (
+                    user_id,
+                    stats
+                )
             )
-        )
+
+    # -----------------------------------------
+    # Ranking priority:
+    #
+    # 1. Points
+    # 2. Wins
+    # 3. Games
+    # -----------------------------------------
 
     players.sort(
-        key=lambda item: item[1],
+        key=lambda item: (
+            item[1]["points"],
+            item[1]["wins"],
+            item[1]["games"]
+        ),
         reverse=True
     )
 
@@ -4683,6 +4841,7 @@ def rank_command(message):
 
         reply_info_message(
             message,
+
             "🏆 Rank data မရှိသေးပါဘူး။\n"
             "Game ကစားပြီး Points ရယူပါ။"
         )
@@ -4690,17 +4849,27 @@ def rank_command(message):
         return
 
     lines = [
+
         "🏆 GROUP RANKING",
         ""
     ]
 
+    medals = {
+        1: "🥇",
+        2: "🥈",
+        3: "🥉"
+    }
+
     for index, (
         user_id,
-        points,
         stats
-    ) in enumerate(players[:10], 1):
+    ) in enumerate(
+        players[:10],
+        1
+    ):
 
         try:
+
             member = bot.get_chat_member(
                 chat_id,
                 user_id
@@ -4711,21 +4880,45 @@ def rank_command(message):
                 or "Unknown"
             )
 
-        except:
+        except Exception:
 
             name = "Unknown"
 
-        rank = get_rank_title(points)
+        points = stats[
+            "points"
+        ]
+
+        rank = get_rank_title(
+            points
+        )
+
+        icon = medals.get(
+            index,
+            f"{index}."
+        )
 
         lines.append(
-            f"{index}. {name} — "
-            f"{points} pts {rank}"
+            f"{icon} {name}\n"
+            f"   💰 {points} pts • "
+            f"{rank}\n"
+            f"   🥇 {stats['wins']} Wins • "
+            f"🎮 {stats['games']} Games"
         )
 
     reply_info_message(
         message,
-        "\n".join(lines)
+        "\n\n".join(lines)
     )
+
+
+# =========================================================
+# 🥇 TOP = RANK
+# =========================================================
+
+@bot.message_handler(commands=["top"])
+def top_command(message):
+
+    rank_command(message)
 
 
 # =========================================================
