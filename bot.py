@@ -4457,16 +4457,6 @@ def top_command(message):
     rank_command(message)
 
 
-# =========================================================
-# 🥇 TOP = RANK
-# =========================================================
-
-@bot.message_handler(commands=["top"])
-def top_command(message):
-
-    rank_command(message)
-
-
 # Spam records
 # key = (type, chat_id, user_id)
 # value = [(time, message_id), ...]
