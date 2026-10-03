@@ -1,27 +1,18 @@
+# =========================================================
+# 🎁 REWARD / POINT SYSTEM
+# =========================================================
+
 from database.players import (
     add_game_result,
     add_bonus_points as db_add_bonus_points,
 )
 
-# =========================================================
-# 🎁 REWARD / POINT SYSTEM
-# =========================================================
-
-from database.players import add_game_result
-
 
 # =========================================================
 # ⚙️ DEFAULT REWARD CONFIG
-#
-# Permanent Rank Points
 # =========================================================
 
 GAME_REWARDS = {
-
-    # -----------------------------------------
-    # EXISTING GAMES
-    # -----------------------------------------
-
     "coin": {
         "win": 5,
         "loss": -1,
@@ -30,21 +21,15 @@ GAME_REWARDS = {
 
     "trivia": {
         "win": 10,
-        # Wrong answer = loss မဟုတ်ပါ
         "loss": 0,
         "draw": 0
     },
 
     "guess": {
         "win": 10,
-        # Wrong guess = loss မဟုတ်ပါ
         "loss": 0,
         "draw": 0
     },
-
-    # -----------------------------------------
-    # FUTURE / COMPETITIVE DEFAULTS
-    # -----------------------------------------
 
     "competitive_10": {
         "win": 10,
@@ -60,35 +45,14 @@ GAME_REWARDS = {
 }
 
 
-# =========================================================
-# 🔎 GET REWARD VALUE
-# =========================================================
-
 def get_reward(game_key, result):
-
     game = GAME_REWARDS.get(game_key)
 
     if game is None:
         return 0
 
-    return int(
-        game.get(result, 0)
-    )
+    return int(game.get(result, 0))
 
-
-# =========================================================
-# 🎮 APPLY STANDARD GAME RESULT
-#
-# Example:
-#
-# apply_game_result(
-#     chat_id,
-#     user_id,
-#     "coin",
-#     "win"
-# )
-#
-# =========================================================
 
 def apply_game_result(
     chat_id,
@@ -96,15 +60,12 @@ def apply_game_result(
     game_key,
     result
 ):
-
     if result not in (
         "win",
         "loss",
         "draw"
     ):
-        print(
-            f"❌ Invalid reward result: {result}"
-        )
+        print(f"❌ Invalid reward result: {result}")
         return False
 
     points = get_reward(
@@ -120,34 +81,18 @@ def apply_game_result(
     )
 
 
-# =========================================================
-# ⭐ CUSTOM POINT RESULT
-#
-# Future games:
-# Boss Raid
-# Team Battle
-# Daily Challenge
-# Achievements
-# etc.
-#
-# တိကျတဲ့ reward amount ကို manually သတ်မှတ်ချင်ရင် သုံးမည်။
-# =========================================================
-
 def apply_custom_game_result(
     chat_id,
     user_id,
     result,
     points
 ):
-
     if result not in (
         "win",
         "loss",
         "draw"
     ):
-        print(
-            f"❌ Invalid custom result: {result}"
-        )
+        print(f"❌ Invalid custom result: {result}")
         return False
 
     return add_game_result(
@@ -157,17 +102,6 @@ def apply_custom_game_result(
         points=int(points)
     )
 
-
-# =========================================================
-# 🛡️ NON-GAME BONUS
-#
-# Achievement / Daily Challenge / Event rewards တွေအတွက်
-# Games/Wins/Losses counters မတိုးသင့်တာကြောင့်
-# အခုတော့ placeholder ပဲထားမည်။
-#
-# Database reward transaction system ထည့်တဲ့အဆင့်မှာ
-# ဒီ function ကို complete လုပ်မည်။
-# =========================================================
 
 def add_bonus_points(
     chat_id,
@@ -193,7 +127,3 @@ def add_bonus_points(
         )
 
     return success
-        "Bonus Point System ကို "
-        "Reward Transactions Database အဆင့်မှာ "
-        "ချိတ်ဆက်မည်။"
-    )
