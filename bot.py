@@ -3985,6 +3985,261 @@ except Exception as e:
     
 
 # =========================================================
+# 😀 EMOJI GUESS
+# =========================================================
+
+@bot.message_handler(commands=["emoji", "emojiguess"])
+def emoji_guess_command(message):
+
+    if message.chat.type not in [
+        "group",
+        "supergroup",
+    ]:
+        bot.reply_to(
+            message,
+            "❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။"
+        )
+        return
+
+    chat_id = message.chat.id
+
+    # Game already running
+    if get_emoji_game(chat_id):
+        bot.reply_to(
+            message,
+            "😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။"
+        )
+        return
+
+    # Pick a non-repeating question
+    question = get_next_emoji_question(
+        chat_id
+    )
+
+    if not question:
+        bot.reply_to(
+            message,
+            "❌ Emoji question မရသေးပါ။"
+        )
+        return
+
+    # Start game
+    started, game = start_emoji_game(
+        chat_id,
+        question,
+        duration=EMOJI_GUESS_TIME,
+    )
+
+    if not started:
+        bot.reply_to(
+            message,
+            "😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။"
+        )
+        return
+
+    # Mark used only after successful start
+    mark_question_used(
+        chat_id,
+        "emoji_guess",
+        question["id"],
+    )
+
+    # Send question
+    bot.send_message(
+        chat_id,
+        (
+            "😀 <b>EMOJI GUESS</b>\n\n"
+            f"{question['emojis']}\n\n"
+            f"📂 Category: <b>{question['category']}</b>\n"
+            f"⏳ Time: <b>{EMOJI_GUESS_TIME}s</b>\n\n"
+            "💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။"
+        ),
+        parse_mode="HTML",
+    )
+
+    # -----------------------------------------
+    # Hint
+    # -----------------------------------------
+
+    def send_emoji_hint():
+
+        active_game = get_emoji_game(
+            chat_id
+        )
+
+        if not active_game:
+            return
+
+        hint = get_emoji_hint(
+            chat_id
+        )
+
+        if not hint:
+            return
+
+        try:
+            hint_message = bot.send_message(
+                chat_id,
+                (
+                    "💡 <b>HINT</b>\n\n"
+                    f"{hint}"
+                ),
+                parse_mode="HTML",
+            )
+
+            delay_delete_message(
+                chat_id,
+                hint_message.message_id,
+                30,
+            )
+
+        except Exception as e:
+            print(
+                f"Emoji Hint Error: {e}"
+            )
+
+    schedule_task(
+        30,
+        send_emoji_hint,
+        task_id=f"emoji_hint:{chat_id}",
+        replace=True,
+    )
+
+    # -----------------------------------------
+    # Timeout
+    # -----------------------------------------
+
+    def emoji_timeout():
+
+        active_game = get_emoji_game(
+            chat_id
+        )
+
+        if not active_game:
+            return
+
+        answer = active_game[
+            "display_answer"
+        ]
+
+        end_emoji_game(
+            chat_id
+        )
+
+        try:
+            result_message = bot.send_message(
+                chat_id,
+                (
+                    "⏰ <b>TIME'S UP!</b>\n\n"
+                    f"✅ Answer: <b>{answer}</b>"
+                ),
+                parse_mode="HTML",
+            )
+
+            delay_delete_message(
+                chat_id,
+                result_message.message_id,
+                90,
+            )
+
+        except Exception as e:
+            print(
+                f"Emoji Timeout Error: {e}"
+            )
+
+    schedule_task(
+        EMOJI_GUESS_TIME,
+        emoji_timeout,
+        task_id=f"emoji_timeout:{chat_id}",
+        replace=True,
+    )
+
+
+# =========================================================
+# 😀 EMOJI GUESS ANSWER
+# =========================================================
+
+@bot.message_handler(
+    func=lambda message:
+        message.chat.type in [
+            "group",
+            "supergroup",
+        ]
+        and bool(message.text)
+        and not message.text.startswith("/")
+        and bool(
+            get_emoji_game(
+                message.chat.id
+            )
+        )
+)
+def emoji_guess_answer(message):
+
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+
+    result = check_emoji_answer(
+        chat_id,
+        user_id,
+        message.text,
+    )
+
+    if result["status"] != "correct":
+        return
+
+    # Stop pending timers
+    cancel_task(
+        f"emoji_hint:{chat_id}"
+    )
+
+    cancel_task(
+        f"emoji_timeout:{chat_id}"
+    )
+
+    # Winner reward
+    try:
+        apply_game_result(
+            chat_id,
+            user_id,
+            "emoji_guess",
+            "win",
+        )
+
+    except Exception as e:
+        print(
+            f"Emoji Reward Error: {e}"
+        )
+
+    winner_name = (
+        message.from_user.first_name
+        or "Player"
+    )
+
+    try:
+        result_message = bot.send_message(
+            chat_id,
+            (
+                "🎉 <b>CORRECT!</b>\n\n"
+                f"👤 Winner: <b>{winner_name}</b>\n"
+                f"✅ Answer: <b>{result['answer']}</b>\n"
+                "🏆 Reward: <b>+10 Points</b>"
+            ),
+            parse_mode="HTML",
+        )
+
+        delay_delete_message(
+            chat_id,
+            result_message.message_id,
+            90,
+        )
+
+    except Exception as e:
+        print(
+            f"Emoji Result Error: {e}"
+        )
+
+
+# =========================================================
 # 5. RANDOM - 200 RESPONSES
 # =========================================================
 
