@@ -3996,7 +3996,10 @@ def emoji_guess_command(message):
 
     chat_id = message.chat.id
 
-    # Game already running
+    # -----------------------------------------
+    # Already running
+    # -----------------------------------------
+
     if get_emoji_game(chat_id):
         bot.reply_to(
             message,
@@ -4004,7 +4007,10 @@ def emoji_guess_command(message):
         )
         return
 
-    # Pick a non-repeating question
+    # -----------------------------------------
+    # Pick next question
+    # -----------------------------------------
+
     question = get_next_emoji_question(
         chat_id
     )
@@ -4016,7 +4022,10 @@ def emoji_guess_command(message):
         )
         return
 
+    # -----------------------------------------
     # Start game
+    # -----------------------------------------
+
     started, game = start_emoji_game(
         chat_id,
         question,
@@ -4030,15 +4039,21 @@ def emoji_guess_command(message):
         )
         return
 
-    # Mark used only after successful start
+    # -----------------------------------------
+    # Mark question as used
+    # -----------------------------------------
+
     mark_question_used(
         chat_id,
         "emoji_guess",
         question["id"],
     )
 
-    # Send question
-    bot.send_message(
+    # -----------------------------------------
+    # Send main game message
+    # -----------------------------------------
+
+    game_message = bot.send_message(
         chat_id,
         (
             "😀 <b>EMOJI GUESS</b>\n\n"
@@ -4050,9 +4065,64 @@ def emoji_guess_command(message):
         parse_mode="HTML",
     )
 
-    # -----------------------------------------
-    # Hint
-    # -----------------------------------------
+    # =========================================
+    # ⏳ LIVE COUNTDOWN
+    # =========================================
+
+    def update_emoji_countdown():
+
+        active_game = get_emoji_game(
+            chat_id
+        )
+
+        if not active_game:
+            return
+
+        remaining = int(
+            get_emoji_time_left(
+                chat_id
+            )
+        )
+
+        if remaining <= 5:
+            return
+
+        try:
+            bot.edit_message_text(
+                (
+                    "😀 <b>EMOJI GUESS</b>\n\n"
+                    f"{question['emojis']}\n\n"
+                    f"📂 Category: <b>{question['category']}</b>\n"
+                    f"⏳ Time: <b>{remaining}s</b>\n\n"
+                    "💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။"
+                ),
+                chat_id=chat_id,
+                message_id=game_message.message_id,
+                parse_mode="HTML",
+            )
+
+        except Exception as e:
+            print(
+                f"Emoji Countdown Error: {e}"
+            )
+
+        schedule_task(
+            5,
+            update_emoji_countdown,
+            task_id=f"emoji_countdown:{chat_id}",
+            replace=True,
+        )
+
+    schedule_task(
+        5,
+        update_emoji_countdown,
+        task_id=f"emoji_countdown:{chat_id}",
+        replace=True,
+    )
+
+    # =========================================
+    # 💡 HINT
+    # =========================================
 
     def send_emoji_hint():
 
@@ -4098,26 +4168,30 @@ def emoji_guess_command(message):
         replace=True,
     )
 
-    # -----------------------------------------
-    # Timeout
-    # -----------------------------------------
+    # =========================================
+    # ⏰ TIMEOUT
+    # =========================================
 
     def emoji_timeout():
 
-        active_game = get_emoji_game(
+        finished_game = end_emoji_game(
             chat_id
         )
 
-        if not active_game:
+        if not finished_game:
             return
 
-        answer = active_game[
+        cancel_task(
+            f"emoji_countdown:{chat_id}"
+        )
+
+        cancel_task(
+            f"emoji_hint:{chat_id}"
+        )
+
+        answer = finished_game[
             "display_answer"
         ]
-
-        end_emoji_game(
-            chat_id
-        )
 
         try:
             result_message = bot.send_message(
@@ -4149,7 +4223,7 @@ def emoji_guess_command(message):
 
 
 # =========================================================
-# 😀 EMOJI GUESS ANSWER
+# 😀 EMOJI GUESS ANSWER HANDLER
 # =========================================================
 
 @bot.message_handler(
@@ -4180,7 +4254,14 @@ def emoji_guess_answer(message):
     if result["status"] != "correct":
         return
 
-    # Stop pending timers
+    # -----------------------------------------
+    # Cancel all timers
+    # -----------------------------------------
+
+    cancel_task(
+        f"emoji_countdown:{chat_id}"
+    )
+
     cancel_task(
         f"emoji_hint:{chat_id}"
     )
@@ -4189,7 +4270,10 @@ def emoji_guess_answer(message):
         f"emoji_timeout:{chat_id}"
     )
 
+    # -----------------------------------------
     # Winner reward
+    # -----------------------------------------
+
     try:
         apply_game_result(
             chat_id,
@@ -4207,6 +4291,10 @@ def emoji_guess_answer(message):
         message.from_user.first_name
         or "Player"
     )
+
+    # -----------------------------------------
+    # Result
+    # -----------------------------------------
 
     try:
         result_message = bot.send_message(
@@ -4230,7 +4318,7 @@ def emoji_guess_answer(message):
         print(
             f"Emoji Result Error: {e}"
         )
-
+        
 
 # =========================================================
 # 5. RANDOM - 200 RESPONSES
