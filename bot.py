@@ -20,6 +20,13 @@ from database.players import (
     initialize_player_stats,
 )
 
+from core.rewards import (
+    GAME_REWARDS,
+    get_reward,
+    apply_game_result,
+    apply_custom_game_result,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
