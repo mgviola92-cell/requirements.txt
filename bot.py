@@ -3946,17 +3946,12 @@ def trivia_answer(message):
     # ---------------------------------    
 
 
-    try:
-            apply_game_result(
-                chat_id,
-                winner.id,
-                "trivia",
-                "win",
-            )
-        except Exception as e:
-            print(
-                f"Trivia Point Error: {e}"
-            )
+    apply_game_result(
+            chat_id,
+            winner.id,
+            "trivia",
+            "win",
+        )
 
     
     # ---------------------------------
