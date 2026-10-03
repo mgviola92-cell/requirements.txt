@@ -41,7 +41,7 @@ def load_font(
 ):
     size = max(8, int(size))
 
-    # Custom font asset ပေးထားရင် အရင်သုံး
+    # Custom font explicitly passed
     if font_path:
         try:
             path = Path(font_path)
@@ -54,7 +54,26 @@ def load_font(
         except Exception:
             pass
 
-    # Render/Linux မှာ ရှိနိုင်တဲ့ standard font
+    # Project Myanmar font
+    project_font = (
+        Path(__file__).resolve().parent.parent
+        / "assets"
+        / "fonts"
+        / "myanmar.ttf"
+    )
+
+    if project_font.exists():
+        try:
+            return ImageFont.truetype(
+                str(project_font),
+                size
+            )
+        except Exception as e:
+            print(
+                f"❌ Myanmar Font Load Error: {e}"
+            )
+
+    # System fallbacks
     fallback_fonts = [
         "DejaVuSans.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -70,7 +89,6 @@ def load_font(
         except Exception:
             continue
 
-    # နောက်ဆုံး fallback
     return ImageFont.load_default()
 
 
