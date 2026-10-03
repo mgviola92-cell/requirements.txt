@@ -2413,12 +2413,16 @@ def guess_number(message):
         # -------------------------------------------------
 
         try:
-
     apply_game_result(
         chat_id,
         winner.id,
         "guess",
         "win",
+    )
+
+except Exception as e:
+    print(
+        f"Guess Point Error: {e}"
     )
 
 except Exception as e:
