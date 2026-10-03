@@ -118,6 +118,14 @@ from games.emoji_guess import (
     end_emoji_game,
 )
 
+from database.used_questions import (
+    init_used_questions_db,
+    mark_question_used,
+    get_used_question_ids,
+    get_recent_question_ids,
+    reset_used_questions,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
