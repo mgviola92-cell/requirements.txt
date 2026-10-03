@@ -1,3 +1,8 @@
+from database.players import (
+    add_game_result,
+    add_bonus_points as db_add_bonus_points,
+)
+
 # =========================================================
 # 🎁 REWARD / POINT SYSTEM
 # =========================================================
@@ -170,8 +175,24 @@ def add_bonus_points(
     points,
     reason=None
 ):
+    points = int(points)
 
-    raise NotImplementedError(
+    success = db_add_bonus_points(
+        chat_id,
+        user_id,
+        points
+    )
+
+    if success:
+        print(
+            f"⭐ Bonus Points: "
+            f"chat={chat_id}, "
+            f"user={user_id}, "
+            f"points={points}, "
+            f"reason={reason}"
+        )
+
+    return success
         "Bonus Point System ကို "
         "Reward Transactions Database အဆင့်မှာ "
         "ချိတ်ဆက်မည်။"
