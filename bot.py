@@ -4158,26 +4158,178 @@ def commands_list(message):
 warn_count = {}
 
 # =========================================================
-# 🏆 POINT / RANK SYSTEM
+# 🏆 POINT / RANK SYSTEM - NEON DATABASE
 # =========================================================
 
+import psycopg
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 player_stats = {}
+player_stats_lock = threading.RLock()
 
 
-def get_player_stats(chat_id, user_id):
-    key = (chat_id, user_id)
+# ---------------------------------------------------------
+# DATABASE SETUP
+# ---------------------------------------------------------
 
-    if key not in player_stats:
-        player_stats[key] = {
-            "points": 0,
-            "games": 0,
-            "wins": 0,
-            "losses": 0,
-            "draws": 0
-        }
+def init_player_stats_db():
 
-    return player_stats[key]
+    if not DATABASE_URL:
 
+        print(
+            "❌ DATABASE_URL မတွေ့ပါ။ "
+            "Render Environment မှာ ထည့်ပါ။"
+        )
+
+        return False
+
+    try:
+
+        with psycopg.connect(
+            DATABASE_URL,
+            connect_timeout=20
+        ) as conn:
+
+            with conn.cursor() as cur:
+
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS player_stats (
+                        chat_id BIGINT NOT NULL,
+                        user_id BIGINT NOT NULL,
+                        points INTEGER NOT NULL DEFAULT 0,
+                        games INTEGER NOT NULL DEFAULT 0,
+                        wins INTEGER NOT NULL DEFAULT 0,
+                        losses INTEGER NOT NULL DEFAULT 0,
+                        draws INTEGER NOT NULL DEFAULT 0,
+
+                        PRIMARY KEY (
+                            chat_id,
+                            user_id
+                        )
+                    )
+                """)
+
+        print(
+            "✅ Player Stats Database Ready"
+        )
+
+        return True
+
+    except Exception as e:
+
+        print(
+            f"❌ Player Stats DB Init Error: {e}"
+        )
+
+        return False
+
+
+# ---------------------------------------------------------
+# LOAD DATABASE → RAM
+# ---------------------------------------------------------
+
+def load_player_stats():
+
+    if not DATABASE_URL:
+        return
+
+    try:
+
+        with psycopg.connect(
+            DATABASE_URL,
+            connect_timeout=20
+        ) as conn:
+
+            with conn.cursor() as cur:
+
+                cur.execute("""
+                    SELECT
+                        chat_id,
+                        user_id,
+                        points,
+                        games,
+                        wins,
+                        losses,
+                        draws
+
+                    FROM player_stats
+                """)
+
+                rows = cur.fetchall()
+
+        with player_stats_lock:
+
+            player_stats.clear()
+
+            for row in rows:
+
+                (
+                    chat_id,
+                    user_id,
+                    points,
+                    games,
+                    wins,
+                    losses,
+                    draws
+                ) = row
+
+                player_stats[
+                    (chat_id, user_id)
+                ] = {
+
+                    "points": points,
+                    "games": games,
+                    "wins": wins,
+                    "losses": losses,
+                    "draws": draws
+                }
+
+        print(
+            f"✅ Player Stats Loaded: "
+            f"{len(rows)} players"
+        )
+
+    except Exception as e:
+
+        print(
+            f"❌ Player Stats Load Error: {e}"
+        )
+
+
+# ---------------------------------------------------------
+# GET PLAYER STATS
+# ---------------------------------------------------------
+
+def get_player_stats(
+    chat_id,
+    user_id
+):
+
+    key = (
+        chat_id,
+        user_id
+    )
+
+    with player_stats_lock:
+
+        if key not in player_stats:
+
+            player_stats[key] = {
+
+                "points": 0,
+                "games": 0,
+                "wins": 0,
+                "losses": 0,
+                "draws": 0
+            }
+
+        return player_stats[key]
+
+
+# ---------------------------------------------------------
+# ADD RESULT + SAVE DATABASE
+# ---------------------------------------------------------
 
 def add_game_result(
     chat_id,
@@ -4185,23 +4337,161 @@ def add_game_result(
     result,
     points=0
 ):
-    stats = get_player_stats(
-        chat_id,
-        user_id
+
+    if result not in [
+        "win",
+        "loss",
+        "draw"
+    ]:
+
+        print(
+            f"❌ Invalid Game Result: {result}"
+        )
+
+        return False
+
+    if not DATABASE_URL:
+
+        print(
+            "❌ Points မသိမ်းနိုင်ပါ။ "
+            "DATABASE_URL မရှိပါ။"
+        )
+
+        return False
+
+    add_win = (
+        1 if result == "win"
+        else 0
     )
 
-    stats["games"] += 1
-    stats["points"] += points
+    add_loss = (
+        1 if result == "loss"
+        else 0
+    )
 
-    if result == "win":
-        stats["wins"] += 1
+    add_draw = (
+        1 if result == "draw"
+        else 0
+    )
 
-    elif result == "loss":
-        stats["losses"] += 1
+    try:
 
-    elif result == "draw":
-        stats["draws"] += 1
+        # ---------------------------------
+        # Database ကို အရင် Save
+        # ---------------------------------
 
+        with psycopg.connect(
+            DATABASE_URL,
+            connect_timeout=20
+        ) as conn:
+
+            with conn.cursor() as cur:
+
+                cur.execute("""
+                    INSERT INTO player_stats (
+
+                        chat_id,
+                        user_id,
+                        points,
+                        games,
+                        wins,
+                        losses,
+                        draws
+
+                    )
+
+                    VALUES (
+
+                        %s,
+                        %s,
+                        %s,
+                        1,
+                        %s,
+                        %s,
+                        %s
+
+                    )
+
+                    ON CONFLICT (
+                        chat_id,
+                        user_id
+                    )
+
+                    DO UPDATE SET
+
+                        points =
+                            player_stats.points
+                            + EXCLUDED.points,
+
+                        games =
+                            player_stats.games
+                            + EXCLUDED.games,
+
+                        wins =
+                            player_stats.wins
+                            + EXCLUDED.wins,
+
+                        losses =
+                            player_stats.losses
+                            + EXCLUDED.losses,
+
+                        draws =
+                            player_stats.draws
+                            + EXCLUDED.draws
+
+                    RETURNING
+
+                        points,
+                        games,
+                        wins,
+                        losses,
+                        draws
+
+                """, (
+
+                    chat_id,
+                    user_id,
+                    points,
+                    add_win,
+                    add_loss,
+                    add_draw
+
+                ))
+
+                row = cur.fetchone()
+
+        # ---------------------------------
+        # DB Save အောင်မြင်ပြီးမှ
+        # RAM ကို Update
+        # ---------------------------------
+
+        with player_stats_lock:
+
+            player_stats[
+                (chat_id, user_id)
+            ] = {
+
+                "points": row[0],
+                "games": row[1],
+                "wins": row[2],
+                "losses": row[3],
+                "draws": row[4]
+            }
+
+        return True
+
+    except Exception as e:
+
+        print(
+            f"❌ Player Stats Save Error: {e}"
+        )
+
+        return False
+
+
+# ---------------------------------------------------------
+# RANK TITLE
+# ---------------------------------------------------------
 
 def get_rank_title(points):
 
@@ -4219,6 +4509,14 @@ def get_rank_title(points):
 
     return "🌱 ROOKIE"
 
+
+# ---------------------------------------------------------
+# BOT START → DATABASE LOAD
+# ---------------------------------------------------------
+
+if init_player_stats_db():
+
+    load_player_stats()
 
 # =========================================================
 # ⚠️ MANUAL WARN
