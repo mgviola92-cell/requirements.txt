@@ -47,6 +47,14 @@ from core.cooldowns import (
     clear_cooldown,
 )
 
+from core.timers import (
+    schedule_task,
+    cancel_task,
+    has_task,
+    get_task_remaining,
+    reschedule_task,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
