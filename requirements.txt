@@ -4,3 +4,4 @@ Pyrogram
 tgcrypto
 yt-dlp
 flask
+psycopg[binary]
