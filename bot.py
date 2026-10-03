@@ -2635,21 +2635,87 @@ def get_local_trivia_question():
 
 def get_trivia_question():
 
-    question = (
-        get_online_trivia_question()
-    )
+    # 50% Online / 50% Local
+    source = random.choice([
+        "online",
+        "local"
+    ])
 
-    if question:
-        return question
+    # =====================================
+    # ONLINE ကို random ရွေးမိရင်
+    # =====================================
 
-    print(
-        "⚠️ Online Trivia unavailable. "
-        "Using local database."
-    )
+    if source == "online":
 
-    return (
-        get_local_trivia_question()
-    )
+        question = (
+            get_online_trivia_question()
+        )
+
+        if question:
+
+            print(
+                "🌐 Trivia Source: ONLINE"
+            )
+
+            return question
+
+        # Online မရရင် Local fallback
+        print(
+            "⚠️ Online Trivia unavailable. "
+            "Using Local Trivia."
+        )
+
+        question = (
+            get_local_trivia_question()
+        )
+
+        if question:
+
+            print(
+                "📁 Trivia Source: LOCAL"
+            )
+
+            return question
+
+        return None
+
+    # =====================================
+    # LOCAL ကို random ရွေးမိရင်
+    # =====================================
+
+    else:
+
+        question = (
+            get_local_trivia_question()
+        )
+
+        if question:
+
+            print(
+                "📁 Trivia Source: LOCAL"
+            )
+
+            return question
+
+        # Local file မရရင် Online fallback
+        print(
+            "⚠️ Local Trivia unavailable. "
+            "Using Online Trivia."
+        )
+
+        question = (
+            get_online_trivia_question()
+        )
+
+        if question:
+
+            print(
+                "🌐 Trivia Source: ONLINE"
+            )
+
+            return question
+
+        return None
 
 
 # ---------------------------------------------------------
