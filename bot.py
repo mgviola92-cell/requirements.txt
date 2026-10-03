@@ -66,14 +66,34 @@ last_called_time = 0
 is_stopped = False
 
 # 🎯 လူခေါ်စာများကိုပဲ သီးသန့် အချိန်ကိုက် လိုက်ဖျက်ပေးမည့် စနစ်
-def delay_delete_message(chat_id, message_id, delay_seconds):
+def delay_delete_message(
+    chat_id,
+    message_id,
+    delay_seconds
+):
     def delete_task():
-        time.sleep(delay_seconds)
         try:
-            bot.delete_message(chat_id, message_id)
+            bot.delete_message(
+                chat_id,
+                message_id
+            )
         except Exception as e:
-            print(f"Auto Delete Error: {e}")
-    threading.Thread(target=delete_task).start()
+            print(
+                f"Auto Delete Error: {e}"
+            )
+
+    task_id = (
+        f"delete:"
+        f"{chat_id}:"
+        f"{message_id}"
+    )
+
+    return schedule_task(
+        delay_seconds,
+        delete_task,
+        task_id=task_id,
+        replace=True
+    )
 
 # --- 🛑 လူခေါ်ခြင်းကို ကြားဖြတ်ရပ်တန့်မည့် လုပ်ဆောင်ချက် (/stop) ---
 @bot.message_handler(commands=['stop', 'နား'])
