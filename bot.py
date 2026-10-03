@@ -10,6 +10,7 @@ import html
 import urllib.request
 import urllib.parse
 from telebot.types import ChatPermissions
+from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -4171,39 +4172,6 @@ player_stats_lock = threading.RLock()
 
 
 # =========================================================
-# ⚙️ RANK CONFIG
-# =========================================================
-
-RANKS = [
-    {
-        "name": "🌱 ROOKIE",
-        "min_points": 0,
-        "next_points": 20
-    },
-    {
-        "name": "⭐ PLAYER",
-        "min_points": 20,
-        "next_points": 50
-    },
-    {
-        "name": "🔥 PRO",
-        "min_points": 50,
-        "next_points": 100
-    },
-    {
-        "name": "💎 MASTER",
-        "min_points": 100,
-        "next_points": 200
-    },
-    {
-        "name": "👑 LEGEND",
-        "min_points": 200,
-        "next_points": None
-    }
-]
-
-
-# =========================================================
 # 🗄️ DATABASE SETUP
 # =========================================================
 
@@ -4535,109 +4503,6 @@ def add_game_result(
         )
 
         return False
-
-
-# =========================================================
-# 🏆 RANK HELPERS
-# =========================================================
-
-def get_rank_data(points):
-
-    points = max(
-        0,
-        int(points)
-    )
-
-    current_rank = RANKS[0]
-
-    for rank in RANKS:
-
-        if points >= rank["min_points"]:
-            current_rank = rank
-
-        else:
-            break
-
-    return current_rank
-
-
-def get_rank_title(points):
-
-    return get_rank_data(
-        points
-    )["name"]
-
-
-def get_rank_progress(points):
-
-    points = max(
-        0,
-        int(points)
-    )
-
-    rank = get_rank_data(
-        points
-    )
-
-    next_points = rank[
-        "next_points"
-    ]
-
-    # LEGEND = max rank
-    if next_points is None:
-
-        return {
-            "current": points,
-            "needed": 0,
-            "percent": 100,
-            "next_rank": None
-        }
-
-    start = rank[
-        "min_points"
-    ]
-
-    total_needed = (
-        next_points - start
-    )
-
-    current_progress = (
-        points - start
-    )
-
-    percent = int(
-        (
-            current_progress
-            / total_needed
-        ) * 100
-    )
-
-    percent = max(
-        0,
-        min(100, percent)
-    )
-
-    next_rank = None
-
-    for item in RANKS:
-
-        if (
-            item["min_points"]
-            == next_points
-        ):
-            next_rank = item["name"]
-            break
-
-    return {
-
-        "current": current_progress,
-
-        "needed": total_needed,
-
-        "percent": percent,
-
-        "next_rank": next_rank
-    }
 
 
 # =========================================================
