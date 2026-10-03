@@ -102,6 +102,11 @@ from ui.rank_card import (
     generate_rank_card_bytes,
 )
 
+from ui.leaderboard_card import (
+    generate_leaderboard_card,
+    generate_leaderboard_card_bytes,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
