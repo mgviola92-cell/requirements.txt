@@ -39,20 +39,39 @@ def load_font(
     size=40,
     font_path=None
 ):
-    try:
-        if font_path:
+    size = max(8, int(size))
+
+    # Custom font asset ပေးထားရင် အရင်သုံး
+    if font_path:
+        try:
             path = Path(font_path)
 
             if path.exists():
                 return ImageFont.truetype(
                     str(path),
-                    int(size)
+                    size
                 )
+        except Exception:
+            pass
 
-        return ImageFont.load_default()
+    # Render/Linux မှာ ရှိနိုင်တဲ့ standard font
+    fallback_fonts = [
+        "DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+    ]
 
-    except Exception:
-        return ImageFont.load_default()
+    for fallback in fallback_fonts:
+        try:
+            return ImageFont.truetype(
+                fallback,
+                size
+            )
+        except Exception:
+            continue
+
+    # နောက်ဆုံး fallback
+    return ImageFont.load_default()
 
 
 # =========================================================
