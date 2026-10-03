@@ -27,6 +27,16 @@ from core.rewards import (
     apply_custom_game_result,
 )
 
+from core.sessions import (
+    start_session,
+    end_session,
+    get_session,
+    get_session_data,
+    update_session,
+    has_session,
+    can_start_session,
+)
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
