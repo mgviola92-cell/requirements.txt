@@ -4370,7 +4370,7 @@ def manual_warn(message):
 
 
 # =========================================================
-# 👤 PROFILE
+# 👤 PROFILE - VISUAL RANK CARD
 # =========================================================
 
 @bot.message_handler(commands=["profile"])
@@ -4383,21 +4383,67 @@ def profile_command(message):
         user.id
     )
 
-    rank = get_rank_title(
-        stats["points"]
-    )
+    try:
+        # -----------------------------------------
+        # Generate visual profile/rank card
+        # -----------------------------------------
 
-    reply_info_message(
-        message,
-        f"👤 PROFILE\n\n"
-        f"👤 {user.first_name}\n"
-        f"🏆 Rank — {rank}\n"
-        f"💰 Points — {stats['points']}\n"
-        f"🎮 Games — {stats['games']}\n"
-        f"🥇 Wins — {stats['wins']}\n"
-        f"❌ Losses — {stats['losses']}\n"
-        f"🤝 Draws — {stats['draws']}"
-    )
+        rank_image = generate_rank_card_bytes(
+            player_name=(
+                user.first_name
+                or "Player"
+            ),
+            points=stats["points"],
+            wins=stats["wins"],
+            games=stats["games"],
+            losses=stats["losses"],
+            draws=stats["draws"],
+        )
+
+        # Telegram file name
+        rank_image.name = "profile_rank_card.png"
+
+        sent = bot.send_photo(
+            message.chat.id,
+            rank_image,
+            caption="🏆 PLAYER PROFILE",
+            reply_to_message_id=message.message_id,
+        )
+
+        # Visual profile card ကို
+        # INFO_DELETE_TIME ပြည့်ရင်ဖျက်
+        delay_delete_message(
+            message.chat.id,
+            sent.message_id,
+            INFO_DELETE_TIME
+        )
+
+    except Exception as e:
+
+        print(
+            f"❌ Profile Card Error: {e}"
+        )
+
+        # -----------------------------------------
+        # Image generate/send error ဖြစ်ရင်
+        # အဟောင်း text profile ကို fallback
+        # -----------------------------------------
+
+        rank = get_rank_title(
+            stats["points"]
+        )
+
+        reply_info_message(
+            message,
+            f"👤 PROFILE\n\n"
+            f"👤 {user.first_name}\n"
+            f"🏆 Rank — {rank}\n"
+            f"💰 Points — {stats['points']}\n"
+            f"🎮 Games — {stats['games']}\n"
+            f"🥇 Wins — {stats['wins']}\n"
+            f"❌ Losses — {stats['losses']}\n"
+            f"🤝 Draws — {stats['draws']}"
+        )
 
 
 # =========================================================
