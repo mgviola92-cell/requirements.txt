@@ -9,8 +9,10 @@ from pathlib import Path
 
 from core.sessions import can_start_session, start_session, end_session
 
-ROUND_SECONDS = 7 * 60
+ROUND_MIN_SECONDS = 8 * 60
+ROUND_MAX_SECONDS = 15 * 60
 IDLE_SECONDS = 60
+SELF_RETRY_SECONDS = 20
 _lock = threading.RLock()
 _games = {}
 _WORDS = None
@@ -60,7 +62,8 @@ def start_game(chat_id, mode='en'):
         allowed, blocker = can_start_session(chat_id, 'word_chain')
         if not allowed:
             return False, blocker
-        started, session = start_session(chat_id, 'word_chain', duration=ROUND_SECONDS + 5)
+        round_seconds = random.randint(ROUND_MIN_SECONDS, ROUND_MAX_SECONDS)
+        started, session = start_session(chat_id, 'word_chain', duration=round_seconds + 5)
         if not started:
             return False, session
         starter = random.choice(_START_MY if mode == 'my' else _START_EN)
@@ -68,8 +71,8 @@ def start_game(chat_id, mode='en'):
         game = {
             'id': uuid.uuid4().hex, 'chat_id': chat_id, 'mode': mode,
             'word': starter, 'required': _last(starter, mode),
-            'used': {starter}, 'last_user': None, 'scores': {}, 'names': {},
-            'started': now, 'deadline': now + ROUND_SECONDS,
+            'used': {starter}, 'last_user': None, 'last_move_at': None, 'scores': {}, 'names': {},
+            'started': now, 'round_seconds': round_seconds, 'deadline': now + round_seconds,
             'idle_deadline': now + IDLE_SECONDS, 'moves': 0,
             'message_id': None,
         }
@@ -104,18 +107,23 @@ def submit(chat_id, game_id, user_id, user_name, text):
             return {'status': 'ignore'}
         if word in game['used']:
             return {'status': 'used'}
-        if game['last_user'] == user_id:
+        self_retry = game['last_user'] == user_id
+        if self_retry and now - (game.get('last_move_at') or now) < SELF_RETRY_SECONDS:
             return {'status': 'same_user'}
         game['used'].add(word)
         game['word'] = word
         game['required'] = _last(word, game['mode'])
         game['last_user'] = user_id
-        game['scores'][user_id] = game['scores'].get(user_id, 0) + 1
+        game['last_move_at'] = now
+        # Solo follow-up advances the word but cannot farm points.
+        if not self_retry:
+            game['scores'][user_id] = game['scores'].get(user_id, 0) + 1
         game['names'][user_id] = (user_name or 'Player')[:40]
         game['moves'] += 1
         game['idle_deadline'] = min(game['deadline'], now + IDLE_SECONDS)
         return {
             'status': 'valid', 'word': word, 'required': game['required'],
+            'self_retry': self_retry,
             'moves': game['moves'], 'scores': dict(game['scores']),
             'names': dict(game['names']), 'deadline': game['deadline'],
             'idle_deadline': game['idle_deadline'], 'message_id': game['message_id'],
