@@ -3,7 +3,7 @@ from io import BytesIO
 from pathlib import Path
 import hashlib
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-from database.daily_challenge import missions_for, game_progress
+from database.daily_challenge import missions_for, game_progress, mission_state
 ROOT=Path(__file__).resolve().parent.parent
 W,H=900,510
 
@@ -29,16 +29,33 @@ def card(stats):
     d.text((60,48),'DAILY CHALLENGE',font=_font(31),fill='#f8fbff')
     double=int(hashlib.sha256(f"{stats.get('chat_id')}:{stats['day']}:double".encode()).hexdigest(),16)%7==0
     d.text((835,67),'x2 DAY' if double else '3 MISSIONS',font=_font(19),anchor='rm',fill='#facc72' if double else '#65e8e6')
+    viewer=stats.get('viewer_id')
+    descriptions={
+        'message':'Send different meaningful messages in this group',
+        'play':'Join and play group mini-games',
+        'correct':'Answer group game questions correctly',
+        'win':'Win group mini-games',
+    }
     for i,(kind,need,unique,personal,(lo,hi)) in enumerate(missions_for(stats['chat_id'],stats['day']),1):
         total,users,_ = (stats['total'],stats['users'],0) if kind=='message' else game_progress(stats['chat_id'],stats['day'],kind)
         y=121+(i-1)*113
         d.rounded_rectangle((42,y,858,y+101),radius=15,fill=(9,22,43,216))
         d.text((59,y+10),f'{i:02d}   {"EASY" if i==1 else "MEDIUM" if i==2 else "HARD"}',font=_font(21),fill='#ffffff')
         d.text((795,y+11),f'{lo*(2 if double else 1)}-{hi*(2 if double else 1)} PTS',font=_font(19),anchor='ra',fill='#facc72')
-        d.text((61,y+42),f'{kind.upper()} {min(total,need)}/{need}    MEMBERS {min(users,unique)}/{unique}',font=_font(17),fill='#d3e3ef')
+        d.text((61,y+37),descriptions.get(kind,kind),font=_font(17),fill='#e2edf9')
+        if viewer is not None:
+            _,_,mine=mission_state(stats['chat_id'],viewer,(kind,need,unique,personal,(lo,hi)),stats['day'])
+            claimed=i in stats.get('claimed',set())
+            ready=total>=need and users>=unique and mine>=personal
+            status='CLAIMED' if claimed else 'READY /dailyclaim '+str(i) if ready else 'LOCKED'
+            sub=f'GROUP {min(total,need)}/{need}  MEMBERS {min(users,unique)}/{unique}  YOU {min(mine,personal)}/{personal}  {status}'
+        else:
+            sub=f'GROUP {min(total,need)}/{need}  MEMBERS {min(users,unique)}/{unique}  YOU NEED {personal}'
+        d.text((61,y+61),sub,font=_font(15),fill='#b6d5e5')
         prog=min(1.0,total/need,users/unique)
         d.rounded_rectangle((61,y+78,829,y+87),radius=4,fill=(61,75,97,255))
         if prog>0:d.rounded_rectangle((61,y+78,61+int(768*prog),y+87),radius=4,fill=(78,219,196,255))
-    d.text((61,469),f"{stats['day']}  |  /daily  |  /dailyclaim 1-3",font=_font(17),fill='#ceddea')
+    footer='PERSONAL VIEW  |  AUTO-DELETE 60s' if viewer is not None else 'PINNED DAILY  |  /daily for personal progress'
+    d.text((61,469),f"{stats['day']}  |  {footer}",font=_font(16),fill='#ceddea')
     out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=90);out.seek(0);out.name='daily_challenge.jpg'
     return out
