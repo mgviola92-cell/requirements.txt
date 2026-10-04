@@ -4865,6 +4865,30 @@ def math_battle_keyboard(game):
         kb.row(*row)
     return kb
 
+def math_battle_deadline_watch(chat_id, game_id, round_index):
+    """Independent round-end watchdog (doesn't rely on image countdown edits)."""
+    game = get_math_battle(chat_id)
+    if not game or game['id'] != game_id or game['round'] != round_index:
+        return
+    remaining = game['deadline'] - time.monotonic()
+    if remaining > 0:
+        schedule_task(
+            remaining + 0.15, math_battle_deadline_watch,
+            chat_id, game_id, round_index,
+        )
+        return
+    math_battle_next(chat_id, game_id, round_index)
+
+
+def math_battle_arm_deadline(game):
+    if game:
+        delay = max(0.15, game['deadline'] - time.monotonic() + 0.15)
+        schedule_task(
+            delay, math_battle_deadline_watch,
+            game['chat_id'], game['id'], game['round'],
+        )
+
+
 def math_battle_next(chat_id, game_id, round_index):
     with math_battle_card_lock:
         current = get_math_battle(chat_id)
@@ -4876,7 +4900,12 @@ def math_battle_next(chat_id, game_id, round_index):
             status, result = advance_math_battle(chat_id, game_id, round_index)
         except Exception as e:
             print('Math next round error:', e)
+            # Do not leave an unresponsive card on screen if question loading fails.
             stop_math_battle(chat_id)
+            try:
+                bot.send_message(chat_id, '⚠️ Math Battle နောက်တစ်ချီ ဖွင့်မရပါ။ Render Logs မှာ Math next round error ကိုစစ်ပါ။')
+            except Exception:
+                pass
             return
         if status == 'finished':
             old_id = current.get('message_id')
@@ -4920,6 +4949,7 @@ def math_battle_next(chat_id, game_id, round_index):
                 try: bot.delete_message(chat_id,old_id)
                 except Exception: pass
             math_battle_schedule_tick(chat_id,result)
+            math_battle_arm_deadline(get_math_battle(chat_id))
         except Exception as e:
             print('Math round card error:',e)
             stop_math_battle(chat_id)
@@ -4972,6 +5002,7 @@ def math_battle_command(message):
         sent=bot.send_photo(chat_id,math_round_card(game),caption='🧮 MATH BATTLE · ROUND 1/5',reply_markup=math_battle_keyboard(game))
         set_math_message(chat_id,game['id'],0,sent.message_id)
         math_battle_schedule_tick(chat_id,get_math_battle(chat_id))
+        math_battle_arm_deadline(get_math_battle(chat_id))
         delay_delete_message(chat_id,message.message_id,10)
     except Exception as e:
         print('Math battle start error:',e)
@@ -5001,6 +5032,9 @@ def math_battle_callback(call):
                 'late':'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', 'correct':'✅ မှန်တယ်!'}
         bot.answer_callback_query(call.id,alerts.get(status,'OK'),show_alert=False)
         if status=='correct' and g:
+            # Re-arm a deadline watchdog because the first winner reduces the timer to 10s.
+            # An older watchdog for this round is harmless (it rechecks the live deadline).
+            math_battle_arm_deadline(g)
             # Update immediately when a player scores; first correct activates 10-second grace.
             if time.monotonic()>=g['deadline']:
                 math_battle_next(chat_id,game_id,int(round_text))
