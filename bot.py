@@ -128,7 +128,6 @@ from database.used_questions import (
 )
 
 from games.word_chain import (
-    ROUND_SECONDS as WORD_CHAIN_MAX_SECONDS,
     IDLE_SECONDS as WORD_CHAIN_IDLE_SECONDS,
     get_game as get_word_chain_game,
     start_game as start_word_chain_game,
@@ -137,6 +136,7 @@ from games.word_chain import (
     finish as finish_word_chain,
 )
 from core.rewards import add_bonus_points
+from ui.word_chain_card import status_card as word_chain_status_card
 
 from games.speed_tap import (
     SPEED_TAP_PENDING_MIN,
@@ -4835,6 +4835,8 @@ def speed_tap_callback(call):
 # =========================================================
 
 word_chain_finish_lock = threading.RLock()
+word_chain_card_lock = threading.RLock()
+WORD_CHAIN_TICK_PREFIX = 'wordchain_live:'
 
 
 def word_chain_scoreboard(game):
@@ -4858,9 +4860,55 @@ def word_chain_status_text(game):
         f"➡️ ဆက်ရန်: {game['required']}\n"
         f"✅ Valid moves: {game['moves']}\n"
         f"⏳ အဖြေမရှိရင် {WORD_CHAIN_IDLE_SECONDS}s နဲ့ပြီးမယ်\n"
-        f"🏁 Round အများဆုံး {WORD_CHAIN_MAX_SECONDS // 60} မိနစ်\n\n"
+        f"🏁 Round {game['round_seconds'] // 60} မိနစ်\n\n"
         f"🏆 Top 3\n{standing}\n\n"
         "⚠️ တစ်ယောက်တည်း နှစ်ခါဆက်တိုက် မဆက်ရ။"
+    )
+
+
+def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
+    """Edit only the current round card; never edit an old card after a move."""
+    with word_chain_card_lock:
+        game = get_word_chain_game(chat_id)
+        if not game or game['id'] != game_id:
+            return
+        if game['moves'] != expected_moves or game['message_id'] != expected_message_id:
+            return
+        now = time.monotonic()
+        remaining = min(game['idle_deadline'], game['deadline']) - now
+        if remaining <= 0:
+            reason = 'limit' if now >= game['deadline'] else 'idle'
+            word_chain_close(chat_id, game_id, reason)
+            return
+        try:
+            from telebot.types import InputMediaPhoto
+            media = InputMediaPhoto(
+                word_chain_status_card(game),
+                caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ',
+            )
+            bot.edit_message_media(
+                media, chat_id=chat_id, message_id=expected_message_id,
+            )
+        except Exception as error:
+            # Network/API errors shouldn't stop the idle/round timeout.
+            print(f'Word Chain Live Card Error: {error}')
+        # Five-second updates, then one-second updates in the final ten seconds.
+        step = 1 if remaining <= 10 else 5
+        schedule_task(
+            min(step, max(0.2, remaining)), word_chain_tick,
+            chat_id, game_id, expected_moves, expected_message_id,
+            task_id=f'{WORD_CHAIN_TICK_PREFIX}{chat_id}:{game_id}:{expected_moves}:{time.monotonic_ns()}',
+        )
+
+
+def word_chain_start_live(chat_id, game):
+    if not game or not game.get('message_id'):
+        return
+    step = 1 if game['idle_deadline'] - time.monotonic() <= 10 else 5
+    schedule_task(
+        step, word_chain_tick,
+        chat_id, game['id'], game['moves'], game['message_id'],
+        task_id=f'{WORD_CHAIN_TICK_PREFIX}{chat_id}:{game["id"]}:{game["moves"]}:{time.monotonic_ns()}',
     )
 
 
@@ -4894,7 +4942,7 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
                     extra = ' (reward error)'
             rows.append(f"{index + 1}. {name}: {count} words{extra}")
         reason_label = {'idle': '60 seconds no answer',
-                        'limit': '7-minute limit',
+                        'limit': 'round time limit',
                         'stop': 'Stopped by admin'}.get(reason, 'Game ended')
         text = (
             f"🏁 WORD CHAIN END — {reason_label}\n\n"
@@ -4940,10 +4988,11 @@ def word_chain_command(message):
         bot.reply_to(message, f'Game တစ်ခု run နေပြီ: {game}')
         return
     try:
-        sent = bot.send_message(chat_id, word_chain_status_text(game))
+        sent = bot.send_photo(chat_id, word_chain_status_card(game), caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ')
         set_word_chain_message_id(chat_id, game['id'], sent.message_id)
+        word_chain_start_live(chat_id, get_word_chain_game(chat_id))
         schedule_task(
-            WORD_CHAIN_MAX_SECONDS,
+            game['round_seconds'],
             word_chain_close,
             chat_id, game['id'], 'limit',
             task_id=f"wordchain_limit:{chat_id}:{game['id']}",
@@ -5003,13 +5052,20 @@ def word_chain_answer(message):
         return
     old_id = result.get('message_id')
     try:
-        sent = bot.send_message(chat_id, word_chain_status_text(new_game))
-        set_word_chain_message_id(chat_id, game['id'], sent.message_id)
-        if old_id:
-            try:
-                bot.delete_message(chat_id, old_id)
-            except Exception:
-                pass
+        with word_chain_card_lock:
+            latest = get_word_chain_game(chat_id)
+            if latest and latest['id'] == game['id'] and latest['moves'] == result['moves']:
+                sent = bot.send_photo(
+                    chat_id, word_chain_status_card(latest),
+                    caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ',
+                )
+                set_word_chain_message_id(chat_id, game['id'], sent.message_id)
+                if old_id:
+                    try:
+                        bot.delete_message(chat_id, old_id)
+                    except Exception:
+                        pass
+                word_chain_start_live(chat_id, get_word_chain_game(chat_id))
     except Exception as error:
         print(f'Word Chain Status Error: {error}')
     delay = max(0.1, new_game['idle_deadline'] - time.monotonic())
