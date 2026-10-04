@@ -10,6 +10,7 @@ import html
 import urllib.request
 import urllib.parse
 from telebot.types import ChatPermissions
+from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
 from database.db import DATABASE_URL, get_db_connection
 from database.players import (
@@ -144,6 +145,11 @@ from games.speed_tap import (
     get_speed_tap_state,
 )
 
+from features.speed_tap_auto import (
+    configure_speed_tap_auto,
+    record_speed_tap_activity,
+)
+
 from ui.speed_tap_card import (
     get_speed_tap_background,
     generate_speed_tap_pending_card_bytes,
@@ -217,6 +223,27 @@ def get_next_emoji_question(chat_id):
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# Activity tracker runs first, then allows ordinary game/command handlers.
+# Commands, bot messages and private chats do not count as group activity.
+@bot.message_handler(func=lambda message: True, content_types=["text"])
+def speed_tap_activity_middleware(message):
+    try:
+        if (
+            message.chat.type in ("group", "supergroup")
+            and message.from_user
+            and not message.from_user.is_bot
+            and message.text
+            and not message.text.lstrip().startswith("/")
+        ):
+            record_speed_tap_activity(
+                message.chat.id,
+                message.from_user.id,
+            )
+    except Exception as exc:
+        print(f"Speed Tap activity error: {exc}")
+    return ContinueHandling()
+
 
 # ကိုယ်ပေါ်စေချင်တဲ့ အီမိုဂျီများကို ဒီထဲမှာ စိုက်ကြိုက် ပြောင်းလဲနိုင်ပါတယ်
 EMOJIS = ["🔥", "✨", "🎉", "💥", "🎯", "🌟", "🚀", "⚡", "🍀", "💎"]
@@ -4035,30 +4062,21 @@ def get_speed_tap_visual_state(chat_id):
 # =========================================================
 
 @bot.message_handler(commands=["speedtap"])
-def speed_tap_command(message):
+def speed_tap_command(message=None, auto_chat_id=None):
 
-    if message.chat.type not in [
-        "group",
-        "supergroup",
-    ]:
-        bot.reply_to(
-            message,
-            "❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။"
+    auto_mode = auto_chat_id is not None
+    if auto_mode:
+        chat_id = auto_chat_id
+    else:
+        if message is None or message.chat.type not in ("group", "supergroup"):
+            if message is not None:
+                bot.reply_to(message, "❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။")
+            return False
+        chat_id = message.chat.id
+        delay_delete_message(
+            chat_id, message.message_id, random.randint(5, 10),
         )
-        return
 
-    chat_id = message.chat.id
-
-    # -----------------------------------------
-    # /speedtap command ကို 5–10 sec နောက်ဖျက်
-    # ဘယ်သူခေါ်လဲ ခဏတော့မြင်ရမယ်
-    # -----------------------------------------
-
-    delay_delete_message(
-        chat_id,
-        message.message_id,
-        random.randint(5, 10),
-    )
 
     existing_game = get_speed_tap_game(
         chat_id
@@ -4483,6 +4501,7 @@ def speed_tap_command(message):
             f"speedtap_pending:{chat_id}",
         replace=True,
     )
+    return True
 
 
 # =========================================================
@@ -6376,6 +6395,32 @@ def sticker_spam_filter(message):
 # =========================================================
 # 🛡️ END OF GROUP MANAGEMENT SYSTEM
 # =========================================================
+
+# =========================================================
+# ⚡ SPEED TAP AUTO-SPAWN WIRING
+# =========================================================
+def can_auto_spawn_speed_tap(chat_id):
+    # Emoji game does not currently create a core session,
+    # so check both the session manager and its own game state.
+    allowed, _ = can_start_session(chat_id, "speed_tap")
+    return bool(
+        allowed
+        and not get_speed_tap_game(chat_id)
+        and not get_emoji_game(chat_id)
+    )
+
+
+def spawn_auto_speed_tap(chat_id):
+    if not can_auto_spawn_speed_tap(chat_id):
+        return False
+    # Reuse the existing pending -> WAIT -> GO -> result flow.
+    return bool(speed_tap_command(auto_chat_id=chat_id))
+
+
+configure_speed_tap_auto(
+    spawn_callback=spawn_auto_speed_tap,
+    can_spawn_callback=can_auto_spawn_speed_tap,
+)
 
 from flask import Flask
 import threading
