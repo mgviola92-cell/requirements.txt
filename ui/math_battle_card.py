@@ -52,8 +52,12 @@ def _export(im):
 def round_card(game):
     im,d=_base(game)
     d.rounded_rectangle((44,120,856,291),radius=22,fill=(6,19,38,211))
-    d.text((450,143),'SOLVE THE QUESTION',font=font(20),fill='#a2b9ce',anchor='mt')
-    q=game['question']['question']
+    raw_question = str(game['question']['question'])
+    # Show algebra's instruction as a clear heading, separate from the equation.
+    is_algebra = game['round'] == 3 and '; x = ?' in raw_question
+    heading = 'SOLVE FOR X' if is_algebra else 'SOLVE THE QUESTION'
+    q = raw_question.split(';', 1)[0].strip() if is_algebra else raw_question
+    d.text((450,143),heading,font=font(20),fill='#a2b9ce',anchor='mt')
     d.text((450,212),q,font=_textfit(d,q,750,47),fill='#ffffff',anchor='mm')
     remain=max(0,int(game['deadline']-time.monotonic()+.99))
     d.rounded_rectangle((45,307,410,365),radius=16,fill=(10,34,54,205))
