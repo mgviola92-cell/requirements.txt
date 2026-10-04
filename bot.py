@@ -4948,7 +4948,10 @@ def math_battle_next(chat_id, game_id, round_index):
             if old_id:
                 try: bot.delete_message(chat_id,old_id)
                 except Exception: pass
-            math_battle_schedule_tick(chat_id,result)
+            # `result` was captured before set_math_message(), so its
+            # message_id is None. Fetch the current round after saving the
+            # new photo ID; otherwise rounds 2-5 never start live ticks.
+            math_battle_schedule_tick(chat_id, get_math_battle(chat_id))
             math_battle_arm_deadline(get_math_battle(chat_id))
         except Exception as e:
             print('Math round card error:',e)
