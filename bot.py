@@ -4927,7 +4927,11 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
         ranked = word_chain_scoreboard(ended)
         # Competition ranks by DISTINCT word counts: ties share the same rank
         # and the same prize. Zero valid words never receive a prize.
-        prizes = (10, 5, 3)
+        # One random prize is rolled PER DISTINCT RANK, not per player.
+        # Players with equal word counts receive exactly the same prize,
+        # including the 5% jackpot bonus (if the rank wins the jackpot).
+        prize_ranges = ((15, 25), (10, 15), (5, 10))
+        rank_prizes = {}
         reward_rows = []
         previous_count = None
         rank = 0
@@ -4935,7 +4939,12 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
             if previous_count != count:
                 rank += 1
                 previous_count = count
-            points = prizes[rank - 1] if rank <= len(prizes) and count > 0 else 0
+                if count > 0 and rank <= len(prize_ranges):
+                    minimum, maximum = prize_ranges[rank - 1]
+                    base_points = random.randint(minimum, maximum)
+                    jackpot_bonus = random.randint(5, 15) if random.random() < 0.05 else 0
+                    rank_prizes[rank] = (base_points + jackpot_bonus, jackpot_bonus)
+            points, jackpot_bonus = rank_prizes.get(rank, (0, 0)) if count > 0 else (0, 0)
             name = ended['names'].get(uid, 'Player')
             reward_ok = True
             if points:
@@ -4950,6 +4959,7 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
             reward_rows.append({
                 'rank': rank, 'name': name, 'words': count,
                 'points': points if reward_ok else 0,
+                'jackpot': bool(jackpot_bonus) if reward_ok else False,
                 'reward_error': not reward_ok,
             })
         reason_label = {
