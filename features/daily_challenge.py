@@ -3,6 +3,7 @@ Register once immediately after TeleBot creation, before all other handlers.
 """
 import threading
 import time
+import hashlib
 from datetime import datetime
 from telebot.handler_backends import ContinueHandling
 from database.daily_challenge import (
@@ -64,18 +65,27 @@ def register_daily_challenge(bot):
             with _lock:_last_refresh.pop((chat_id,day),None)
             return False
 
+    def random_post_minute(chat_id, day):
+        # One reproducible random minute in the morning half of the Myanmar calendar day.
+        # The chosen minute stays the same across Render restarts.
+        seed=f'daily-post:{chat_id}:{day.isoformat()}'.encode()
+        return int.from_bytes(hashlib.sha256(seed).digest()[:8], 'big') % (12 * 60)
+
+    def post_time_reached(chat_id, now=None):
+        now=now or datetime.now(MMT)
+        return now.hour*60+now.minute >= random_post_minute(chat_id,now.date())
+
     def daily_auto_loop():
-        # Myanmar-time morning: 08:00 onward. If the bot restarts later in
-        # the day, missed posts are recovered at the next check.
+        # Every group gets a different random posting time each day.
+        # A missed post is recovered after a restart; the Neon card id prevents duplicates.
         while True:
             try:
                 now=datetime.now(MMT)
-                if now.hour>=8:
-                    for chat_id in active_groups():
-                        if not get_card_id(chat_id):
-                            publish(chat_id,force=True)
+                for chat_id in active_groups():
+                    if post_time_reached(chat_id,now) and not get_card_id(chat_id,now.date()):
+                        publish(chat_id,force=True)
             except Exception as exc:print('Daily auto scheduler error:',exc)
-            time.sleep(180)
+            time.sleep(60)
 
     threading.Thread(target=daily_auto_loop,daemon=True,name='daily_challenge_scheduler').start()
 
@@ -118,9 +128,10 @@ def register_daily_challenge(bot):
         try:
             register_group(message.chat.id)
             if record_message(message.chat.id,message.from_user.id,message.text):
-                # Initial card may be posted on the group's first activity.
-                # After 8am subsequent days are also handled by scheduler.
-                publish(message.chat.id)
+                # Record activity immediately, but do not post before today's
+                # random scheduled minute. Refresh an already-posted card.
+                if get_card_id(message.chat.id) or post_time_reached(message.chat.id):
+                    publish(message.chat.id)
         except Exception as exc:print('Daily activity error:',exc)
         return ContinueHandling()
     return True
