@@ -80,3 +80,63 @@ def status_card(game):
         d.text((73,419),'TOP  —',font=font(19),fill=gold)
     out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=93,optimize=True)
     out.seek(0); out.name='word_chain.jpg'; return out
+
+
+# =========================================================
+# FINISHED WORD CHAIN — COMPACT RESULT CARD
+# Drawn with the same fonts, background and visual language
+# as the live status card. Background is selected once for
+# the result card, not for each countdown tick.
+# =========================================================
+def result_card(game, rows, reason):
+    im = _card_background(game['id'], 'result').copy()
+    d = ImageDraw.Draw(im, 'RGBA')
+    white = (250, 252, 255, 255)
+    cyan = (93, 245, 220, 255)
+    muted = (194, 211, 226, 255)
+    gold = (255, 214, 110, 255)
+
+    d.rounded_rectangle((22, 18, 878, 462), radius=28,
+                        fill=(7, 16, 32, 100), outline=(125, 213, 235, 160), width=2)
+    d.rounded_rectangle((40, 32, 860, 111), radius=20, fill=(8, 18, 36, 215))
+    d.rounded_rectangle((55, 48, 65, 95), radius=5, fill=cyan)
+    d.text((82, 50), 'WORD CHAIN', font=font(34), fill=white)
+    d.text((824, 79), 'RESULT', font=font(21), fill=gold, anchor='rm')
+
+    reason = str(reason or 'Game ended')
+    d.text((57, 126), reason, font=fit_text(d, reason, 780, 23, 16), fill=muted)
+
+    head_y = 168
+    d.rounded_rectangle((54, head_y, 846, head_y + 41), radius=12, fill=(19, 46, 65, 230))
+    d.text((78, head_y + 7), 'RANK', font=font(19), fill=cyan)
+    d.text((183, head_y + 7), 'PLAYER', font=font(19), fill=cyan)
+    d.text((646, head_y + 7), 'WORDS', font=font(19), fill=cyan, anchor='rm')
+    d.text((822, head_y + 7), 'REWARD', font=font(19), fill=cyan, anchor='rm')
+
+    if not rows:
+        d.text((450, 279), 'No valid answers', font=font(29), fill=white, anchor='mm')
+    else:
+        # Five visible rows for legibility on compact Telegram photos.
+        for idx, row in enumerate(rows[:5]):
+            y = 219 + idx * 43
+            if idx % 2 == 0:
+                d.rounded_rectangle((54, y, 846, y + 41), radius=10, fill=(14, 27, 46, 190))
+            d.text((85, y + 6), f"#{row['rank']}", font=font(21), fill=gold)
+            name = str(row['name'])
+            d.text((183, y + 7), name,
+                   font=fit_text(d, name, 330, 21, 16, True), fill=white)
+            d.text((638, y + 7), str(row['words']), font=font(21), fill=white, anchor='rm')
+            reward = 'ERROR' if row.get('reward_error') else (
+                f"+{row['points']}" if row['points'] else '—'
+            )
+            d.text((813, y + 7), reward, font=font(21),
+                   fill=gold if row['points'] else muted, anchor='rm')
+        if len(rows) > 5:
+            d.text((450, 449), f"+{len(rows)-5} more players", font=font(14),
+                   fill=muted, anchor='mm')
+
+    out = BytesIO()
+    im.convert('RGB').save(out, 'JPEG', quality=93, optimize=True)
+    out.seek(0)
+    out.name = 'word_chain_result.jpg'
+    return out
