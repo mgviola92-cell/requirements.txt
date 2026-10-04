@@ -10,6 +10,7 @@ import html
 import urllib.request
 import urllib.parse
 from features.daily_challenge import register_daily_challenge
+from database.daily_challenge import record_game_event
 from telebot.types import ChatPermissions
 from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
@@ -250,6 +251,23 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 register_daily_challenge(bot)
+
+# Daily events: record only after the existing rewards function succeeds.
+_original_daily_apply_game_result = apply_game_result
+_original_daily_custom_result = apply_custom_game_result
+
+def apply_game_result(chat_id, user_id, game_key, result):
+    awarded = _original_daily_apply_game_result(chat_id,user_id,game_key,result)
+    if result == 'win' and awarded:
+        try:
+            record_game_event(chat_id,user_id,game_key,'win',
+                              f'{game_key}:{user_id}:{time.time_ns()}')
+        except Exception as exc: print('Daily win event error:',exc)
+    return awarded
+
+def apply_custom_game_result(chat_id,user_id,result,points):
+    return _original_daily_custom_result(chat_id,user_id,result,points)
+
 
 # Activity tracker runs first, then allows ordinary game/command handlers.
 # Commands, bot messages and private chats do not count as group activity.
@@ -4750,6 +4768,12 @@ def speed_tap_callback(call):
             "win",
             reward_points,
         )
+        try:
+            record_game_event(chat_id,call.from_user.id,'speed_tap','win',
+                              f'speedtap:{chat_id}:{call.message.message_id}:{call.from_user.id}')
+            record_game_event(chat_id,call.from_user.id,'speed_tap','play',
+                              f'speedplay:{chat_id}:{call.message.message_id}:{call.from_user.id}')
+        except Exception as exc: print('Daily speedtap event error:',exc)
 
     except Exception as e:
 
@@ -5038,6 +5062,12 @@ def math_battle_callback(call):
                 'late':'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', 'correct':'✅ မှန်တယ်!'}
         bot.answer_callback_query(call.id,alerts.get(status,'OK'),show_alert=False)
         if status=='correct' and g:
+            try:
+                record_game_event(chat_id,call.from_user.id,'math_battle','correct',
+                                  f'math:{game_id}:{round_text}:{call.from_user.id}')
+                record_game_event(chat_id,call.from_user.id,'math_battle','play',
+                                  f'mathplay:{game_id}:{round_text}:{call.from_user.id}')
+            except Exception as exc: print('Daily math event error:',exc)
             # Re-arm a deadline watchdog because the first winner reduces the timer to 10s.
             # An older watchdog for this round is harmless (it rechecks the live deadline).
             math_battle_arm_deadline(g)
@@ -5294,6 +5324,13 @@ def word_chain_answer(message):
     if result['status'] == 'expired':
         word_chain_close(chat_id, game['id'], 'idle')
         return
+    if result['status'] == 'valid':
+        try:
+            record_game_event(chat_id,message.from_user.id,'word_chain','correct',
+                              f'word:{game["id"]}:{message.message_id}')
+            record_game_event(chat_id,message.from_user.id,'word_chain','play',
+                              f'wordplay:{game["id"]}:{message.message_id}')
+        except Exception as exc: print('Daily word event error:',exc)
     if result['status'] != 'valid':
         # The Word Chain handler precedes the catch-all group filter.
         # Preserve normal chat moderation even while a game is running.
