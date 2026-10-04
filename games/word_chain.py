@@ -1,4 +1,4 @@
-"""Group Word Chain. EN: last letter; MY: last space-separated word."""
+"""Group Word Chain. EN: last letter; MY: last pronounced syllable's initial consonant."""
 import json
 import random
 import re
@@ -17,7 +17,11 @@ _lock = threading.RLock()
 _games = {}
 _WORDS = None
 _START_EN = ("apple", "tiger", "river", "orange", "green", "music", "garden", "winter")
-_START_MY = ("မိုး ရေ", "ရေ ခဲ", "ပန်း ပွင့်", "လေ ပြေ", "သစ် ပင်", "မီး အိမ်")
+_START_MY = ("ပင်စည်", "စားစရာ", "ရထား", "သစ်ပင်", "ပန်းကန်", "လေယာဉ်")
+
+# Myanmar letters (not combining vowel signs, asat or medials).
+_MY_CONSONANT = re.compile(r'[\u1000-\u1021\u103f]')
+_MY_WRITING = re.compile(r'[\u1000-\u109f\uaa60-\uaa7f ]+')
 
 
 def _english_words():
@@ -28,24 +32,43 @@ def _english_words():
     return _WORDS
 
 
+def _myanmar_onsets(value):
+    """Extract base consonants, excluding codas killed by asat (e.g., င်, ည်).
+
+    Myanmar orthography is more complex than Unicode character boundaries. This
+    handles ordinary unstacked written words (e.g., ပင်စည် => ပ,စ).
+    """
+    result = []
+    for i, ch in enumerate(value):
+        if not _MY_CONSONANT.fullmatch(ch):
+            continue
+        # A base consonant immediately followed by virama (stacked letters)
+        # or asat (final consonant) is not the syllable onset to chain from.
+        if i + 1 < len(value) and value[i + 1] in ('\u103a', '\u1039'):
+            continue
+        result.append(ch)
+    return result
+
+
 def normalize(text, mode):
     text = re.sub(r'[\u200b-\u200d\ufeff]', '', str(text or '')).strip()
     if mode == 'en':
         return text.casefold() if re.fullmatch(r'[A-Za-z]{3,12}', text) else None
     text = ' '.join(text.split())
-    if not re.fullmatch(r'[\u1000-\u109f\uaa60-\uaa7f ]+', text):
+    if not text or len(text) > 40 or not _MY_WRITING.fullmatch(text):
         return None
-    parts = text.split(' ')
-    # Explicit space-separated Burmese words: e.g. မိုး ရေ -> ရေ ခဲ.
-    return text if 2 <= len(parts) <= 4 and all(parts) else None
+    if not _myanmar_onsets(text):
+        return None
+    # Both "ပင်စည်" and naturally spaced phrases are accepted.
+    return text
 
 
 def _first(value, mode):
-    return value[0] if mode == 'en' else value.split(' ')[0]
+    return value[0] if mode == 'en' else _myanmar_onsets(value)[0]
 
 
 def _last(value, mode):
-    return value[-1] if mode == 'en' else value.split(' ')[-1]
+    return value[-1] if mode == 'en' else _myanmar_onsets(value)[-1]
 
 
 def get_game(chat_id):
@@ -100,7 +123,6 @@ def submit(chat_id, game_id, user_id, user_name, text):
         word = normalize(text, game['mode'])
         if not word:
             return {'status': 'ignore'}
-        # In EN, check vocabulary instead of treating arbitrary group chat as a word.
         if game['mode'] == 'en' and word not in _english_words():
             return {'status': 'ignore'}
         if _first(word, game['mode']) != game['required']:
@@ -115,7 +137,6 @@ def submit(chat_id, game_id, user_id, user_name, text):
         game['required'] = _last(word, game['mode'])
         game['last_user'] = user_id
         game['last_move_at'] = now
-        # Solo follow-up advances the word but cannot farm points.
         if not self_retry:
             game['scores'][user_id] = game['scores'].get(user_id, 0) + 1
         game['names'][user_id] = (user_name or 'Player')[:40]
