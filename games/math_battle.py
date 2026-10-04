@@ -3,6 +3,8 @@ import random
 import threading
 import time
 import uuid
+import json
+from pathlib import Path
 from core.sessions import start_session, end_session
 from database.used_questions import get_used_question_ids, get_recent_question_ids, mark_question_used, reset_used_questions
 
@@ -56,6 +58,23 @@ def _pool():
             if len(pool)==1000: break
         if len(pool)<1000: raise RuntimeError(f'Only {len(pool)} level {level+1} questions')
         pools.append(pool)
+    # Append extra question packs; retain all original M1-0001 ... M5-1000 IDs.
+    extra_path = Path(__file__).resolve().parent.parent / 'data' / 'math_battle_extra_10000.json'
+    if not extra_path.exists():
+        raise FileNotFoundError(f'Math Battle question data missing: {extra_path}')
+    with extra_path.open('r', encoding='utf-8') as f:
+        extra_pools = json.load(f)
+    if len(extra_pools) != 5 or any(len(p) != 2000 for p in extra_pools):
+        raise ValueError('Math Battle extra data must have exactly 2000 questions in each of 5 levels')
+    for level, extra in enumerate(extra_pools):
+        current_ids = {q['id'] for q in pools[level]}
+        current_questions = {q['question'] for q in pools[level]}
+        for q in extra:
+            if q['id'] in current_ids or q['question'] in current_questions:
+                raise ValueError(f'Duplicate math question in level {level+1}: {q["id"]}')
+            current_ids.add(q['id'])
+            current_questions.add(q['question'])
+        pools[level].extend(extra)
     _POOL=pools
     return pools
 
