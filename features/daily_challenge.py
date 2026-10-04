@@ -13,6 +13,17 @@ from database.daily_challenge import (
 )
 from ui.daily_challenge_card import card
 
+TEMP_CARD_SECONDS = 60
+
+def _delete_later(bot, chat_id, message_id, delay=TEMP_CARD_SECONDS):
+    def remove():
+        try: bot.delete_message(chat_id, message_id)
+        except Exception as exc: print("Daily temporary cleanup:", exc)
+    timer = threading.Timer(delay, remove)
+    timer.daemon = True
+    timer.start()
+
+
 _lock=threading.RLock()
 _last_refresh={}
 _ready=False
@@ -91,35 +102,46 @@ def register_daily_challenge(bot):
 
     @bot.message_handler(commands=['daily','dailychallenge'])
     def daily_command(message):
-        if message.chat.type not in ('group','supergroup') or not _ready:return
-        register_group(message.chat.id)
-        publish(message.chat.id,force=True)
-        s=overview(message.chat.id,message.from_user.id)
-        missions=missions_for(message.chat.id,s['day'])
-        details='\n'.join(
-            f'{i}. '+('Claimed' if i in s['claimed'] else
-                      'Ready' if all(x>=y for x,y in zip(mission_state(message.chat.id,message.from_user.id,m),m[1:4])) else 'Locked')
-            + f' [{m[0]}] (your {mission_state(message.chat.id,message.from_user.id,m)[2]}/{m[3]})'
-            for i,m in enumerate(missions,1))
-        bot.reply_to(message,'🎯 Your Daily Missions:\n'+details+'\nUse /dailyclaim 1, 2 or 3')
+        if message.chat.type not in ('group','supergroup') or not _ready: return
+        try:
+            register_group(message.chat.id)
+            # Temporary personal card. Do not publish or pin the main daily card.
+            snapshot=overview(message.chat.id,message.from_user.id)
+            snapshot['chat_id']=message.chat.id
+            snapshot['viewer_id']=message.from_user.id
+            sent=bot.send_photo(message.chat.id,card(snapshot),
+                caption='🎯 Your Daily Challenge | /dailyclaim 1, 2 or 3',
+                reply_to_message_id=message.message_id)
+            _delete_later(bot,message.chat.id,sent.message_id)
+        except Exception as exc:
+            print('Daily temporary card error:',exc)
+        finally:
+            _delete_later(bot,message.chat.id,message.message_id)
 
     @bot.message_handler(commands=['dailyclaim'])
     def daily_claim_command(message):
         if message.chat.type not in ('group','supergroup') or not _ready:return
         register_group(message.chat.id)
-        try:idx=int((message.text or '').split()[1])
-        except (IndexError,ValueError):
-            bot.reply_to(message,'Usage: /dailyclaim 1 (or 2 / 3)');return
-        try:state,pts=claim(message.chat.id,message.from_user.id,idx)
-        except Exception as exc:
-            print('Daily claim error:',exc)
-            bot.reply_to(message,'Database error. Try again later.');return
-        response={'ok':f'🎁 Mission {idx}: +{pts} Points!',
-                  'locked':'🔒 Group goal or your own participation not complete.',
-                  'claimed':'✅ You already claimed this mission today.',
-                  'invalid':'Choose mission 1, 2 or 3.'}[state]
-        bot.reply_to(message,response)
-        if state=='ok':publish(message.chat.id,force=True)
+        try:
+            try: idx=int((message.text or '').split()[1])
+            except (IndexError,ValueError):
+                result='Usage: /dailyclaim 1 (or 2 / 3)'
+            else:
+                try: state,pts=claim(message.chat.id,message.from_user.id,idx)
+                except Exception as exc:
+                    print('Daily claim error:',exc)
+                    result='Database error. Try again later.'
+                else:
+                    result={'ok':f'🎁 Mission {idx}: +{pts} Points!',
+                        'locked':'🔒 Complete the group goal and your personal goal first.',
+                        'claimed':'✅ You already claimed this mission today.',
+                        'invalid':'Choose mission 1, 2 or 3.'}[state]
+                    if state=='ok' and get_card_id(message.chat.id):
+                        publish(message.chat.id,force=True)
+            sent=bot.reply_to(message,result)
+            _delete_later(bot,message.chat.id,sent.message_id)
+        except Exception as exc:print('Daily claim response error:',exc)
+        finally:_delete_later(bot,message.chat.id,message.message_id)
 
     @bot.message_handler(func=lambda m:True,content_types=['text'])
     def daily_activity(message):
