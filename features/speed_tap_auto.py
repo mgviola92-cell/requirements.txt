@@ -21,6 +21,7 @@
 import random
 import threading
 import time
+import uuid
 
 from core.timers import (
     schedule_task,
@@ -33,34 +34,22 @@ from core.timers import (
 # ⚙️ SETTINGS
 # =========================================================
 
-# Recent activity window.
 ACTIVITY_WINDOW_SECONDS = 5 * 60
 
-# Minimum recent text messages required.
 MIN_ACTIVE_MESSAGES = 6
-
-# Minimum distinct members required.
 MIN_ACTIVE_USERS = 2
 
-# First/random evaluation delay after activity.
 CHECK_DELAY_MIN = 90
 CHECK_DELAY_MAX = 300
 
-# If group is still active but the random roll fails,
-# evaluate again after another unpredictable delay.
 RECHECK_DELAY_MIN = 120
 RECHECK_DELAY_MAX = 480
 
-# Chance of auto-spawning on a qualified evaluation.
 AUTO_SPAWN_CHANCE = 0.35
 
-# After a successful automatic spawn, keep the auto system
-# quiet for a random amount of time.
 AUTO_QUIET_MIN = 15 * 60
 AUTO_QUIET_MAX = 45 * 60
 
-# Prevent one user from creating fake "group activity"
-# by sending messages extremely quickly.
 PER_USER_ACTIVITY_GAP = 8
 
 
@@ -78,6 +67,9 @@ _last_user_activity = {}
 
 # chat_id -> timestamp until automatic spawning is quiet
 _quiet_until = {}
+
+# chat_id -> currently armed unique timer task id
+_check_task_ids = {}
 
 _spawn_callback = None
 _can_spawn_callback = None
@@ -145,6 +137,15 @@ def get_speed_tap_activity(
             in items
         }
 
+        task_id = _check_task_ids.get(
+            chat_id
+        )
+
+        check_armed = bool(
+            task_id
+            and has_task(task_id)
+        )
+
         return {
             "messages": len(items),
             "users": len(users),
@@ -162,6 +163,7 @@ def get_speed_tap_activity(
                 )
                 - now,
             ),
+            "check_armed": check_armed,
         }
 
 
@@ -192,13 +194,50 @@ def configure_speed_tap_auto(
 
 # =========================================================
 # 🕒 RANDOM CHECK SCHEDULER
+#
+# IMPORTANT:
+# Every check uses a UNIQUE core timer id.
+#
+# Why:
+# core.timers removes a task only AFTER its callback returns.
+# If we tried to schedule the next check using the same id
+# from inside the running callback, the new task could fail
+# or be removed by the old callback's cleanup.
 # =========================================================
 
-def _task_id(chat_id):
+def _make_task_id(
+    chat_id,
+):
 
     return (
         f"speedtap_auto_check:"
-        f"{chat_id}"
+        f"{chat_id}:"
+        f"{uuid.uuid4().hex}"
+    )
+
+
+def _run_auto_check(
+    chat_id,
+    task_id,
+):
+
+    # The currently running timer is no longer considered
+    # "armed" by this module. This lets evaluation safely
+    # schedule a NEW unique recheck if needed.
+    with _lock:
+
+        current = _check_task_ids.get(
+            chat_id
+        )
+
+        if current == task_id:
+            _check_task_ids.pop(
+                chat_id,
+                None,
+            )
+
+    return _evaluate_speed_tap_auto(
+        chat_id
     )
 
 
@@ -208,18 +247,62 @@ def _schedule_random_check(
     maximum,
 ):
 
+    with _lock:
+
+        current_task_id = (
+            _check_task_ids.get(
+                chat_id
+            )
+        )
+
+        if (
+            current_task_id
+            and has_task(
+                current_task_id
+            )
+        ):
+            return current_task_id
+
+        task_id = _make_task_id(
+            chat_id
+        )
+
+        _check_task_ids[
+            chat_id
+        ] = task_id
+
     delay = random.randint(
         int(minimum),
         int(maximum),
     )
 
-    return schedule_task(
+    scheduled = schedule_task(
         delay,
-        _evaluate_speed_tap_auto,
+        _run_auto_check,
         chat_id,
-        task_id=_task_id(chat_id),
+        task_id,
+        task_id=task_id,
         replace=False,
     )
+
+    if not scheduled:
+
+        with _lock:
+
+            if (
+                _check_task_ids.get(
+                    chat_id
+                )
+                == task_id
+            ):
+                _check_task_ids.pop(
+                    chat_id,
+                    None,
+                )
+
+        return None
+
+    return task_id
 
 
 # =========================================================
@@ -271,8 +354,6 @@ def _evaluate_speed_tap_auto(
     # -----------------------------------------
 
     if now < quiet_until:
-
-        # Do not constantly reschedule while quiet.
         return False
 
     # -----------------------------------------
@@ -285,7 +366,6 @@ def _evaluate_speed_tap_auto(
         or user_count
         < MIN_ACTIVE_USERS
     ):
-
         return False
 
     # -----------------------------------------
@@ -393,8 +473,6 @@ def _evaluate_speed_tap_auto(
             + quiet_seconds
         )
 
-        # Clear previous activity so the same burst
-        # cannot immediately trigger another event.
         _activity.pop(
             chat_id,
             None,
@@ -462,15 +540,25 @@ def record_speed_tap_activity(
             )
         )
 
+        current_task_id = (
+            _check_task_ids.get(
+                chat_id
+            )
+        )
+
+        check_already_armed = bool(
+            current_task_id
+            and has_task(
+                current_task_id
+            )
+        )
+
     # During auto quiet time, record activity
     # but do not arm another check yet.
     if quiet:
         return True
 
-    # Only one random evaluation task per group.
-    if not has_task(
-        _task_id(chat_id)
-    ):
+    if not check_already_armed:
 
         _schedule_random_check(
             chat_id,
@@ -489,9 +577,19 @@ def clear_speed_tap_auto(
     chat_id,
 ):
 
-    cancel_task(
-        _task_id(chat_id)
-    )
+    with _lock:
+
+        task_id = (
+            _check_task_ids.pop(
+                chat_id,
+                None,
+            )
+        )
+
+    if task_id:
+        cancel_task(
+            task_id
+        )
 
     with _lock:
 
@@ -513,6 +611,7 @@ def clear_speed_tap_auto(
         ]
 
         for key in keys:
+
             _last_user_activity.pop(
                 key,
                 None,
