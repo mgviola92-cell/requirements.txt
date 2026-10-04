@@ -1,66 +1,126 @@
-"""Telegram wiring. Call register_daily_challenge(bot) before polling starts."""
-import hashlib,time,threading
+"""Daily Challenge: persistent groups, random daily missions, scheduled auto-post.
+Register once immediately after TeleBot creation, before all other handlers.
+"""
+import threading
+import time
+from datetime import datetime
 from telebot.handler_backends import ContinueHandling
-from database.daily_challenge import (initialize_daily_challenge,record_message,overview,claim,
-  get_card_id,set_card_id,today,MISSIONS)
+from database.daily_challenge import (
+    initialize_daily_challenge, register_group, active_groups, previous_card,
+    record_message, overview, claim, get_card_id, set_card_id, today,
+    missions_for, mission_state, MMT,
+)
 from ui.daily_challenge_card import card
-_lock=threading.RLock();_last_refresh={};_ready=False
+
+_lock=threading.RLock()
+_last_refresh={}
+_ready=False
+_registered=False
 
 def register_daily_challenge(bot):
-    global _ready
-    try:_ready=initialize_daily_challenge()
+    global _ready, _registered
+    if _registered: return _ready
+    try:
+        _ready=initialize_daily_challenge()
     except Exception as exc:
-        print('Daily Challenge database init error:',exc);_ready=False
+        print('Daily Challenge init error:',exc)
+        return False
+    _registered=True
 
     def publish(chat_id, force=False):
-        if not _ready:return
+        if not _ready: return False
+        day=today()
         now=time.monotonic()
         with _lock:
-            key=(chat_id,today())
-            if not force and now-_last_refresh.get(key,0)<30:return
+            key=(chat_id,day)
+            if not force and now-_last_refresh.get(key,0)<30: return False
             _last_refresh[key]=now
         try:
-            s=overview(chat_id);s['chat_id']=chat_id
-            current=get_card_id(chat_id)
-            if current:
+            existing=get_card_id(chat_id,day)
+            s=overview(chat_id,day=day)
+            s['chat_id']=chat_id
+            if existing:
                 try:
                     from telebot.types import InputMediaPhoto
-                    bot.edit_message_media(InputMediaPhoto(card(s)),chat_id,current)
-                    return
-                except Exception as exc:print('Daily card edit retry:',exc)
+                    bot.edit_message_media(InputMediaPhoto(card(s)),chat_id,existing)
+                except Exception as exc:
+                    # Editing an unchanged card is normal, not a reason to spam another.
+                    if 'message is not modified' in str(exc).lower():return True
+                    print('Daily Challenge edit error:',exc)
+                else:
+                    return True
+                # Only send a replacement if an existing message was deleted or invalid.
             sent=bot.send_photo(chat_id,card(s),caption='🎯 DAILY CHALLENGE  |  /dailyclaim 1-3')
-            set_card_id(chat_id,sent.message_id)
+            set_card_id(chat_id,sent.message_id,day)
             try:bot.pin_chat_message(chat_id,sent.message_id,disable_notification=True)
-            except Exception:pass
-        except Exception as exc:print('Daily publish error:',exc)
+            except Exception as exc:print('Daily Challenge pin unavailable:',exc)
+            old=previous_card(chat_id,day)
+            if old:
+                try:bot.unpin_chat_message(chat_id,old)
+                except Exception:pass
+            return True
+        except Exception as exc:
+            print('Daily Challenge publish error:',exc)
+            with _lock:_last_refresh.pop((chat_id,day),None)
+            return False
+
+    def daily_auto_loop():
+        # Myanmar-time morning: 08:00 onward. If the bot restarts later in
+        # the day, missed posts are recovered at the next check.
+        while True:
+            try:
+                now=datetime.now(MMT)
+                if now.hour>=8:
+                    for chat_id in active_groups():
+                        if not get_card_id(chat_id):
+                            publish(chat_id,force=True)
+            except Exception as exc:print('Daily auto scheduler error:',exc)
+            time.sleep(180)
+
+    threading.Thread(target=daily_auto_loop,daemon=True,name='daily_challenge_scheduler').start()
 
     @bot.message_handler(commands=['daily','dailychallenge'])
     def daily_command(message):
         if message.chat.type not in ('group','supergroup') or not _ready:return
+        register_group(message.chat.id)
         publish(message.chat.id,force=True)
         s=overview(message.chat.id,message.from_user.id)
-        details='\n'.join(f'{i}. {"Claimed" if i in s["claimed"] else "Ready" if s["total"]>=m[0] and s["users"]>=m[1] and s["mine"]>=m[2] else "Locked"} (your {s["mine"]}/{m[2]})' for i,m in enumerate(MISSIONS,1))
+        missions=missions_for(message.chat.id,s['day'])
+        details='\n'.join(
+            f'{i}. '+('Claimed' if i in s['claimed'] else
+                      'Ready' if all(x>=y for x,y in zip(mission_state(message.chat.id,message.from_user.id,m),m[1:4])) else 'Locked')
+            + f' [{m[0]}] (your {mission_state(message.chat.id,message.from_user.id,m)[2]}/{m[3]})'
+            for i,m in enumerate(missions,1))
         bot.reply_to(message,'🎯 Your Daily Missions:\n'+details+'\nUse /dailyclaim 1, 2 or 3')
 
     @bot.message_handler(commands=['dailyclaim'])
     def daily_claim_command(message):
         if message.chat.type not in ('group','supergroup') or not _ready:return
+        register_group(message.chat.id)
         try:idx=int((message.text or '').split()[1])
         except (IndexError,ValueError):
             bot.reply_to(message,'Usage: /dailyclaim 1 (or 2 / 3)');return
         try:state,pts=claim(message.chat.id,message.from_user.id,idx)
         except Exception as exc:
-            print('Daily claim error:',exc);bot.reply_to(message,'Database error. Try again later.');return
-        response={'ok':f'🎁 Mission {idx}: +{pts} Points!','locked':'🔒 Group goal or your own participation not complete.',
-                  'claimed':'✅ You have already claimed this mission today.','invalid':'Choose mission 1, 2 or 3.'}[state]
+            print('Daily claim error:',exc)
+            bot.reply_to(message,'Database error. Try again later.');return
+        response={'ok':f'🎁 Mission {idx}: +{pts} Points!',
+                  'locked':'🔒 Group goal or your own participation not complete.',
+                  'claimed':'✅ You already claimed this mission today.',
+                  'invalid':'Choose mission 1, 2 or 3.'}[state]
         bot.reply_to(message,response)
+        if state=='ok':publish(message.chat.id,force=True)
 
-    @bot.message_handler(func=lambda m: True,content_types=['text'])
+    @bot.message_handler(func=lambda m:True,content_types=['text'])
     def daily_activity(message):
-        if not _ready or message.chat.type not in ('group','supergroup') or not message.from_user or message.from_user.is_bot:return ContinueHandling()
+        if not _ready or message.chat.type not in ('group','supergroup') or not message.from_user or message.from_user.is_bot:
+            return ContinueHandling()
         try:
+            register_group(message.chat.id)
             if record_message(message.chat.id,message.from_user.id,message.text):
+                # Initial card may be posted on the group's first activity.
+                # After 8am subsequent days are also handled by scheduler.
                 publish(message.chat.id)
         except Exception as exc:print('Daily activity error:',exc)
         return ContinueHandling()
-    return _ready
+    return True
