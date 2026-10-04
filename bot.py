@@ -127,6 +127,18 @@ from database.used_questions import (
     reset_used_questions,
 )
 
+from games.math_battle import (
+    TIMES as MATH_ROUND_TIMES,
+    start as start_math_battle,
+    snapshot as get_math_battle,
+    set_message as set_math_message,
+    answer as answer_math_battle,
+    advance as advance_math_battle,
+    stop as stop_math_battle,
+)
+from ui.math_battle_card import round_card as math_round_card, result_card as math_result_card
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+
 from games.word_chain import (
     IDLE_SECONDS as WORD_CHAIN_IDLE_SECONDS,
     get_game as get_word_chain_game,
@@ -4834,6 +4846,174 @@ def speed_tap_callback(call):
 # =========================================================
 # 🔤 WORD CHAIN /wordchain en | /wordchain mm | /endwordchain
 # =========================================================
+
+# =========================================================
+# 🧮 MATH BATTLE — FIVE ROUND INLINE GAME
+# =========================================================
+math_battle_card_lock = threading.RLock()
+
+def math_battle_keyboard(game):
+    kb = InlineKeyboardMarkup(row_width=2)
+    opts = game['question']['options']
+    for j in range(0, 4, 2):
+        row = []
+        for k in (j, j+1):
+            row.append(InlineKeyboardButton(
+                f'{"ABCD"[k]}. {opts[k]}',
+                callback_data=f"math:{game['id']}:{game['round']}:{k}",
+            ))
+        kb.row(*row)
+    return kb
+
+def math_battle_next(chat_id, game_id, round_index):
+    with math_battle_card_lock:
+        current = get_math_battle(chat_id)
+        if not current or current['id'] != game_id or current['round'] != round_index:
+            return
+        if time.monotonic() < current['deadline']:
+            return
+        try:
+            status, result = advance_math_battle(chat_id, game_id, round_index)
+        except Exception as e:
+            print('Math next round error:', e)
+            stop_math_battle(chat_id)
+            return
+        if status == 'finished':
+            old_id = current.get('message_id')
+            if old_id:
+                try: bot.delete_message(chat_id, old_id)
+                except Exception: pass
+            ranked = sorted(result['scores'].items(), key=lambda pair: (-pair[1], pair[0]))
+            rewards = {}
+            # Tied scores get the same rank reward; each rank group's roll is shared.
+            distinct = []
+            for _, score in ranked:
+                if score not in distinct: distinct.append(score)
+            tiers = ((15,25),(10,15),(5,10))
+            for tier_index, score in enumerate(distinct[:3]):
+                prize = random.randint(*tiers[tier_index])
+                if random.random() < 0.05: prize += random.randint(5,15)
+                tied_users = [uid for uid, pts in ranked if pts == score]
+                for uid in tied_users:
+                    try:
+                        if tier_index == 0 and uid == tied_users[0]:
+                            ok = apply_custom_game_result(chat_id, uid, 'win', prize)
+                        else:
+                            ok = add_bonus_points(chat_id, uid, prize, reason='math_battle')
+                        if ok: rewards[uid] = prize
+                    except Exception as e:
+                        print('Math reward error:', e)
+            try:
+                sent=bot.send_photo(chat_id, math_result_card(result, rewards), caption='🏁 MATH BATTLE — FINAL RESULT')
+                delay_delete_message(chat_id, sent.message_id, 120)
+            except Exception as e:
+                print('Math final card error:', e)
+            return
+        if status != 'next': return
+        old_id=current.get('message_id')
+        try:
+            sent=bot.send_photo(chat_id, math_round_card(result), reply_markup=math_battle_keyboard(result), caption=f"🧮 MATH BATTLE · ROUND {result['round']+1}/5")
+            if not set_math_message(chat_id,game_id,result['round'],sent.message_id):
+                bot.delete_message(chat_id,sent.message_id)
+                return
+            if old_id:
+                try: bot.delete_message(chat_id,old_id)
+                except Exception: pass
+            math_battle_schedule_tick(chat_id,result)
+        except Exception as e:
+            print('Math round card error:',e)
+            stop_math_battle(chat_id)
+
+def math_battle_tick(chat_id, game_id, round_index, message_id):
+    with math_battle_card_lock:
+        game=get_math_battle(chat_id)
+        if not game or game['id']!=game_id or game['round']!=round_index or game['message_id']!=message_id:
+            return
+        remaining=game['deadline']-time.monotonic()
+        if remaining<=0:
+            math_battle_next(chat_id,game_id,round_index)
+            return
+        try:
+            bot.edit_message_media(
+                InputMediaPhoto(math_round_card(game), caption=f"🧮 MATH BATTLE · ROUND {round_index+1}/5"),
+                chat_id=chat_id, message_id=message_id,
+                reply_markup=math_battle_keyboard(game),
+            )
+        except Exception as e:
+            if 'message is not modified' not in str(e).lower():
+                print('Math countdown edit:',e)
+        game=get_math_battle(chat_id)
+        if game and game['id']==game_id and game['round']==round_index and game['message_id']==message_id:
+            remaining=game['deadline']-time.monotonic()
+            if remaining<=0:
+                math_battle_next(chat_id,game_id,round_index)
+            else:
+                step=1 if remaining<=10 else 5
+                schedule_task(min(step,max(.15,remaining)),math_battle_tick,chat_id,game_id,round_index,message_id)
+
+def math_battle_schedule_tick(chat_id, game):
+    if not game.get('message_id'): return
+    remaining=max(.15,game['deadline']-time.monotonic())
+    delay=1 if remaining<=10 else 5
+    schedule_task(min(delay,remaining),math_battle_tick,chat_id,game['id'],game['round'],game['message_id'])
+
+@bot.message_handler(commands=['mathbattle','math'])
+def math_battle_command(message):
+    if message.chat.type not in ('group','supergroup'):
+        bot.reply_to(message,'🧮 Math Battle ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။')
+        return
+    chat_id=message.chat.id
+    try:
+        created,game=start_math_battle(chat_id)
+        if not created:
+            sent=bot.reply_to(message,f'⏳ {game} game/event ရှိနေပါတယ်။')
+            delay_delete_message(chat_id,sent.message_id,20)
+            return
+        sent=bot.send_photo(chat_id,math_round_card(game),caption='🧮 MATH BATTLE · ROUND 1/5',reply_markup=math_battle_keyboard(game))
+        set_math_message(chat_id,game['id'],0,sent.message_id)
+        math_battle_schedule_tick(chat_id,get_math_battle(chat_id))
+        delay_delete_message(chat_id,message.message_id,10)
+    except Exception as e:
+        print('Math battle start error:',e)
+        stop_math_battle(chat_id)
+
+@bot.message_handler(commands=['endmath','stopmath'])
+def math_battle_end_command(message):
+    if message.chat.type not in ('group','supergroup'): return
+    if not is_admin(message):
+        bot.reply_to(message,'❌ Admin ပဲ ရပ်နိုင်ပါတယ်။')
+        return
+    g=stop_math_battle(message.chat.id)
+    if g and g.get('message_id'):
+        try: bot.delete_message(message.chat.id,g['message_id'])
+        except Exception: pass
+    bot.reply_to(message,'🛑 Math Battle ရပ်လိုက်ပြီ။' if g else 'Math Battle မရှိပါ။')
+
+@bot.callback_query_handler(func=lambda c: bool(c.data and c.data.startswith('math:')))
+def math_battle_callback(call):
+    try:
+        _,game_id,round_text,index_text=call.data.split(':')
+        chat_id=call.message.chat.id
+        if call.message.chat.type not in ('group','supergroup'): return
+        status,g=answer_math_battle(chat_id,game_id,int(round_text),call.from_user.id,call.from_user.first_name,int(index_text))
+        alerts={'stale':'ဒီမေးခွန်းပြီးသွားပါပြီ။','closed':'အချိန်ကုန်ပြီ။',
+                'already':'တစ်ချီမှာ တစ်ကြိမ်ပဲ ဖြေလို့ရတယ်။','wrong':'❌ မမှန်ပါ။',
+                'late':'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', 'correct':'✅ မှန်တယ်!'}
+        bot.answer_callback_query(call.id,alerts.get(status,'OK'),show_alert=False)
+        if status=='correct' and g:
+            # Update immediately when a player scores; first correct activates 10-second grace.
+            if time.monotonic()>=g['deadline']:
+                math_battle_next(chat_id,game_id,int(round_text))
+            elif g.get('message_id'):
+                try:
+                    bot.edit_message_media(
+                        InputMediaPhoto(math_round_card(g),caption=f"🧮 MATH BATTLE · ROUND {g['round']+1}/5"),
+                        chat_id=chat_id,message_id=g['message_id'],reply_markup=math_battle_keyboard(g))
+                except Exception: pass
+    except Exception as e:
+        print('Math callback error:',e)
+        try: bot.answer_callback_query(call.id,'⚠️ ပြန်စမ်းကြည့်ပါ။')
+        except Exception: pass
 
 word_chain_finish_lock = threading.RLock()
 word_chain_card_lock = threading.RLock()
