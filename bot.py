@@ -140,6 +140,14 @@ from games.speed_tap import (
     get_speed_tap_state,
 )
 
+from ui.speed_tap_card import (
+    get_speed_tap_background,
+    generate_speed_tap_wait_card_bytes,
+    generate_speed_tap_go_card_bytes,
+    generate_speed_tap_result_card_bytes,
+    generate_speed_tap_timeout_card_bytes,
+)
+
 # =========================================================
 # 😀 EMOJI GUESS QUESTION SELECTOR
 # Neon used-question + recent-history tracking
@@ -4011,7 +4019,7 @@ def speed_tap_command(message):
     chat_id = message.chat.id
 
     # -----------------------------------------
-    # Existing round check
+    # Existing round
     # -----------------------------------------
 
     if get_speed_tap_game(chat_id):
@@ -4020,10 +4028,6 @@ def speed_tap_command(message):
             "⚡ Speed Tap game တစ်ပွဲ ရှိနေပြီးသားပါ။"
         )
         return
-
-    # -----------------------------------------
-    # Random WAIT time
-    # -----------------------------------------
 
     wait_seconds = random.randint(
         SPEED_TAP_WAIT_MIN,
@@ -4043,20 +4047,34 @@ def speed_tap_command(message):
         return
 
     # -----------------------------------------
-    # WAIT message
-    #
-    # Button exists already.
-    # Tap too early = popup only.
+    # Choose one background for WAIT -> GO
     # -----------------------------------------
 
+    background_path = (
+        get_speed_tap_background()
+    )
+
+    # -----------------------------------------
+    # WAIT card
+    # -----------------------------------------
+
+    visual_mode = True
+
     try:
-        game_message = bot.send_message(
+
+        wait_card = (
+            generate_speed_tap_wait_card_bytes(
+                wait_seconds=wait_seconds,
+                background_path=background_path,
+            )
+        )
+
+        game_message = bot.send_photo(
             chat_id,
-            (
-                "⚡ <b>SPEED TAP</b>\n\n"
-                "⏳ <b>WAIT...</b>\n\n"
-                "စောနှိပ်ရင် မနိုင်ဘူးနော် 😏\n"
-                "🟢 GO ပေါ်လာမှ မြန်မြန်နှိပ်!"
+            wait_card,
+            caption=(
+                "⚡ <b>SPEED TAP</b>\n"
+                "⏳ WAIT... GO ပေါ်လာမှနှိပ်!"
             ),
             parse_mode="HTML",
             reply_markup=speed_tap_keyboard(
@@ -4066,43 +4084,21 @@ def speed_tap_command(message):
         )
 
     except Exception as e:
+
         print(
-            f"Speed Tap Start Error: {e}"
+            f"Speed Tap WAIT Card Error: {e}"
         )
 
-        end_speed_tap_game(
-            chat_id
-        )
-        return
-
-    set_speed_tap_message_id(
-        chat_id,
-        game_message.message_id,
-    )
-
-    # =====================================================
-    # 🟢 ACTIVATE / GO
-    # =====================================================
-
-    def speed_tap_go():
-
-        active_game = activate_speed_tap(
-            chat_id,
-            active_time=SPEED_TAP_ACTIVE_TIME,
-        )
-
-        if not active_game:
-            return
+        visual_mode = False
 
         try:
-            bot.edit_message_text(
+            game_message = bot.send_message(
+                chat_id,
                 (
                     "⚡ <b>SPEED TAP</b>\n\n"
-                    "🟢 <b>GO! GO! GO!</b>\n\n"
-                    "👇 အမြန်ဆုံးနှိပ်!"
+                    "⏳ <b>WAIT...</b>\n\n"
+                    "GO ပေါ်လာမှ နှိပ်ပါ!"
                 ),
-                chat_id=chat_id,
-                message_id=game_message.message_id,
                 parse_mode="HTML",
                 reply_markup=speed_tap_keyboard(
                     chat_id,
@@ -4110,21 +4106,22 @@ def speed_tap_command(message):
                 ),
             )
 
-        except Exception as e:
+        except Exception as send_error:
+
             print(
-                f"Speed Tap GO Error: {e}"
+                f"Speed Tap Start Error: "
+                f"{send_error}"
             )
 
-        # -----------------------------------------
-        # Active phase timeout
-        # -----------------------------------------
+            end_speed_tap_game(
+                chat_id
+            )
+            return
 
-        schedule_task(
-            SPEED_TAP_ACTIVE_TIME,
-            speed_tap_timeout,
-            task_id=f"speedtap_timeout:{chat_id}",
-            replace=True,
-        )
+    set_speed_tap_message_id(
+        chat_id,
+        game_message.message_id,
+    )
 
     # =====================================================
     # ⏰ TIMEOUT
@@ -4140,20 +4137,59 @@ def speed_tap_command(message):
             return
 
         try:
-            bot.edit_message_text(
-                (
-                    "⚡ <b>SPEED TAP</b>\n\n"
-                    "⏰ <b>TIME'S UP!</b>\n\n"
-                    "ဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး 😴"
-                ),
-                chat_id=chat_id,
-                message_id=game_message.message_id,
-                parse_mode="HTML",
-                reply_markup=speed_tap_keyboard(
-                    chat_id,
-                    active=False,
-                ),
-            )
+
+            if visual_mode:
+
+                timeout_card = (
+                    generate_speed_tap_timeout_card_bytes(
+                        background_path=
+                            background_path,
+                    )
+                )
+
+                media = (
+                    telebot.types.InputMediaPhoto(
+                        media=timeout_card,
+                        caption=(
+                            "⏰ <b>TIME'S UP!</b>\n"
+                            "ဘယ်သူမှ အချိန်မီ "
+                            "မနှိပ်လိုက်ဘူး 😴"
+                        ),
+                        parse_mode="HTML",
+                    )
+                )
+
+                bot.edit_message_media(
+                    media=media,
+                    chat_id=chat_id,
+                    message_id=
+                        game_message.message_id,
+                    reply_markup=
+                        speed_tap_keyboard(
+                            chat_id,
+                            active=False,
+                        ),
+                )
+
+            else:
+
+                bot.edit_message_text(
+                    (
+                        "⚡ <b>SPEED TAP</b>\n\n"
+                        "⏰ <b>TIME'S UP!</b>\n\n"
+                        "ဘယ်သူမှ အချိန်မီ "
+                        "မနှိပ်လိုက်ဘူး 😴"
+                    ),
+                    chat_id=chat_id,
+                    message_id=
+                        game_message.message_id,
+                    parse_mode="HTML",
+                    reply_markup=
+                        speed_tap_keyboard(
+                            chat_id,
+                            active=False,
+                        ),
+                )
 
             delay_delete_message(
                 chat_id,
@@ -4170,8 +4206,89 @@ def speed_tap_command(message):
             chat_id
         )
 
+    # =====================================================
+    # 🟢 GO
+    # =====================================================
+
+    def speed_tap_go():
+
+        active_game = activate_speed_tap(
+            chat_id,
+            active_time=
+                SPEED_TAP_ACTIVE_TIME,
+        )
+
+        if not active_game:
+            return
+
+        try:
+
+            if visual_mode:
+
+                go_card = (
+                    generate_speed_tap_go_card_bytes(
+                        background_path=
+                            background_path,
+                    )
+                )
+
+                media = (
+                    telebot.types.InputMediaPhoto(
+                        media=go_card,
+                        caption=(
+                            "🟢 <b>GO! GO! GO!</b>\n"
+                            "⚡ TAP NOW!"
+                        ),
+                        parse_mode="HTML",
+                    )
+                )
+
+                bot.edit_message_media(
+                    media=media,
+                    chat_id=chat_id,
+                    message_id=
+                        game_message.message_id,
+                    reply_markup=
+                        speed_tap_keyboard(
+                            chat_id,
+                            active=True,
+                        ),
+                )
+
+            else:
+
+                bot.edit_message_text(
+                    (
+                        "⚡ <b>SPEED TAP</b>\n\n"
+                        "🟢 <b>GO! GO! GO!</b>\n\n"
+                        "👇 အမြန်ဆုံးနှိပ်!"
+                    ),
+                    chat_id=chat_id,
+                    message_id=
+                        game_message.message_id,
+                    parse_mode="HTML",
+                    reply_markup=
+                        speed_tap_keyboard(
+                            chat_id,
+                            active=True,
+                        ),
+                )
+
+        except Exception as e:
+            print(
+                f"Speed Tap GO Error: {e}"
+            )
+
+        schedule_task(
+            SPEED_TAP_ACTIVE_TIME,
+            speed_tap_timeout,
+            task_id=
+                f"speedtap_timeout:{chat_id}",
+            replace=True,
+        )
+
     # -----------------------------------------
-    # Schedule GO
+    # Random WAIT -> GO
     # -----------------------------------------
 
     schedule_task(
@@ -4189,7 +4306,9 @@ def speed_tap_command(message):
 @bot.callback_query_handler(
     func=lambda call:
         bool(call.data)
-        and call.data.startswith("speedtap:")
+        and call.data.startswith(
+            "speedtap:"
+        )
 )
 def speed_tap_callback(call):
 
@@ -4230,11 +4349,10 @@ def speed_tap_callback(call):
         )
         return
 
-    # -----------------------------------------
-    # Make sure callback belongs to this group
-    # -----------------------------------------
-
-    if call.message.chat.id != callback_chat_id:
+    if (
+        call.message.chat.id
+        != callback_chat_id
+    ):
         bot.answer_callback_query(
             call.id,
             "❌ ဒီ game မဟုတ်ပါ။"
@@ -4249,10 +4367,6 @@ def speed_tap_callback(call):
         or call.from_user.username
         or "Player"
     )
-
-    # -----------------------------------------
-    # Register tap
-    # -----------------------------------------
 
     result = register_speed_tap(
         chat_id,
@@ -4290,20 +4404,20 @@ def speed_tap_callback(call):
             call.id,
             (
                 "😏 စောသေးတယ်! "
-                f"{remaining:.1f}s လောက်စောင့်ဦး"
+                f"{remaining:.1f}s "
+                "လောက်စောင့်ဦး"
             ),
-            show_alert=False,
         )
         return
 
     # -----------------------------------------
-    # Already finished
+    # Finished
     # -----------------------------------------
 
     if status == "finished":
         bot.answer_callback_query(
             call.id,
-            "🏁 တခြားသူတစ်ယောက် အရင်နှိပ်သွားပြီ။"
+            "🏁 တခြားသူ အရင်နှိပ်သွားပြီ။"
         )
         return
 
@@ -4318,12 +4432,12 @@ def speed_tap_callback(call):
         )
         return
 
-    # -----------------------------------------
-    # Winner
-    # -----------------------------------------
-
     if status != "winner":
         return
+
+    # =====================================================
+    # 🏆 WINNER
+    # =====================================================
 
     reaction_ms = result.get(
         "reaction_ms",
@@ -4361,35 +4475,126 @@ def speed_tap_callback(call):
         )
 
     # -----------------------------------------
-    # Show result in same game message
+    # Visual result
     # -----------------------------------------
 
     try:
-        bot.edit_message_text(
-            (
-                "⚡ <b>SPEED TAP RESULT</b>\n\n"
-                f"🏆 Winner: <b>{user_name}</b>\n"
-                f"⏱ Reaction: <b>{reaction_ms} ms</b>\n"
-                "⭐ Reward: <b>+10 Points</b>"
-            ),
-            chat_id=chat_id,
-            message_id=call.message.message_id,
-            parse_mode="HTML",
-            reply_markup=speed_tap_keyboard(
-                chat_id,
-                active=False,
-            ),
+
+        result_card = (
+            generate_speed_tap_result_card_bytes(
+                winner_name=user_name,
+                reaction_ms=reaction_ms,
+                reward_points=10,
+            )
         )
 
+        media = (
+            telebot.types.InputMediaPhoto(
+                media=result_card,
+                caption=(
+                    "⚡ <b>SPEED TAP RESULT</b>\n\n"
+                    f"🏆 Winner: "
+                    f"<b>{user_name}</b>\n"
+                    f"⏱ Reaction: "
+                    f"<b>{reaction_ms} ms</b>\n"
+                    "⭐ Reward: "
+                    "<b>+10 Points</b>"
+                ),
+                parse_mode="HTML",
+            )
+        )
+
+        # If current message is already a photo,
+        # replace its media.
+        if call.message.photo:
+
+            bot.edit_message_media(
+                media=media,
+                chat_id=chat_id,
+                message_id=
+                    call.message.message_id,
+                reply_markup=
+                    speed_tap_keyboard(
+                        chat_id,
+                        active=False,
+                    ),
+            )
+
+        else:
+
+            # Text fallback message cannot become
+            # photo through edit_message_text.
+            try:
+                bot.delete_message(
+                    chat_id,
+                    call.message.message_id,
+                )
+            except Exception:
+                pass
+
+            result_message = bot.send_photo(
+                chat_id,
+                result_card,
+                caption=(
+                    "⚡ <b>SPEED TAP RESULT</b>\n\n"
+                    f"🏆 Winner: "
+                    f"<b>{user_name}</b>\n"
+                    f"⏱ Reaction: "
+                    f"<b>{reaction_ms} ms</b>\n"
+                    "⭐ Reward: "
+                    "<b>+10 Points</b>"
+                ),
+                parse_mode="HTML",
+                reply_markup=
+                    speed_tap_keyboard(
+                        chat_id,
+                        active=False,
+                    ),
+            )
+
+            delay_delete_message(
+                chat_id,
+                result_message.message_id,
+                90,
+            )
+
+    except Exception as e:
+
+        print(
+            f"Speed Tap Result Card Error: {e}"
+        )
+
+        try:
+            bot.edit_message_caption(
+                caption=(
+                    "⚡ <b>SPEED TAP RESULT</b>\n\n"
+                    f"🏆 Winner: "
+                    f"<b>{user_name}</b>\n"
+                    f"⏱ Reaction: "
+                    f"<b>{reaction_ms} ms</b>\n"
+                    "⭐ Reward: "
+                    "<b>+10 Points</b>"
+                ),
+                chat_id=chat_id,
+                message_id=
+                    call.message.message_id,
+                parse_mode="HTML",
+                reply_markup=
+                    speed_tap_keyboard(
+                        chat_id,
+                        active=False,
+                    ),
+            )
+
+        except Exception:
+            pass
+
+    # Photo result stays 90 sec
+    if call.message.photo:
         delay_delete_message(
             chat_id,
             call.message.message_id,
             90,
-        )
-
-    except Exception as e:
-        print(
-            f"Speed Tap Result Error: {e}"
         )
 
     end_speed_tap_game(
