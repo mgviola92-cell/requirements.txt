@@ -137,6 +137,7 @@ from games.word_chain import (
 )
 from core.rewards import add_bonus_points
 from ui.word_chain_card import status_card as word_chain_status_card
+from ui.word_chain_card import result_card as word_chain_result_card
 
 from games.speed_tap import (
     SPEED_TAP_PENDING_MIN,
@@ -4924,35 +4925,58 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
             except Exception:
                 pass
         ranked = word_chain_scoreboard(ended)
-        rows = []
+        # Competition ranks by DISTINCT word counts: ties share the same rank
+        # and the same prize. Zero valid words never receive a prize.
         prizes = (10, 5, 3)
-        for index, (uid, count) in enumerate(ranked):
+        reward_rows = []
+        previous_count = None
+        rank = 0
+        for uid, count in ranked:
+            if previous_count != count:
+                rank += 1
+                previous_count = count
+            points = prizes[rank - 1] if rank <= len(prizes) and count > 0 else 0
             name = ended['names'].get(uid, 'Player')
-            extra = ''
-            if index < len(prizes):
-                points = prizes[index]
+            reward_ok = True
+            if points:
                 try:
-                    if index == 0:
-                        ok = apply_custom_game_result(chat_id, uid, 'win', points)
+                    if rank == 1:
+                        reward_ok = bool(apply_custom_game_result(chat_id, uid, 'win', points))
                     else:
-                        ok = add_bonus_points(chat_id, uid, points, reason='word_chain')
-                    extra = f' (+{points} Points)' if ok else ' (reward error)'
+                        reward_ok = bool(add_bonus_points(chat_id, uid, points, reason='word_chain'))
                 except Exception as error:
                     print(f'Word Chain Reward Error: {error}')
-                    extra = ' (reward error)'
-            rows.append(f"{index + 1}. {name}: {count} words{extra}")
-        reason_label = {'idle': '60 seconds no answer',
-                        'limit': 'round time limit',
-                        'stop': 'Stopped by admin'}.get(reason, 'Game ended')
-        text = (
-            f"🏁 WORD CHAIN END — {reason_label}\n\n"
-            + ("\n".join(rows[:10]) if rows else "ဘယ်သူမှ အမှတ်မရခဲ့ပါ။")
-        )
+                    reward_ok = False
+            reward_rows.append({
+                'rank': rank, 'name': name, 'words': count,
+                'points': points if reward_ok else 0,
+                'reward_error': not reward_ok,
+            })
+        reason_label = {
+            'idle': '60 seconds no answer',
+            'limit': 'Round time limit',
+            'stop': 'Stopped by admin',
+        }.get(reason, 'Game ended')
         try:
-            sent = bot.send_message(chat_id, text)
+            result_image = word_chain_result_card(ended, reward_rows, reason_label)
+            sent = bot.send_photo(chat_id, result_image, caption='🏁 WORD CHAIN RESULT')
             delay_delete_message(chat_id, sent.message_id, 90)
         except Exception as error:
-            print(f'Word Chain End Message Error: {error}')
+            print(f'Word Chain Result Card Error: {error}')
+            # Keep results accessible if Telegram photo upload fails.
+            lines = [
+                f"{row['rank']}. {row['name']}: {row['words']} words "
+                + (f"(+{row['points']} Points)" if row['points'] else '(no reward)')
+                for row in reward_rows[:10]
+            ]
+            try:
+                sent = bot.send_message(
+                    chat_id, '🏁 WORD CHAIN END — ' + reason_label + '\n\n'
+                    + ('\n'.join(lines) if lines else 'No valid answers.'),
+                )
+                delay_delete_message(chat_id, sent.message_id, 90)
+            except Exception as fallback_error:
+                print(f'Word Chain Result Fallback Error: {fallback_error}')
         return True
 
 
