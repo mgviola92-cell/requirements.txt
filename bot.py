@@ -126,6 +126,20 @@ from database.used_questions import (
     reset_used_questions,
 )
 
+from games.speed_tap import (
+    SPEED_TAP_WAIT_MIN,
+    SPEED_TAP_WAIT_MAX,
+    SPEED_TAP_ACTIVE_TIME,
+    create_speed_tap_game,
+    get_speed_tap_game,
+    set_speed_tap_message_id,
+    activate_speed_tap,
+    register_speed_tap,
+    expire_speed_tap,
+    end_speed_tap_game,
+    get_speed_tap_state,
+)
+
 # =========================================================
 # 😀 EMOJI GUESS QUESTION SELECTOR
 # Neon used-question + recent-history tracking
