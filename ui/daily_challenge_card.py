@@ -36,6 +36,27 @@ def card(stats):
         'correct':'Answer group game questions correctly',
         'win':'Win group mini-games',
     }
+    if stats.get('personal'):
+        d.text((60,95),'YOUR PRIVATE DAILY MISSIONS',font=_font(16),fill='#70e1d9')
+        for mission,progress in stats['missions']:
+            i,kind,game,need,lo,hi=mission
+            y=121+(i-1)*113
+            label='EASY' if i==1 else 'MEDIUM' if i==2 else 'HARD'
+            from database.daily_challenge import PERSONAL_DESCRIPTIONS
+            desc=PERSONAL_DESCRIPTIONS.get((kind,game),kind).format(n=need)
+            d.rounded_rectangle((42,y,858,y+101),radius=15,fill=(9,22,43,216))
+            d.text((59,y+10),f'{i:02d}  {label}',font=_font(21),fill='#ffffff')
+            d.text((795,y+11),f'{lo*(2 if double else 1)}-{hi*(2 if double else 1)} PTS',font=_font(19),anchor='ra',fill='#facc72')
+            d.text((61,y+37),desc,font=_font(17),fill='#e2edf9')
+            claimed=i in stats.get('claimed',set())
+            status='CLAIMED' if claimed else 'READY /dailyclaim '+str(i) if progress>=need else 'IN PROGRESS'
+            d.text((61,y+61),f'YOU {min(progress,need)}/{need}   {status}',font=_font(15),fill='#b6d5e5')
+            d.rounded_rectangle((61,y+78,829,y+87),radius=4,fill=(61,75,97,255))
+            filled=int(768*min(1,progress/need))
+            if filled:d.rounded_rectangle((61,y+78,61+filled,y+87),radius=4,fill=(78,219,196,255))
+        d.text((61,469),f"{stats['day']}  |  PERSONAL VIEW  |  AUTO-DELETE 60s",font=_font(16),fill='#ceddea')
+        out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=90);out.seek(0);out.name='daily_challenge.jpg'
+        return out
     for i,(kind,need,unique,personal,(lo,hi)) in enumerate(missions_for(stats['chat_id'],stats['day']),1):
         total,users,_ = (stats['total'],stats['users'],0) if kind=='message' else game_progress(stats['chat_id'],stats['day'],kind)
         y=121+(i-1)*113
@@ -55,7 +76,7 @@ def card(stats):
         prog=min(1.0,total/need,users/unique)
         d.rounded_rectangle((61,y+78,829,y+87),radius=4,fill=(61,75,97,255))
         if prog>0:d.rounded_rectangle((61,y+78,61+int(768*prog),y+87),radius=4,fill=(78,219,196,255))
-    footer='PERSONAL VIEW  |  AUTO-DELETE 60s' if viewer is not None else 'PINNED DAILY  |  /daily for personal progress'
+    footer='PERSONAL VIEW  |  AUTO-DELETE 60s' if viewer is not None else 'PINNED GROUP DAILY  |  /dailygroupclaim 1-3'
     d.text((61,469),f"{stats['day']}  |  {footer}",font=_font(16),fill='#ceddea')
     out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=90);out.seek(0);out.name='daily_challenge.jpg'
     return out
