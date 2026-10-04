@@ -9,6 +9,7 @@ import json
 import html
 import urllib.request
 import urllib.parse
+from features.daily_challenge import register_daily_challenge
 from telebot.types import ChatPermissions
 from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
@@ -247,6 +248,8 @@ def get_next_emoji_question(chat_id):
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
+
+register_daily_challenge(bot)
 
 # Activity tracker runs first, then allows ordinary game/command handlers.
 # Commands, bot messages and private chats do not count as group activity.
