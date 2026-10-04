@@ -36,6 +36,12 @@ GAME_REWARDS = {
     "loss": 0,
     "draw": 0
     },
+
+    "speed_tap": {
+    "win": 10,
+    "loss": 0,
+    "draw": 0
+    },
     
     "competitive_10": {
         "win": 10,
