@@ -127,6 +127,17 @@ from database.used_questions import (
     reset_used_questions,
 )
 
+from games.word_chain import (
+    ROUND_SECONDS as WORD_CHAIN_MAX_SECONDS,
+    IDLE_SECONDS as WORD_CHAIN_IDLE_SECONDS,
+    get_game as get_word_chain_game,
+    start_game as start_word_chain_game,
+    set_message_id as set_word_chain_message_id,
+    submit as submit_word_chain,
+    finish as finish_word_chain,
+)
+from core.rewards import add_bonus_points
+
 from games.speed_tap import (
     SPEED_TAP_PENDING_MIN,
     SPEED_TAP_PENDING_MAX,
@@ -4819,6 +4830,197 @@ def speed_tap_callback(call):
 
 # =========================================================
 # 😀 EMOJI GUESS
+# =========================================================
+# 🔤 WORD CHAIN /wordchain en | /wordchain mm | /endwordchain
+# =========================================================
+
+word_chain_finish_lock = threading.RLock()
+
+
+def word_chain_scoreboard(game):
+    ranked = sorted(
+        game['scores'].items(),
+        key=lambda pair: (-pair[1], pair[0]),
+    )
+    return ranked
+
+
+def word_chain_status_text(game):
+    leaders = word_chain_scoreboard(game)
+    standing = "\n".join(
+        f"{n}. {game['names'].get(uid, 'Player')}: {score}"
+        for n, (uid, score) in enumerate(leaders[:3], 1)
+    ) or "No scores yet"
+    mode = 'မြန်မာ (space ခြားထားတဲ့ စကားလုံး)' if game['mode'] == 'my' else 'English'
+    return (
+        f"🔤 WORD CHAIN — {mode}\n\n"
+        f"🔗 နောက်ဆုံး: {game['word']}\n"
+        f"➡️ ဆက်ရန်: {game['required']}\n"
+        f"✅ Valid moves: {game['moves']}\n"
+        f"⏳ အဖြေမရှိရင် {WORD_CHAIN_IDLE_SECONDS}s နဲ့ပြီးမယ်\n"
+        f"🏁 Round အများဆုံး {WORD_CHAIN_MAX_SECONDS // 60} မိနစ်\n\n"
+        f"🏆 Top 3\n{standing}\n\n"
+        "⚠️ တစ်ယောက်တည်း နှစ်ခါဆက်တိုက် မဆက်ရ။"
+    )
+
+
+def word_chain_close(chat_id, game_id, reason='timeout'):
+    with word_chain_finish_lock:
+        ended = finish_word_chain(chat_id, game_id)
+        if not ended:
+            return False
+        old_id = ended.get('message_id')
+        if old_id:
+            try:
+                bot.delete_message(chat_id, old_id)
+            except Exception:
+                pass
+        ranked = word_chain_scoreboard(ended)
+        rows = []
+        prizes = (10, 5, 3)
+        for index, (uid, count) in enumerate(ranked):
+            name = ended['names'].get(uid, 'Player')
+            extra = ''
+            if index < len(prizes):
+                points = prizes[index]
+                try:
+                    if index == 0:
+                        ok = apply_custom_game_result(chat_id, uid, 'win', points)
+                    else:
+                        ok = add_bonus_points(chat_id, uid, points, reason='word_chain')
+                    extra = f' (+{points} Points)' if ok else ' (reward error)'
+                except Exception as error:
+                    print(f'Word Chain Reward Error: {error}')
+                    extra = ' (reward error)'
+            rows.append(f"{index + 1}. {name}: {count} words{extra}")
+        reason_label = {'idle': '60 seconds no answer',
+                        'limit': '7-minute limit',
+                        'stop': 'Stopped by admin'}.get(reason, 'Game ended')
+        text = (
+            f"🏁 WORD CHAIN END — {reason_label}\n\n"
+            + ("\n".join(rows[:10]) if rows else "ဘယ်သူမှ အမှတ်မရခဲ့ပါ။")
+        )
+        try:
+            sent = bot.send_message(chat_id, text)
+            delay_delete_message(chat_id, sent.message_id, 90)
+        except Exception as error:
+            print(f'Word Chain End Message Error: {error}')
+        return True
+
+
+def word_chain_idle_check(chat_id, game_id, expected_idle):
+    game = get_word_chain_game(chat_id)
+    if not game or game['id'] != game_id:
+        return
+    # Ignore stale timers that were scheduled before a valid move.
+    if game['idle_deadline'] != expected_idle:
+        return
+    if time.monotonic() >= game['deadline']:
+        word_chain_close(chat_id, game_id, 'limit')
+    elif time.monotonic() >= game['idle_deadline']:
+        word_chain_close(chat_id, game_id, 'idle')
+
+
+@bot.message_handler(commands=['wordchain', 'wc'])
+def word_chain_command(message):
+    if message.chat.type not in ('group', 'supergroup'):
+        bot.reply_to(message, 'Group ထဲမှာပဲ ကစားလို့ရပါတယ်။')
+        return
+    args = (message.text or '').split()
+    if len(args) > 1 and args[1].lower() not in ('en', 'english', 'my', 'mm', 'burmese', 'မြန်မာ'):
+        bot.reply_to(message, 'အသုံးပြုရန်: /wordchain en သို့မဟုတ် /wordchain mm')
+        return
+    mode = args[1].lower() if len(args) > 1 else 'en'
+    chat_id = message.chat.id
+    if get_speed_tap_game(chat_id) or get_emoji_game(chat_id):
+        bot.reply_to(message, 'တခြား game ပြီးမှ Word Chain စနိုင်ပါတယ်။')
+        return
+    created, game = start_word_chain_game(chat_id, mode)
+    if not created:
+        bot.reply_to(message, f'Game တစ်ခု run နေပြီ: {game}')
+        return
+    try:
+        sent = bot.send_message(chat_id, word_chain_status_text(game))
+        set_word_chain_message_id(chat_id, game['id'], sent.message_id)
+        schedule_task(
+            WORD_CHAIN_MAX_SECONDS,
+            word_chain_close,
+            chat_id, game['id'], 'limit',
+            task_id=f"wordchain_limit:{chat_id}:{game['id']}",
+        )
+        schedule_task(
+            WORD_CHAIN_IDLE_SECONDS,
+            word_chain_idle_check,
+            chat_id, game['id'], game['idle_deadline'],
+            task_id=f"wordchain_idle:{chat_id}:{game['id']}:0",
+        )
+        delay_delete_message(chat_id, message.message_id, random.randint(5, 10))
+    except Exception as error:
+        print(f'Word Chain Start Error: {error}')
+        finish_word_chain(chat_id, game['id'])
+
+
+@bot.message_handler(commands=['endwordchain', 'stopwc'])
+def word_chain_stop_command(message):
+    game = get_word_chain_game(message.chat.id)
+    if not game:
+        return
+    if not is_user_admin(bot, message.chat.id, message.from_user.id):
+        bot.reply_to(message, 'Admin ပဲ ဒီ game ကိုရပ်လို့ရပါတယ်။')
+        return
+    word_chain_close(message.chat.id, game['id'], 'stop')
+
+
+@bot.message_handler(
+    func=lambda message: (
+        message.chat.type in ('group', 'supergroup')
+        and bool(message.text)
+        and not message.text.startswith('/')
+        and bool(get_word_chain_game(message.chat.id))
+    )
+)
+def word_chain_answer(message):
+    chat_id = message.chat.id
+    game = get_word_chain_game(chat_id)
+    if not game:
+        return
+    result = submit_word_chain(
+        chat_id, game['id'], message.from_user.id,
+        message.from_user.first_name, message.text,
+    )
+    if result['status'] == 'expired':
+        word_chain_close(chat_id, game['id'], 'idle')
+        return
+    if result['status'] != 'valid':
+        # The Word Chain handler precedes the catch-all group filter.
+        # Preserve normal chat moderation even while a game is running.
+        ban_word_filter(message)
+        return
+    delay_delete_message(chat_id, message.message_id, random.randint(30, 45))
+    # A valid move refreshes the inactivity deadline.
+    new_game = get_word_chain_game(chat_id)
+    if not new_game or new_game['id'] != game['id']:
+        return
+    old_id = result.get('message_id')
+    try:
+        sent = bot.send_message(chat_id, word_chain_status_text(new_game))
+        set_word_chain_message_id(chat_id, game['id'], sent.message_id)
+        if old_id:
+            try:
+                bot.delete_message(chat_id, old_id)
+            except Exception:
+                pass
+    except Exception as error:
+        print(f'Word Chain Status Error: {error}')
+    delay = max(0.1, new_game['idle_deadline'] - time.monotonic())
+    schedule_task(
+        delay,
+        word_chain_idle_check,
+        chat_id, game['id'], new_game['idle_deadline'],
+        task_id=f"wordchain_idle:{chat_id}:{game['id']}:{new_game['moves']}",
+    )
+
+
 # =========================================================
 
 @bot.message_handler(commands=["emoji", "emojiguess"])
