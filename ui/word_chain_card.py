@@ -70,14 +70,23 @@ def status_card(game):
     d.text((73,383),f"MOVES  {game['moves']}",font=font(20),fill=white)
     d.text((289,383),f'ANSWER  00:{idle:02d}',font=font(20),fill=cyan)
     d.text((573,383),'ROUND  ∞',font=font(20),fill=muted)
-    ranked=sorted(game['scores'].items(),key=lambda x:(-x[1],x[0]))
-    if ranked:
-        uid,score=ranked[0]
-        name=str(game['names'].get(uid,'Player'))
-        name=name[:21]+('…' if len(name)>21 else '')
-        d.text((73,419),'TOP  '+name+'  '+str(score),font=fit_text(d,'TOP  '+name+'  '+str(score),715,19,15,True),fill=gold)
-    else:
-        d.text((73,419),'TOP  —',font=font(19),fill=gold)
+    ranked = sorted(game['scores'].items(), key=lambda x: (-x[1], x[0]))[:3]
+    # Compact three-column leaderboard fits inside the existing footer.
+    # Show equal word counts as tied ranks, matching the end-result rewards.
+    last_count = None
+    rank = 0
+    for index, (uid, score) in enumerate(ranked):
+        if score != last_count:
+            rank = index + 1
+            last_count = score
+        x = 73 + index * 255
+        name = str(game['names'].get(uid, 'Player'))
+        label = f'#{rank} {name}  {score}'
+        color = gold if rank == 1 else white
+        d.text((x, 419), label,
+               font=fit_text(d, label, 235, 18, 12, True), fill=color)
+    if not ranked:
+        d.text((73, 419), 'TOP 3  —', font=font(19), fill=gold)
     out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=93,optimize=True)
     out.seek(0); out.name='word_chain.jpg'; return out
 
