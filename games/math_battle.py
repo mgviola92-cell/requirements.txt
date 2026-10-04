@@ -122,7 +122,10 @@ def answer(chat_id, game_id, round_index, user_id, name, index):
         g['answered'].add(user_id)
         if index!=g['question']['correct_index']: return 'wrong',snapshot(chat_id)
         if len(g['podium'])>=3: return 'late',snapshot(chat_id)
-        pts=(10,5,3)[len(g['podium'])]
+        # Random MATCH SCORE per correct-answer position.
+        # Disjoint ranges preserve 1st > 2nd > 3rd.
+        score_ranges = ((10, 18), (5, 9), (1, 4))
+        pts = random.randint(*score_ranges[len(g['podium'])])
         g['podium'].append(user_id)
         g['scores'][user_id]=g['scores'].get(user_id,0)+pts
         g['names'][user_id]=(name or 'Player')[:35]
