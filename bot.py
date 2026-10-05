@@ -4760,11 +4760,13 @@ def boss_raid_force_unpin(chat_id,message_id):
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
     if not raid or raid["id"]!=raid_id:return
-    if raid.get("result")=="victory":\n        boss_raid_finish(chat_id,raid,True);return
-    # get_raid may already mark it timed-out; do not lose the ending sequence.
+    if raid.get("result")=="victory":
+        boss_raid_finish(chat_id,raid,True)
+        return
     if not raid.get("finished"):
         raid=finish_boss_raid(chat_id,raid_id,"timeout")
-    if raid:boss_raid_finish(chat_id,raid,False)
+    if raid:
+        boss_raid_finish(chat_id,raid,False)
 
 @bot.message_handler(commands=['boss','bossraid','raid'])
 def boss_raid_command(message):
