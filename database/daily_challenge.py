@@ -33,6 +33,16 @@ def initialize_daily_challenge():
                 PRIMARY KEY(chat_id,day,event_id,user_id))''')
             cur.execute('''CREATE INDEX IF NOT EXISTS daily_game_event_lookup
                 ON daily_game_events(chat_id,day,kind,user_id)''')
+            cur.execute("""CREATE TABLE IF NOT EXISTS daily_personal_missions (
+                chat_id BIGINT NOT NULL, cycle_day DATE NOT NULL, user_id BIGINT NOT NULL,
+                mission INTEGER NOT NULL, kind TEXT NOT NULL, game TEXT NOT NULL DEFAULT '',
+                needed INTEGER NOT NULL, lo INTEGER NOT NULL, hi INTEGER NOT NULL,
+                PRIMARY KEY(chat_id,cycle_day,user_id,mission))""")
+            cur.execute("""CREATE TABLE IF NOT EXISTS daily_personal_claims (
+                chat_id BIGINT NOT NULL, cycle_day DATE NOT NULL, user_id BIGINT NOT NULL,
+                mission INTEGER NOT NULL, points INTEGER NOT NULL,
+                claimed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                PRIMARY KEY(chat_id,cycle_day,user_id,mission))""")
     return True
 
 def register_group(chat_id):
@@ -61,7 +71,7 @@ def record_message(chat_id,user_id,text,now=None):
     normalized=' '.join(str(text or '').casefold().split())[:250]
     if len(normalized)<4 or normalized.startswith('/') or len(set(normalized))<3:
         return False
-    day=now.astimezone(MMT).date()
+    day=active_cycle(chat_id)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''INSERT INTO daily_group_activity
@@ -79,7 +89,7 @@ def record_game_event(chat_id, user_id, game, kind, event_id):
     """Persist meaningful results once. Cap same-kind events per member/day."""
     if kind not in ('win', 'play', 'correct') or not event_id:
         return False
-    day = today()
+    day = active_cycle(chat_id)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('SELECT COUNT(*) FROM daily_game_events WHERE chat_id=%s AND day=%s AND user_id=%s AND kind=%s',
@@ -217,3 +227,104 @@ def set_card_id(chat_id,message_id,day=None):
             cur.execute('''INSERT INTO daily_cards(chat_id,day,message_id) VALUES(%s,%s,%s)
               ON CONFLICT(chat_id,day) DO UPDATE SET message_id=EXCLUDED.message_id''',
               (chat_id,day or today(),message_id))
+
+# The cycle changes when the NEW MAIN CARD is published, not on /daily or at midnight.
+def active_cycle(chat_id):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT MAX(day) FROM daily_cards WHERE chat_id=%s',(chat_id,))
+            r=cur.fetchone()
+            return r[0] if r and r[0] is not None else today()
+
+# Three independent personal missions, stable per member and main-card cycle.
+# Only use events actually emitted by bot.py; other games can join this pool later.
+PERSONAL_POOL = (
+    [('message','',2),('play','',1),('correct','',1),('win','',1)],
+    [('message','',4),('play','',3),('correct','',2),('win','',2),
+     ('correct','math_battle',2),('correct','word_chain',2)],
+    [('message','',6),('play','',5),('correct','',4),('win','',3),
+     ('correct','math_battle',4),('correct','word_chain',4)],
+)
+PERSONAL_REWARDS=((3,8),(8,15),(15,25))
+PERSONAL_DESCRIPTIONS={
+    ('message',''):'Send {n} different meaningful group messages',
+    ('play',''):'Participate in {n} group game actions',
+    ('correct',''):'Get {n} correct game answers',
+    ('win',''):'Win {n} mini-games',
+    ('correct','math_battle'):'Get {n} Math Battle answers correct',
+    ('correct','word_chain'):'Submit {n} correct Word Chain words',
+}
+
+def personal_missions(chat_id,user_id,day=None):
+    import hashlib
+    day=day or active_cycle(chat_id)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            for tier,pool in enumerate(PERSONAL_POOL,1):
+                seed=f'personal:{chat_id}:{user_id}:{day}:{tier}'.encode()
+                k=int.from_bytes(hashlib.sha256(seed).digest()[:8],'big')%len(pool)
+                kind,game,needed=pool[k]
+                lo,hi=PERSONAL_REWARDS[tier-1]
+                cur.execute('''INSERT INTO daily_personal_missions
+                    (chat_id,cycle_day,user_id,mission,kind,game,needed,lo,hi)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING''',
+                    (chat_id,day,user_id,tier,kind,game,needed,lo,hi))
+            cur.execute('''SELECT mission,kind,game,needed,lo,hi FROM daily_personal_missions
+                WHERE chat_id=%s AND cycle_day=%s AND user_id=%s ORDER BY mission''',
+                (chat_id,day,user_id))
+            return cur.fetchall()
+
+def personal_progress(chat_id,user_id,mission,day=None):
+    day=day or active_cycle(chat_id)
+    _,kind,game,needed,lo,hi=mission
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            if kind=='message':
+                cur.execute('''SELECT COALESCE(messages,0) FROM daily_group_activity
+                    WHERE chat_id=%s AND day=%s AND user_id=%s''',(chat_id,day,user_id))
+            else:
+                cur.execute('''SELECT COUNT(*) FROM daily_game_events WHERE chat_id=%s
+                    AND day=%s AND user_id=%s AND kind=%s AND (%s='' OR game=%s)''',
+                    (chat_id,day,user_id,kind,game,game))
+            r=cur.fetchone()
+            return int(r[0]) if r else 0
+
+def personal_overview(chat_id,user_id):
+    day=active_cycle(chat_id)
+    missions=personal_missions(chat_id,user_id,day)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''SELECT mission FROM daily_personal_claims
+                WHERE chat_id=%s AND cycle_day=%s AND user_id=%s''',(chat_id,day,user_id))
+            claimed={x[0] for x in cur.fetchall()}
+    return {'day':day,'chat_id':chat_id,'viewer_id':user_id,'personal':True,
+            'missions':[(m,personal_progress(chat_id,user_id,m,day)) for m in missions],
+            'claimed':claimed}
+
+def personal_claim(chat_id,user_id,index):
+    import random,hashlib
+    if index not in (1,2,3):return 'invalid',0
+    day=active_cycle(chat_id)
+    missions=personal_missions(chat_id,user_id,day)
+    chosen=next((m for m in missions if m[0]==index),None)
+    if chosen is None:return 'invalid',0
+    if personal_progress(chat_id,user_id,chosen,day)<chosen[3]:return 'locked',0
+    double=int(hashlib.sha256(f'{chat_id}:{day}:double'.encode()).hexdigest(),16)%7==0
+    pts=random.randint(chosen[4],chosen[5])*(2 if double else 1)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT pg_advisory_xact_lock(%s,%s)',(int(chat_id)%2147483647,int(user_id)%2147483647))
+            cur.execute('''INSERT INTO daily_personal_claims(chat_id,cycle_day,user_id,mission,points)
+                VALUES(%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING RETURNING points''',
+                (chat_id,day,user_id,index,pts))
+            if not cur.fetchone():return 'claimed',0
+            cur.execute('''INSERT INTO player_stats(chat_id,user_id,points,games,wins,losses,draws)
+                VALUES(%s,%s,%s,0,0,0,0) ON CONFLICT(chat_id,user_id)
+                DO UPDATE SET points=GREATEST(0,player_stats.points+EXCLUDED.points)
+                RETURNING points,games,wins,losses,draws''',(chat_id,user_id,pts))
+            stats=cur.fetchone()
+            cur.execute('''INSERT INTO reward_transactions(chat_id,user_id,points,reason)
+                VALUES(%s,%s,%s,%s)''',(chat_id,user_id,pts,f'daily_personal_{day}_mission_{index}'))
+    with player_stats_lock:
+        player_stats[(chat_id,user_id)]=dict(zip(('points','games','wins','losses','draws'),stats))
+    return 'ok',pts
