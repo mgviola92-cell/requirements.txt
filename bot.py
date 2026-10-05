@@ -10,7 +10,6 @@ import html
 import urllib.request
 import urllib.parse
 from features.daily_challenge import register_daily_challenge
-from database.daily_challenge import record_game_event
 from telebot.types import ChatPermissions
 from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
@@ -252,23 +251,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 register_daily_challenge(bot)
 
-# Daily events: record only after the existing rewards function succeeds.
-_original_daily_apply_game_result = apply_game_result
-_original_daily_custom_result = apply_custom_game_result
-
-def apply_game_result(chat_id, user_id, game_key, result):
-    awarded = _original_daily_apply_game_result(chat_id,user_id,game_key,result)
-    if result == 'win' and awarded:
-        try:
-            record_game_event(chat_id,user_id,game_key,'win',
-                              f'{game_key}:{user_id}:{time.time_ns()}')
-        except Exception as exc: print('Daily win event error:',exc)
-    return awarded
-
-def apply_custom_game_result(chat_id,user_id,result,points):
-    return _original_daily_custom_result(chat_id,user_id,result,points)
-
-
 # Activity tracker runs first, then allows ordinary game/command handlers.
 # Commands, bot messages and private chats do not count as group activity.
 @bot.message_handler(func=lambda message: True, content_types=["text"])
@@ -288,6 +270,81 @@ def speed_tap_activity_middleware(message):
     except Exception as exc:
         print(f"Speed Tap activity error: {exc}")
     return ContinueHandling()
+
+
+# =========================================================
+# 🚨 EARLY TEXT SPAM MIDDLEWARE
+# Exact rule: 5 non-command text messages from one user inside 10 seconds
+# -> delete that burst + temporary mute immediately on message #5.
+# Runs before ordinary game/text handlers so handler order cannot hide messages.
+# =========================================================
+_text_spam_lock = threading.RLock()
+_text_spam_events = {}
+TEXT_SPAM_LIMIT = 5
+TEXT_SPAM_WINDOW = 10.0
+TEXT_SPAM_MUTE_SECONDS = 45
+
+
+@bot.message_handler(func=lambda message: True, content_types=["text"])
+def early_text_spam_middleware(message):
+    if (
+        message.chat.type not in ("group", "supergroup")
+        or not message.from_user
+        or message.from_user.is_bot
+        or not message.text
+        or message.text.lstrip().startswith("/")
+    ):
+        return ContinueHandling()
+
+    try:
+        # Admins are intentionally exempt, matching the existing moderation policy.
+        if is_admin(message):
+            return ContinueHandling()
+    except Exception:
+        pass
+
+    now = time.monotonic()
+    key = (message.chat.id, message.from_user.id)
+
+    with _text_spam_lock:
+        recent = [
+            item for item in _text_spam_events.get(key, [])
+            if now - item[0] <= TEXT_SPAM_WINDOW
+        ]
+        recent.append((now, message.message_id))
+        _text_spam_events[key] = recent
+        hit_limit = len(recent) >= TEXT_SPAM_LIMIT
+        burst_ids = [item[1] for item in recent] if hit_limit else []
+        if hit_limit:
+            _text_spam_events[key] = []
+
+    if not hit_limit:
+        return ContinueHandling()
+
+    for mid in burst_ids:
+        try:
+            bot.delete_message(message.chat.id, mid)
+        except Exception:
+            pass
+
+    try:
+        bot.restrict_chat_member(
+            message.chat.id,
+            message.from_user.id,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=int(time.time() + TEXT_SPAM_MUTE_SECONDS),
+        )
+        warning = bot.send_message(
+            message.chat.id,
+            f"🔇 {message.from_user.first_name or 'User'} — 10 စက္ကန့်အတွင်း စာ 5 စောင် ဆက်တိုက်ပို့လို့ "
+            f"{TEXT_SPAM_MUTE_SECONDS} စက္ကန့် Mute လုပ်ထားပါတယ်။",
+        )
+        delay_delete_message(message.chat.id, warning.message_id, 8)
+    except Exception as exc:
+        print(f"Early Text Spam Mute Error: {exc}")
+
+    # Stop other text handlers for the triggering 5th spam message.
+    return None
 
 
 # ကိုယ်ပေါ်စေချင်တဲ့ အီမိုဂျီများကို ဒီထဲမှာ စိုက်ကြိုက် ပြောင်းလဲနိုင်ပါတယ်
@@ -1684,504 +1741,8 @@ def coin_player_choice(message):
 
 
 # =========================================================
-# 2. RPS
+# RPS REMOVED
 # =========================================================
-
-rps_games = {}
-
-RPS_ALIASES = {
-
-    "ကျောက်": "ကျောက်",
-
-    "ကျောက်တုံး": "ကျောက်",
-
-    "rock": "ကျောက်",
-
-    "စာရွက်": "စာရွက်",
-
-    "paper": "စာရွက်",
-
-    "ကတ်ကြေး": "ကတ်ကြေး",
-
-    "scissors": "ကတ်ကြေး"
-}
-
-
-def rps_winner(player1, player2):
-
-    # SAME = DRAW
-    if player1 == player2:
-        return "draw"
-
-    if (
-        player1 == "ကျောက်"
-        and player2 == "ကတ်ကြေး"
-    ):
-        return "p1"
-
-    if (
-        player1 == "စာရွက်"
-        and player2 == "ကျောက်"
-    ):
-        return "p1"
-
-    if (
-        player1 == "ကတ်ကြေး"
-        and player2 == "စာရွက်"
-    ):
-        return "p1"
-
-    return "p2"
-
-
-def find_rps_games_for_user(chat_id, user):
-
-    games = []
-
-    for game_id, game in rps_games.items():
-
-        if game["chat_id"] != chat_id:
-            continue
-
-        if user.id == game["challenger_id"]:
-
-            games.append(
-                (game_id, game, "challenger")
-            )
-
-        elif game["target_id"] is not None:
-
-            if user.id == game["target_id"]:
-
-                games.append(
-                    (game_id, game, "target")
-                )
-
-        elif (
-            game["target_username"]
-            and user.username
-            and user.username.lower()
-            == game["target_username"].lower()
-        ):
-
-            games.append(
-                (game_id, game, "target")
-            )
-
-    return games
-
-
-@bot.message_handler(commands=["rps"])
-def rps_command(message):
-
-    # Command message = 2 minutes
-    delay_delete_message(
-        message.chat.id,
-        message.message_id,
-        GAME_DELETE_TIME
-    )
-
-    args = message.text.split()
-
-    # -----------------------------------------------------
-    # REPLY CHALLENGE
-    # -----------------------------------------------------
-
-    if (
-        len(args) == 1
-        and message.reply_to_message
-    ):
-
-        target = (
-            message.reply_to_message.from_user
-        )
-
-        challenger = message.from_user
-
-        if target.is_bot:
-
-            reply_game_message(
-                message,
-                "❌ Bot ကို challenge "
-                "လုပ်လို့မရပါ။"
-            )
-
-            return
-
-        if target.id == challenger.id:
-
-            reply_game_message(
-                message,
-                "😂 ကိုယ့်ကိုယ်ကို challenge "
-                "လုပ်လို့မရဘူး။"
-            )
-
-            return
-
-        for game in rps_games.values():
-
-            if (
-                game["chat_id"] == message.chat.id
-                and game["challenger_id"]
-                == challenger.id
-            ):
-
-                reply_game_message(
-                    message,
-                    "⚠️ မင်းမှာ RPS game "
-                    "ရှိပြီးသားပါ။"
-                )
-
-                return
-
-        game_id = (
-            f"rps_reply_{message.chat.id}_"
-            f"{challenger.id}_{target.id}"
-        )
-
-        rps_games[game_id] = {
-
-            "chat_id": message.chat.id,
-
-            "challenger_id": challenger.id,
-
-            "target_id": target.id,
-
-            "target_username": None,
-
-            "challenger_choice": None,
-
-            "target_choice": None,
-
-            "created": time.time()
-        }
-
-        reply_game_message(
-            message,
-            f"✊ RPS CHALLENGE!\n\n"
-            f"👤 {challenger.first_name}\n"
-            f"⚔️ vs {target.first_name}\n\n"
-            f"🪨 ကျောက် / ကျောက်တုံး\n"
-            f"📄 စာရွက်\n"
-            f"✂️ ကတ်ကြေး\n\n"
-            f"တစ်ခုစီရွေးပါ။\n\n"
-            f"🔒 Choice ကို ချက်ချင်းဖျက်မယ်။\n"
-            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
-        )
-
-        return
-
-    # -----------------------------------------------------
-    # /rps
-    # -----------------------------------------------------
-
-    if len(args) == 1:
-
-        reply_game_message(
-            message,
-            "✊ RPS\n\n"
-            "🤖 Bot နဲ့ကစားရန်\n"
-            "/rps ကျောက်\n"
-            "/rps စာရွက်\n"
-            "/rps ကတ်ကြေး\n\n"
-            "🪨 `ကျောက်` နဲ့ `ကျောက်တုံး` "
-            "နှစ်ခုလုံးရပါတယ်။\n\n"
-            "👥 Username ရှိရင်\n"
-            "/rps @username\n\n"
-            "👤 Username မရှိရင်\n"
-            "သူ့ message ကို Reply → /rps"
-        )
-
-        return
-
-    choice = args[1].strip().lower()
-
-    # -----------------------------------------------------
-    # RPS VS BOT
-    # -----------------------------------------------------
-
-    if choice in RPS_ALIASES:
-
-        player_choice = RPS_ALIASES[choice]
-
-        bot_choice = random.choice([
-            "ကျောက်",
-            "စာရွက်",
-            "ကတ်ကြေး"
-        ])
-
-        result = rps_winner(
-            player_choice,
-            bot_choice
-        )
-
-        if result == "draw":
-
-            result_text = "🤝 သရေကျတယ်!"
-
-        elif result == "p1":
-
-            result_text = "🏆 မင်းနိုင်တယ်!"
-
-        else:
-
-            result_text = "🤖 Bot နိုင်တယ်!"
-
-        reply_game_message(
-            message,
-            f"✊ RPS RESULT\n\n"
-            f"👤 မင်း — {player_choice}\n"
-            f"🤖 Bot — {bot_choice}\n\n"
-            f"{result_text}"
-        )
-
-        return
-
-    # -----------------------------------------------------
-    # RPS VS USERNAME
-    # -----------------------------------------------------
-
-    if choice.startswith("@"):
-
-        if message.chat.type not in [
-            "group",
-            "supergroup"
-        ]:
-
-            reply_game_message(
-                message,
-                "❌ လူချင်း RPS ကို Group ထဲမှာပဲ ကစားပါ။"
-            )
-
-            return
-
-        target_username = (
-            choice[1:].strip().lower()
-        )
-
-        challenger = message.from_user
-
-        if not target_username:
-
-            reply_game_message(
-                message,
-                "❌ Username ထည့်ပေးပါ။"
-            )
-
-            return
-
-        if (
-            challenger.username
-            and challenger.username.lower()
-            == target_username
-        ):
-
-            reply_game_message(
-                message,
-                "😂 ကိုယ့်ကိုယ်ကို challenge "
-                "လုပ်လို့မရဘူး။"
-            )
-
-            return
-
-        for game in rps_games.values():
-
-            if (
-                game["chat_id"] == message.chat.id
-                and game["challenger_id"]
-                == challenger.id
-            ):
-
-                reply_game_message(
-                    message,
-                    "⚠️ မင်းမှာ RPS game "
-                    "ရှိပြီးသားပါ။"
-                )
-
-                return
-
-        game_id = (
-            f"rps_username_{message.chat.id}_"
-            f"{challenger.id}_{target_username}"
-        )
-
-        rps_games[game_id] = {
-
-            "chat_id": message.chat.id,
-
-            "challenger_id": challenger.id,
-
-            "target_id": None,
-
-            "target_username": target_username,
-
-            "challenger_choice": None,
-
-            "target_choice": None,
-
-            "created": time.time()
-        }
-
-        reply_game_message(
-            message,
-            f"✊ RPS CHALLENGE!\n\n"
-            f"👤 {challenger.first_name}\n"
-            f"⚔️ vs @{target_username}\n\n"
-            f"🪨 ကျောက် / ကျောက်တုံး\n"
-            f"📄 စာရွက်\n"
-            f"✂️ ကတ်ကြေး\n\n"
-            f"🔒 Choice ကို ချက်ချင်းဖျက်မယ်။\n"
-            f"နှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။"
-        )
-
-        return
-
-    reply_game_message(
-        message,
-        "❌ RPS command မမှန်ပါ။"
-    )
-
-
-@bot.message_handler(
-    func=lambda message:
-    message.text
-    and message.text.strip().lower()
-    in [
-        "ကျောက်",
-        "ကျောက်တုံး",
-        "rock",
-        "စာရွက်",
-        "paper",
-        "ကတ်ကြေး",
-        "scissors"
-    ]
-)
-def rps_player_choice(message):
-
-    if message.chat.type not in [
-        "group",
-        "supergroup"
-    ]:
-        return
-
-    games = find_rps_games_for_user(
-        message.chat.id,
-        message.from_user
-    )
-
-    if not games:
-        return
-
-    if len(games) > 1:
-        return
-
-    game_id, game, player_type = games[0]
-
-    normalized_choice = RPS_ALIASES[
-        message.text.strip().lower()
-    ]
-
-    # CHOICE = IMMEDIATELY DELETE
-
-    try:
-
-        bot.delete_message(
-            message.chat.id,
-            message.message_id
-        )
-
-    except Exception as e:
-
-        print(
-            f"RPS Choice Delete Error: {e}"
-        )
-
-    # -----------------------------------------------------
-    # PLAYER 1
-    # -----------------------------------------------------
-
-    if player_type == "challenger":
-
-        if game["challenger_choice"] is not None:
-            return
-
-        game["challenger_choice"] = (
-            normalized_choice
-        )
-
-        send_game_message(
-            message.chat.id,
-            "🔒 Player 1 choice ပြီးပြီ။"
-        )
-
-    # -----------------------------------------------------
-    # PLAYER 2
-    # -----------------------------------------------------
-
-    else:
-
-        if game["target_choice"] is not None:
-            return
-
-        game["target_choice"] = (
-            normalized_choice
-        )
-
-        game["target_id"] = (
-            message.from_user.id
-        )
-
-        send_game_message(
-            message.chat.id,
-            "🔒 Player 2 choice ပြီးပြီ။"
-        )
-
-    # -----------------------------------------------------
-    # BOTH CHOSE
-    # -----------------------------------------------------
-
-    if (
-        game["challenger_choice"] is not None
-        and game["target_choice"] is not None
-    ):
-
-        p1 = game["challenger_choice"]
-
-        p2 = game["target_choice"]
-
-        result = rps_winner(
-            p1,
-            p2
-        )
-
-        if result == "draw":
-
-            result_text = (
-                "🤝 သရေကျတယ်!"
-            )
-
-        elif result == "p1":
-
-            result_text = (
-                "🏆 Player 1 နိုင်တယ်!"
-            )
-
-        else:
-
-            result_text = (
-                "🏆 Player 2 နိုင်တယ်!"
-            )
-
-        send_game_message(
-            message.chat.id,
-            f"✊ RPS RESULT\n\n"
-            f"👤 Player 1 — {p1}\n"
-            f"👤 Player 2 — {p2}\n\n"
-            f"{result_text}"
-        )
-
-        del rps_games[game_id]
-
 
 # =========================================================
 # 3. 8 BALL - 200 RESPONSES
@@ -3282,69 +2843,39 @@ def format_trivia_message(
     game,
     remaining
 ):
+    """Readable text-only Trivia layout."""
+    letters = ["A", "B", "C", "D"]
 
-    letters = [
-        "A",
-        "B",
-        "C",
-        "D"
-    ]
+    remaining = max(0, int(remaining))
+    minutes = remaining // 60
+    seconds = remaining % 60
 
     lines = [
-
-        "🧠 TRIVIA",
+        "🧠  TRIVIA CHALLENGE",
+        "━━━━━━━━━━━━━━━━━━",
         "",
-
-        f"❓ "
-        f"{game['question']}",
-
-        ""
+        "❓ မေးခွန်း",
+        str(game.get("question", "")).strip(),
+        "",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
     ]
 
-    for index, answer in enumerate(
-        game["answers"]
-    ):
-
-        lines.append(
-            f"{letters[index]}. "
-            f"{answer}"
-        )
-
-    remaining = max(
-        0,
-        int(
-            remaining
-        )
-    )
-
-    minutes = (
-        remaining // 60
-    )
-
-    seconds = (
-        remaining % 60
-    )
+    for index, answer in enumerate(game.get("answers", [])[:4]):
+        lines.append(f"{letters[index]})  {str(answer).strip()}")
+        lines.append("")
 
     lines.extend([
-
+        "━━━━━━━━━━━━━━━━━━",
+        f"⏳ ကျန်ချိန်  {minutes:02d}:{seconds:02d}",
         "",
-
-        f"⏳ အချိန် — "
-        f"{minutes:02d}:"
-        f"{seconds:02d}",
-
-        "",
-
-        "👤 လူတစ်ယောက်ကို "
-        "တစ်ခါပဲ ဖြေလို့ရပါတယ်။",
-
-        "🏆 ပထမဆုံးအဖြေမှန်သူ "
-        "+10 Points"
+        "💬 ဖြေဆိုရန် — A / B / C / D ထဲက တစ်လုံးပဲ ပို့ပါ။",
+        "👤 လူတစ်ယောက် တစ်ကြိမ်ပဲ ဖြေနိုင်ပါတယ်။",
+        "🏆 ပထမဆုံးအဖြေမှန်သူ  +10 Points",
     ])
 
-    return "\n".join(
-        lines
-    )
+    return "\n".join(lines)
+
 
 
 # ---------------------------------------------------------
@@ -4768,12 +4299,6 @@ def speed_tap_callback(call):
             "win",
             reward_points,
         )
-        try:
-            record_game_event(chat_id,call.from_user.id,'speed_tap','win',
-                              f'speedtap:{chat_id}:{call.message.message_id}:{call.from_user.id}')
-            record_game_event(chat_id,call.from_user.id,'speed_tap','play',
-                              f'speedplay:{chat_id}:{call.message.message_id}:{call.from_user.id}')
-        except Exception as exc: print('Daily speedtap event error:',exc)
 
     except Exception as e:
 
@@ -4985,31 +4510,46 @@ def math_battle_next(chat_id, game_id, round_index):
             stop_math_battle(chat_id)
 
 def math_battle_tick(chat_id, game_id, round_index, message_id):
+    """Live countdown in caption only; keeps the photo static to avoid Telegram flicker/reload."""
     with math_battle_card_lock:
-        game=get_math_battle(chat_id)
-        if not game or game['id']!=game_id or game['round']!=round_index or game['message_id']!=message_id:
+        game = get_math_battle(chat_id)
+        if not game or game['id'] != game_id or game['round'] != round_index or game['message_id'] != message_id:
             return
-        remaining=game['deadline']-time.monotonic()
-        if remaining<=0:
-            math_battle_next(chat_id,game_id,round_index)
+
+        remaining = game['deadline'] - time.monotonic()
+        if remaining <= 0:
+            math_battle_next(chat_id, game_id, round_index)
             return
+
+        seconds_left = max(0, int(remaining + 0.999))
+        caption = (
+            f"🧮 MATH BATTLE · ROUND {round_index + 1}/5\n"
+            f"⏳ Time left: {seconds_left}s"
+        )
         try:
-            bot.edit_message_media(
-                InputMediaPhoto(math_round_card(game), caption=f"🧮 MATH BATTLE · ROUND {round_index+1}/5"),
-                chat_id=chat_id, message_id=message_id,
+            bot.edit_message_caption(
+                caption=caption,
+                chat_id=chat_id,
+                message_id=message_id,
                 reply_markup=math_battle_keyboard(game),
             )
         except Exception as e:
             if 'message is not modified' not in str(e).lower():
-                print('Math countdown edit:',e)
-        game=get_math_battle(chat_id)
-        if game and game['id']==game_id and game['round']==round_index and game['message_id']==message_id:
-            remaining=game['deadline']-time.monotonic()
-            if remaining<=0:
-                math_battle_next(chat_id,game_id,round_index)
+                print('Math countdown caption edit:', e)
+
+        game = get_math_battle(chat_id)
+        if game and game['id'] == game_id and game['round'] == round_index and game['message_id'] == message_id:
+            remaining = game['deadline'] - time.monotonic()
+            if remaining <= 0:
+                math_battle_next(chat_id, game_id, round_index)
             else:
-                step=1 if remaining<=10 else 5
-                schedule_task(min(step,max(.15,remaining)),math_battle_tick,chat_id,game_id,round_index,message_id)
+                step = 1 if remaining <= 10 else 5
+                schedule_task(
+                    min(step, max(.15, remaining)),
+                    math_battle_tick,
+                    chat_id, game_id, round_index, message_id,
+                    task_id=f"math_live:{chat_id}:{game_id}:{round_index}:{time.monotonic_ns()}",
+                )
 
 def math_battle_schedule_tick(chat_id, game):
     if not game.get('message_id'): return
@@ -5062,12 +4602,6 @@ def math_battle_callback(call):
                 'late':'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', 'correct':'✅ မှန်တယ်!'}
         bot.answer_callback_query(call.id,alerts.get(status,'OK'),show_alert=False)
         if status=='correct' and g:
-            try:
-                record_game_event(chat_id,call.from_user.id,'math_battle','correct',
-                                  f'math:{game_id}:{round_text}:{call.from_user.id}')
-                record_game_event(chat_id,call.from_user.id,'math_battle','play',
-                                  f'mathplay:{game_id}:{round_text}:{call.from_user.id}')
-            except Exception as exc: print('Daily math event error:',exc)
             # Re-arm a deadline watchdog because the first winner reduces the timer to 10s.
             # An older watchdog for this round is harmless (it rechecks the live deadline).
             math_battle_arm_deadline(g)
@@ -5118,39 +4652,41 @@ def word_chain_status_text(game):
 
 
 def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
-    """Edit only the current round card; never edit an old card after a move."""
+    """Update only the caption countdown; never reload the photo for timer ticks."""
     with word_chain_card_lock:
         game = get_word_chain_game(chat_id)
         if not game or game['id'] != game_id:
             return
         if game['moves'] != expected_moves or game['message_id'] != expected_message_id:
             return
+
         now = time.monotonic()
         remaining = min(game['idle_deadline'], game['deadline']) - now
         if remaining <= 0:
             reason = 'limit' if now >= game['deadline'] else 'idle'
             word_chain_close(chat_id, game_id, reason)
             return
+
+        seconds_left = max(0, int(remaining + 0.999))
         try:
-            from telebot.types import InputMediaPhoto
-            media = InputMediaPhoto(
-                word_chain_status_card(game),
-                caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ',
-            )
-            bot.edit_message_media(
-                media, chat_id=chat_id, message_id=expected_message_id,
+            bot.edit_message_caption(
+                caption=(
+                    "🔤 WORD CHAIN — စကားလုံးဆက်ပါ\n"
+                    f"⏳ Next answer: {seconds_left}s"
+                ),
+                chat_id=chat_id,
+                message_id=expected_message_id,
             )
         except Exception as error:
-            # Network/API errors shouldn't stop the idle/round timeout.
-            print(f'Word Chain Live Card Error: {error}')
-        # Five-second updates, then one-second updates in the final ten seconds.
+            if 'message is not modified' not in str(error).lower():
+                print(f'Word Chain Live Caption Error: {error}')
+
         step = 1 if remaining <= 10 else 5
         schedule_task(
             min(step, max(0.2, remaining)), word_chain_tick,
             chat_id, game_id, expected_moves, expected_message_id,
             task_id=f'{WORD_CHAIN_TICK_PREFIX}{chat_id}:{game_id}:{expected_moves}:{time.monotonic_ns()}',
         )
-
 
 def word_chain_start_live(chat_id, game):
     if not game or not game.get('message_id'):
@@ -5324,13 +4860,6 @@ def word_chain_answer(message):
     if result['status'] == 'expired':
         word_chain_close(chat_id, game['id'], 'idle')
         return
-    if result['status'] == 'valid':
-        try:
-            record_game_event(chat_id,message.from_user.id,'word_chain','correct',
-                              f'word:{game["id"]}:{message.message_id}')
-            record_game_event(chat_id,message.from_user.id,'word_chain','play',
-                              f'wordplay:{game["id"]}:{message.message_id}')
-        except Exception as exc: print('Daily word event error:',exc)
     if result['status'] != 'valid':
         # The Word Chain handler precedes the catch-all group filter.
         # Preserve normal chat moderation even while a game is running.
@@ -6131,27 +5660,6 @@ def clean_new_games():
     now = time.time()
 
     # -----------------------------------------------------
-    # RPS
-    # -----------------------------------------------------
-
-    expired_rps = []
-
-    for game_id, game in rps_games.items():
-
-        if (
-            now - game["created"]
-            > GAME_DELETE_TIME
-        ):
-
-            expired_rps.append(
-                game_id
-            )
-
-    for game_id in expired_rps:
-
-        del rps_games[game_id]
-
-    # -----------------------------------------------------
     # COIN
     # -----------------------------------------------------
 
@@ -6770,35 +6278,7 @@ def ban_word_filter(message):
         user_id = message.from_user.id
         name = message.from_user.first_name
 
-        # =================================================
-        # 🚨 TEXT SPAM CHECK
-        # =================================================
-
-        count = check_spam(
-            chat_id,
-            user_id,
-            "text",
-            message.message_id
-        )
-
-        if count >= SPAM_LIMIT:
-
-            # Spam window ထဲက message အားလုံးဖျက်
-            delete_spam_messages(
-                chat_id,
-                user_id,
-                "text"
-            )
-
-            # User ကို Mute
-            mute_user(
-                chat_id,
-                user_id,
-                name,
-                "စိတ်အေးအေးထား ငါလိုးမတောသားး"
-            )
-
-            return
+        # Text spam is handled by early_text_spam_middleware().
 
         # =================================================
         # 🚫 BAN WORD CHECK
