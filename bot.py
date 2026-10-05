@@ -196,6 +196,7 @@ from games.boss_raid import (
 from ui.boss_raid_card import (
     get_boss_artwork,
     live_card as generate_boss_live_card,
+    visual_stage as get_boss_visual_stage,
     result_card as generate_boss_result_card,
 )
 
@@ -4809,11 +4810,11 @@ def boss_raid_command(message):
     try:
         live,variant=generate_boss_live_card(raid,art=art)
         sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-        boss_raid_visual_state[chat_id]={"art":art,"variant":variant}
+        boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"stage":get_boss_visual_stage(raid)}
     except Exception as ex:
         print("Boss live card error:",ex)
         sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-        boss_raid_visual_state[chat_id]={"art":art,"variant":None}
+        boss_raid_visual_state[chat_id]={"art":art,"variant":None,"stage":get_boss_visual_stage(raid)}
     set_boss_raid_message_id(chat_id,raid["id"],sent.message_id);raid=get_boss_raid(chat_id)
     safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True);delay_delete_message(chat_id,message.message_id,10)
     schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
@@ -4830,7 +4831,24 @@ def boss_raid_callback(call):
     if result["status"]!="ok":bot.answer_callback_query(call.id,"🏁 ဒီ Raid ပြီးသွားပြီ။");return
     raid=result["raid"]
     note="🛡️ Boss BLOCK!" if result["blocked"] else (f'💥 CRITICAL! -{result["damage"]} HP' if result["crit"] else f'⚔️ -{result["damage"]} HP')
-    bot.answer_callback_query(call.id,note);boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
+    bot.answer_callback_query(call.id,note)
+    # Re-render the same pinned photo only when the boss crosses a visual HP stage.
+    # 24 base images become Normal / Damaged / Rage / Final variants at runtime.
+    state=boss_raid_visual_state.get(chat_id,{})
+    new_stage=get_boss_visual_stage(raid)
+    if state and state.get("art") and state.get("stage")!=new_stage and raid.get("message_id") and not raid.get("finished"):
+        try:
+            live,variant=generate_boss_live_card(raid,art=state.get("art"),variant=state.get("variant"))
+            media=types.InputMediaPhoto(live,caption=boss_raid_text(raid),parse_mode="HTML")
+            bot.edit_message_media(media=media,chat_id=chat_id,message_id=raid["message_id"],reply_markup=boss_attack_keyboard(raid["id"]))
+            state["stage"]=new_stage;state["variant"]=variant
+            boss_raid_visual_state[chat_id]=state
+            boss_raid_last_edit[chat_id]=time.monotonic()
+        except Exception as ex:
+            print("Boss visual stage edit error:",ex)
+            boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
+    else:
+        boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
     reaction=result.get("reaction")
     if reaction:boss_reaction_message(chat_id,raid,reaction["text"],"phase")
     event=result.get("event")
