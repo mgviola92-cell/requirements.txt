@@ -13,7 +13,13 @@ ACCENTS={"crimson":(240,70,70,255),"obsidian":(185,140,255,255),"ember":(255,170
 
 def get_boss_artwork(boss_name):
     slug=str(boss_name).lower().replace(" ","_")
-    # Prefer boss-specific art; fall back to the shared pool.
+    # Simple asset workflow: one base image per boss in assets/boss_raid/.
+    # Example: assets/boss_raid/slime_king.jpg
+    # Old per-boss folders remain supported for backward compatibility.
+    from core.asset_manager import get_asset_path
+    for ext in (".jpg",".jpeg",".png",".webp"):
+        p=get_asset_path("boss_raid",slug+ext)
+        if p:return p
     p=random_asset_avoiding_recent("boss:"+slug,"boss_raid",slug,recent_limit=4,recursive=True)
     if p:return p
     return random_asset_avoiding_recent("boss:generic","boss_raid","generic",recent_limit=10,recursive=True)
