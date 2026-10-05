@@ -15,6 +15,11 @@ from telebot.types import ChatPermissions
 from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
 from database.db import DATABASE_URL, get_db_connection
+from database.member_registry import (
+    initialize_member_registry,
+    remember_member,
+    get_known_member_ids,
+)
 from database.players import (
     player_stats,
     player_stats_lock,
@@ -252,6 +257,52 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 register_daily_challenge(bot)
 
+try:
+    initialize_member_registry()
+except Exception as exc:
+    print(f"Member registry init error: {exc}")
+
+# =========================================================
+# 👥 GROUP MEMBER REGISTRY MIDDLEWARE
+# Remembers non-bot users the bot actually sees in each group.
+# This is not online-status tracking. Data persists in Neon.
+# =========================================================
+@bot.message_handler(
+    func=lambda message: True,
+    content_types=[
+        "text", "audio", "document", "animation", "game", "photo",
+        "sticker", "video", "video_note", "voice", "contact",
+        "location", "venue", "poll", "dice", "new_chat_members"
+    ],
+)
+def member_registry_middleware(message):
+    try:
+        if message.chat.type in ("group", "supergroup"):
+            seen = []
+            if message.from_user and not message.from_user.is_bot:
+                seen.append(message.from_user)
+            if getattr(message, "reply_to_message", None):
+                u = getattr(message.reply_to_message, "from_user", None)
+                if u and not u.is_bot:
+                    seen.append(u)
+            for u in (getattr(message, "new_chat_members", None) or []):
+                if u and not u.is_bot:
+                    seen.append(u)
+            used = set()
+            for u in seen:
+                if u.id in used:
+                    continue
+                used.add(u.id)
+                remember_member(
+                    message.chat.id, u.id,
+                    username=getattr(u, "username", None),
+                    first_name=getattr(u, "first_name", None),
+                    last_name=getattr(u, "last_name", None),
+                )
+    except Exception as exc:
+        print(f"Member registry activity error: {exc}")
+    return ContinueHandling()
+
 # Activity tracker runs first, then allows ordinary game/command handlers.
 # Commands, bot messages and private chats do not count as group activity.
 @bot.message_handler(func=lambda message: True, content_types=["text"])
@@ -409,84 +460,100 @@ def stop_mention(message):
 def mention_all_users(message):
     global last_called_time, is_stopped
 
-    if message.chat.type in ['group', 'supergroup']:
-        chat_id = message.chat.id
+    if message.chat.type not in ('group', 'supergroup'):
+        bot.reply_to(message, "This command can only be used in Telegram Groups.")
+        return
 
-     # Admin ရိုက်လိုက်တဲ့ /လာကြစမ်း command ကို
-        # 60 စက္ကန့်နောက် ဖျက်မယ်
-        delay_delete_message(
-            message.chat.id,
-            message.message_id,
-            80
+    chat_id = message.chat.id
+    delay_delete_message(chat_id, message.message_id, 80)
+
+    current_time = time.time()
+    if last_called_time != 0 and (current_time - last_called_time) < 140:
+        remaining_time = int(140 - (current_time - last_called_time))
+        notice = bot.reply_to(
+            message,
+            f"⏳ လူခေါ်တာ Cooldown ရှိသေးတယ် — {remaining_time} စက္ကန့် စောင့်ပါ။"
         )
+        delay_delete_message(chat_id, notice.message_id, 15)
+        return
 
-        # ⏱️ ၄၀ စက္ကန့် Cooldown တွက်ချက်ခြင်း
-        current_time = time.time()
-        if last_called_time != 0 and (current_time - last_called_time) < 140:
-            remaining_time = int(140 - (current_time - last_called_time))
+    is_stopped = False
+    last_called_time = current_time
 
-            if remaining_time > 60:
-                bot.reply_to(message, "⏳ လူခေါ်တာမပြီးသေးဘဲ လီးမို့ထပ်ခေါ်နေတာလား ဖြတ်ထိုးလိုက်ရ စောက်တောသား ⏳")
-            else:
-                bot.reply_to(message, f"⏳ ဆက်တိုက်ခေါ်လို့ မရဘူး စောက်ရူးကောင် ငါလည်း ငြောင်းတတ်တယ် နောက်ထပ် {remaining_time} စက္ကန့် စောင့်ပြီးမှဆက်ခေါ် ကမကလ")
+    parts = (message.text or "").split(maxsplit=1)
+    input_line = parts[1].strip() if len(parts) > 1 else "တောသားတွေလာကြစမ်း"
+
+    try:
+        # Admins are always known, even before they send a message after this update.
+        admins = bot.get_chat_administrators(chat_id)
+        admin_ids = [a.user.id for a in admins if not a.user.is_bot]
+        for a in admins:
+            if not a.user.is_bot:
+                try:
+                    remember_member(
+                        chat_id, a.user.id,
+                        username=a.user.username,
+                        first_name=a.user.first_name,
+                        last_name=a.user.last_name,
+                    )
+                except Exception:
+                    pass
+
+        known_ids = get_known_member_ids(chat_id, limit=5000)
+        # Preserve newest-seen ordering, then include any admin missing from DB.
+        user_list = []
+        seen_ids = set()
+        for uid in list(known_ids) + admin_ids:
+            if uid in seen_ids:
+                continue
+            seen_ids.add(uid)
+            user_list.append(uid)
+
+        if not user_list:
+            notice = bot.reply_to(message, "❌ ခေါ်လို့ရမယ့် member data မရှိသေးပါဘူး။")
+            delay_delete_message(chat_id, notice.message_id, 15)
             return
 
-        # လူခေါ်ခြင်း အသစ်စတင်တိုင်း Stop အလံကို ပုံမှန်ပြန်လုပ်ခြင်း
-        is_stopped = False
-        last_called_time = current_time
+        # Keep each Telegram message comfortably below entity/text limits.
+        batch_size = 35
+        batches = [user_list[i:i + batch_size] for i in range(0, len(user_list), batch_size)]
 
-        user_text = message.text.split(maxsplit=1)
-        if len(user_text) > 1:
-            input_line = user_text[1]
-        else:
-            input_line = "တောသားတွေလာကြစမ်း"
+        sent_people = 0
+        for batch_no, batch in enumerate(batches, start=1):
+            if is_stopped:
+                break
 
-        try:
-            chat_admins = bot.get_chat_administrators(chat_id)
-
-            user_list = []
-            for admin in chat_admins:
-                if not admin.user.is_bot:
-                    user_list.append(admin.user.id)
-
-            for _ in range(30):
-                if is_stopped:
-                    break
-
-                hidden_mentions = ""
-                for u_id in user_list:
-                    hidden_mentions += f"<a href='tg://user?id={u_id}'>​</a>"
-
-                random_emojis = " ".join(random.sample(EMOJIS, k=8))
-                final_message = f"{input_line}\n\n\n{random_emojis}{hidden_mentions}"
-
-                sent_msg = bot.send_message(chat_id, final_message, parse_mode='HTML')
-
-                # 🎯 လူခေါ်စာစောင်များကိုပဲ သီးသန့် ၁ မိနစ်ပြည့်ရင် ဖျက်ခိုင်းထားပါသည်
-                delay_delete_message(chat_id, sent_msg.message_id, 60)
-                time.sleep(2)
-
-        except Exception as e:
-            print(f"Error caught inside loop: {e}")
+            hidden_mentions = "".join(
+                f"<a href='tg://user?id={uid}'>\u200b</a>" for uid in batch
+            )
+            random_emojis = " ".join(random.sample(EMOJIS, k=8))
+            batch_note = f"  •  {batch_no}/{len(batches)}" if len(batches) > 1 else ""
+            final_message = (
+                f"{html.escape(input_line)}{batch_note}\n\n\n"
+                f"{random_emojis}\n"
+                f"{hidden_mentions}"
+            )
+            sent_msg = bot.send_message(chat_id, final_message, parse_mode='HTML')
+            delay_delete_message(chat_id, sent_msg.message_id, 60)
+            sent_people += len(batch)
+            if batch_no < len(batches):
+                time.sleep(1.2)
 
         if not is_stopped:
-            try:
-                time.sleep(1.0)
-                finish_time = time.time()
-                remaining_cooldown = int(120 - (finish_time - last_called_time))
-                if remaining_cooldown > 60:
-                    remaining_cooldown = 60
+            finish_msg = bot.send_message(
+                chat_id,
+                f"✅ Known members {sent_people} ယောက် ခေါ်ပြီးပြီ။ "
+                f"(Bot မြင်ဖူးတဲ့ members စာရင်းအတိုင်း)"
+            )
+            delay_delete_message(chat_id, finish_msg.message_id, 30)
 
-                custom_finish_message = f"ခေါ်ပြီးဘီ လီးဖစ်နေလား (နောက်ထပ် {remaining_cooldown} စက္ကန့် စောင့်ဦး)"
-                finish_msg = bot.send_message(chat_id, custom_finish_message)
-
-                # 🎯 Finish Message ကိုပါ ၁ မိနစ်ပြည့်လျှင် ပြန်ဖျက်ခိုင်းခြင်း
-                delay_delete_message(chat_id, finish_msg.message_id, 60)
-            except Exception as e:
-                print(f"Error sending finish message: {e}")
-
-    else:
-        bot.reply_to(message, "This command can only be used in Telegram Groups.")
+    except Exception as exc:
+        print(f"Known-member mention error: {exc}")
+        try:
+            notice = bot.reply_to(message, "❌ Member တွေကို ခေါ်တဲ့အချိန် Error ဖြစ်သွားတယ်။")
+            delay_delete_message(chat_id, notice.message_id, 15)
+        except Exception:
+            pass
 
 # =========================================================
 # 👮 ADMIN-ONLY MENTION TARGET
