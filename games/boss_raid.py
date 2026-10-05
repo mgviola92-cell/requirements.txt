@@ -13,6 +13,8 @@ CRIT_DAMAGE_MIN=10
 CRIT_DAMAGE_MAX=18
 BLOCK_CHANCE_PERCENT=6
 PHASE_THRESHOLDS=(75,50,25,10)
+BOSS_EVENT_CHANCE_PERCENT=8
+BOSS_EVENT_MIN_HITS=8
 
 BOSSES=[
 {"name":"Slime King","emoji":"🟢","tier":"EASY","hp":650},{"name":"Cave Troll","emoji":"👹","tier":"EASY","hp":760},{"name":"Wild Golem","emoji":"🪨","tier":"EASY","hp":880},{"name":"Venom Spider","emoji":"🕷️","tier":"EASY","hp":980},{"name":"Goblin Chief","emoji":"👺","tier":"EASY","hp":1100},{"name":"Frost Wolf","emoji":"🐺","tier":"EASY","hp":1250},
@@ -36,6 +38,19 @@ WIN_LINES=[
 "မဖြစ်နိုင်ဘူး… ဒီအုပ်စုက ငါ့ကိုတကယ်လှဲလိုက်တာလား။","ဒီတစ်ခါ မင်းတို့နိုင်တယ်… နောက်တစ်ခါ မလွယ်ဘူး။","ငါ့အဆုံးသတ်က ဒီလိုဖြစ်မယ်မထင်ခဲ့ဘူး။",
 "ကောင်းတယ်… ဒီ victory ကို ထိုက်တန်တယ်။","ငါရှုံးပြီ။ ဒါပေမယ့် နောက် Boss က မင်းတို့ကိုစောင့်နေတယ်။","ဒီအုပ်စုကို လျှော့တွက်မိတာ ငါ့အမှားပဲ။",
 "လက်ခံတယ်… ဒီ Raid ကို မင်းတို့ယူသွား။","ငါ့ HP သုည… မင်းတို့ရဲ့ teamwork ကတော့ full ပဲ။","ဒီနေ့ Champion က မင်းတို့ပဲ။","နောက်တစ်ခါတွေ့ရင် ဒီလိုလွယ်မယ်မထင်နဲ့။",
+]
+BOSS_ATTACK_LINES=[
+"Boss က မြေပြင်ကိုထုချလိုက်တယ် — Raid party တစ်ခုလုံး လှုပ်ခါသွားတယ်!",
+"Boss ရဲ့ counter attack ဝင်လာတယ် — အရှိန်မလျှော့နဲ့!",
+"Boss က rage ဖြစ်လာပြီ — ဒီအချိန်က damage တင်ရမယ့်အချိန်!",
+"Boss က party ကို ခြိမ်းခြောက်လိုက်တယ် — နောက်မဆုတ်နဲ့!",
+"Boss ရဲ့ heavy strike ကျလာတယ် — Raid က ပိုပြင်းလာပြီ!",
+"Boss က roar လုပ်လိုက်တယ် — battlefield တစ်ခုလုံး တုန်သွားတယ်!",
+]
+MODIFIER_LINES=[
+("rage","🔥 RAGE","Boss rage ဖြစ်နေတယ် — Phase resistance ပိုပြင်းလာပြီ!"),
+("exposed","💢 EXPOSED","Boss guard ပွင့်သွားတယ် — အခုအချိန် ဝိုင်းချ!"),
+("fortify","🛡 FORTIFY","Boss က defense တင်လိုက်တယ် — မရပ်ဘဲ ဆက်တိုက်ချ!"),
 ]
 _raids={}
 _recent={}
@@ -61,7 +76,7 @@ def start_raid(chat_id,duration=RAID_DURATION,boss=None):
         cur=_raids.get(chat_id)
         if cur and not cur["finished"]:return False,_copy(cur)
         b=dict(boss or random.choice(BOSSES));now=time.time()
-        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False}
+        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False,"event_hits":0,"modifier":None}
         _raids[chat_id]=r;return True,_copy(r)
 
 def get_raid(chat_id):
@@ -93,13 +108,22 @@ def attack(chat_id,raid_id,user_id,user_name):
         f=r["fighters"].setdefault(user_id,{"name":user_name or "Player","damage":0,"hits":0})
         f["name"]=user_name or f["name"];f["hits"]+=1;f["damage"]+=dmg
         r["total_damage"]+=dmg;r["hp"]=max(0,r["hp"]-dmg);r["phase"]=_phase(r["hp"],r["max_hp"])
+        r["event_hits"]+=1
         new_pct=r["hp"]/r["max_hp"]*100
         reaction=None
         for t in PHASE_THRESHOLDS:
             if old_pct>t>=new_pct and t not in r["thresholds_seen"]:
                 r["thresholds_seen"].add(t);reaction={"threshold":t,"text":_pick((r["boss"]["name"],"phase"),PHASE_LINES)};break
+        event=None
+        if not r["finished"] and r["event_hits"]>=BOSS_EVENT_MIN_HITS and secrets.randbelow(100)<BOSS_EVENT_CHANCE_PERCENT:
+            r["event_hits"]=0
+            if secrets.randbelow(100)<45:
+                mod=secrets.choice(MODIFIER_LINES);r["modifier"]=mod[0]
+                event={"kind":"modifier","title":mod[1],"text":mod[2]}
+            else:
+                event={"kind":"attack","title":"💥 BOSS ATTACK","text":_pick((r["boss"]["name"],"attack"),BOSS_ATTACK_LINES)}
         if r["hp"]<=0:r["finished"]=True;r["result"]="victory"
-        return {"status":"ok","damage":dmg,"crit":crit,"blocked":blocked,"reaction":reaction,"raid":_copy(r)}
+        return {"status":"ok","damage":dmg,"crit":crit,"blocked":blocked,"reaction":reaction,"event":event,"raid":_copy(r)}
 
 def ending_line(raid):
     kind="win" if raid.get("result")=="victory" else "lose"
