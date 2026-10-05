@@ -8,6 +8,19 @@ from database.players import (
 )
 
 
+
+def _team_battle_points(chat_id, user_id, points):
+    """Mirror positive game rewards into an active Team Battle only."""
+    try:
+        points = int(points)
+        if points <= 0:
+            return
+        from games.team_battle import record_points
+        record_points(chat_id, user_id, points)
+    except Exception as exc:
+        print(f"Team Battle reward hook error: {exc}")
+
+
 # =========================================================
 # ⚙️ DEFAULT REWARD CONFIG
 # =========================================================
@@ -85,12 +98,15 @@ def apply_game_result(
         result
     )
 
-    return add_game_result(
+    success = add_game_result(
         chat_id,
         user_id,
         result,
         points=points
     )
+    if success:
+        _team_battle_points(chat_id, user_id, points)
+    return success
 
 
 def apply_custom_game_result(
@@ -107,12 +123,16 @@ def apply_custom_game_result(
         print(f"❌ Invalid custom result: {result}")
         return False
 
-    return add_game_result(
+    points = int(points)
+    success = add_game_result(
         chat_id,
         user_id,
         result,
-        points=int(points)
+        points=points
     )
+    if success:
+        _team_battle_points(chat_id, user_id, points)
+    return success
 
 
 def add_bonus_points(
@@ -130,6 +150,7 @@ def add_bonus_points(
     )
 
     if success:
+        _team_battle_points(chat_id, user_id, points)
         print(
             f"⭐ Bonus Points: "
             f"chat={chat_id}, "
