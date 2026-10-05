@@ -4744,6 +4744,7 @@ def boss_raid_finish(chat_id,raid,won):
     # IMPORTANT: keep visual state until the live PHOTO caption is finalized.
     state=boss_raid_visual_state.get(chat_id,{})
     art=state.get("art");variant=state.get("variant")
+    result_art=get_boss_artwork(raid["boss"]["name"],"normal" if won else "final") or art
 
     try:boss_raid_edit(chat_id,raid,force=True)
     except Exception as ex:print("Boss final live-card edit error:",ex)
@@ -4765,7 +4766,7 @@ def boss_raid_finish(chat_id,raid,won):
         caption+=f'\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>'
 
     try:
-        card=generate_boss_result_card(raid,won,line,muted,protected,art=art,variant=variant,composition=state.get("composition"))
+        card=generate_boss_result_card(raid,won,line,muted,protected,art=result_art,variant=variant,composition=state.get("composition"))
         msg=bot.send_photo(chat_id,card,caption=caption,parse_mode="HTML")
         delay_delete_message(chat_id,msg.message_id,90)
     except Exception as ex:
