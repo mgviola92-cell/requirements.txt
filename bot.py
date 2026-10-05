@@ -457,10 +457,114 @@ def stop_mention(message):
             mention_stopped[message.chat.id] = True
         bot.reply_to(message, "🛑 ရပ်လိုက်ပြီ စောက်အမျိုးမျိုးပဲ မသာကောင်")
 
-# --- ၁။ လူခေါ်သည့် လုပ်ဆောင်ချက် (All Mention Function) ---
+
+MENTION_COOLDOWN = 140
+MENTION_ROUNDS = 30
+MENTION_ROUND_DELAY = 2.0
+MENTION_BATCH_SIZE = 35
+
+
+def _mention_cooldown_check(message):
+    chat_id = message.chat.id
+    now = time.time()
+
+    with mention_state_lock:
+        last_called = mention_last_called.get(chat_id, 0)
+        elapsed = now - last_called if last_called else MENTION_COOLDOWN
+
+        if elapsed < MENTION_COOLDOWN:
+            remaining = max(1, int(MENTION_COOLDOWN - elapsed))
+            return False, remaining
+
+        mention_last_called[chat_id] = now
+        mention_stopped[chat_id] = False
+
+    return True, 0
+
+
+def _send_mention_cooldown_notice(message, remaining_time):
+    if remaining_time > 60:
+        notice = bot.reply_to(
+            message,
+            "⏳ လူခေါ်တာမပြီးသေးဘဲ လီးမို့ထပ်ခေါ်နေတာလား ဖြတ်ထိုးလိုက်ရ စောက်တောသား ⏳"
+        )
+    else:
+        notice = bot.reply_to(
+            message,
+            f"⏳ ဆက်တိုက်ခေါ်လို့ မရဘူး စောက်ရူးကောင် ငါလည်း ငြောင်းတတ်တယ် "
+            f"နောက်ထပ် {remaining_time} စက္ကန့် စောင့်ပြီးမှဆက်ခေါ် ကမကလ"
+        )
+
+    delay_delete_message(message.chat.id, notice.message_id, 15)
+
+
+def _mention_is_stopped(chat_id):
+    with mention_state_lock:
+        return mention_stopped.get(chat_id, False)
+
+
+def _send_mention_rounds(chat_id, user_ids, input_line):
+    # Telegram text/entity limits အတွက် member များရင် batch ခွဲမယ်။
+    # အရင် behavior အတိုင်း 30 rounds ပြန်ခေါ်မယ်။
+    batches = [
+        user_ids[i:i + MENTION_BATCH_SIZE]
+        for i in range(0, len(user_ids), MENTION_BATCH_SIZE)
+    ]
+
+    for round_no in range(MENTION_ROUNDS):
+        if _mention_is_stopped(chat_id):
+            break
+
+        for batch in batches:
+            if _mention_is_stopped(chat_id):
+                break
+
+            hidden_mentions = "".join(
+                f"<a href='tg://user?id={uid}'>\u200b</a>"
+                for uid in batch
+            )
+            random_emojis = " ".join(random.sample(EMOJIS, k=8))
+
+            # Agreed styling: စာနဲ့ emoji row ကြား blank line 2 ကြောင်း။
+            final_message = (
+                f"{html.escape(input_line)}\n\n\n"
+                f"{random_emojis}\n"
+                f"{hidden_mentions}"
+            )
+
+            sent_msg = bot.send_message(
+                chat_id,
+                final_message,
+                parse_mode='HTML'
+            )
+            delay_delete_message(chat_id, sent_msg.message_id, 60)
+
+        if round_no < MENTION_ROUNDS - 1 and not _mention_is_stopped(chat_id):
+            time.sleep(MENTION_ROUND_DELAY)
+
+
+def _send_common_mention_finish(chat_id):
+    if _mention_is_stopped(chat_id):
+        return
+
+    with mention_state_lock:
+        started_at = mention_last_called.get(chat_id, time.time())
+
+    remaining_cooldown = int(
+        MENTION_COOLDOWN - (time.time() - started_at)
+    )
+    remaining_cooldown = max(0, min(60, remaining_cooldown))
+
+    finish_msg = bot.send_message(
+        chat_id,
+        f"ခေါ်ပြီးဘီ လီးဖစ်နေလား (နောက်ထပ် {remaining_cooldown} စက္ကန့် စောင့်ဦး)"
+    )
+    delay_delete_message(chat_id, finish_msg.message_id, 60)
+
+
+# --- 👥 Known-member mention ---
 @bot.message_handler(commands=['all', 'everyone', 'လာကြစမ်း'])
 def mention_all_users(message):
-
     if message.chat.type not in ('group', 'supergroup'):
         bot.reply_to(message, "This command can only be used in Telegram Groups.")
         return
@@ -468,45 +572,36 @@ def mention_all_users(message):
     chat_id = message.chat.id
     delay_delete_message(chat_id, message.message_id, 80)
 
-    current_time = time.time()
-    with mention_state_lock:
-        last_called_time = mention_last_called.get(chat_id, 0)
-        if last_called_time != 0 and (current_time - last_called_time) < 140:
-            remaining_time = int(140 - (current_time - last_called_time))
-        else:
-            remaining_time = 0
-            mention_stopped[chat_id] = False
-            mention_last_called[chat_id] = current_time
-
-    if remaining_time > 0:
-        notice = bot.reply_to(
-            message,
-            f"⏳ လူခေါ်တာ Cooldown ရှိသေးတယ် — {remaining_time} စက္ကန့် စောင့်ပါ။"
-        )
-        delay_delete_message(chat_id, notice.message_id, 15)
+    ready, remaining = _mention_cooldown_check(message)
+    if not ready:
+        _send_mention_cooldown_notice(message, remaining)
         return
 
     parts = (message.text or "").split(maxsplit=1)
     input_line = parts[1].strip() if len(parts) > 1 else "တောသားတွေလာကြစမ်း"
 
     try:
-        # Admins are always known, even before they send a message after this update.
+        # Admins ကို registry ထဲသေချာထည့်ထားပြီး known members နဲ့ပေါင်းမယ်။
         admins = bot.get_chat_administrators(chat_id)
-        admin_ids = [a.user.id for a in admins if not a.user.is_bot]
-        for a in admins:
-            if not a.user.is_bot:
-                try:
-                    remember_member(
-                        chat_id, a.user.id,
-                        username=a.user.username,
-                        first_name=a.user.first_name,
-                        last_name=a.user.last_name,
-                    )
-                except Exception:
-                    pass
+        admin_ids = []
+
+        for item in admins:
+            if item.user.is_bot:
+                continue
+            admin_ids.append(item.user.id)
+            try:
+                remember_member(
+                    chat_id,
+                    item.user.id,
+                    username=item.user.username,
+                    first_name=item.user.first_name,
+                    last_name=item.user.last_name,
+                )
+            except Exception:
+                pass
 
         known_ids = get_known_member_ids(chat_id, limit=5000)
-        # Preserve newest-seen ordering, then include any admin missing from DB.
+
         user_list = []
         seen_ids = set()
         for uid in list(known_ids) + admin_ids:
@@ -516,59 +611,36 @@ def mention_all_users(message):
             user_list.append(uid)
 
         if not user_list:
-            notice = bot.reply_to(message, "❌ ခေါ်လို့ရမယ့် member data မရှိသေးပါဘူး။")
+            notice = bot.reply_to(
+                message,
+                "❌ ခေါ်လို့ရမယ့် member data မရှိသေးပါဘူး။"
+            )
             delay_delete_message(chat_id, notice.message_id, 15)
             return
 
-        # Keep each Telegram message comfortably below entity/text limits.
-        batch_size = 35
-        batches = [user_list[i:i + batch_size] for i in range(0, len(user_list), batch_size)]
+        _send_mention_rounds(chat_id, user_list, input_line)
 
-        sent_people = 0
-        for batch_no, batch in enumerate(batches, start=1):
-            with mention_state_lock:
-                stopped = mention_stopped.get(chat_id, False)
-            if stopped:
-                break
-
-            hidden_mentions = "".join(
-                f"<a href='tg://user?id={uid}'>\u200b</a>" for uid in batch
-            )
-            random_emojis = " ".join(random.sample(EMOJIS, k=8))
-            batch_note = f"  •  {batch_no}/{len(batches)}" if len(batches) > 1 else ""
-            final_message = (
-                f"{html.escape(input_line)}{batch_note}\n\n\n"
-                f"{random_emojis}\n"
-                f"{hidden_mentions}"
-            )
-            sent_msg = bot.send_message(chat_id, final_message, parse_mode='HTML')
-            delay_delete_message(chat_id, sent_msg.message_id, 60)
-            sent_people += len(batch)
-            if batch_no < len(batches):
-                time.sleep(1.2)
-
-        with mention_state_lock:
-            stopped = mention_stopped.get(chat_id, False)
-        if not stopped:
-            finish_msg = bot.send_message(
-                chat_id,
-                f"✅ Known members {sent_people} ယောက် ခေါ်ပြီးပြီ။ "
-                f"(Bot မြင်ဖူးတဲ့ members စာရင်းအတိုင်း)"
-            )
-            delay_delete_message(chat_id, finish_msg.message_id, 30)
+        if not _mention_is_stopped(chat_id):
+            time.sleep(1.0)
+            _send_common_mention_finish(chat_id)
 
     except Exception as exc:
         print(f"Known-member mention error: {exc}")
         try:
-            notice = bot.reply_to(message, "❌ Member တွေကို ခေါ်တဲ့အချိန် Error ဖြစ်သွားတယ်။")
+            notice = bot.reply_to(
+                message,
+                "❌ Member တွေကို ခေါ်တဲ့အချိန် Error ဖြစ်သွားတယ်။"
+            )
             delay_delete_message(chat_id, notice.message_id, 15)
         except Exception:
             pass
 
+
 # =========================================================
 # 👮 ADMIN-ONLY MENTION TARGET
 # /admincall /အက်မင်ခေါ် [optional text]
-# Mentions only non-bot group admins.
+# Uses the SAME cooldown/round/finish behavior as /လာကြစမ်း,
+# but mentions admins only.
 # =========================================================
 @bot.message_handler(commands=["admincall", "အက်မင်ခေါ်"])
 def mention_admins_only(message):
@@ -576,30 +648,54 @@ def mention_admins_only(message):
         bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
         return
 
-    delay_delete_message(message.chat.id, message.message_id, 80)
+    chat_id = message.chat.id
+    delay_delete_message(chat_id, message.message_id, 80)
+
+    ready, remaining = _mention_cooldown_check(message)
+    if not ready:
+        _send_mention_cooldown_notice(message, remaining)
+        return
 
     try:
-        admins = bot.get_chat_administrators(message.chat.id)
-        admin_ids = [item.user.id for item in admins if not item.user.is_bot]
+        admins = bot.get_chat_administrators(chat_id)
+        admin_ids = [
+            item.user.id
+            for item in admins
+            if not item.user.is_bot
+        ]
+
         if not admin_ids:
-            bot.reply_to(message, "❌ ခေါ်လို့ရမယ့် Admin မတွေ့ပါဘူး။")
+            notice = bot.reply_to(
+                message,
+                "❌ ခေါ်လို့ရမယ့် Admin မတွေ့ပါဘူး။"
+            )
+            delay_delete_message(chat_id, notice.message_id, 15)
             return
 
         parts = (message.text or "").split(maxsplit=1)
-        input_line = parts[1].strip() if len(parts) > 1 else "အက်မင်တို့ ခဏလာကြည့်ပေးပါဦး 👮"
-        hidden_mentions = "".join(
-            f"<a href='tg://user?id={uid}'>​</a>" for uid in admin_ids
+        input_line = (
+            parts[1].strip()
+            if len(parts) > 1
+            else "အက်မင်တို့ ခဏလာကြည့်ပေးပါဦး 👮"
         )
-        random_emojis = " ".join(random.sample(EMOJIS, k=8))
-        sent = bot.send_message(
-            message.chat.id,
-            f"{input_line}\n\n\n{random_emojis}{hidden_mentions}",
-            parse_mode="HTML",
-        )
-        delay_delete_message(message.chat.id, sent.message_id, 60)
+
+        _send_mention_rounds(chat_id, admin_ids, input_line)
+
+        if not _mention_is_stopped(chat_id):
+            time.sleep(1.0)
+            _send_common_mention_finish(chat_id)
+
     except Exception as exc:
         print(f"Admin mention error: {exc}")
-        bot.reply_to(message, "❌ Admin တွေကို ခေါ်လို့မရသေးပါဘူး။")
+        try:
+            notice = bot.reply_to(
+                message,
+                "❌ Admin တွေကို ခေါ်လို့မရသေးပါဘူး။"
+            )
+            delay_delete_message(chat_id, notice.message_id, 15)
+        except Exception:
+            pass
+
 
 # --- 🎵 သီချင်းတောင်းသည့် လုပ်ဆောင်ချက် (/play /ဖွင့်) ---
 
