@@ -90,7 +90,9 @@ def get_raid(chat_id):
     with _lock:
         r=_raids.get(chat_id)
         if not r:return None
-        if not r["finished"] and time.time()>=r["ends_at"]:r["finished"]=True;r["result"]="timeout"
+        # Timeout ownership belongs to the scheduled timeout handler.
+        # Reads/callbacks must not silently finish the raid before that handler
+        # can run the result + unpin sequence.
         return _copy(r)
 
 def set_message_id(chat_id,raid_id,message_id):
