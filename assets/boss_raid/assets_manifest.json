@@ -1,24 +1,21 @@
 {
   "version": 1,
   "system": "boss_raid_visuals",
-  "layout": "assets/boss_raid/<boss_slug>/<phase_or_variant>/",
+  "layout": "assets/boss_raid/<boss_slug>.<jpg|jpeg|png|webp>",
   "selection": {
-    "recent_avoidance": true,
-    "boss_specific_first": true,
+    "boss_filename_match": true,
+    "legacy_boss_folder_fallback": true,
     "generic_fallback": true
   },
   "live_image_policy": "cinematic artwork only; changing HP/timer/damage/raiders stay in Telegram caption",
   "phases": [
-    "normal",
-    "damaged",
-    "rage",
-    "final"
+    "generated_by_card_system"
   ],
   "variants": [
-    "wide",
-    "closeup",
-    "dark",
-    "alert"
+    "crimson",
+    "obsidian",
+    "ember",
+    "storm"
   ],
   "bosses": [
     "slime_king",
@@ -45,5 +42,6 @@
     "eclipse_titan",
     "immortal_demon",
     "neon_destroyer"
-  ]
+  ],
+  "workflow": "one base image per boss; dynamic card styling supplies visual variants"
 }
