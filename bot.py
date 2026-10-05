@@ -201,6 +201,16 @@ from ui.boss_raid_card import (
 )
 
 
+from games.pair_challenge import (
+    start as start_pair_challenge,
+    get as get_pair_challenge,
+    set_message as set_pair_challenge_message,
+    choose as choose_pair_challenge,
+    finish as finish_pair_challenge,
+    pairs as pair_challenge_pairs,
+)
+from ui.pair_challenge_card import challenge_card as pair_challenge_card, result_card as pair_challenge_result_card
+
 from games.team_battle import (
     start_battle as start_team_battle,
     get_battle as get_team_battle,
@@ -448,6 +458,90 @@ try:
     initialize_member_registry()
 except Exception as exc:
     print(f"Member registry init error: {exc}")
+
+
+# =========================================================
+# 👥 PAIR CHALLENGE
+# =========================================================
+def pair_challenge_keyboard(game):
+    kb = InlineKeyboardMarkup()
+    kb.row(
+        InlineKeyboardButton("A • " + game["left"], callback_data="pair:" + game["id"] + ":a"),
+        InlineKeyboardButton("B • " + game["right"], callback_data="pair:" + game["id"] + ":b"),
+    )
+    return kb
+
+def finish_pair_challenge_round(chat_id, game_id):
+    game = finish_pair_challenge(chat_id, game_id)
+    if not game:
+        return
+    rows = pair_challenge_pairs(game)
+    old_id = game.get("message_id")
+    try:
+        sent = bot.send_photo(
+            chat_id,
+            pair_challenge_result_card(game, rows),
+            caption=f"👥 PAIR CHALLENGE • {len(rows)} pair(s)",
+        )
+        if old_id:
+            safe_delete_message(bot, chat_id, old_id)
+        delay_delete_message(chat_id, sent.message_id, 120)
+    except Exception as exc:
+        print("Pair Challenge result error:", exc)
+
+@bot.message_handler(commands=["pair"])
+def pair_challenge_command(message):
+    if message.chat.type not in ("group", "supergroup"):
+        return
+    started, game = start_pair_challenge(message.chat.id)
+    if not started:
+        bot.reply_to(message, "👥 Pair Challenge က run နေပြီးသားပါ။")
+        return
+    try:
+        sent = bot.send_photo(
+            message.chat.id,
+            pair_challenge_card(game),
+            caption="👥 PAIR CHALLENGE • 90 seconds",
+            reply_markup=pair_challenge_keyboard(game),
+        )
+        set_pair_challenge_message(message.chat.id, game["id"], sent.message_id)
+        schedule_task(
+            max(1, game["ends_at"] - time.time()),
+            finish_pair_challenge_round,
+            message.chat.id,
+            game["id"],
+            task_id=f"pair_challenge:{message.chat.id}",
+            replace=True,
+        )
+    except Exception as exc:
+        print("Pair Challenge start error:", exc)
+
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pair:"))
+def pair_challenge_callback(call):
+    try:
+        _, game_id, choice = call.data.split(":", 2)
+        game = get_pair_challenge(call.message.chat.id)
+        if not game or game["id"] != game_id:
+            bot.answer_callback_query(call.id, "ဒီ round ပြီးသွားပြီ။")
+            return
+        result = choose_pair_challenge(
+            call.message.chat.id,
+            game_id,
+            call.from_user.id,
+            call.from_user.first_name or call.from_user.username or "Player",
+            choice,
+        )
+        status = result.get("status")
+        if status == "already":
+            bot.answer_callback_query(call.id, "တစ်ခါရွေးပြီးပြီ။")
+        elif status == "ok":
+            label = game["left"] if choice == "a" else game["right"]
+            bot.answer_callback_query(call.id, "ရွေးထားတာ — " + label)
+        else:
+            bot.answer_callback_query(call.id, "ဒီ round ပိတ်သွားပြီ။")
+    except Exception as exc:
+        print("Pair Challenge callback error:", exc)
+
 
 # =========================================================
 # 👥 GROUP MEMBER REGISTRY MIDDLEWARE
