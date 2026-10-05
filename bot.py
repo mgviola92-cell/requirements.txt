@@ -2,6 +2,7 @@ import telebot
 print("TEST 1 - bot.py started")
 import time
 import random
+import secrets
 import yt_dlp
 import os
 import threading
@@ -348,7 +349,18 @@ def early_text_spam_middleware(message):
 
 
 # ကိုယ်ပေါ်စေချင်တဲ့ အီမိုဂျီများကို ဒီထဲမှာ စိုက်ကြိုက် ပြောင်းလဲနိုင်ပါတယ်
-EMOJIS = ["🔥", "✨", "🎉", "💥", "🎯", "🌟", "🚀", "⚡", "🍀", "💎"]
+EMOJIS = [
+    "🔥", "✨", "🎉", "💥", "🎯", "🌟", "🚀", "⚡", "🍀", "💎",
+    "🌈", "🦋", "🌸", "🌺", "🌻", "🌙", "☀️", "⭐", "💫", "☄️",
+    "🎊", "🎈", "🎁", "🎀", "🎵", "🎶", "🎸", "🎧", "🥁", "🎺",
+    "⚽", "🏀", "🏆", "🥇", "🎮", "🕹️", "🎲", "🧩", "♟️", "🎳",
+    "🍎", "🍓", "🍒", "🍉", "🍊", "🍋", "🥭", "🍍", "🥝", "🍇",
+    "🍔", "🍕", "🍟", "🌮", "🍩", "🍪", "🍫", "🍿", "🧋", "☕",
+    "🐶", "🐱", "🐼", "🦊", "🐯", "🦁", "🐸", "🐧", "🦄", "🐝",
+    "🌊", "🌴", "🌵", "🍁", "🍂", "🌿", "☘️", "🌱", "🌲", "🏔️",
+    "❤️", "🧡", "💛", "💚", "💙", "💜", "🤍", "🩵", "🩷", "💖",
+    "😎", "🥳", "🤩", "😺", "🙌", "👏", "🤝", "💪", "🫶", "✌️",
+]
 
 # Cooldown စနစ်နှင့် Stop စနစ်အတွက် မှတ်ဉာဏ်သိမ်းဆည်းရန်နေရာ
 last_called_time = 0
@@ -445,8 +457,8 @@ def mention_all_users(message):
                 for u_id in user_list:
                     hidden_mentions += f"<a href='tg://user?id={u_id}'>​</a>"
 
-                random_emojis = "".join(random.choices(EMOJIS, k=5))
-                final_message = f"{input_line}\n{random_emojis}{hidden_mentions}"
+                random_emojis = " ".join(random.sample(EMOJIS, k=8))
+                final_message = f"{input_line}\n\n\n{random_emojis}{hidden_mentions}"
 
                 sent_msg = bot.send_message(chat_id, final_message, parse_mode='HTML')
 
@@ -475,6 +487,42 @@ def mention_all_users(message):
 
     else:
         bot.reply_to(message, "This command can only be used in Telegram Groups.")
+
+# =========================================================
+# 👮 ADMIN-ONLY MENTION TARGET
+# /admincall /အက်မင်ခေါ် [optional text]
+# Mentions only non-bot group admins.
+# =========================================================
+@bot.message_handler(commands=["admincall", "အက်မင်ခေါ်"])
+def mention_admins_only(message):
+    if message.chat.type not in ("group", "supergroup"):
+        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        return
+
+    delay_delete_message(message.chat.id, message.message_id, 80)
+
+    try:
+        admins = bot.get_chat_administrators(message.chat.id)
+        admin_ids = [item.user.id for item in admins if not item.user.is_bot]
+        if not admin_ids:
+            bot.reply_to(message, "❌ ခေါ်လို့ရမယ့် Admin မတွေ့ပါဘူး။")
+            return
+
+        parts = (message.text or "").split(maxsplit=1)
+        input_line = parts[1].strip() if len(parts) > 1 else "အက်မင်တို့ ခဏလာကြည့်ပေးပါဦး 👮"
+        hidden_mentions = "".join(
+            f"<a href='tg://user?id={uid}'>​</a>" for uid in admin_ids
+        )
+        random_emojis = " ".join(random.sample(EMOJIS, k=8))
+        sent = bot.send_message(
+            message.chat.id,
+            f"{input_line}\n\n\n{random_emojis}{hidden_mentions}",
+            parse_mode="HTML",
+        )
+        delay_delete_message(message.chat.id, sent.message_id, 60)
+    except Exception as exc:
+        print(f"Admin mention error: {exc}")
+        bot.reply_to(message, "❌ Admin တွေကို ခေါ်လို့မရသေးပါဘူး။")
 
 # --- 🎵 သီချင်းတောင်းသည့် လုပ်ဆောင်ချက် (/play /ဖွင့်) ---
 
@@ -1058,10 +1106,8 @@ COIN_ALIASES = {
 # =========================================================
 
 def flip_coin():
-    return random.choice([
-        "ခေါင်း",
-        "အမြီး",
-    ])
+    # OS-backed unbiased 50/50 bit. Independent from the bot's normal PRNG state.
+    return "ခေါင်း" if secrets.randbelow(2) == 0 else "အမြီး"
 
 
 # =========================================================
