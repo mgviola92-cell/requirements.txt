@@ -4724,8 +4724,7 @@ def boss_raid_finish(chat_id,raid,won):
     # Unpin is independent: a failed edit/result render must never leave the raid pinned.
     if raid.get("message_id"):
         try:
-            ok=safe_unpin_message(bot,chat_id,raid["message_id"])
-            if not ok:print("Boss Raid warning: unpin failed")
+            boss_raid_force_unpin(chat_id,raid["message_id"])
         except Exception as ex:print("Boss unpin error:",ex)
 
     boss_raid_visual_state.pop(chat_id,None)
@@ -4749,6 +4748,14 @@ def boss_raid_finish(chat_id,raid,won):
             delay_delete_message(chat_id,msg.message_id,90)
         except Exception as fallback_ex:
             print("Boss result fallback error:",fallback_ex)
+
+def boss_raid_force_unpin(chat_id,message_id):
+    if not message_id:return
+    try:
+        if not safe_unpin_message(bot,chat_id,message_id):
+            bot.unpin_chat_message(chat_id,message_id)
+    except Exception as ex:
+        print("Boss force unpin error:",ex)
 
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
