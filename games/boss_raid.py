@@ -49,6 +49,11 @@ BOSS_ATTACK_LINES=[
 "Boss ရဲ့ heavy strike ကျလာတယ် — Raid က ပိုပြင်းလာပြီ!",
 "Boss က roar လုပ်လိုက်တယ် — battlefield တစ်ခုလုံး တုန်သွားတယ်!",
 ]
+BOSS_ATTACK_EFFECTS=[
+("quake","🌋 QUAKE","Boss quake ကြောင့် party damage momentum ကျသွားတယ်!",-18),
+("slam","💥 HEAVY SLAM","Heavy Slam! Boss က HP နည်းနည်းပြန်တက်သွားတယ်!",28),
+("roar","📣 WAR ROAR","War Roar! Boss defense တင်းလာတယ်!",0),
+]
 MODIFIER_LINES=[
 ("rage","🔥 RAGE","Boss rage ဖြစ်နေတယ် — Phase resistance ပိုပြင်းလာပြီ!"),
 ("exposed","💢 EXPOSED","Boss guard ပွင့်သွားတယ် — အခုအချိန် ဝိုင်းချ!"),
@@ -129,7 +134,16 @@ def attack(chat_id,raid_id,user_id,user_name):
                 mod=secrets.choice(MODIFIER_LINES);r["modifier"]=mod[0];r["modifier_hits_left"]=MODIFIER_DURATION_HITS
                 event={"kind":"modifier","title":mod[1],"text":mod[2],"hits":MODIFIER_DURATION_HITS}
             else:
-                event={"kind":"attack","title":"💥 BOSS ATTACK","text":_pick((r["boss"]["name"],"attack"),BOSS_ATTACK_LINES)}
+                effect=secrets.choice(BOSS_ATTACK_EFFECTS)
+                if effect[0]=="slam":
+                    heal=min(effect[3],r["max_hp"]-r["hp"]);r["hp"]+=heal
+                    event={"kind":"attack","title":effect[1],"text":effect[2],"heal":heal}
+                elif effect[0]=="roar":
+                    r["modifier"]="fortify";r["modifier_hits_left"]=10
+                    event={"kind":"attack","title":effect[1],"text":effect[2],"hits":10}
+                else:
+                    # Quake is a battle event, not a player punishment/mute.
+                    event={"kind":"attack","title":effect[1],"text":effect[2]}
         if r["hp"]<=0:r["finished"]=True;r["result"]="victory"
         return {"status":"ok","damage":dmg,"crit":crit,"blocked":blocked,"reaction":reaction,"event":event,"raid":_copy(r)}
 
