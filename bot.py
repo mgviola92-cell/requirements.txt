@@ -193,6 +193,12 @@ from games.boss_raid import (
     claim_ending as claim_boss_raid_ending,
 )
 
+from ui.boss_raid_card import (
+    get_boss_artwork,
+    live_card as generate_boss_live_card,
+    result_card as generate_boss_result_card,
+)
+
 from ui.speed_tap_card import (
     get_speed_tap_background,
     generate_speed_tap_pending_card_bytes,
@@ -4629,6 +4635,7 @@ def speed_tap_callback(call):
 # =========================================================
 boss_raid_edit_lock=threading.RLock()
 boss_raid_last_edit={}
+boss_raid_visual_state={}
 
 def boss_raid_text(raid):
     boss=raid["boss"];hp=max(0,raid["hp"]);mx=raid["max_hp"];pct=(hp/mx*100) if mx else 0
@@ -4661,7 +4668,12 @@ def boss_raid_edit(chat_id,raid,force=False):
         last=boss_raid_last_edit.get(chat_id,0)
         if not force and now-last<1.0:return
         boss_raid_last_edit[chat_id]=now
-    try:bot.edit_message_text(boss_raid_text(raid),chat_id,mid,parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False)))
+    try:
+        state=boss_raid_visual_state.get(chat_id,{})
+        if state:
+            bot.edit_message_caption(chat_id=chat_id,message_id=mid,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False)))
+        else:
+            bot.edit_message_text(boss_raid_text(raid),chat_id,mid,parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False)))
     except Exception as ex:
         if "message is not modified" not in str(ex).lower():print("Boss Raid edit error:",ex)
 
@@ -4674,7 +4686,6 @@ def boss_reaction_message(chat_id,raid,text,kind="phase"):
     except Exception as ex:print("Boss reaction error:",ex)
 
 def boss_raid_mute_fighters(chat_id,raid):
-    # Telegram does not allow bots to restrict creator/admin accounts.
     until=int(time.time())+45
     try:admins={x.user.id for x in bot.get_chat_administrators(chat_id)}
     except Exception:admins=set()
@@ -4685,31 +4696,29 @@ def boss_raid_mute_fighters(chat_id,raid):
             bot.restrict_chat_member(chat_id,uid,until_date=until,permissions=types.ChatPermissions(can_send_messages=False))
             muted+=1
         except Exception as ex:print("Boss defeat mute error:",uid,ex)
-    if raid.get("fighters"):
-        try:
-            msg=bot.send_message(chat_id,f'🔒 <b>DEFEAT PENALTY</b>\nRaid fighters: {len(raid["fighters"])}\n🤐 45 sec muted: {muted}\n🛡 Admin/Owner protected by Telegram: {protected}',parse_mode="HTML")
-            delay_delete_message(chat_id,msg.message_id,45)
-        except Exception:pass
+    return muted,protected
 
 def boss_raid_finish(chat_id,raid,won):
-    # Callback + timeout can arrive almost together. Only one may finish the raid.
     owned=claim_boss_raid_ending(chat_id,raid["id"])
     if not owned:return
-    raid=owned
-    end_session(chat_id,"boss_raid")
+    raid=owned;end_session(chat_id,"boss_raid")
+    line=boss_ending_line(raid)
+    muted,protected=(0,0) if won else boss_raid_mute_fighters(chat_id,raid)
+    state=boss_raid_visual_state.pop(chat_id,{})
+    art=state.get("art");variant=state.get("variant")
+    # End live card first, then unpin it.
     boss_raid_edit(chat_id,raid,force=True)
-    if raid.get("message_id"):
-        unpinned=safe_unpin_message(bot,chat_id,raid["message_id"])
-        if not unpinned:
-            print("Boss Raid warning: could not unpin result card")
-    boss_reaction_message(chat_id,raid,boss_ending_line(raid),"win" if won else "lose")
-    if won:
-        try:
-            msg=bot.send_message(chat_id,'🏆 <b>RAID VICTORY!</b>\nBoss ကိုအနိုင်ယူလိုက်ပြီ! 🎉',parse_mode="HTML")
-            delay_delete_message(chat_id,msg.message_id,75)
-        except Exception as ex:print("Boss victory message error:",ex)
-    else:
-        boss_raid_mute_fighters(chat_id,raid)
+    if raid.get("message_id"):safe_unpin_message(bot,chat_id,raid["message_id"])
+    # Result is a visual game card instead of two plain text messages.
+    try:
+        card=generate_boss_result_card(raid,won,line,muted,protected,art=art,variant=variant)
+        caption=(f'🏆 <b>RAID VICTORY</b>' if won else f'☠️ <b>PARTY DEFEATED</b>')+f'\n{raid["boss"]["emoji"]} <b>{html.escape(raid["boss"]["name"])}</b>: “{html.escape(line)}”'
+        if not won:caption+=f'\n\n🔒 45s penalty • {muted} muted • {protected} Admin/Owner protected'
+        msg=bot.send_photo(chat_id,card,caption=caption,parse_mode="HTML")
+        delay_delete_message(chat_id,msg.message_id,90)
+    except Exception as ex:
+        print("Boss result card error:",ex)
+        boss_reaction_message(chat_id,raid,line,"win" if won else "lose")
 
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
@@ -4731,7 +4740,15 @@ def boss_raid_command(message):
     if not created:bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။');return
     ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=BOSS_RAID_DURATION)
     if not ok:finish_boss_raid(chat_id,raid["id"],"cancelled");return
-    sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+    art=get_boss_artwork(raid["boss"]["name"])
+    try:
+        live,variant=generate_boss_live_card(raid,art=art)
+        sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+        boss_raid_visual_state[chat_id]={"art":art,"variant":variant}
+    except Exception as ex:
+        print("Boss live card error:",ex)
+        sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+        boss_raid_visual_state[chat_id]={"art":art,"variant":None}
     set_boss_raid_message_id(chat_id,raid["id"],sent.message_id);raid=get_boss_raid(chat_id)
     safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True);delay_delete_message(chat_id,message.message_id,10)
     schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
