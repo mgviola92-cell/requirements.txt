@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "system": "boss_raid_visuals",
+  "layout": "assets/boss_raid/<boss_slug>/<phase_or_variant>/",
+  "selection": {
+    "recent_avoidance": true,
+    "boss_specific_first": true,
+    "generic_fallback": true
+  },
+  "live_image_policy": "cinematic artwork only; changing HP/timer/damage/raiders stay in Telegram caption",
+  "phases": [
+    "normal",
+    "damaged",
+    "rage",
+    "final"
+  ],
+  "variants": [
+    "wide",
+    "closeup",
+    "dark",
+    "alert"
+  ],
+  "bosses": [
+    "slime_king",
+    "cave_troll",
+    "wild_golem",
+    "venom_spider",
+    "goblin_chief",
+    "frost_wolf",
+    "orc_warlord",
+    "stone_guardian",
+    "sand_serpent",
+    "dark_knight",
+    "thunder_beast",
+    "swamp_hydra",
+    "inferno_giant",
+    "abyss_reaper",
+    "storm_titan",
+    "ancient_hydra",
+    "demon_lord",
+    "void_colossus",
+    "celestial_dragon",
+    "world_eater",
+    "chaos_emperor",
+    "eclipse_titan",
+    "immortal_demon",
+    "neon_destroyer"
+  ]
+}
