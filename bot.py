@@ -181,6 +181,16 @@ from features.speed_tap_auto import (
     record_speed_tap_activity,
 )
 
+from games.boss_raid import (
+    RAID_DURATION as BOSS_RAID_DURATION,
+    start_raid as start_boss_raid,
+    get_raid as get_boss_raid,
+    set_message_id as set_boss_raid_message_id,
+    attack as attack_boss_raid,
+    finish_raid as finish_boss_raid,
+    top_fighters as boss_top_fighters,
+)
+
 from ui.speed_tap_card import (
     get_speed_tap_background,
     generate_speed_tap_pending_card_bytes,
@@ -4611,6 +4621,115 @@ def speed_tap_callback(call):
     end_speed_tap_game(
         chat_id
     )
+
+# =========================================================
+# 👹 GROUP BOSS RAID
+# No gameplay attack cooldown. Balance = low hit damage + boss HP/phases.
+# One pinned message is edited in place.
+# =========================================================
+boss_raid_edit_lock = threading.RLock()
+boss_raid_last_edit = {}
+
+def boss_raid_text(raid):
+    boss=raid["boss"]
+    hp=max(0,raid["hp"]); max_hp=raid["max_hp"]
+    pct=(hp/max_hp*100) if max_hp else 0
+    filled=max(0,min(12,int(round(pct/100*12))))
+    bar="█"*filled+"░"*(12-filled)
+    left=max(0,int(raid["ends_at"]-time.time()))
+    mins,secs=divmod(left,60)
+    top=boss_top_fighters(raid,3)
+    top_lines=[]
+    medals=["🥇","🥈","🥉"]
+    for idx,p in enumerate(top):
+        top_lines.append(f'{medals[idx]} {html.escape(str(p["name"]))} — {p["damage"]} DMG')
+    if not top_lines: top_lines=["— No attacks yet —"]
+    state="🏁 DEFEATED" if raid.get("result")=="victory" else ("⌛ TIME UP" if raid.get("finished") else "⚔️ RAID LIVE")
+    return (
+        f'{boss["emoji"]} <b>{html.escape(boss["name"])}</b> · {boss["tier"]}\n'
+        f'{state} · PHASE {raid["phase"]}\n\n'
+        f'❤️ {hp:,} / {max_hp:,} HP\n'
+        f'{bar} {pct:.1f}%\n\n'
+        f'⏱️ {mins:02d}:{secs:02d}   💥 {raid["total_damage"]:,} DMG   👥 {len(raid["fighters"])} Fighters\n\n'
+        f'<b>TOP DAMAGE</b>\n'+"\n".join(top_lines)+
+        "\n\n⚔️ ATTACK ကို ဆက်တိုက်နှိပ်လို့ရတယ် — cooldown မရှိဘူး။"
+    )
+
+def boss_raid_edit(chat_id,raid,force=False):
+    mid=raid.get("message_id")
+    if not mid:return
+    now=time.monotonic()
+    with boss_raid_edit_lock:
+        last=boss_raid_last_edit.get(chat_id,0)
+        # Telegram edit flood မဖြစ်အောင် UI edit ကို throttle ပဲလုပ်တယ်။
+        # Attack damage ကိုတော့ တစ်ချက်မှမပယ်ဘူး။
+        if not force and now-last<1.0:return
+        boss_raid_last_edit[chat_id]=now
+    try:
+        bot.edit_message_text(
+            boss_raid_text(raid),chat_id,mid,parse_mode="HTML",
+            reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False))
+        )
+    except Exception as e:
+        if "message is not modified" not in str(e).lower():
+            print("Boss Raid edit error:",e)
+
+def boss_raid_timeout(chat_id,raid_id):
+    raid=get_boss_raid(chat_id)
+    if not raid or raid["id"]!=raid_id or raid.get("finished") and raid.get("result")=="victory":return
+    raid=finish_boss_raid(chat_id,raid_id,"timeout")
+    end_session(chat_id,"boss_raid")
+    if raid:
+        boss_raid_edit(chat_id,raid,force=True)
+        if raid.get("message_id"): safe_unpin_message(bot,chat_id,raid["message_id"])
+
+@bot.message_handler(commands=['boss','bossraid','raid'])
+def boss_raid_command(message):
+    if message.chat.type not in ('group','supergroup'):
+        bot.reply_to(message,'👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။');return
+    chat_id=message.chat.id
+    allowed,blocker=can_start_session(chat_id,"boss_raid")
+    if not allowed:
+        sent=bot.reply_to(message,f'⏳ {blocker} game/event ရှိနေပါတယ်။')
+        delay_delete_message(chat_id,sent.message_id,15);return
+    created,raid=start_boss_raid(chat_id)
+    if not created:
+        bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။');return
+    session_ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=BOSS_RAID_DURATION)
+    if not session_ok:
+        finish_boss_raid(chat_id,raid["id"],"cancelled");return
+    sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+    set_boss_raid_message_id(chat_id,raid["id"],sent.message_id)
+    raid=get_boss_raid(chat_id)
+    safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True)
+    delay_delete_message(chat_id,message.message_id,10)
+    schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
+
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("boss:"))
+def boss_raid_callback(call):
+    parts=call.data.split(":")
+    if len(parts)!=3:
+        bot.answer_callback_query(call.id,"❌ Invalid raid.");return
+    raid_id,action=parts[1],parts[2]
+    if action=="closed":
+        bot.answer_callback_query(call.id,"🏁 ဒီ Raid ပြီးသွားပြီ။");return
+    if action!="attack":
+        bot.answer_callback_query(call.id,"❌ Invalid action.");return
+    chat_id=call.message.chat.id
+    name=call.from_user.first_name or call.from_user.username or "Player"
+    result=attack_boss_raid(chat_id,raid_id,call.from_user.id,name)
+    if result["status"]!="ok":
+        bot.answer_callback_query(call.id,"🏁 ဒီ Raid ပြီးသွားပြီ။");return
+    raid=result["raid"]
+    if result["blocked"]: note="🛡️ Boss BLOCK!"
+    elif result["crit"]: note=f'💥 CRITICAL! -{result["damage"]} HP'
+    else: note=f'⚔️ -{result["damage"]} HP'
+    bot.answer_callback_query(call.id,note)
+    boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
+    if raid.get("finished") and raid.get("result")=="victory":
+        cancel_task(f'boss_timeout:{chat_id}')
+        end_session(chat_id,"boss_raid")
+        if raid.get("message_id"): safe_unpin_message(bot,chat_id,raid["message_id"])
 
 # =========================================================
 # 😀 EMOJI GUESS
