@@ -19,28 +19,26 @@ def get_boss_artwork(boss_name):
     return random_asset_avoiding_recent("boss:generic","boss_raid","generic",recent_limit=10,recursive=True)
 
 def _base(art,variant):
+    # Artwork-first cinematic scene: keep the boss visible instead of covering
+    # the whole image with a dashboard panel.
     card=create_card(W,H,(10,12,18,255))
-    if art:card=add_background_image(card,art,blur=.4,darken=125)
+    if art:card=add_background_image(card,art,blur=.12,darken=42)
     accent=ACCENTS.get(variant,ACCENTS["crimson"])
-    draw_panel(card,(30,28,1070,692),fill=(10,13,20,205),radius=34,outline=accent,outline_width=3)
+    draw_panel(card,(24,22,1076,698),fill=(7,9,14,35),radius=32,outline=accent,outline_width=3)
     return card,accent
 
 def live_card(raid,art=None,variant=None):
     variant=variant or random.choice(VARIANTS)
     card,accent=_base(art,variant)
     b=raid["boss"]
-    hp=max(0,raid["hp"]);mx=max(1,raid["max_hp"]);pct=hp/mx*100
-    # Static image = cinematic boss scene. Live raider stats stay in caption.
-    draw_panel(card,(45,40,1055,188),fill=(10,13,20,210),radius=30,outline=accent,outline_width=3)
-    draw_text(card,"BOSS RAID",(82,82),size=29,fill=accent)
-    draw_text(card,b["name"].upper(),(82,145),size=56)
-    phase=raid.get("phase",1)
-    phase_label={1:"AWAKENING",2:"ENRAGED",3:"FINAL PHASE"}.get(phase,"FINAL PHASE")
-    draw_text(card,f'{b["tier"]}  •  {phase_label}',(1010,145),size=27,fill=(225,230,238,255),anchor="ra")
-    draw_panel(card,(45,574,1055,675),fill=(10,13,20,225),radius=28)
-    draw_text(card,"BOSS HP",(82,606),size=23,fill=(238,240,245,255))
-    draw_progress_bar(card,(82,637,1018,661),pct,background=(48,52,61,255),foreground=accent,radius=12)
-    return card_to_bytes(card,"JPEG",94),variant
+    # The JPEG is intentionally mostly artwork. Exact HP/timer/damage/raiders
+    # are live Telegram caption data, so the image never shows stale stats.
+    draw_panel(card,(48,42,1052,148),fill=(7,9,14,145),radius=26,outline=accent,outline_width=2)
+    draw_text(card,"GROUP BOSS RAID",(82,78),size=24,fill=accent)
+    draw_text(card,b["name"].upper(),(82,128),size=48)
+    draw_panel(card,(760,604,1048,672),fill=(7,9,14,150),radius=22,outline=accent,outline_width=2)
+    draw_text(card,f'{b["tier"]}  •  RAID LIVE',(1012,646),size=24,fill=(238,240,245,255),anchor="ra")
+    return card_to_bytes(card,"JPEG",95),variant
 
 def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None):
     variant=variant or random.choice(VARIANTS);card,accent=_base(art,variant);b=raid["boss"]
