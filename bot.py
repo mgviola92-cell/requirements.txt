@@ -4696,9 +4696,35 @@ def boss_raid_mute_fighters(chat_id,raid):
     for uid in raid.get("fighters",{}):
         if uid in admins:protected+=1;continue
         try:
-            bot.restrict_chat_member(chat_id,uid,until_date=until,permissions=types.ChatPermissions(can_send_messages=False))
-            muted+=1
-        except Exception as ex:print("Boss defeat mute error:",uid,ex)
+            member=bot.get_chat_member(chat_id,uid)
+            if member.status in ("administrator","creator"):
+                protected+=1;continue
+            mute_permissions=types.ChatPermissions(
+                can_send_messages=False,
+                can_send_audios=False,
+                can_send_documents=False,
+                can_send_photos=False,
+                can_send_videos=False,
+                can_send_video_notes=False,
+                can_send_voice_notes=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+                can_change_info=False,
+                can_invite_users=False,
+                can_pin_messages=False,
+                can_manage_topics=False,
+            )
+            result=bot.restrict_chat_member(
+                chat_id,
+                uid,
+                permissions=mute_permissions,
+                until_date=until,
+                use_independent_chat_permissions=True,
+            )
+            if result:muted+=1
+            else:print("Boss defeat mute returned False:",uid)
+        except Exception as ex:print("Boss defeat mute error:",uid,repr(ex))
     return muted,protected
 
 def boss_raid_finish(chat_id,raid,won):
