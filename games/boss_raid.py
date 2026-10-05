@@ -61,7 +61,7 @@ def start_raid(chat_id,duration=RAID_DURATION,boss=None):
         cur=_raids.get(chat_id)
         if cur and not cur["finished"]:return False,_copy(cur)
         b=dict(boss or random.choice(BOSSES));now=time.time()
-        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set()}
+        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False}
         _raids[chat_id]=r;return True,_copy(r)
 
 def get_raid(chat_id):
@@ -104,6 +104,15 @@ def attack(chat_id,raid_id,user_id,user_name):
 def ending_line(raid):
     kind="win" if raid.get("result")=="victory" else "lose"
     return _pick((raid["boss"]["name"],kind),WIN_LINES if kind=="win" else LOSE_LINES)
+
+def claim_ending(chat_id,raid_id):
+    """Exactly one callback/timer owns the final ending sequence."""
+    with _lock:
+        r=_raids.get(chat_id)
+        if not r or r["id"]!=raid_id or r.get("ending_handled"):
+            return None
+        r["ending_handled"]=True
+        return _copy(r)
 
 def finish_raid(chat_id,raid_id,result=None):
     with _lock:
