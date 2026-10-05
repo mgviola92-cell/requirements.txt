@@ -4701,24 +4701,51 @@ def boss_raid_mute_fighters(chat_id,raid):
 def boss_raid_finish(chat_id,raid,won):
     owned=claim_boss_raid_ending(chat_id,raid["id"])
     if not owned:return
-    raid=owned;end_session(chat_id,"boss_raid")
+    raid=owned
+    try:end_session(chat_id,"boss_raid")
+    except Exception as ex:print("Boss end_session error:",ex)
+
     line=boss_ending_line(raid)
-    muted,protected=(0,0) if won else boss_raid_mute_fighters(chat_id,raid)
-    state=boss_raid_visual_state.pop(chat_id,{})
+    muted,protected=(0,0)
+    if not won:
+        try:muted,protected=boss_raid_mute_fighters(chat_id,raid)
+        except Exception as ex:print("Boss penalty error:",ex)
+
+    # IMPORTANT: keep visual state until the live PHOTO caption is finalized.
+    state=boss_raid_visual_state.get(chat_id,{})
     art=state.get("art");variant=state.get("variant")
-    # End live card first, then unpin it.
-    boss_raid_edit(chat_id,raid,force=True)
-    if raid.get("message_id"):safe_unpin_message(bot,chat_id,raid["message_id"])
-    # Result is a visual game card instead of two plain text messages.
+
+    try:boss_raid_edit(chat_id,raid,force=True)
+    except Exception as ex:print("Boss final live-card edit error:",ex)
+
+    # Unpin is independent: a failed edit/result render must never leave the raid pinned.
+    if raid.get("message_id"):
+        try:
+            ok=safe_unpin_message(bot,chat_id,raid["message_id"])
+            if not ok:print("Boss Raid warning: unpin failed")
+        except Exception as ex:print("Boss unpin error:",ex)
+
+    boss_raid_visual_state.pop(chat_id,None)
+
+    # Always send a clear result. Visual rendering failure falls back to text.
+    title='🏆 <b>RAID VICTORY!</b>' if won else '☠️ <b>PARTY DEFEATED!</b>'
+    caption=title+f'\n\n{raid["boss"]["emoji"]} <b>{html.escape(raid["boss"]["name"])}</b>\n“{html.escape(line)}”'
+    if won:
+        caption+=f'\n\n⚔️ Total Damage: <b>{raid["total_damage"]:,}</b>\n👥 Raiders: <b>{len(raid["fighters"])}</b>'
+    else:
+        caption+=f'\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>'
+
     try:
         card=generate_boss_result_card(raid,won,line,muted,protected,art=art,variant=variant)
-        caption=(f'🏆 <b>RAID VICTORY</b>' if won else f'☠️ <b>PARTY DEFEATED</b>')+f'\n{raid["boss"]["emoji"]} <b>{html.escape(raid["boss"]["name"])}</b>: “{html.escape(line)}”'
-        if not won:caption+=f'\n\n🔒 45s penalty • {muted} muted • {protected} Admin/Owner protected'
         msg=bot.send_photo(chat_id,card,caption=caption,parse_mode="HTML")
         delay_delete_message(chat_id,msg.message_id,90)
     except Exception as ex:
         print("Boss result card error:",ex)
-        boss_reaction_message(chat_id,raid,line,"win" if won else "lose")
+        try:
+            msg=bot.send_message(chat_id,caption,parse_mode="HTML")
+            delay_delete_message(chat_id,msg.message_id,90)
+        except Exception as fallback_ex:
+            print("Boss result fallback error:",fallback_ex)
 
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
