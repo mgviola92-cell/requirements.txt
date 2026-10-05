@@ -167,6 +167,9 @@ def live_card(raid,art=None,variant=None,composition=None):
     draw_panel(card,(730,604,1048,672),fill=(7,9,14,150),radius=22,outline=accent,outline_width=2)
     label={"normal":"RAID LIVE","damaged":"DAMAGED","rage":"RAGE","final":"FINAL STAND"}[stage]
     draw_text(card,f'{b["tier"]}  •  {label}',(1012,646),size=24,fill=(238,240,245,255),anchor="ra")
+    phase_label={"normal":"PHASE I","damaged":"PHASE II","rage":"PHASE III","final":"FINAL PHASE"}[stage]
+    draw_panel(card,(48,604,310,672),fill=(7,9,14,175),radius=22,outline=accent,outline_width=2)
+    draw_text(card,phase_label,(179,646),size=22,fill=accent,anchor="mm")
     return card_to_bytes(card,"JPEG",95),variant,composition
 
 def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None,composition=None):
