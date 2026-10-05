@@ -3,97 +3,116 @@ import secrets
 import threading
 import time
 import uuid
+from collections import deque
 
-RAID_DURATION = 180
-BASE_DAMAGE_MIN = 2
-BASE_DAMAGE_MAX = 6
-CRIT_CHANCE_PERCENT = 7
-CRIT_DAMAGE_MIN = 8
-CRIT_DAMAGE_MAX = 15
-BLOCK_CHANCE_PERCENT = 6
+RAID_DURATION=180
+BASE_DAMAGE_MIN=2
+BASE_DAMAGE_MAX=6
+CRIT_CHANCE_PERCENT=7
+CRIT_DAMAGE_MIN=8
+CRIT_DAMAGE_MAX=15
+BLOCK_CHANCE_PERCENT=6
+PHASE_THRESHOLDS=(75,50,25,10)
 
-BOSSES = [
-    {"name":"Slime King","emoji":"🟢","tier":"EASY","hp":650},{"name":"Cave Troll","emoji":"👹","tier":"EASY","hp":760},{"name":"Wild Golem","emoji":"🪨","tier":"EASY","hp":880},{"name":"Venom Spider","emoji":"🕷️","tier":"EASY","hp":980},{"name":"Goblin Chief","emoji":"👺","tier":"EASY","hp":1100},{"name":"Frost Wolf","emoji":"🐺","tier":"EASY","hp":1250},
-    {"name":"Orc Warlord","emoji":"🪓","tier":"NORMAL","hp":1500},{"name":"Stone Guardian","emoji":"🗿","tier":"NORMAL","hp":1700},{"name":"Sand Serpent","emoji":"🐍","tier":"NORMAL","hp":1900},{"name":"Dark Knight","emoji":"⚔️","tier":"NORMAL","hp":2150},{"name":"Thunder Beast","emoji":"⚡","tier":"NORMAL","hp":2400},{"name":"Swamp Hydra","emoji":"🐲","tier":"NORMAL","hp":2700},
-    {"name":"Inferno Giant","emoji":"🔥","tier":"HARD","hp":3100},{"name":"Abyss Reaper","emoji":"💀","tier":"HARD","hp":3500},{"name":"Storm Titan","emoji":"🌩️","tier":"HARD","hp":3900},{"name":"Ancient Hydra","emoji":"🐉","tier":"HARD","hp":4400},{"name":"Demon Lord","emoji":"😈","tier":"HARD","hp":5000},{"name":"Void Colossus","emoji":"🌌","tier":"HARD","hp":5700},
-    {"name":"Celestial Dragon","emoji":"🐲","tier":"LEGENDARY","hp":6500},{"name":"World Eater","emoji":"🌍","tier":"LEGENDARY","hp":7400},{"name":"Chaos Emperor","emoji":"👑","tier":"LEGENDARY","hp":8400},{"name":"Eclipse Titan","emoji":"🌑","tier":"LEGENDARY","hp":9500},{"name":"Immortal Demon","emoji":"👿","tier":"LEGENDARY","hp":10800},{"name":"Neon Destroyer","emoji":"☄️","tier":"LEGENDARY","hp":12500},
+BOSSES=[
+{"name":"Slime King","emoji":"🟢","tier":"EASY","hp":650},{"name":"Cave Troll","emoji":"👹","tier":"EASY","hp":760},{"name":"Wild Golem","emoji":"🪨","tier":"EASY","hp":880},{"name":"Venom Spider","emoji":"🕷️","tier":"EASY","hp":980},{"name":"Goblin Chief","emoji":"👺","tier":"EASY","hp":1100},{"name":"Frost Wolf","emoji":"🐺","tier":"EASY","hp":1250},
+{"name":"Orc Warlord","emoji":"🪓","tier":"NORMAL","hp":1500},{"name":"Stone Guardian","emoji":"🗿","tier":"NORMAL","hp":1700},{"name":"Sand Serpent","emoji":"🐍","tier":"NORMAL","hp":1900},{"name":"Dark Knight","emoji":"⚔️","tier":"NORMAL","hp":2150},{"name":"Thunder Beast","emoji":"⚡","tier":"NORMAL","hp":2400},{"name":"Swamp Hydra","emoji":"🐲","tier":"NORMAL","hp":2700},
+{"name":"Inferno Giant","emoji":"🔥","tier":"HARD","hp":3100},{"name":"Abyss Reaper","emoji":"💀","tier":"HARD","hp":3500},{"name":"Storm Titan","emoji":"🌩️","tier":"HARD","hp":3900},{"name":"Ancient Hydra","emoji":"🐉","tier":"HARD","hp":4400},{"name":"Demon Lord","emoji":"😈","tier":"HARD","hp":5000},{"name":"Void Colossus","emoji":"🌌","tier":"HARD","hp":5700},
+{"name":"Celestial Dragon","emoji":"🐲","tier":"LEGENDARY","hp":6500},{"name":"World Eater","emoji":"🌍","tier":"LEGENDARY","hp":7400},{"name":"Chaos Emperor","emoji":"👑","tier":"LEGENDARY","hp":8400},{"name":"Eclipse Titan","emoji":"🌑","tier":"LEGENDARY","hp":9500},{"name":"Immortal Demon","emoji":"👿","tier":"LEGENDARY","hp":10800},{"name":"Neon Destroyer","emoji":"☄️","tier":"LEGENDARY","hp":12500},
 ]
 
+# Pools are deliberately large and recent picks are remembered per boss/event.
+PHASE_LINES=[
+"အားကောင်းတယ်ထင်နေတာလား… အခုမှစတာ။","ဒီလောက်နဲ့ ငါ့ကိုလှဲနိုင်မယ်ထင်လား။","ကောင်းတယ်… နည်းနည်းတော့နာလာပြီ။","ဆက်လာစမ်း၊ ဘယ်လောက်ခံနိုင်လဲကြည့်မယ်။",
+"အုပ်စုလိုက်လာလည်း ငါမကြောက်ဘူး။","ဟေ့… အခုတော့ စိတ်ဝင်စားလာပြီ။","ငါ့ HP ကိုကြည့်ပြီး မပျော်နဲ့ဦး။","တကယ်တိုက်တတ်တာလား၊ button ပဲနှိပ်တတ်တာလား။",
+"ဒီတစ်ခါတော့ မင်းတို့ကံကောင်းတာ။","အရှိန်တင်လိုက်… ငါလည်းအရှိန်တင်တော့မယ်။","နောက် Phase မှာ မငိုနဲ့။","မဆိုးဘူး… ဒါပေမယ့် မလုံလောက်သေးဘူး။",
+]
+LOSE_LINES=[
+"အချိန်ကုန်ပြီ။ အုပ်စုလိုက်လာပြီး ဒီလောက်ပဲလား။","ငါ့ရှေ့မှာ party တစ်ခုလုံးတောင် မလုံလောက်ဘူး။","ပြန်လေ့ကျင့်ပြီးမှလာခဲ့ကြ။ ဒီတစ်ခါ ငါနိုင်တယ်။",
+"ATTACK ကိုတော့တော်တော်နှိပ်တယ်… damage ကဘယ်မှာလဲ။","ဒီ Raid ကို ငါပိုင်တယ်။ နောက်တစ်ခါ ပိုကောင်းအောင်လာ။","မင်းတို့အဖွဲ့ကို ငါ့ HP ကပဲ နှုတ်ဆက်လိုက်တယ်။",
+"အချိန်က မင်းတို့ကိုကယ်မပေးနိုင်ခဲ့ဘူး။","Fighters တွေများတာနဲ့ Boss မသေဘူးကွ။","ဒီနေ့တော့ ငါ့နေ့ပဲ။ ပြန်လာချင်ရင်လာခဲ့။","တံခါးက ဟိုဘက်မှာ… defeat party ရေ။",
+]
+WIN_LINES=[
+"မဖြစ်နိုင်ဘူး… ဒီအုပ်စုက ငါ့ကိုတကယ်လှဲလိုက်တာလား။","ဒီတစ်ခါ မင်းတို့နိုင်တယ်… နောက်တစ်ခါ မလွယ်ဘူး။","ငါ့အဆုံးသတ်က ဒီလိုဖြစ်မယ်မထင်ခဲ့ဘူး။",
+"ကောင်းတယ်… ဒီ victory ကို ထိုက်တန်တယ်။","ငါရှုံးပြီ။ ဒါပေမယ့် နောက် Boss က မင်းတို့ကိုစောင့်နေတယ်။","ဒီအုပ်စုကို လျှော့တွက်မိတာ ငါ့အမှားပဲ။",
+"လက်ခံတယ်… ဒီ Raid ကို မင်းတို့ယူသွား။","ငါ့ HP သုည… မင်းတို့ရဲ့ teamwork ကတော့ full ပဲ။","ဒီနေ့ Champion က မင်းတို့ပဲ။","နောက်တစ်ခါတွေ့ရင် ဒီလိုလွယ်မယ်မထင်နဲ့။",
+]
 _raids={}
+_recent={}
 _lock=threading.RLock()
 
-def _copy(raid):
-    if not raid: return None
-    out=dict(raid)
-    out["fighters"]={uid:dict(v) for uid,v in raid["fighters"].items()}
-    return out
+def _copy(r):
+    if not r:return None
+    o=dict(r);o["fighters"]={u:dict(v) for u,v in r["fighters"].items()};o["thresholds_seen"]=set(r.get("thresholds_seen",set()));return o
 
-def _phase(hp,max_hp):
-    ratio=hp/max_hp if max_hp else 0
-    if ratio<=.25:return 3
-    if ratio<=.60:return 2
-    return 1
+def _phase(h,m):
+    x=h/m if m else 0
+    return 3 if x<=.25 else (2 if x<=.60 else 1)
 
-def _mult(phase):
-    return {1:1.0,2:.90,3:.80}.get(phase,1.0)
+def _mult(p):return {1:1.,2:.90,3:.80}.get(p,1.)
+
+def _pick(key,pool):
+    hist=_recent.setdefault(key,deque(maxlen=min(6,max(1,len(pool)-1))))
+    choices=[x for x in pool if x not in hist] or list(pool)
+    x=secrets.choice(choices);hist.append(x);return x
 
 def start_raid(chat_id,duration=RAID_DURATION,boss=None):
     with _lock:
-        current=_raids.get(chat_id)
-        if current and not current["finished"]: return False,_copy(current)
-        picked=dict(boss or random.choice(BOSSES))
-        now=time.time()
-        raid={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":picked,"hp":picked["hp"],"max_hp":picked["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None}
-        _raids[chat_id]=raid
-        return True,_copy(raid)
+        cur=_raids.get(chat_id)
+        if cur and not cur["finished"]:return False,_copy(cur)
+        b=dict(boss or random.choice(BOSSES));now=time.time()
+        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set()}
+        _raids[chat_id]=r;return True,_copy(r)
 
 def get_raid(chat_id):
     with _lock:
-        raid=_raids.get(chat_id)
-        if not raid:return None
-        if not raid["finished"] and time.time()>=raid["ends_at"]:
-            raid["finished"]=True;raid["result"]="timeout"
-        return _copy(raid)
+        r=_raids.get(chat_id)
+        if not r:return None
+        if not r["finished"] and time.time()>=r["ends_at"]:r["finished"]=True;r["result"]="timeout"
+        return _copy(r)
 
 def set_message_id(chat_id,raid_id,message_id):
     with _lock:
-        raid=_raids.get(chat_id)
-        if not raid or raid["id"]!=raid_id:return False
-        raid["message_id"]=message_id;return True
+        r=_raids.get(chat_id)
+        if not r or r["id"]!=raid_id:return False
+        r["message_id"]=message_id;return True
 
 def attack(chat_id,raid_id,user_id,user_name):
     with _lock:
-        raid=_raids.get(chat_id)
-        if not raid or raid["id"]!=raid_id:return {"status":"no_raid"}
-        if raid["finished"] or time.time()>=raid["ends_at"]:
-            raid["finished"]=True
-            raid["result"]=raid["result"] or "timeout"
-            return {"status":"finished","raid":_copy(raid)}
-        # No gameplay attack cooldown: every legitimate press is accepted.
+        r=_raids.get(chat_id)
+        if not r or r["id"]!=raid_id:return {"status":"no_raid"}
+        if r["finished"] or time.time()>=r["ends_at"]:
+            r["finished"]=True;r["result"]=r["result"] or "timeout";return {"status":"finished","raid":_copy(r)}
+        old_pct=r["hp"]/r["max_hp"]*100
         roll=secrets.randbelow(100);crit=False;blocked=False
-        if roll<BLOCK_CHANCE_PERCENT: raw=0;blocked=True
-        elif roll<BLOCK_CHANCE_PERCENT+CRIT_CHANCE_PERCENT:
-            raw=secrets.randbelow(CRIT_DAMAGE_MAX-CRIT_DAMAGE_MIN+1)+CRIT_DAMAGE_MIN;crit=True
-        else: raw=secrets.randbelow(BASE_DAMAGE_MAX-BASE_DAMAGE_MIN+1)+BASE_DAMAGE_MIN
-        damage=int(round(raw*_mult(raid["phase"])))
-        if raw>0:damage=max(1,damage)
-        fighter=raid["fighters"].setdefault(user_id,{"name":user_name or "Player","damage":0,"hits":0})
-        fighter["name"]=user_name or fighter["name"];fighter["hits"]+=1;fighter["damage"]+=damage
-        raid["total_damage"]+=damage;raid["hp"]=max(0,raid["hp"]-damage);raid["phase"]=_phase(raid["hp"],raid["max_hp"])
-        if raid["hp"]<=0:raid["finished"]=True;raid["result"]="victory"
-        return {"status":"ok","damage":damage,"crit":crit,"blocked":blocked,"raid":_copy(raid)}
+        if roll<BLOCK_CHANCE_PERCENT:raw=0;blocked=True
+        elif roll<BLOCK_CHANCE_PERCENT+CRIT_CHANCE_PERCENT:raw=secrets.randbelow(CRIT_DAMAGE_MAX-CRIT_DAMAGE_MIN+1)+CRIT_DAMAGE_MIN;crit=True
+        else:raw=secrets.randbelow(BASE_DAMAGE_MAX-BASE_DAMAGE_MIN+1)+BASE_DAMAGE_MIN
+        dmg=int(round(raw*_mult(r["phase"])))
+        if raw>0:dmg=max(1,dmg)
+        f=r["fighters"].setdefault(user_id,{"name":user_name or "Player","damage":0,"hits":0})
+        f["name"]=user_name or f["name"];f["hits"]+=1;f["damage"]+=dmg
+        r["total_damage"]+=dmg;r["hp"]=max(0,r["hp"]-dmg);r["phase"]=_phase(r["hp"],r["max_hp"])
+        new_pct=r["hp"]/r["max_hp"]*100
+        reaction=None
+        for t in PHASE_THRESHOLDS:
+            if old_pct>t>=new_pct and t not in r["thresholds_seen"]:
+                r["thresholds_seen"].add(t);reaction={"threshold":t,"text":_pick((r["boss"]["name"],"phase"),PHASE_LINES)};break
+        if r["hp"]<=0:r["finished"]=True;r["result"]="victory"
+        return {"status":"ok","damage":dmg,"crit":crit,"blocked":blocked,"reaction":reaction,"raid":_copy(r)}
+
+def ending_line(raid):
+    kind="win" if raid.get("result")=="victory" else "lose"
+    return _pick((raid["boss"]["name"],kind),WIN_LINES if kind=="win" else LOSE_LINES)
 
 def finish_raid(chat_id,raid_id,result=None):
     with _lock:
-        raid=_raids.get(chat_id)
-        if not raid or raid["id"]!=raid_id:return None
-        raid["finished"]=True;raid["result"]=result or raid["result"] or ("victory" if raid["hp"]<=0 else "timeout")
-        return _copy(raid)
+        r=_raids.get(chat_id)
+        if not r or r["id"]!=raid_id:return None
+        r["finished"]=True;r["result"]=result or r["result"] or ("victory" if r["hp"]<=0 else "timeout");return _copy(r)
 
 def clear_raid(chat_id):
     with _lock:return _raids.pop(chat_id,None)
 
-def top_fighters(raid,limit=3):
-    fighters=list((raid or {}).get("fighters",{}).values())
-    fighters.sort(key=lambda x:(x["damage"],x["hits"]),reverse=True)
-    return fighters[:limit]
+def top_fighters(r,limit=3):
+    fs=list((r or {}).get("fighters",{}).values());fs.sort(key=lambda x:(x["damage"],x["hits"]),reverse=True);return fs[:limit]
