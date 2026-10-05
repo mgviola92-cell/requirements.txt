@@ -1,6 +1,6 @@
 # =========================================================
 # 👹 BOSS RAID DYNAMIC VISUAL CARDS
-# One base artwork per boss -> live visual states generated at runtime.
+# One base artwork per boss -> many runtime cinematic variants.
 # =========================================================
 import random
 from PIL import Image, ImageEnhance, ImageFilter
@@ -11,6 +11,8 @@ W,H=1100,720
 VARIANTS=("crimson","obsidian","ember","storm")
 ACCENTS={"crimson":(240,70,70,255),"obsidian":(185,140,255,255),"ember":(255,170,60,255),"storm":(90,190,255,255)}
 VISUAL_STAGES=("normal","damaged","rage","final")
+COMPOSITIONS=("center","close","left","right")
+_STAGE_DARKEN={"normal":38,"damaged":44,"rage":34,"final":28}
 
 def get_boss_artwork(boss_name):
     slug=str(boss_name).lower().replace(" ","_")
@@ -31,7 +33,6 @@ def visual_stage(raid):
     return "normal"
 
 def _stage_art(art,stage):
-    """Generate a fresh treatment from the base artwork without changing the source file."""
     image=open_image(art)
     if image is None:return None
     stage=stage if stage in VISUAL_STAGES else "normal"
@@ -49,20 +50,55 @@ def _stage_art(art,stage):
     image=image.filter(ImageFilter.UnsharpMask(radius=2,percent=145,threshold=3))
     return Image.alpha_composite(image,Image.new("RGBA",image.size,(65,0,90,70)))
 
-def _base(art,variant,stage="normal"):
+def _compose_art(image,composition):
+    """Crop/zoom a base boss image into different cinematic compositions."""
+    if image is None:return None
+    composition=composition if composition in COMPOSITIONS else "center"
+    w,h=image.size
+    zoom={"center":1.0,"close":1.28,"left":1.16,"right":1.16}[composition]
+    crop_w=max(1,int(w/zoom));crop_h=max(1,int(h/zoom))
+    if composition=="left":cx=int(w*.42)
+    elif composition=="right":cx=int(w*.58)
+    else:cx=w//2
+    cy=int(h*.48) if composition=="close" else h//2
+    left=max(0,min(w-crop_w,cx-crop_w//2))
+    top=max(0,min(h-crop_h,cy-crop_h//2))
+    return image.crop((left,top,left+crop_w,top+crop_h)).resize((w,h),Image.Resampling.LANCZOS)
+
+def _effects(card,stage,variant):
+    """Lightweight procedural overlays; no extra image assets required."""
+    overlay=Image.new("RGBA",card.size,(0,0,0,0))
+    d=__import__("PIL").ImageDraw.Draw(overlay)
+    accent=ACCENTS.get(variant,ACCENTS["crimson"])
+    # Cinematic edge vignette.
+    for i,a in ((0,105),(18,72),(36,44)):
+        d.rounded_rectangle((i,i,W-i,H-i),radius=34,outline=(0,0,0,a),width=18)
+    # Stage-specific energy bands.
+    if stage in ("rage","final"):
+        for x in range(-H,W,190):
+            d.line((x,H,x+260,0),fill=(accent[0],accent[1],accent[2],28 if stage=="rage" else 42),width=9)
+    if stage=="damaged":
+        for x in (210,520,835):
+            d.line((x,80,x-75,650),fill=(205,150,105,24),width=5)
+    return Image.alpha_composite(card,overlay)
+
+def _base(art,variant,stage="normal",composition="center"):
     card=create_card(W,H,(10,12,18,255))
     treated=_stage_art(art,stage) if art else None
+    treated=_compose_art(treated,composition)
     if treated:
-        darken={"normal":38,"damaged":44,"rage":34,"final":28}.get(stage,38)
-        card=add_background_image(card,treated,blur=.12,darken=darken)
+        card=add_background_image(card,treated,blur=.12,darken=_STAGE_DARKEN.get(stage,38))
+    card=_effects(card,stage,variant)
     accent=ACCENTS.get(variant,ACCENTS["crimson"])
-    draw_panel(card,(24,22,1076,698),fill=(7,9,14,35),radius=32,outline=accent,outline_width=3)
+    frame_alpha={"normal":35,"damaged":50,"rage":72,"final":90}.get(stage,35)
+    draw_panel(card,(24,22,1076,698),fill=(7,9,14,frame_alpha),radius=32,outline=accent,outline_width=3)
     return card,accent
 
-def live_card(raid,art=None,variant=None):
+def live_card(raid,art=None,variant=None,composition=None):
     variant=variant or random.choice(VARIANTS)
+    composition=composition or random.choice(COMPOSITIONS)
     stage=visual_stage(raid)
-    card,accent=_base(art,variant,stage)
+    card,accent=_base(art,variant,stage,composition)
     b=raid["boss"]
     draw_panel(card,(48,42,1052,148),fill=(7,9,14,145),radius=26,outline=accent,outline_width=2)
     draw_text(card,"GROUP BOSS RAID",(82,78),size=24,fill=accent)
@@ -70,10 +106,11 @@ def live_card(raid,art=None,variant=None):
     draw_panel(card,(730,604,1048,672),fill=(7,9,14,150),radius=22,outline=accent,outline_width=2)
     label={"normal":"RAID LIVE","damaged":"DAMAGED","rage":"RAGE","final":"FINAL STAND"}[stage]
     draw_text(card,f'{b["tier"]}  •  {label}',(1012,646),size=24,fill=(238,240,245,255),anchor="ra")
-    return card_to_bytes(card,"JPEG",95),variant
+    return card_to_bytes(card,"JPEG",95),variant,composition
 
-def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None):
-    variant=variant or random.choice(VARIANTS);card,accent=_base(art,variant,"final");b=raid["boss"]
+def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None,composition=None):
+    variant=variant or random.choice(VARIANTS);composition=composition or random.choice(COMPOSITIONS)
+    card,accent=_base(art,variant,"final",composition);b=raid["boss"]
     title="RAID VICTORY" if won else "PARTY DEFEATED";icon="🏆" if won else "☠"
     draw_text(card,f"{icon} {title}",(550,105),size=58,fill=accent,anchor="mm")
     draw_text(card,b["name"].upper(),(550,175),size=42,anchor="mm")
