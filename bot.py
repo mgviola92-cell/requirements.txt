@@ -4801,7 +4801,11 @@ def boss_raid_callback(call):
     event=result.get("event")
     if event:
         try:
-            extra=f'\n⚡ Effect: {event.get("hits")} attacks' if event.get("kind")=="modifier" else ""
+            extra=""
+            if event.get("hits"):
+                extra=f'\nEffect: {event.get("hits")} attacks'
+            if event.get("heal"):
+                extra=f'\nBoss recovered {event.get("heal")} HP'
             ev=bot.send_message(chat_id,f'<b>{html.escape(event["title"])}</b>\n{html.escape(event["text"])}{extra}',parse_mode="HTML")
             delay_delete_message(chat_id,ev.message_id,28)
         except Exception as ex:print("Boss event message error:",ex)
