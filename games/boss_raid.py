@@ -15,6 +15,8 @@ BLOCK_CHANCE_PERCENT=6
 PHASE_THRESHOLDS=(75,50,25,10)
 BOSS_EVENT_CHANCE_PERCENT=8
 BOSS_EVENT_MIN_HITS=8
+MODIFIER_DURATION_HITS=18
+MODIFIER_DAMAGE_MULTIPLIERS={"rage":0.82,"exposed":1.35,"fortify":0.68}
 
 BOSSES=[
 {"name":"Slime King","emoji":"🟢","tier":"EASY","hp":650},{"name":"Cave Troll","emoji":"👹","tier":"EASY","hp":760},{"name":"Wild Golem","emoji":"🪨","tier":"EASY","hp":880},{"name":"Venom Spider","emoji":"🕷️","tier":"EASY","hp":980},{"name":"Goblin Chief","emoji":"👺","tier":"EASY","hp":1100},{"name":"Frost Wolf","emoji":"🐺","tier":"EASY","hp":1250},
@@ -76,7 +78,7 @@ def start_raid(chat_id,duration=RAID_DURATION,boss=None):
         cur=_raids.get(chat_id)
         if cur and not cur["finished"]:return False,_copy(cur)
         b=dict(boss or random.choice(BOSSES));now=time.time()
-        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False,"event_hits":0,"modifier":None}
+        r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False,"event_hits":0,"modifier":None,"modifier_hits_left":0}
         _raids[chat_id]=r;return True,_copy(r)
 
 def get_raid(chat_id):
@@ -103,8 +105,14 @@ def attack(chat_id,raid_id,user_id,user_name):
         if roll<BLOCK_CHANCE_PERCENT:raw=0;blocked=True
         elif roll<BLOCK_CHANCE_PERCENT+CRIT_CHANCE_PERCENT:raw=secrets.randbelow(CRIT_DAMAGE_MAX-CRIT_DAMAGE_MIN+1)+CRIT_DAMAGE_MIN;crit=True
         else:raw=secrets.randbelow(BASE_DAMAGE_MAX-BASE_DAMAGE_MIN+1)+BASE_DAMAGE_MIN
-        dmg=int(round(raw*_mult(r["phase"])))
+        modifier=r.get("modifier")
+        mod_mult=MODIFIER_DAMAGE_MULTIPLIERS.get(modifier,1.0)
+        dmg=int(round(raw*_mult(r["phase"])*mod_mult))
         if raw>0:dmg=max(1,dmg)
+        if r.get("modifier_hits_left",0)>0:
+            r["modifier_hits_left"]-=1
+            if r["modifier_hits_left"]<=0:
+                r["modifier"]=None
         f=r["fighters"].setdefault(user_id,{"name":user_name or "Player","damage":0,"hits":0})
         f["name"]=user_name or f["name"];f["hits"]+=1;f["damage"]+=dmg
         r["total_damage"]+=dmg;r["hp"]=max(0,r["hp"]-dmg);r["phase"]=_phase(r["hp"],r["max_hp"])
@@ -118,8 +126,8 @@ def attack(chat_id,raid_id,user_id,user_name):
         if not r["finished"] and r["event_hits"]>=BOSS_EVENT_MIN_HITS and secrets.randbelow(100)<BOSS_EVENT_CHANCE_PERCENT:
             r["event_hits"]=0
             if secrets.randbelow(100)<45:
-                mod=secrets.choice(MODIFIER_LINES);r["modifier"]=mod[0]
-                event={"kind":"modifier","title":mod[1],"text":mod[2]}
+                mod=secrets.choice(MODIFIER_LINES);r["modifier"]=mod[0];r["modifier_hits_left"]=MODIFIER_DURATION_HITS
+                event={"kind":"modifier","title":mod[1],"text":mod[2],"hits":MODIFIER_DURATION_HITS}
             else:
                 event={"kind":"attack","title":"💥 BOSS ATTACK","text":_pick((r["boss"]["name"],"attack"),BOSS_ATTACK_LINES)}
         if r["hp"]<=0:r["finished"]=True;r["result"]="victory"
