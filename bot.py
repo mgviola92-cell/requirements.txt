@@ -190,6 +190,7 @@ from games.boss_raid import (
     finish_raid as finish_boss_raid,
     top_fighters as boss_top_fighters,
     ending_line as boss_ending_line,
+    claim_ending as claim_boss_raid_ending,
 )
 
 from ui.speed_tap_card import (
@@ -4631,7 +4632,7 @@ boss_raid_last_edit={}
 
 def boss_raid_text(raid):
     boss=raid["boss"];hp=max(0,raid["hp"]);mx=raid["max_hp"];pct=(hp/mx*100) if mx else 0
-    filled=max(0,min(16,int(round(pct/100*16))));bar="▰"*filled+"▱"*(16-filled)
+    filled=max(0,min(16,int(round(pct/100*16))));bar="🟥"*filled+"⬛"*(16-filled)
     left=max(0,int(raid["ends_at"]-time.time()));mins,secs=divmod(left,60)
     top=boss_top_fighters(raid,3);medals=["🥇","🥈","🥉"]
     rows=[f'{medals[i]} <b>{html.escape(str(p["name"]))}</b>  •  {p["damage"]:,} DMG' for i,p in enumerate(top)]
@@ -4691,16 +4692,32 @@ def boss_raid_mute_fighters(chat_id,raid):
         except Exception:pass
 
 def boss_raid_finish(chat_id,raid,won):
+    # Callback + timeout can arrive almost together. Only one may finish the raid.
+    owned=claim_boss_raid_ending(chat_id,raid["id"])
+    if not owned:return
+    raid=owned
     end_session(chat_id,"boss_raid")
     boss_raid_edit(chat_id,raid,force=True)
-    if raid.get("message_id"):safe_unpin_message(bot,chat_id,raid["message_id"])
+    if raid.get("message_id"):
+        unpinned=safe_unpin_message(bot,chat_id,raid["message_id"])
+        if not unpinned:
+            print("Boss Raid warning: could not unpin result card")
     boss_reaction_message(chat_id,raid,boss_ending_line(raid),"win" if won else "lose")
-    if not won:boss_raid_mute_fighters(chat_id,raid)
+    if won:
+        try:
+            msg=bot.send_message(chat_id,'🏆 <b>RAID VICTORY!</b>\nBoss ကိုအနိုင်ယူလိုက်ပြီ! 🎉',parse_mode="HTML")
+            delay_delete_message(chat_id,msg.message_id,75)
+        except Exception as ex:print("Boss victory message error:",ex)
+    else:
+        boss_raid_mute_fighters(chat_id,raid)
 
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
-    if not raid or raid["id"]!=raid_id or (raid.get("finished") and raid.get("result")=="victory"):return
-    raid=finish_boss_raid(chat_id,raid_id,"timeout")
+    if not raid or raid["id"]!=raid_id:return
+    if raid.get("result")=="victory":return
+    # get_raid may already mark it timed-out; do not lose the ending sequence.
+    if not raid.get("finished"):
+        raid=finish_boss_raid(chat_id,raid_id,"timeout")
     if raid:boss_raid_finish(chat_id,raid,False)
 
 @bot.message_handler(commands=['boss','bossraid','raid'])
