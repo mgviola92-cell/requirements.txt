@@ -4647,6 +4647,9 @@ def boss_raid_text(raid):
     if raid.get("result")=="victory":state="🏆 RAID CLEARED"
     elif raid.get("finished"):state="☠️ PARTY DEFEATED"
     else:state=f'⚔️ PHASE {raid["phase"]}  •  RAID LIVE'
+    mod=raid.get("modifier")
+    mod_text={"rage":"🔥 RAGE • damage resisted","exposed":"💢 EXPOSED • bonus damage","fortify":"🛡 FORTIFY • heavy defense"}.get(mod)
+    if mod_text:state+=f'\n{mod_text} • {raid.get("modifier_hits_left",0)} hits left'
     return (
         f'╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n'
         f'{boss["emoji"]} <b>{html.escape(boss["name"]).upper()}</b>\n'
@@ -4798,7 +4801,8 @@ def boss_raid_callback(call):
     event=result.get("event")
     if event:
         try:
-            ev=bot.send_message(chat_id,f'<b>{html.escape(event["title"])}</b>\n{html.escape(event["text"])}',parse_mode="HTML")
+            extra=f'\n⚡ Effect: {event.get("hits")} attacks' if event.get("kind")=="modifier" else ""
+            ev=bot.send_message(chat_id,f'<b>{html.escape(event["title"])}</b>\n{html.escape(event["text"])}{extra}',parse_mode="HTML")
             delay_delete_message(chat_id,ev.message_id,28)
         except Exception as ex:print("Boss event message error:",ex)
     if raid.get("finished") and raid.get("result")=="victory":
