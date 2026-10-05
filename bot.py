@@ -200,6 +200,18 @@ from ui.boss_raid_card import (
     result_card as generate_boss_result_card,
 )
 
+
+from games.team_battle import (
+    start_battle as start_team_battle,
+    get_battle as get_team_battle,
+    set_message_id as set_team_battle_message_id,
+    finish_battle as finish_team_battle,
+    member_ids as team_battle_member_ids,
+    hype_line as team_battle_hype_line,
+    set_update_listener as set_team_battle_update_listener,
+)
+from ui.team_battle_card import generate_team_battle_card
+
 from ui.speed_tap_card import (
     get_speed_tap_background,
     generate_speed_tap_pending_card_bytes,
@@ -275,6 +287,162 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 register_daily_challenge(bot)
+
+
+# =========================================================
+# 🔴🔵 TEAM BATTLE — RED vs BLUE
+# Permanent game rewards stay unchanged; positive earned points are mirrored
+# into the temporary active battle score by core.rewards.
+# =========================================================
+_team_battle_edit_lock = threading.RLock()
+_team_battle_last_edit = {}
+
+def _team_battle_caption(battle, stage="live"):
+    red = int(battle.get("scores", {}).get("red", 0))
+    blue = int(battle.get("scores", {}).get("blue", 0))
+    if stage == "final":
+        if red > blue:
+            return "🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!"
+        if blue > red:
+            return "🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!"
+        return "🏁 TEAM BATTLE FINAL — 🤝 DRAW!"
+    if stage == "half":
+        return "⚔️ TEAM BATTLE — HALF-TIME"
+    return "⚔️ TEAM BATTLE — RED vs BLUE"
+
+def _team_battle_replace_card(battle, stage):
+    chat_id = battle["chat_id"]
+    old_id = battle.get("message_id")
+    try:
+        sent = bot.send_photo(
+            chat_id,
+            generate_team_battle_card(battle, stage),
+            caption=_team_battle_caption(battle, stage),
+        )
+        safe_pin_message(bot, chat_id, sent.message_id, disable_notification=True)
+        set_team_battle_message_id(chat_id, battle["id"], sent.message_id, stage)
+        if old_id and old_id != sent.message_id:
+            safe_unpin_message(bot, chat_id, old_id)
+            safe_delete_message(bot, chat_id, old_id)
+        return sent.message_id
+    except Exception as exc:
+        print("Team Battle card replace error:", exc)
+        return None
+
+def _team_battle_live_update(battle):
+    chat_id = battle["chat_id"]
+    mid = battle.get("message_id")
+    if not mid or battle.get("finished"):
+        return
+    now = time.monotonic()
+    with _team_battle_edit_lock:
+        last = _team_battle_last_edit.get(chat_id, 0.0)
+        if now - last < 1.5:
+            return
+        _team_battle_last_edit[chat_id] = now
+    try:
+        bot.edit_message_media(
+            InputMediaPhoto(
+                generate_team_battle_card(battle, battle.get("stage", "live")),
+                caption=_team_battle_caption(battle, battle.get("stage", "live")),
+            ),
+            chat_id=chat_id,
+            message_id=mid,
+        )
+    except Exception as exc:
+        print("Team Battle live edit error:", exc)
+
+def _team_battle_member_mention(chat_id, uid):
+    try:
+        member = bot.get_chat_member(chat_id, uid)
+        user = member.user
+        name = html.escape(user.first_name or user.username or "Player")
+        return f'<a href="tg://user?id={uid}">{name}</a>'
+    except Exception:
+        return "Player"
+
+def _team_battle_hype(chat_id, battle_id):
+    battle = get_team_battle(chat_id)
+    if not battle or battle["id"] != battle_id or battle.get("finished"):
+        return
+    ids = team_battle_member_ids(battle)
+    if ids:
+        picks = random.sample(ids, min(len(ids), random.randint(1, min(4, len(ids)))))
+        mentions = " ".join(_team_battle_member_mention(chat_id, uid) for uid in picks)
+        try:
+            msg = bot.send_message(
+                chat_id,
+                f"⚡ <b>TEAM BATTLE UPDATE</b>\n\n{mentions}\n{team_battle_hype_line()}",
+                parse_mode="HTML",
+            )
+            threading.Timer(35, lambda: safe_delete_message(bot, chat_id, msg.message_id)).start()
+        except Exception as exc:
+            print("Team Battle hype error:", exc)
+    remaining = max(0, battle["ends_at"] - time.time())
+    if remaining > 70:
+        schedule_task(
+            min(random.randint(55, 105), max(20, remaining - 20)),
+            _team_battle_hype,
+            chat_id,
+            battle_id,
+            task_id=f"team_battle_hype:{chat_id}",
+            replace=True,
+        )
+
+def _team_battle_half(chat_id, battle_id):
+    battle = get_team_battle(chat_id)
+    if not battle or battle["id"] != battle_id or battle.get("finished"):
+        return
+    _team_battle_replace_card(battle, "half")
+
+def _team_battle_final(chat_id, battle_id):
+    battle = finish_team_battle(chat_id, battle_id)
+    if not battle:
+        return
+    _team_battle_replace_card(battle, "final")
+    cancel_task(f"team_battle_hype:{chat_id}")
+    _team_battle_last_edit.pop(chat_id, None)
+
+set_team_battle_update_listener(_team_battle_live_update)
+
+@bot.message_handler(commands=["teambattle"])
+def team_battle_command(message):
+    if message.chat.type not in ("group", "supergroup"):
+        return
+    if not is_user_admin(bot, message.chat.id, message.from_user.id):
+        bot.reply_to(message, "❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။")
+        return
+    started, battle = start_team_battle(message.chat.id)
+    if not started:
+        bot.reply_to(message, "⚔️ Team Battle က လက်ရှိ run နေပါတယ်။")
+        return
+    try:
+        sent = bot.send_photo(
+            message.chat.id,
+            generate_team_battle_card(battle, "live"),
+            caption=_team_battle_caption(battle, "live"),
+        )
+        set_team_battle_message_id(message.chat.id, battle["id"], sent.message_id, "live")
+        safe_pin_message(bot, message.chat.id, sent.message_id, disable_notification=True)
+    except Exception as exc:
+        print("Team Battle start card error:", exc)
+        return
+
+    half_delay = max(1, battle["half_at"] - time.time())
+    final_delay = max(2, battle["ends_at"] - time.time())
+    schedule_task(
+        half_delay, _team_battle_half, message.chat.id, battle["id"],
+        task_id=f"team_battle_half:{message.chat.id}", replace=True,
+    )
+    schedule_task(
+        final_delay, _team_battle_final, message.chat.id, battle["id"],
+        task_id=f"team_battle_final:{message.chat.id}", replace=True,
+    )
+    schedule_task(
+        random.randint(45, 80), _team_battle_hype, message.chat.id, battle["id"],
+        task_id=f"team_battle_hype:{message.chat.id}", replace=True,
+    )
+
 
 try:
     initialize_member_registry()
