@@ -4756,6 +4756,7 @@ def boss_raid_finish(chat_id,raid,won):
         except Exception as ex:print("Boss unpin error:",ex)
 
     boss_raid_visual_state.pop(chat_id,None)
+    boss_raid_last_edit.pop(chat_id,None)
 
     # Always send a clear result. Visual rendering failure falls back to text.
     title='🏆 <b>RAID VICTORY!</b>' if won else '☠️ <b>PARTY DEFEATED!</b>'
