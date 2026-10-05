@@ -45,12 +45,40 @@ def _element_effects(card,element,stage):
         for y in (190,365,540):d.line((0,y,W,y),fill=(a[0],a[1],a[2],alpha),width=5)
     return Image.alpha_composite(card,overlay)
 
-def get_boss_artwork(boss_name):
+def get_boss_artwork(boss_name,stage=None):
+    """AI asset preferred, then stage pool, then the original 24 base images."""
     slug=str(boss_name).lower().replace(" ","_")
     from core.asset_manager import get_asset_path
+    stage=str(stage or "").lower()
+
+    # Optional future AI library:
+    # assets/boss_raid/ai/<boss_slug>/<stage>/*.(png|jpg|jpeg|webp)
+    # assets/boss_raid/ai/<boss_slug>/*.(png|jpg|jpeg|webp)
+    if stage in VISUAL_STAGES:
+        p=random_asset_avoiding_recent(
+            "boss-ai:"+slug+":"+stage,"boss_raid","ai",slug,stage,
+            recent_limit=4,recursive=True
+        )
+        if p:return p
+    p=random_asset_avoiding_recent(
+        "boss-ai:"+slug,"boss_raid","ai",slug,
+        recent_limit=6,recursive=False
+    )
+    if p:return p
+
+    # Legacy/stage-specific artwork remains supported.
+    if stage in VISUAL_STAGES:
+        p=random_asset_avoiding_recent(
+            "boss-stage:"+slug+":"+stage,"boss_raid",slug,stage,
+            recent_limit=4,recursive=True
+        )
+        if p:return p
+
+    # Current flat 24-image base library.
     for ext in (".jpg",".jpeg",".png",".webp"):
         p=get_asset_path("boss_raid",slug+ext)
         if p:return p
+
     p=random_asset_avoiding_recent("boss:"+slug,"boss_raid",slug,recent_limit=4,recursive=True)
     if p:return p
     return random_asset_avoiding_recent("boss:generic","boss_raid","generic",recent_limit=10,recursive=True)
