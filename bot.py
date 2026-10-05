@@ -4753,7 +4753,7 @@ def boss_raid_finish(chat_id,raid,won):
 def boss_raid_timeout(chat_id,raid_id):
     raid=get_boss_raid(chat_id)
     if not raid or raid["id"]!=raid_id:return
-    if raid.get("result")=="victory":return
+    if raid.get("result")=="victory":\n        boss_raid_finish(chat_id,raid,True);return
     # get_raid may already mark it timed-out; do not lose the ending sequence.
     if not raid.get("finished"):
         raid=finish_boss_raid(chat_id,raid_id,"timeout")
