@@ -172,7 +172,15 @@ def live_card(raid,art=None,variant=None,composition=None):
 def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None,composition=None):
     variant=variant or random.choice(VARIANTS);composition=composition or random.choice(COMPOSITIONS)
     b=raid["boss"];element=boss_element(b["name"])
-    card,accent=_base(art,variant,"final",composition,element)
+    # Victory should feel cleared/bright; defeat keeps the threatening final-phase look.
+    result_stage="normal" if won else "final"
+    card,accent=_base(art,variant,result_stage,composition,element)
+    if won:
+        glow=Image.new("RGBA",card.size,(255,230,150,18))
+        card=Image.alpha_composite(card,glow)
+    else:
+        shade=Image.new("RGBA",card.size,(35,0,45,24))
+        card=Image.alpha_composite(card,shade)
     title="RAID VICTORY" if won else "PARTY DEFEATED";icon="🏆" if won else "☠"
     draw_text(card,f"{icon} {title}",(550,105),size=58,fill=accent,anchor="mm")
     draw_text(card,b["name"].upper(),(550,175),size=42,anchor="mm")
