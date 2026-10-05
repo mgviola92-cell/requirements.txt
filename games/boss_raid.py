@@ -111,6 +111,9 @@ def claim_ending(chat_id,raid_id):
         r=_raids.get(chat_id)
         if not r or r["id"]!=raid_id or r.get("ending_handled"):
             return None
+        # Never claim a live raid by mistake.
+        if not r.get("finished"):
+            return None
         r["ending_handled"]=True
         return _copy(r)
 
