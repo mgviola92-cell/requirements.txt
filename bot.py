@@ -4795,6 +4795,12 @@ def boss_raid_callback(call):
     bot.answer_callback_query(call.id,note);boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
     reaction=result.get("reaction")
     if reaction:boss_reaction_message(chat_id,raid,reaction["text"],"phase")
+    event=result.get("event")
+    if event:
+        try:
+            ev=bot.send_message(chat_id,f'<b>{html.escape(event["title"])}</b>\n{html.escape(event["text"])}',parse_mode="HTML")
+            delay_delete_message(chat_id,ev.message_id,28)
+        except Exception as ex:print("Boss event message error:",ex)
     if raid.get("finished") and raid.get("result")=="victory":
         cancel_task(f'boss_timeout:{chat_id}');boss_raid_finish(chat_id,raid,True)
 
