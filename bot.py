@@ -4806,7 +4806,7 @@ def boss_raid_command(message):
     if not created:bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။');return
     ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=BOSS_RAID_DURATION)
     if not ok:finish_boss_raid(chat_id,raid["id"],"cancelled");return
-    art=get_boss_artwork(raid["boss"]["name"])
+    art=get_boss_artwork(raid["boss"]["name"],get_boss_visual_stage(raid))
     try:
         live,variant,composition=generate_boss_live_card(raid,art=art)
         sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
@@ -4838,10 +4838,11 @@ def boss_raid_callback(call):
     new_stage=get_boss_visual_stage(raid)
     if state and state.get("art") and state.get("stage")!=new_stage and raid.get("message_id") and not raid.get("finished"):
         try:
-            live,variant,composition=generate_boss_live_card(raid,art=state.get("art"),variant=state.get("variant"),composition=state.get("composition"))
+            stage_art=get_boss_artwork(raid["boss"]["name"],new_stage) or state.get("art")
+            live,variant,composition=generate_boss_live_card(raid,art=stage_art,variant=state.get("variant"),composition=state.get("composition"))
             media=types.InputMediaPhoto(live,caption=boss_raid_text(raid),parse_mode="HTML")
             bot.edit_message_media(media=media,chat_id=chat_id,message_id=raid["message_id"],reply_markup=boss_attack_keyboard(raid["id"]))
-            state["stage"]=new_stage;state["variant"]=variant;state["composition"]=composition
+            state["art"]=stage_art;state["stage"]=new_stage;state["variant"]=variant;state["composition"]=composition
             boss_raid_visual_state[chat_id]=state
             boss_raid_last_edit[chat_id]=time.monotonic()
         except Exception as ex:
