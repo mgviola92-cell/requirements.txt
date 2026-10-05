@@ -4765,7 +4765,7 @@ def boss_raid_finish(chat_id,raid,won):
         caption+=f'\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>'
 
     try:
-        card=generate_boss_result_card(raid,won,line,muted,protected,art=art,variant=variant)
+        card=generate_boss_result_card(raid,won,line,muted,protected,art=art,variant=variant,composition=state.get("composition"))
         msg=bot.send_photo(chat_id,card,caption=caption,parse_mode="HTML")
         delay_delete_message(chat_id,msg.message_id,90)
     except Exception as ex:
@@ -4808,9 +4808,9 @@ def boss_raid_command(message):
     if not ok:finish_boss_raid(chat_id,raid["id"],"cancelled");return
     art=get_boss_artwork(raid["boss"]["name"])
     try:
-        live,variant=generate_boss_live_card(raid,art=art)
+        live,variant,composition=generate_boss_live_card(raid,art=art)
         sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-        boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"stage":get_boss_visual_stage(raid)}
+        boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"composition":composition,"stage":get_boss_visual_stage(raid)}
     except Exception as ex:
         print("Boss live card error:",ex)
         sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
@@ -4838,10 +4838,10 @@ def boss_raid_callback(call):
     new_stage=get_boss_visual_stage(raid)
     if state and state.get("art") and state.get("stage")!=new_stage and raid.get("message_id") and not raid.get("finished"):
         try:
-            live,variant=generate_boss_live_card(raid,art=state.get("art"),variant=state.get("variant"))
+            live,variant,composition=generate_boss_live_card(raid,art=state.get("art"),variant=state.get("variant"),composition=state.get("composition"))
             media=types.InputMediaPhoto(live,caption=boss_raid_text(raid),parse_mode="HTML")
             bot.edit_message_media(media=media,chat_id=chat_id,message_id=raid["message_id"],reply_markup=boss_attack_keyboard(raid["id"]))
-            state["stage"]=new_stage;state["variant"]=variant
+            state["stage"]=new_stage;state["variant"]=variant;state["composition"]=composition
             boss_raid_visual_state[chat_id]=state
             boss_raid_last_edit[chat_id]=time.monotonic()
         except Exception as ex:
