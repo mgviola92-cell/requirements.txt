@@ -413,9 +413,11 @@ EMOJIS = [
     "😎", "🥳", "🤩", "😺", "🙌", "👏", "🤝", "💪", "🫶", "✌️",
 ]
 
-# Cooldown စနစ်နှင့် Stop စနစ်အတွက် မှတ်ဉာဏ်သိမ်းဆည်းရန်နေရာ
-last_called_time = 0
-is_stopped = False
+# Mention cooldown/stop state is isolated per group.
+# This prevents one group's /လာကြစမ်း or /stop from affecting another group.
+mention_last_called = {}
+mention_stopped = {}
+mention_state_lock = threading.RLock()
 
 # 🎯 လူခေါ်စာများကိုပဲ သီးသန့် အချိန်ကိုက် လိုက်ဖျက်ပေးမည့် စနစ်
 def delay_delete_message(
@@ -450,15 +452,14 @@ def delay_delete_message(
 # --- 🛑 လူခေါ်ခြင်းကို ကြားဖြတ်ရပ်တန့်မည့် လုပ်ဆောင်ချက် (/stop) ---
 @bot.message_handler(commands=['stop', 'နား'])
 def stop_mention(message):
-    global is_stopped
     if message.chat.type in ['group', 'supergroup']:
-        is_stopped = True
+        with mention_state_lock:
+            mention_stopped[message.chat.id] = True
         bot.reply_to(message, "🛑 ရပ်လိုက်ပြီ စောက်အမျိုးမျိုးပဲ မသာကောင်")
 
 # --- ၁။ လူခေါ်သည့် လုပ်ဆောင်ချက် (All Mention Function) ---
-@bot.message_handler(commands=['start', 'all', 'everyone', 'လာကြစမ်း'])
+@bot.message_handler(commands=['all', 'everyone', 'လာကြစမ်း'])
 def mention_all_users(message):
-    global last_called_time, is_stopped
 
     if message.chat.type not in ('group', 'supergroup'):
         bot.reply_to(message, "This command can only be used in Telegram Groups.")
@@ -468,17 +469,22 @@ def mention_all_users(message):
     delay_delete_message(chat_id, message.message_id, 80)
 
     current_time = time.time()
-    if last_called_time != 0 and (current_time - last_called_time) < 140:
-        remaining_time = int(140 - (current_time - last_called_time))
+    with mention_state_lock:
+        last_called_time = mention_last_called.get(chat_id, 0)
+        if last_called_time != 0 and (current_time - last_called_time) < 140:
+            remaining_time = int(140 - (current_time - last_called_time))
+        else:
+            remaining_time = 0
+            mention_stopped[chat_id] = False
+            mention_last_called[chat_id] = current_time
+
+    if remaining_time > 0:
         notice = bot.reply_to(
             message,
             f"⏳ လူခေါ်တာ Cooldown ရှိသေးတယ် — {remaining_time} စက္ကန့် စောင့်ပါ။"
         )
         delay_delete_message(chat_id, notice.message_id, 15)
         return
-
-    is_stopped = False
-    last_called_time = current_time
 
     parts = (message.text or "").split(maxsplit=1)
     input_line = parts[1].strip() if len(parts) > 1 else "တောသားတွေလာကြစမ်း"
@@ -520,7 +526,9 @@ def mention_all_users(message):
 
         sent_people = 0
         for batch_no, batch in enumerate(batches, start=1):
-            if is_stopped:
+            with mention_state_lock:
+                stopped = mention_stopped.get(chat_id, False)
+            if stopped:
                 break
 
             hidden_mentions = "".join(
@@ -539,7 +547,9 @@ def mention_all_users(message):
             if batch_no < len(batches):
                 time.sleep(1.2)
 
-        if not is_stopped:
+        with mention_state_lock:
+            stopped = mention_stopped.get(chat_id, False)
+        if not stopped:
             finish_msg = bot.send_message(
                 chat_id,
                 f"✅ Known members {sent_people} ယောက် ခေါ်ပြီးပြီ။ "
@@ -5866,7 +5876,7 @@ def commands_list(message):
         "🎲 /random ၊ /ကျပမ်း — Random Number\n\n"
 
         "👥 GROUP COMMANDS\n"
-        "📢 /start — Members ခေါ်ရန်\n"
+
         "📢 /all — Members ခေါ်ရန်\n"
         "📢 /everyone — Members ခေါ်ရန်\n"
         "📢 /လာကြစမ်း — Members ခေါ်ရန်\n"
