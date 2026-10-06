@@ -553,7 +553,13 @@ def finish_pair_challenge_round(chat_id, game_id):
         sent = bot.send_photo(
             chat_id,
             pair_challenge_result_card(game),
-            caption="👥 PAIR CHALLENGE • RESULT",
+            caption=(
+                "👥 PAIR CHALLENGE • ✅ SUCCESS\n"
+                + ("SYNC တူသွားပြီ — teamwork success!" if (game.get("challenge") or {}).get("kind") == "sync" else "အားလုံးမှန်တယ် — challenge clear!")
+                if game.get("success")
+                else "👥 PAIR CHALLENGE • ❌ FAILED\n"
+                + ("SYNC မတူဘူး — နှစ်ယောက်လုံး တူတဲ့ဘက်ရွေးမှ အောင်မယ်။" if (game.get("challenge") or {}).get("kind") == "sync" else "အဖြေမပြည့်/မမှန်လို့ ဒီ round မအောင်ဘူး။")
+            ),
         )
         if old_id:
             safe_delete_message(bot, chat_id, old_id)
@@ -650,7 +656,10 @@ def pair_answer_callback(call):
     result = answer_pair_challenge(call.message.chat.id, gid, call.from_user.id, choice)
     status = result.get("status")
     if status == "ok":
+        updated = result.get("game") or {}
         bot.answer_callback_query(call.id, "Answer သိမ်းထားပြီ ✅")
+        if len(updated.get("answers", {})) >= len(updated.get("players", {})):
+            finish_pair_challenge_round(call.message.chat.id, gid)
     elif status == "already":
         bot.answer_callback_query(call.id, "တစ်ခါဖြေပြီးပြီ။")
     elif status == "not_player":
