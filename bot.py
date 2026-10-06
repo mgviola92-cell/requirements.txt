@@ -202,14 +202,23 @@ from ui.boss_raid_card import (
 
 
 from games.pair_challenge import (
-    start as start_pair_challenge,
+    MODES as PAIR_MODES,
+    create_lobby as create_pair_lobby,
     get as get_pair_challenge,
     set_message as set_pair_challenge_message,
-    choose as choose_pair_challenge,
+    select_mode as select_pair_mode,
+    join as join_pair_challenge,
+    can_start as can_start_pair_challenge,
+    start_round as start_pair_round,
+    answer as answer_pair_challenge,
     finish as finish_pair_challenge,
-    pairs as pair_challenge_pairs,
+    cancel as cancel_pair_challenge,
 )
-from ui.pair_challenge_card import challenge_card as pair_challenge_card, result_card as pair_challenge_result_card
+from ui.pair_challenge_card import (
+    lobby_card as pair_lobby_card,
+    challenge_card as pair_challenge_card,
+    result_card as pair_challenge_result_card,
+)
 
 from games.team_battle import (
     start_battle as start_team_battle,
@@ -461,30 +470,95 @@ except Exception as exc:
 
 
 # =========================================================
-# 👥 PAIR CHALLENGE
+# 👥 PAIR CHALLENGE — Duo / Squad / 2v2
 # =========================================================
-def pair_challenge_keyboard(game):
+def _pair_mode_keyboard(game):
     kb = InlineKeyboardMarkup()
+    gid = game["id"]
+    kb.row(InlineKeyboardButton("👥 Duo (2)", callback_data=f"pairmode:{gid}:duo"))
+    kb.row(InlineKeyboardButton("🧩 Squad (2-4)", callback_data=f"pairmode:{gid}:squad"))
+    kb.row(InlineKeyboardButton("⚔️ Team Versus (2v2)", callback_data=f"pairmode:{gid}:versus"))
+    return kb
+
+def _pair_lobby_keyboard(game):
+    kb = InlineKeyboardMarkup()
+    gid = game["id"]
     kb.row(
-        InlineKeyboardButton("A • " + game["left"], callback_data="pair:" + game["id"] + ":a"),
-        InlineKeyboardButton("B • " + game["right"], callback_data="pair:" + game["id"] + ":b"),
+        InlineKeyboardButton("➕ JOIN", callback_data=f"pairjoin:{gid}"),
+        InlineKeyboardButton("▶️ START", callback_data=f"pairstart:{gid}"),
     )
     return kb
+
+def _pair_answer_keyboard(game):
+    kb = InlineKeyboardMarkup()
+    gid = game["id"]
+    options = (game.get("challenge") or {}).get("options", ["A", "B"])
+    kb.row(
+        InlineKeyboardButton("A • " + options[0], callback_data=f"pairans:{gid}:a"),
+        InlineKeyboardButton("B • " + options[1], callback_data=f"pairans:{gid}:b"),
+    )
+    return kb
+
+def _pair_caption(game, seconds=None):
+    mode = PAIR_MODES.get(game.get("mode"), {}).get("title", "PAIR CHALLENGE")
+    if game.get("state") == "mode":
+        return "👥 PAIR CHALLENGE • Mode ရွေးပါ"
+    if game.get("state") == "lobby":
+        maximum = PAIR_MODES[game["mode"]]["max"]
+        return f"👥 {mode} • {len(game['players'])}/{maximum} players"
+    if seconds is None:
+        seconds = max(0, int(game.get("ends_at", time.time()) - time.time() + 0.999))
+    return f"👥 {mode} • ⏳ {seconds}s"
+
+def _pair_edit_lobby(game):
+    mid = game.get("message_id")
+    if not mid:
+        return
+    try:
+        bot.edit_message_media(
+            InputMediaPhoto(pair_lobby_card(game), caption=_pair_caption(game)),
+            chat_id=game["chat_id"], message_id=mid,
+            reply_markup=_pair_lobby_keyboard(game) if game.get("mode") else _pair_mode_keyboard(game),
+        )
+    except Exception as exc:
+        print("Pair lobby update error:", exc)
+
+def _pair_countdown(chat_id, game_id):
+    game = get_pair_challenge(chat_id)
+    if not game or game["id"] != game_id or game.get("state") != "playing":
+        return
+    left = max(0, int(game["ends_at"] - time.time() + 0.999))
+    if left <= 0:
+        finish_pair_challenge_round(chat_id, game_id)
+        return
+    try:
+        bot.edit_message_caption(
+            _pair_caption(game, left),
+            chat_id=chat_id,
+            message_id=game["message_id"],
+            reply_markup=_pair_answer_keyboard(game),
+        )
+    except Exception as exc:
+        if "message is not modified" not in str(exc).lower():
+            print("Pair countdown update error:", exc)
+    schedule_task(1, _pair_countdown, chat_id, game_id, task_id=f"pair_tick:{chat_id}", replace=True)
 
 def finish_pair_challenge_round(chat_id, game_id):
     game = finish_pair_challenge(chat_id, game_id)
     if not game:
         return
-    rows = pair_challenge_pairs(game)
+    cancel_task(f"pair_tick:{chat_id}")
     old_id = game.get("message_id")
     try:
         sent = bot.send_photo(
             chat_id,
-            pair_challenge_result_card(game, rows),
-            caption=f"👥 PAIR CHALLENGE • {len(rows)} pair(s)",
+            pair_challenge_result_card(game),
+            caption="👥 PAIR CHALLENGE • RESULT",
         )
         if old_id:
             safe_delete_message(bot, chat_id, old_id)
+        for uid in game.get("winners", []):
+            add_bonus_points(chat_id, uid, 5, reason="pair_challenge")
         delay_delete_message(chat_id, sent.message_id, 120)
     except Exception as exc:
         print("Pair Challenge result error:", exc)
@@ -493,54 +567,96 @@ def finish_pair_challenge_round(chat_id, game_id):
 def pair_challenge_command(message):
     if message.chat.type not in ("group", "supergroup"):
         return
-    started, game = start_pair_challenge(message.chat.id)
-    if not started:
+    created, game = create_pair_lobby(
+        message.chat.id, message.from_user.id,
+        message.from_user.first_name or message.from_user.username or "Player",
+    )
+    if not created:
         bot.reply_to(message, "👥 Pair Challenge က run နေပြီးသားပါ။")
         return
     try:
         sent = bot.send_photo(
-            message.chat.id,
-            pair_challenge_card(game),
-            caption="👥 PAIR CHALLENGE • 90 seconds",
-            reply_markup=pair_challenge_keyboard(game),
+            message.chat.id, pair_lobby_card(game),
+            caption=_pair_caption(game), reply_markup=_pair_mode_keyboard(game),
         )
         set_pair_challenge_message(message.chat.id, game["id"], sent.message_id)
-        schedule_task(
-            max(1, game["ends_at"] - time.time()),
-            finish_pair_challenge_round,
-            message.chat.id,
-            game["id"],
-            task_id=f"pair_challenge:{message.chat.id}",
-            replace=True,
-        )
     except Exception as exc:
+        cancel_pair_challenge(message.chat.id, game["id"])
         print("Pair Challenge start error:", exc)
 
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pair:"))
-def pair_challenge_callback(call):
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairmode:"))
+def pair_mode_callback(call):
+    _, gid, mode = call.data.split(":", 2)
+    result = select_pair_mode(call.message.chat.id, gid, call.from_user.id, mode)
+    status = result.get("status")
+    if status == "owner_only":
+        bot.answer_callback_query(call.id, "Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။")
+        return
+    if status != "ok":
+        bot.answer_callback_query(call.id, "ဒီ lobby ပိတ်သွားပြီ။")
+        return
+    bot.answer_callback_query(call.id, "Mode ရွေးပြီးပြီ။")
+    _pair_edit_lobby(result["game"])
+
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairjoin:"))
+def pair_join_callback(call):
+    _, gid = call.data.split(":", 1)
+    result = join_pair_challenge(
+        call.message.chat.id, gid, call.from_user.id,
+        call.from_user.first_name or call.from_user.username or "Player",
+    )
+    status = result.get("status")
+    if status == "ok":
+        bot.answer_callback_query(call.id, "ဝင်ပြီးပြီ 👥")
+        _pair_edit_lobby(result["game"])
+    elif status == "already":
+        bot.answer_callback_query(call.id, "ဝင်ထားပြီးသား။")
+    elif status == "full":
+        bot.answer_callback_query(call.id, "Player ပြည့်ပြီ။")
+    else:
+        bot.answer_callback_query(call.id, "Lobby ပိတ်သွားပြီ။")
+
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairstart:"))
+def pair_start_callback(call):
+    _, gid = call.data.split(":", 1)
+    current = get_pair_challenge(call.message.chat.id)
+    if not current or current["id"] != gid:
+        bot.answer_callback_query(call.id, "Lobby ပိတ်သွားပြီ။")
+        return
+    if call.from_user.id != current["owner_id"]:
+        bot.answer_callback_query(call.id, "Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။")
+        return
+    if not can_start_pair_challenge(current):
+        bot.answer_callback_query(call.id, "Player မလုံလောက်သေးဘူး။")
+        return
+    game = start_pair_round(call.message.chat.id, gid, duration=90)
+    if not game:
+        bot.answer_callback_query(call.id, "Start မရသေးဘူး။")
+        return
+    bot.answer_callback_query(call.id, "Challenge စပြီ!")
     try:
-        _, game_id, choice = call.data.split(":", 2)
-        game = get_pair_challenge(call.message.chat.id)
-        if not game or game["id"] != game_id:
-            bot.answer_callback_query(call.id, "ဒီ round ပြီးသွားပြီ။")
-            return
-        result = choose_pair_challenge(
-            call.message.chat.id,
-            game_id,
-            call.from_user.id,
-            call.from_user.first_name or call.from_user.username or "Player",
-            choice,
+        bot.edit_message_media(
+            InputMediaPhoto(pair_challenge_card(game), caption=_pair_caption(game, 90)),
+            chat_id=game["chat_id"], message_id=game["message_id"],
+            reply_markup=_pair_answer_keyboard(game),
         )
-        status = result.get("status")
-        if status == "already":
-            bot.answer_callback_query(call.id, "တစ်ခါရွေးပြီးပြီ။")
-        elif status == "ok":
-            label = game["left"] if choice == "a" else game["right"]
-            bot.answer_callback_query(call.id, "ရွေးထားတာ — " + label)
-        else:
-            bot.answer_callback_query(call.id, "ဒီ round ပိတ်သွားပြီ။")
     except Exception as exc:
-        print("Pair Challenge callback error:", exc)
+        print("Pair round card error:", exc)
+    schedule_task(1, _pair_countdown, game["chat_id"], gid, task_id=f"pair_tick:{game['chat_id']}", replace=True)
+
+@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairans:"))
+def pair_answer_callback(call):
+    _, gid, choice = call.data.split(":", 2)
+    result = answer_pair_challenge(call.message.chat.id, gid, call.from_user.id, choice)
+    status = result.get("status")
+    if status == "ok":
+        bot.answer_callback_query(call.id, "Answer သိမ်းထားပြီ ✅")
+    elif status == "already":
+        bot.answer_callback_query(call.id, "တစ်ခါဖြေပြီးပြီ။")
+    elif status == "not_player":
+        bot.answer_callback_query(call.id, "ဒီ round ရဲ့ player မဟုတ်ဘူး။")
+    else:
+        bot.answer_callback_query(call.id, "Round ပိတ်သွားပြီ။")
 
 
 # =========================================================
