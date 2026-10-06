@@ -147,12 +147,12 @@ def _base(art,variant,stage="normal",composition="center",element="shadow"):
     treated=_compose_art(treated,composition)
     treated=_element_treatment(treated,element)
     if treated:
-        card=add_background_image(card,treated,blur=.12,darken=_STAGE_DARKEN.get(stage,38))
+        card=add_background_image(card,treated,blur=0,darken=max(8,_STAGE_DARKEN.get(stage,38)-22))
     card=_effects(card,stage,variant)
     card=_element_effects(card,element,stage)
     accent=ELEMENT_ACCENTS.get(element,ACCENTS.get(variant,ACCENTS["crimson"]))
     frame_alpha={"normal":35,"damaged":50,"rage":72,"final":90}.get(stage,35)
-    draw_panel(card,(24,22,1076,698),fill=(7,9,14,frame_alpha),radius=32,outline=accent,outline_width=3)
+    draw_panel(card,(24,22,1076,698),fill=(7,9,14,min(24,frame_alpha)),radius=32,outline=accent,outline_width=3)
     return card,accent
 
 def live_card(raid,art=None,variant=None,composition=None):
