@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 print("TEST 1 - bot.py started")
 import time
 import random
