@@ -5,6 +5,7 @@ import uuid
 
 _lock = threading.RLock()
 _games = {}
+_recent = {}
 
 MODES = {
     "duo": {"title": "CO-OP DUO", "min": 2, "max": 2},
@@ -13,12 +14,31 @@ MODES = {
 }
 
 CHALLENGES = [
-    {"kind": "quiz", "question": "Which planet is known as the Red Planet?", "options": ["Mars", "Venus"], "answer": "a"},
-    {"kind": "quiz", "question": "Which is larger?", "options": ["Pacific Ocean", "Atlantic Ocean"], "answer": "a"},
-    {"kind": "puzzle", "question": "Complete the pattern: 2, 4, 8, 16, ?", "options": ["24", "32"], "answer": "b"},
-    {"kind": "puzzle", "question": "If CAT = 3 letters, ELEPHANT = ?", "options": ["7", "8"], "answer": "b"},
-    {"kind": "sync", "question": "SYNC: Everyone pick the same side without chatting.", "options": ["LEFT", "RIGHT"], "answer": None},
+    {"id":"q1","kind":"quiz","question":"Which planet is known as the Red Planet?","options":["Mars","Venus"],"answer":"a"},
+    {"id":"q2","kind":"quiz","question":"Which is larger?","options":["Pacific Ocean","Atlantic Ocean"],"answer":"a"},
+    {"id":"q3","kind":"quiz","question":"Which animal is the fastest on land?","options":["Cheetah","Lion"],"answer":"a"},
+    {"id":"q4","kind":"quiz","question":"Which one is a programming language?","options":["Python","Photoshop"],"answer":"a"},
+    {"id":"p1","kind":"puzzle","question":"Complete: 2, 4, 8, 16, ?","options":["24","32"],"answer":"b"},
+    {"id":"p2","kind":"puzzle","question":"Complete: 3, 6, 12, 24, ?","options":["36","48"],"answer":"b"},
+    {"id":"p3","kind":"puzzle","question":"Odd one out","options":["Triangle","Circle"],"answer":"b"},
+    {"id":"p4","kind":"puzzle","question":"If 5 + 5 x 2 = ?","options":["15","20"],"answer":"a"},
+    {"id":"s1","kind":"sync","question":"SYNC: Pick the same side without chatting.","options":["LEFT","RIGHT"],"answer":None},
+    {"id":"s2","kind":"sync","question":"SYNC: Match your teammate.","options":["SUN","MOON"],"answer":None},
+    {"id":"s3","kind":"sync","question":"SYNC: Think alike and choose.","options":["FIRE","ICE"],"answer":None},
+    {"id":"s4","kind":"sync","question":"SYNC: Same choice wins.","options":["DAY","NIGHT"],"answer":None},
 ]
+
+def _pick_challenge(chat_id):
+    recent = _recent.setdefault(chat_id, [])
+    available = [q for q in CHALLENGES if q["id"] not in recent]
+    if not available:
+        recent.clear()
+        available = list(CHALLENGES)
+    challenge = random.choice(available)
+    recent.append(challenge["id"])
+    if len(recent) > 8:
+        del recent[:-8]
+    return dict(challenge)
 
 def _copy(game):
     if not game:
@@ -97,7 +117,7 @@ def start_round(chat_id, game_id, duration=60):
             random.shuffle(ids)
             for index, uid in enumerate(ids):
                 game["players"][uid]["team"] = "red" if index < 2 else "blue"
-        challenge = dict(random.choice(CHALLENGES))
+        challenge = _pick_challenge(chat_id)
         game["challenge"] = challenge
         game["answers"] = {}
         game["state"] = "playing"
