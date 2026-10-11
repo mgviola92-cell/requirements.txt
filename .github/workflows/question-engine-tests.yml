@@ -8,13 +8,33 @@ on:
       - 'tests/**'
       - '.github/workflows/question-engine-tests.yml'
   workflow_dispatch:
+    inputs:
+      live:
+        description: 'Also test live APIs (limited calls)'
+        required: false
+        type: boolean
+        default: false
 jobs:
-  offline-tests:
+  question-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Run offline question engine tests
+      - name: Run offline unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Audit all 50 procedural templates
+        if: always()
+        run: python -m tests.question_audit --samples 100 --output reports
+      - name: Optional live provider probes
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+        run: python -m tests.question_audit --samples 100 --live --live-samples 2 --output reports
+      - name: Upload readable and machine-readable reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: question-audit-report
+          path: reports/
+          if-no-files-found: warn
