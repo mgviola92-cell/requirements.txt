@@ -147,6 +147,10 @@ def broadcast():
         if target!="all":
             try:target=int(target)
             except ValueError:return ("Invalid target",400)
+        if target!="all":
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active=TRUE AND broadcast_opt_out=FALSE",(target,))
+                if not cur.fetchone():return ("Destination not available",400)
         with _job_lock:
             if _running:return ("A broadcast is already in progress",409)
             _running=True
@@ -155,7 +159,7 @@ def broadcast():
                 cur.execute("SELECT chat_id FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY chat_id")
                 ids=[x[0] for x in cur.fetchall()]
                 if target!="all":
-                    if target not in ids:return ("Destination not available",400)
+                    if target not in ids:raise RuntimeError("Destination no longer available")
                     ids=[target]
                 cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",
                             (message,len(ids)))
