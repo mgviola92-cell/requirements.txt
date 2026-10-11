@@ -141,7 +141,7 @@ class OwnerOperationsTests(unittest.TestCase):
             handlers['owner_tools_action'](q)
         leave.assert_not_called();bot.answer_callback_query.assert_called_once()
 
-    def test_testgroup_selection_is_visible_and_keeps_its_page(self):
+    def test_testgroup_selection_advances_to_game_choice(self):
         _,bot,handlers,replace=self.handlers()
         conn,cur=self.connection();cur.fetchall.return_value=[(-100-i,'Group '+str(i)) for i in range(12)]
         q=NS(id='q',data='ops:test:-111:1:1',from_user=NS(id=42),message=NS(message_id=7,chat=NS(id=42,type='private')))
@@ -151,11 +151,29 @@ class OwnerOperationsTests(unittest.TestCase):
         with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'),patch.object(ops,'test_group',side_effect=select):
             handlers['owner_tools_action'](q)
             text,markup=replace.call_args.args[2:]
-            self.assertIn('Group 11 ကို Test Group အဖြစ် သိမ်းပြီးပါပြီ။',text)
-            buttons=[b for row in markup.keyboard for b in row]
-            self.assertTrue(any(b.text=='✅ Group 11' and b.callback_data=='ops:test:-111:0:1' for b in buttons))
-            self.assertTrue(any(b.callback_data=='ops:features:0' for b in buttons))
+            self.assertIn('Group 11 ကို ရွေးထားပြီးပါပြီ။',text)
+            self.assertTrue(any(b.text=='🎮 Game ရွေးမယ်' for row in markup.keyboard for b in row))
+            self.assertTrue(any(b.callback_data=='ops:tests:1' for row in markup.keyboard for b in row))
             q.data='ops:test:-111:0:1';handlers['owner_tools_action'](q)
-            text,markup=replace.call_args.args[2:]
-            self.assertIn('စာရင်းမှ ဖယ်ပြီးပါပြီ။',text)
-            self.assertTrue(any(b.text=='⬜ Group 11' for row in markup.keyboard for b in row))
+            self.assertIn('ဖယ်ပြီးပါပြီ။',replace.call_args.args[2])
+            buttons=[b for row in replace.call_args.args[3].keyboard for b in row]
+            self.assertTrue(any(b.text=='Group 11' and b.callback_data=='ops:test:-111:1:1' for b in buttons))
+
+    def test_private_game_list_contains_only_games_and_uses_stable_keys(self):
+        _,bot,handlers,replace=self.handlers();conn,cur=self.connection();cur.fetchall.return_value=[(-100,'Test Group')]
+        q=NS(id='q',data='ops:features:0',from_user=NS(id=42),message=NS(message_id=7,chat=NS(id=42,type='private')))
+        with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'):
+            handlers['owner_tools_action'](q)
+        buttons=[b for row in replace.call_args.args[3].keyboard for b in row]
+        self.assertEqual(len([b for b in buttons if b.callback_data.startswith('ops:game:')]),9)
+        self.assertTrue(any(b.text=='👹 Boss Raid' and b.callback_data=='ops:game:boss_raid' for b in buttons))
+        self.assertFalse(any('enabled.' in b.text or 'Command' in b.text for b in buttons))
+
+    def test_game_publish_updates_engine_and_manual_command_together(self):
+        conn,cur=self.connection()
+        ops._cache['releases'][ops.GAME_HANDLERS['boss_raid']]='test'
+        with patch.object(ops,'get_db_connection',return_value=conn):ops.change_release(42,'game:boss_raid','all')
+        inserts=[c.args[1] for c in cur.execute.call_args_list if 'INSERT INTO owner_feature_releases' in c.args[0]]
+        self.assertIn(('game:boss_raid','all'),inserts)
+        self.assertIn((ops.GAME_HANDLERS['boss_raid'],'all'),inserts)
+        self.assertEqual(ops._cache['releases'][ops.GAME_HANDLERS['boss_raid']],'all')

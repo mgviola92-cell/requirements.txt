@@ -16,6 +16,16 @@ from database.db import get_db_connection
 MMT=ZoneInfo('Asia/Yangon')
 PERMISSIONS={'edit','announce','stats'}
 COMMAND_GAMES={'boss':'boss_raid','bossraid':'boss_raid','raid':'boss_raid','teambattle':'team_battle','pair':'pair_challenge','mathbattle':'math_battle','math':'math_battle','wordchain':'word_chain','wc':'word_chain','emoji':'emoji_guess','emojiguess':'emoji_guess','speedtap':'speed_tap','wyr':'would_you_rather','wouldyourather':'would_you_rather','imposter':'imposter'}
+GAME_LABELS={
+    'boss_raid':'👹 Boss Raid','team_battle':'⚔️ Team Battle','math_battle':'🧮 Math Battle',
+    'pair_challenge':'👥 Pair Challenge','imposter':'🎭 Imposter','word_chain':'🔗 Word Chain',
+    'emoji_guess':'😀 Emoji Guess','speed_tap':'⚡ Speed Tap','would_you_rather':'🤔 Would You Rather'}
+GAME_COMMANDS={'boss_raid':'/boss','team_battle':'/teambattle','math_battle':'/mathbattle','pair_challenge':'/pair','imposter':'/imposter','word_chain':'/wordchain','emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr'}
+GAME_HANDLERS={k:'enabled.bot.'+fn for k,fn in {
+    'boss_raid':'boss_raid_command','team_battle':'team_battle_command','math_battle':'math_battle_command',
+    'pair_challenge':'pair_challenge_command','word_chain':'word_chain_command',
+    'emoji_guess':'emoji_guess_command','speed_tap':'speed_tap_command'}.items()}
+GAME_HANDLERS.update(imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command')
 _ready=False
 _lock=threading.RLock()
 _cache={'groups':set(),'releases':{}}
@@ -100,8 +110,15 @@ def change_release(actor,feature,rollout):
         if rollout=='test':
             cur.execute('SELECT 1 FROM owner_test_groups LIMIT 1')
             if not cur.fetchone():raise ValueError('ရွေးထားတဲ့ Test Group အရင်လိုပါတယ်။')
-        cur.execute('INSERT INTO owner_feature_releases(feature,rollout) VALUES(%s,%s) ON CONFLICT(feature) DO UPDATE SET rollout=EXCLUDED.rollout',(feature,rollout))
-    with _lock:_cache['releases'][feature]=rollout;_loaded=0
+        keys=[feature]
+        if feature.startswith('game:'):
+            handler=GAME_HANDLERS.get(feature[5:])
+            if handler in release_features():keys.append(handler)
+        for key in keys:
+            cur.execute('INSERT INTO owner_feature_releases(feature,rollout) VALUES(%s,%s) ON CONFLICT(feature) DO UPDATE SET rollout=EXCLUDED.rollout',(key,rollout))
+    with _lock:
+        for key in keys:_cache['releases'][key]=rollout
+        _loaded=0
 
 
 def test_group(actor,cid,enabled):
@@ -326,7 +343,7 @@ def register(app,bot,replace_card,clear_broadcast):
     def permitted(q,permission=None):return private(q) and (is_owner(q.from_user.id) if permission is None else can(q.from_user.id,permission))
     def home(uid):
         rows=[]
-        if is_owner(uid):rows+=[('🧪 Test Groups','ops:tests:0'),('🚀 Feature Rollout','ops:features:0'),('🚪 Leave Group','ops:leavegroups:0'),('👥 Assistants','ops:assistants')]
+        if is_owner(uid):rows+=[('🧪 Game စမ်းသပ်ရန်','ops:tests:0'),('🚪 Leave Group','ops:leavegroups:0'),('👥 Assistants','ops:assistants')]
         if can(uid,'announce'):rows+=[('📅 Schedule Announcement','ops:announce'),('📜 Schedules','ops:schedules')]
         if can(uid,'stats'):rows.append(('📊 Usage','ops:stats'))
         if can(uid,'edit'):rows.append(('⚙️ Settings & Messages','ctl:home:0'))
@@ -338,26 +355,44 @@ def register(app,bot,replace_card,clear_broadcast):
             lines.append(f'#{sid} · {target} · {when.astimezone(MMT):%m-%d %H:%M} · {status}')
             if status=='pending':rows.append((f'❌ Cancel #{sid}',f'ops:cancel:{sid}'))
         rows.append(('⬅️ Back','ops:home'));card(uid,'\n'.join(lines)[:3500],rows)
-    def group_list(uid,action,page,notice=''):
-        entries=groups();rows=[]
+    def selected_groups():
         refresh()
-        selected=[title or str(cid) for cid,title in entries if cid in _cache['groups']]
+        return [(cid,title or str(cid)) for cid,title in groups() if cid in _cache['groups']]
+    def selected_card(uid,cid,page=0,notice=''):
+        title=dict(groups()).get(cid,str(cid))
+        rows=[('🎮 Game ရွေးမယ်','ops:features:0'),('👥 Group ရွေးမယ် / ပြောင်းမယ်',f'ops:tests:{page}')]
+        if cid in _cache['groups']:rows.append(('ဖယ်မယ်',f'ops:test:{cid}:0:{page}'))
+        rows.append(('⬅️ နောက်သို့','ops:home'))
+        card(uid,(notice or ('✅ '+title+' ကို ရွေးထားပြီးပါပြီ။'))+'\n\nအခု စမ်းချင်တဲ့ Game ကို ရွေးပါ။',rows)
+    def group_list(uid,action,page,notice=''):
+        entries=groups();rows=[];refresh()
         for cid,title in entries[page*10:(page+1)*10]:
             enabled=cid in _cache['groups']
-            label=('✅ ' if enabled else '⬜ ')+(title or str(cid))[:45] if action=='tests' else (title or str(cid))[:45]
-            data=f'ops:test:{cid}:{0 if enabled else 1}:{page}' if action=='tests' else f'ops:leave:{cid}'
+            label=('✅ ' if enabled else '')+(title or str(cid))[:45] if action=='tests' else (title or str(cid))[:45]
+            data=f'ops:test:{cid}:1:{page}' if action=='tests' else f'ops:leave:{cid}'
             rows.append((label,data))
-        if page:rows.append(('← Previous',f'ops:{action}:{page-1}'))
-        if (page+1)*10<len(entries):rows.append(('Next →',f'ops:{action}:{page+1}'))
-        if action=='tests':rows.append(('🚀 Feature Rollout → Test only','ops:features:0'))
-        rows.append(('⬅️ Back','ops:home'))
-        if action=='tests':
-            text='🧪 TEST GROUPS\n\n'
-            if notice:text+=notice+'\n\n'
-            text+=f'✅ ရွေးထားသော Group: {len(selected)} ခု\n'
-            text+='\n'.join('• '+name[:70] for name in selected[:10]) if selected else 'မရွေးရသေးပါ။'
-            text+='\n\n✅ = ရွေးထားပြီး · ⬜ = မရွေးရသေး\nပြန်နှိပ်ရင် ရွေးထားတာကို ဖယ်ပါမယ်။\n\nGroup ရွေးပြီးရင် Feature Rollout မှာ Game ရွေးပြီး Test only နှိပ်ပါ။'
-        else:text='🚪 ထွက်ခိုင်းချင်တဲ့ Group ရွေးပါ။'
+        if page:rows.append(('← ရှေ့စာမျက်နှာ',f'ops:{action}:{page-1}'))
+        if (page+1)*10<len(entries):rows.append(('နောက်စာမျက်နှာ →',f'ops:{action}:{page+1}'))
+        if action=='tests' and selected_groups():rows.append(('🎮 Game ရွေးမယ်','ops:features:0'))
+        rows.append(('⬅️ နောက်သို့','ops:home'))
+        text='🧪 ဘယ် Group မှာ Game စမ်းချင်လဲ?\n\nအောက်က Group ကို နှိပ်ရွေးပါ။' if action=='tests' else '🚪 ထွက်ခိုင်းချင်တဲ့ Group ရွေးပါ။'
+        if notice:text=notice+'\n\n'+text
+        card(uid,text,rows)
+    def game_list(uid):
+        rows=[(label,f'ops:game:{kind}') for kind,label in GAME_LABELS.items()]
+        rows += [('👥 စမ်းမယ့် Group ရွေးမယ်','ops:tests:0'),('⬅️ နောက်သို့','ops:home')]
+        names=', '.join(title[:45] for _,title in selected_groups())
+        card(uid,'🎮 ဘယ် Game ကို စမ်းချင်လဲ?'+('\n\nစမ်းမယ့် Group: '+names[:500] if names else '\n\nစမ်းမယ့် Group ကို အရင်ရွေးပါ။'),rows)
+    def game_card(uid,kind,notice=''):
+        if kind not in GAME_LABELS:raise ValueError('Game မရှိပါ။')
+        refresh()
+        testing=any(_cache['releases'].get(key)=='test' for key in ['game:'+kind,GAME_HANDLERS.get(kind)])
+        text=GAME_LABELS[kind]+'\n\n'+(notice+'\n\n' if notice else '')
+        text+='လက်ရှိ: '+('စမ်းသပ် Group မှာပဲ ဖွင့်ထားပါတယ်။' if testing else 'Group အားလုံးမှာ ဖွင့်ထားပါတယ်။')
+        selected=selected_groups()
+        if selected:text+='\n\nစမ်းသပ် Group: '+', '.join(title[:45] for _,title in selected)[:500]
+        if notice:text+='\n\nအဲဒီ Group ထဲမှာ '+GAME_COMMANDS[kind]+' ပို့ပြီး ကစားပါ။'
+        rows=[('🧪 ရွေးထားတဲ့ Group မှာပဲ စမ်းမယ်',f'ops:mode:{kind}:test'),('🌍 Group အားလုံးမှာ ဖွင့်မယ်',f'ops:mode:{kind}:all'),('🎮 တခြား Game ရွေးမယ်','ops:features:0'),('👥 Group ပြောင်းမယ်','ops:tests:0')]
         card(uid,text,rows)
     def targets(uid,page=0):
         entries=groups();rows=[('🌍 All Groups','ops:target:all')]
@@ -391,19 +426,17 @@ def register(app,bot,replace_card,clear_broadcast):
             elif action=='test':
                 cid=int(parts[2]);enabled=parts[3]=='1';page=max(0,int(parts[4])) if len(parts)>4 else 0
                 test_group(uid,cid,enabled)
-                title=dict(groups()).get(cid,str(cid))
-                notice=('✅ '+title+' ကို Test Group အဖြစ် သိမ်းပြီးပါပြီ။') if enabled else ('☑️ '+title+' ကို Test Group စာရင်းမှ ဖယ်ပြီးပါပြီ။')
-                group_list(uid,'tests',page,notice[:250])
-            elif action=='features':
-                page=int(parts[2]);entries=list(release_features().items());rows=[]
-                for ix,(key,label) in enumerate(entries[page*8:(page+1)*8],page*8):rows.append((label[:48],f'ops:feature:{ix}'))
-                if page:rows.append(('← Previous',f'ops:features:{page-1}'))
-                if (page+1)*8<len(entries):rows.append(('Next →',f'ops:features:{page+1}'))
-                rows.append(('⬅️ Back','ops:home'));card(uid,'🚀 Feature ကိုရွေးပြီး Test only / Publish လုပ်နိုင်ပါတယ်။',rows)
-            elif action=='feature':
-                ix=int(parts[2]);key=list(release_features())[ix]
-                card(uid,release_features()[key]+'\n\nTest group သီးသန့် စမ်းမလား၊ အားလုံးအတွက် ဖွင့်မလား။',[('🧪 Test only',f'ops:release:{ix}:test'),('🌍 Publish to all',f'ops:release:{ix}:all'),('⬅️ Back','ops:features:0')])
-            elif action=='release':change_release(uid,list(release_features())[int(parts[2])],parts[3]);home(uid)
+                if enabled:selected_card(uid,cid,page)
+                else:group_list(uid,'tests',page,'✅ Group ကို စမ်းသပ်စာရင်းမှ ဖယ်ပြီးပါပြီ။')
+            elif action in ('features','feature'):game_list(uid)
+            elif action=='game':game_card(uid,parts[2])
+            elif action=='mode':
+                kind=parts[2];rollout=parts[3]
+                if kind not in GAME_LABELS:raise ValueError('Game မရှိပါ။')
+                change_release(uid,'game:'+kind,rollout)
+                notice='✅ ရွေးထားတဲ့ Group မှာပဲ ဒီ Game ကို စမ်းနိုင်ပါပြီ။' if rollout=='test' else '✅ Group အားလုံးမှာ ဒီ Game ကို ဖွင့်ပေးပြီးပါပြီ။'
+                game_card(uid,kind,notice)
+            elif action=='release':game_list(uid)
             elif action=='leave':
                 cid=int(parts[2]);destinations(str(cid));title=dict(groups()).get(cid,str(cid))
                 card(uid,f'🚪 {title}\n{cid}\n\nဒီ Group ကနေ Bot ထွက်ခိုင်းမှာလား။',[('✅ Confirm Leave',f'ops:leaveyes:{cid}'),('❌ Cancel','ops:home')])
