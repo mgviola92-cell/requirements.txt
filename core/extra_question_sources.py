@@ -11,7 +11,7 @@ def _get(url):
 
 def open_library_question():
     subject=random.choice(("science","history","astronomy","mathematics","biology","technology","geography","fiction"))
-    params=urllib.parse.urlencode({"q":"subject:"+subject,"fields":"title,author_name,first_publish_year,language,edition_count",
+    params=urllib.parse.urlencode({"q":"subject:"+subject,"fields":"title,author_name,first_publish_year,language,edition_count,first_sentence,subject",
                                     "limit":60,"page":random.randint(1,8)})
     rows=_get("https://openlibrary.org/search.json?"+params).get("docs",[])
     rows=[r for r in rows if r.get("title") and r.get("author_name") and isinstance(r.get("first_publish_year"),int)]
@@ -20,17 +20,33 @@ def open_library_question():
         title=row["title"]
         if not 5<=len(title)<=90:continue
         kinds=["author","year"]
+        if row.get("edition_count") and row["edition_count"]>=1:
+            kinds.append("editions")
+        if row.get("language"):
+            kinds.append("language")
         random.shuffle(kinds)
         for kind in kinds:
             if kind=="author":
                 correct=row["author_name"][0]
                 others=[r["author_name"][0] for r in rows if r.get("author_name") and r["title"]!=title]
                 item=_quiz("Who wrote the book "+title+"?",correct,others,"openlibrary:author")
-            else:
+            elif kind=="year":
                 year=row["first_publish_year"]
                 if not 1450<=year<=2026:continue
                 others=[r["first_publish_year"] for r in rows if r["first_publish_year"]!=year]
                 item=_quiz("In what year was the book "+title+" first published?",year,others,"openlibrary:year")
+            elif kind=="editions":
+                count=row["edition_count"]
+                wrong=[r["edition_count"] for r in rows if isinstance(r.get("edition_count"),int) and r["edition_count"]!=count]
+                item=_quiz("How many editions does Open Library currently list for "+title+"?",count,wrong,"openlibrary:editions")
+            else:
+                codes={"eng":"English","fre":"French","spa":"Spanish","ger":"German",
+                       "ita":"Italian","por":"Portuguese","jpn":"Japanese",
+                       "rus":"Russian","chi":"Chinese","ara":"Arabic"}
+                languages=[codes[x] for x in row["language"] if x in codes]
+                if len(languages)!=1:continue
+                others=[v for v in codes.values() if v!=languages[0]]
+                item=_quiz("Which language is listed for the book "+title+"?",languages[0],others,"openlibrary:language")
             if item:return item
     return None
 
