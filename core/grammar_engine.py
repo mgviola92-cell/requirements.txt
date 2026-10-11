@@ -53,9 +53,9 @@ def analyze(sentence, max_issues=3):
         if not match:continue
         piece=match.group(0)
         if rule_id in ("DID_BASE","DOES_BASE","DID_QUESTION","MODAL_BASE","DOES_QUESTION"):
-            wrong=match.group(3) if rule_id in ("DID_QUESTION","DOES_QUESTION") else match.group(2)
+            wrong=match.group(2)
             right=verb_map[wrong.lower()]
-            revised=piece[:match.start(3 if rule_id in ("DID_QUESTION","DOES_QUESTION") else 2)-match.start()]+_preserve_case(wrong,right)
+            revised=piece[:match.start(2)-match.start()]+_preserve_case(wrong,right)
         elif rule_id=="HE_SHE_DONT":
             revised=re.sub("don't","doesn't",piece,flags=re.I)
         else:
