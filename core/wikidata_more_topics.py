@@ -1,0 +1,36 @@
+"""Additional Wikidata subject-property quiz categories.
+
+Queries may return no usable rows; the caller skips those safely.
+"""
+MORE_TOPICS = [
+ ("country anthem","wdt:P31 wd:Q6256","wdt:P85","What is the national anthem of {}?"),
+ ("country highest point","wdt:P31 wd:Q6256","wdt:P610","What is the highest point of {}?"),
+ ("country timezone","wdt:P31 wd:Q6256","wdt:P421","Which time zone is used in {}?"),
+ ("country head office","wdt:P31 wd:Q6256","wdt:P131","Which administrative area includes {}?"),
+ ("city country","wdt:P31 wd:Q515","wdt:P17","In which country is the city {}?"),
+ ("city population","wdt:P31 wd:Q515","wdt:P1082","What population is recorded for {}?"),
+ ("city elevation","wdt:P31 wd:Q515","wdt:P2044","What elevation is recorded for {}?"),
+ ("city timezone","wdt:P31 wd:Q515","wdt:P421","Which time zone is used in {}?"),
+ ("mountain elevation","wdt:P31 wd:Q8502","wdt:P2044","What is the elevation of {}?"),
+ ("mountain country","wdt:P31 wd:Q8502","wdt:P17","In which country is {}?"),
+ ("river country","wdt:P31 wd:Q4022","wdt:P17","Through which country does {} flow?"),
+ ("river length","wdt:P31 wd:Q4022","wdt:P2043","What length is recorded for the river {}?"),
+ ("lake country","wdt:P31 wd:Q23397","wdt:P17","In which country is lake {}?"),
+ ("lake area","wdt:P31 wd:Q23397","wdt:P2046","What area is recorded for lake {}?"),
+ ("airport country","wdt:P31 wd:Q1248784","wdt:P17","In which country is airport {}?"),
+ ("airport IATA","wdt:P31 wd:Q1248784","wdt:P238","What is the IATA code of airport {}?"),
+ ("airport ICAO","wdt:P31 wd:Q1248784","wdt:P239","What is the ICAO code of airport {}?"),
+ ("university country","wdt:P31 wd:Q3918","wdt:P17","In which country is {} university located?"),
+ ("university inception","wdt:P31 wd:Q3918","wdt:P571","When was {} established?"),
+ ("company headquarters","wdt:P31 wd:Q4830453","wdt:P159","Where is the headquarters of {}?"),
+ ("company inception","wdt:P31 wd:Q4830453","wdt:P571","When was {} founded?"),
+ ("company industry","wdt:P31 wd:Q4830453","wdt:P452","Which industry does {} operate in?"),
+ ("film publication","wdt:P31 wd:Q11424","wdt:P577","When was the film {} released?"),
+ ("film original language","wdt:P31 wd:Q11424","wdt:P364","What was the original language of {}?"),
+ ("film genre","wdt:P31 wd:Q11424","wdt:P136","Which genre does the film {} belong to?"),
+ ("book publication","wdt:P31 wd:Q571","wdt:P577","When was the book {} published?"),
+ ("book original language","wdt:P31 wd:Q571","wdt:P364","What was the original language of the book {}?"),
+ ("book genre","wdt:P31 wd:Q571","wdt:P136","Which genre is the book {}?"),
+ ("chemical element group","wdt:P31 wd:Q11344","wdt:P279","Which class contains the element {}?"),
+ ("chemical element discoverer","wdt:P31 wd:Q11344","wdt:P61","Who discovered {}?"),
+]
