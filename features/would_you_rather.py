@@ -70,7 +70,7 @@ _recent_order = {}
 _auto_activity = {}
 _auto_threshold = {}
 _auto_last = {}
-_DURATION = (300, 900)
+_DURATION = (45, 120)
 
 def generate(rng=None):
     rng = rng or random
