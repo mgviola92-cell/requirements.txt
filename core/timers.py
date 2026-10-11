@@ -67,10 +67,9 @@ def schedule_task(
 
             finally:
                 with _timers_lock:
-                    _timers.pop(
-                        task_id,
-                        None
-                    )
+                    current = _timers.get(task_id)
+                    if current is not None and current["timer"] is timer:
+                        _timers.pop(task_id, None)
 
         timer = threading.Timer(
             delay_seconds,
