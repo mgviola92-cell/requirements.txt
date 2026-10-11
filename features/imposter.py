@@ -105,7 +105,7 @@ def _keyboard(s,page=0):
 def _view(s):
     phase=s["phase"]
     names=_players(s)
-    head="🎭 <b>IMPOSTER PROTOCOL</b>\n<code>━━━━━━━━━━━━━━━━━━━━</code>\n"
+    head="⌁ <b>IMPOSTER / CLASSIFIED</b>\n<code>━━━━━━━━━━━━━━━━━━━━</code>\n"
     if phase=="join":
         rows="\n".join(f"<code>{i+1:02d}.</code> {_name(p)}" for i,p in enumerate(names[:12]))
         if len(names)>12:rows+=f"\n… နောက်ထပ် {len(names)-12} ယောက်"
@@ -118,16 +118,16 @@ def _view(s):
         idx=s["turn"]
         p=names[idx]
         done=sum(1 for i in range(idx) if not names[i].get("removed"))
-        return (head+f"🗣️ <b>ROUND {s['round']} · CLUE {idx+1}/{len(names)}</b>\n"
-                f"👉 အခုအလှည့် — <b>{_name(p)}</b>\n"
+        return (head+f"<code>TRANSMISSION  {s['round']:02d} / {idx+1:02d}</code>\n\n"
+                f"🎙️ <b>NOW SPEAKING</b>\n👉 <b>{_name(p)}</b>\n\n"
                 "💬 Group Chat မှာ သဲလွန်စတစ်ခု ရေးပါ။\n"
                 "⏳ 45s + 15s Warning · အလှည့်မကျော်ရ\n"
-                f"✅ ဖြေပြီး: {done} · 👥 စုစုပေါင်း: {len(names)}")
+                f"\n<code>● {done} DONE   /   {len(names)} AGENTS</code>")
     if phase=="decision":
         choices=s["decisions"]
         a=sum(x=="more" for x in choices.values())
         b=sum(x=="guess" for x in choices.values())
-        return (head+f"🗳️ <b>ROUND {s['round']} ပြီးပါပြီ</b>\n"
+        return (head+f"<code>DECISION ROOM / ROUND {s['round']:02d}</code>\n\n"
                 "နောက် Round ဆက်မလား၊ Imposter ကို ခန့်မှန်းမလား?\n"
                 f"🔁 ဆက်မယ်: {a} · 🔎 ခန့်မှန်းမယ်: {b}\n"
                 f"မဲပေးပြီး: {len(choices)}/{len(_eligible(s))}")
@@ -136,7 +136,7 @@ def _view(s):
                 "🎭 Imposter က သရေဖြတ်ဆုံးဖြတ်မယ်။\n"
                 "Button ကို Imposter တစ်ယောက်တည်း သုံးနိုင်ပြီး ရွေးချယ်မှုကို Private Alert နဲ့ ပြမယ်။")
     if phase=="final":
-        return (head+"🔎 <b>WHO IS THE IMPOSTER?</b>\n"
+        return (head+"<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\n"
                 "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
                 f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
                 "⏳ 60 seconds · မပေးသူ Abstain")
