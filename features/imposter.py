@@ -17,6 +17,7 @@ from core.sessions import start_session, end_session
 from core.rewards import add_bonus_points
 from database.db import get_db_connection
 from data.imposter_words import WORDS
+from core.myanmar_secret_matcher import matches_secret
 
 LOCK = threading.RLock()
 JOIN_TIME = 40
@@ -193,7 +194,8 @@ def _finish(bot,chat_id,s,reason="vote"):
     imp_idx=next((i for i,p in enumerate(s["players"]) if p["id"]==s["imposter"]),-1)
     correct=[uid for uid,idx in votes.items() if idx==imp_idx and uid!=s["imposter"]]
     found=len(correct)>len(_eligible(s))//2
-    if reason=="imposter_afk":found=True
+    if reason in ("imposter_afk","secret_wrong"):found=True
+    if reason=="secret_right":found=False
     s["finished_reason"]=reason
     s["winners"]=correct
     s["found"]=found
@@ -206,6 +208,7 @@ def _finish(bot,chat_id,s,reason="vote"):
         "┃  <code>IMPOSTER • FINAL REPORT</code>\n"
         "╚══════════════════════╝\n\n"
         f"🏆 <b>{win_label} WINS</b>\n\n"
+        (("🎯 <b>SECRET GUESSED CORRECTLY!</b>\n\n" if reason=="secret_right" else "❌ <b>IMPOSTER GUESSED WRONG!</b>\n\n") if reason.startswith("secret_") else "")+
         "🔎 <b>IDENTITY REVEALED</b>\n"
         f"  🎭 {_name(s['players'][imp_idx])}\n"
         f"  🔐 {html.escape(s['word'])}\n\n"
@@ -224,7 +227,10 @@ def _finish(bot,chat_id,s,reason="vote"):
     if not s.get("rewards_claimed"):
         s["rewards_claimed"]=True
         _save(chat_id,s)
-        rewarded=correct + ([] if found else [s["imposter"]])
+        rewarded=([p["id"] for p in _eligible(s) if p["id"]!=s["imposter"]]
+                  if reason=="secret_wrong" else
+                  ([s["imposter"]] if reason=="secret_right" else
+                   correct + ([] if found else [s["imposter"]])))
         for uid in rewarded:
             try:add_bonus_points(chat_id,uid,10 if uid==s["imposter"] else 5,reason="imposter")
             except Exception as exc:print("Imposter rewards:",exc)
@@ -366,6 +372,34 @@ def register(bot):
             except Exception:
                 s["phase"]="cancelled";_save(msg.chat.id,s);end_session(msg.chat.id,"imposter")
                 raise
+
+    @bot.message_handler(
+        func=lambda m: bool(m.text and
+            (m.text.split(maxsplit=1)[0].split("@")[0] in ("/secret","/ဖြေမယ်"))),
+        content_types=["text"])
+    def imposter_secret_guess(msg):
+        if msg.chat.type not in ("group","supergroup") or not msg.from_user:
+            return ContinueHandling()
+        # Secret guessing is an explicit group action. No DM, no second chance.
+        with LOCK:
+            state=_load(msg.chat.id)
+            if not _active(state) or state["phase"]=="join":
+                bot.reply_to(msg,"🎭 Secret ဖြေဖို့ လက်ရှိ Imposter Game ရှိရပါမယ်။")
+                return ContinueHandling()
+            if state.get("imposter")!=msg.from_user.id:
+                bot.reply_to(msg,"🔒 ဒီ Command ကို Imposter ပဲ သုံးနိုင်ပါတယ်။")
+                return ContinueHandling()
+            parts=(msg.text or "").split(maxsplit=1)
+            if len(parts)<2 or not parts[1].strip():
+                bot.reply_to(msg,"🎭 /secret အဖြေ လို့ တစ်ခါတည်း ဖြေပါ။ မှားရင် ချက်ချင်းရှုံးမယ်။")
+                return ContinueHandling()
+            guess=parts[1].strip()
+            if len(guess)>100:
+                bot.reply_to(msg,"အဖြေက ရှည်လွန်းပါတယ်။")
+                return ContinueHandling()
+            correct=matches_secret(guess,state["word"])
+            _finish(bot,msg.chat.id,state,"secret_right" if correct else "secret_wrong")
+        return ContinueHandling()
 
     @bot.message_handler(commands=["imposterstop"])
     def stop(msg):
