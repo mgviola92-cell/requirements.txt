@@ -151,6 +151,25 @@ def _edit(bot,chat_id,s):
         if "message is not modified" not in str(e).lower():
             print("Imposter edit:",e)
 
+def _publish_turn(bot,chat_id,s):
+    """New bottom-of-chat message per turn; old controller is retired."""
+    old=s.get("message_id")
+    try:
+        message=bot.send_message(chat_id,_view(s),parse_mode="HTML",
+                                 reply_markup=_keyboard(s))
+        s["message_id"]=message.message_id
+        _save(chat_id,s)
+        if old and old!=message.message_id:
+            try:
+                bot.delete_message(chat_id,old)
+            except Exception:
+                try:bot.edit_message_reply_markup(chat_id,old,reply_markup=None)
+                except Exception as exc:print("Imposter retire controller:",exc)
+    except Exception as exc:
+        print("Imposter publish turn:",exc)
+        _edit(bot,chat_id,s)
+
+
 def _announce(bot,chat_id,text):
     try:bot.send_message(chat_id,text,parse_mode="HTML")
     except Exception as e:print("Imposter announce:",e)
@@ -168,13 +187,25 @@ def _finish(bot,chat_id,s,reason="vote"):
     s["found"]=found
     _save(chat_id,s)
     _edit(bot,chat_id,s)
-    _announce(bot,chat_id,"🏁 <b>CASE CLOSED · IMPOSTER</b>\n"
-              f"🎭 Imposter: <b>{_name(s['players'][imp_idx])}</b>\n"
-              f"🔐 Secret Word: <b>{html.escape(s['word'])}</b>\n"
-              f"🔍 မှန်ကန်တဲ့မဲ: {len(correct)} ယောက်\n"
-              f"🏆 {'Normal Players' if found else 'Imposter'} အနိုင်ရပါတယ်။\n"
-              +"🎯 မှန်ကန်စွာရွေးသူ: "
-              +((", ".join(_name(p) for p in s["players"] if p["id"] in correct)) or "မရှိ"))
+    winners=", ".join(_name(p) for p in s["players"] if p["id"] in correct) or "မရှိပါ"
+    win_label="🟢 NORMAL TEAM" if found else "🔴 IMPOSTER"
+    result=(
+        "╔═══ 🎭 <b>CASE FILE CLOSED</b> ═══╗\\n"
+        "┃  <code>IMPOSTER • FINAL REPORT</code>\\n"
+        "╚══════════════════════╝\\n\\n"
+        f"🏆 <b>{win_label} WINS</b>\\n\\n"
+        "🔎 <b>IDENTITY REVEALED</b>\\n"
+        f"  🎭 {_name(s['players'][imp_idx])}\\n"
+        f"  🔐 {html.escape(s['word'])}\\n\\n"
+        "📊 <b>VOTE INTELLIGENCE</b>\\n"
+        f"  ✅ မှန်ကန်သူ  {len(correct)} ယောက်\\n"
+        f"  🗳️ မဲပေးသူ  {len(votes)} ယောက်\\n\\n"
+        "⭐ <b>TOP INVESTIGATORS</b>\\n"
+        f"  {winners}\\n\\n"
+        "━━━━━━━━━━━━━━━━━━\\n"
+        "🎮 နောက်ပွဲစရန် /imposter"
+    )
+    _announce(bot,chat_id,result)
     end_session(chat_id,"imposter")
     ACTIVE_CHATS.discard(chat_id)
     # Reward participants only once. Claim before external DB side effects.
@@ -213,7 +244,7 @@ def _next_turn(bot,chat_id,s):
         s["deadline"]=time.time()+DECISION_TIME
     else:s["deadline"]=time.time()+45
     _save(chat_id,s)
-    _edit(bot,chat_id,s)
+    _publish_turn(bot,chat_id,s)
 
 def _tick(bot,chat_id,s):
     now=time.time()
@@ -232,20 +263,7 @@ def _tick(bot,chat_id,s):
                   "\n".join(f"{i+1:02d}. {_name(p)}" for i,p in enumerate(s["players"][:100]))+
                   ("\n… ကျန်သူတွေကို List Button နဲ့ကြည့်ပါ။" if len(s["players"])>100 else "")+
                   "\n\n🔐 Game Message မှာ SECRET ကြည့်မယ် နှိပ်ပြီး ကိုယ့် Role ကို ကြည့်ပါ။")
-        # Put the interactive controller directly below the player roster.
-        # The original recruitment message is far up the chat and must not
-        # remain the only place where the secret button is reachable.
-        previous_id=s.get("message_id")
-        try:
-            main=bot.send_message(chat_id,_view(s),parse_mode="HTML",reply_markup=_keyboard(s))
-            s["message_id"]=main.message_id
-            _save(chat_id,s)
-            if previous_id:
-                try:bot.edit_message_reply_markup(chat_id,previous_id,reply_markup=None)
-                except Exception as exc:print("Imposter old join buttons:",exc)
-        except Exception as exc:
-            print("Imposter new controller:",exc)
-            _edit(bot,chat_id,s)
+        _publish_turn(bot,chat_id,s)
     elif s["phase"]=="clue":
         p=s["players"][s["turn"]]
         if not s.get("warned"):
@@ -268,10 +286,10 @@ def _tick(bot,chat_id,s):
         if more==guess and s["round"]<MAX_ROUNDS:
             s["phase"]="tie";s["deadline"]=now+40
         else:_decide(s,"more" if more>guess else "guess")
-        _save(chat_id,s);_edit(bot,chat_id,s)
+        _save(chat_id,s);_publish_turn(bot,chat_id,s)
     elif s["phase"]=="tie":
         _decide(s,"guess") # fail-safe if impostor does not respond
-        _save(chat_id,s);_edit(bot,chat_id,s)
+        _save(chat_id,s);_publish_turn(bot,chat_id,s)
     elif s["phase"]=="final":_finish(bot,chat_id,s)
 
 def _watch(bot):
@@ -389,7 +407,7 @@ def register(bot):
                     return bot.answer_callback_query(q.id,"အောက်က ရွေးချယ်မှုတစ်ခု နှိပ်ပါ။",show_alert=True)
                 if action=="tie" and s["phase"]=="tie" and len(data)>3:
                     if uid!=s["imposter"]:return bot.answer_callback_query(q.id,"Imposter တစ်ယောက်သာ ဆုံးဖြတ်နိုင်ပါတယ်။",show_alert=True)
-                    _decide(s,data[3]);_save(chat_id,s);_edit(bot,chat_id,s)
+                    _decide(s,data[3]);_save(chat_id,s);_publish_turn(bot,chat_id,s)
                     return bot.answer_callback_query(q.id,"ဆုံးဖြတ်ပြီးပါပြီ။")
                 if action=="page" and s["phase"]=="final":
                     page=int(data[3]);bot.edit_message_reply_markup(chat_id,s["message_id"],reply_markup=_keyboard(s,page))
