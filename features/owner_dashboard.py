@@ -451,7 +451,7 @@ def register_owner_dashboard(app,bot):
         return new_card
     def get_owner_draft(uid):
         with _owner_draft_lock:
-            draft=get_owner_draft(uid)
+            draft=_owner_drafts.get(uid)
             if draft and time.time()<draft.get("expires",0):return draft
         try:
             _,_,draft=_load_panel_state(uid)
@@ -462,7 +462,7 @@ def register_owner_dashboard(app,bot):
         return None
 
     def clear_owner_draft(uid):
-        clear_owner_draft(uid)
+        with _owner_draft_lock:_owner_drafts.pop(uid,None)
         _save_panel_state(uid)
 
     def owner_buttons():
@@ -527,7 +527,7 @@ def register_owner_dashboard(app,bot):
             elif action.startswith("to:"):
                 target=action[3:]
                 with _owner_draft_lock:
-                    draft=_owner_drafts.get(uid)
+                    draft=get_owner_draft(uid)
                     if not draft or draft.get("phase")!="ready" or time.time()>draft["expires"]:
                         bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
                     draft["target"]=target
@@ -539,10 +539,10 @@ def register_owner_dashboard(app,bot):
             elif action=="send":
                 global _running
                 with _owner_draft_lock:
-                    draft=_owner_drafts.get(uid)
+                    draft=get_owner_draft(uid)
                     if not draft or draft.get("phase")!="ready" or "target" not in draft or time.time()>draft["expires"]:
                         bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
-                    draft=_owner_drafts.pop(uid)
+                    draft=_owner_drafts.pop(uid,None) or draft
                     _save_panel_state(uid,draft=None)
                 try:
                     with get_db_connection() as conn,conn.cursor() as cur:
