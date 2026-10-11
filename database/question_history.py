@@ -37,3 +37,16 @@ def mark(chat_id, question):
     except Exception as exc:
         print("Question history mark:", exc)
         return False
+
+
+def claim(chat_id, question):
+    """Reserve a question once per chat, atomically."""
+    try:
+        _init()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO game_question_history(chat_id,question_hash) VALUES (%s,%s) ON CONFLICT DO NOTHING RETURNING question_hash", (chat_id, _key(question)))
+                return cur.fetchone() is not None
+    except Exception as exc:
+        print("Question claim failed:", exc)
+        return None
