@@ -71,6 +71,9 @@ def _name(p):
 def _players(s):
     return s["players"]
 
+def _eligible(s):
+    return [p for p in s["players"] if not p.get("removed")]
+
 def _active(s):
     return s and s["phase"] not in ("finished","cancelled")
 
@@ -127,7 +130,7 @@ def _view(s):
         return (head+f"🗳️ <b>ROUND {s['round']} ပြီးပါပြီ</b>\n"
                 "နောက် Round ဆက်မလား၊ Imposter ကို ခန့်မှန်းမလား?\n"
                 f"🔁 ဆက်မယ်: {a} · 🔎 ခန့်မှန်းမယ်: {b}\n"
-                f"မဲပေးပြီး: {len(choices)}/{len(names)}")
+                f"မဲပေးပြီး: {len(choices)}/{len(_eligible(s))}")
     if phase=="tie":
         return (head+"⚖️ <b>VOTE သရေဖြစ်နေပါတယ်</b>\n"
                 "🎭 Imposter က သရေဖြတ်ဆုံးဖြတ်မယ်။\n"
@@ -135,7 +138,7 @@ def _view(s):
     if phase=="final":
         return (head+"🔎 <b>WHO IS THE IMPOSTER?</b>\n"
                 "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
-                f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(names)}\n"
+                f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
                 "⏳ 60 seconds · မပေးသူ Abstain")
     return head+"🏁 Game ပြီးဆုံးပါပြီ။"
 
@@ -158,7 +161,7 @@ def _finish(bot,chat_id,s,reason="vote"):
     votes={int(u):int(idx) for u,idx in s["votes"].items()}
     imp_idx=next((i for i,p in enumerate(s["players"]) if p["id"]==s["imposter"]),-1)
     correct=[uid for uid,idx in votes.items() if idx==imp_idx and uid!=s["imposter"]]
-    found=len(correct)>len(s["players"])//2
+    found=len(correct)>len(_eligible(s))//2
     if reason=="imposter_afk":found=True
     s["finished_reason"]=reason
     s["winners"]=correct
@@ -178,7 +181,7 @@ def _finish(bot,chat_id,s,reason="vote"):
     if not s.get("rewards_claimed"):
         s["rewards_claimed"]=True
         _save(chat_id,s)
-        rewarded=correct if found else [s["imposter"]]
+        rewarded=correct + ([] if found else [s["imposter"]])
         for uid in rewarded:
             try:add_bonus_points(chat_id,uid,10 if uid==s["imposter"] else 5,reason="imposter")
             except Exception as exc:print("Imposter rewards:",exc)
@@ -359,7 +362,7 @@ def register(bot):
                 if action=="decision" and s["phase"]=="decision" and len(data)>3:
                     if str(uid) in s["decisions"]:return bot.answer_callback_query(q.id,"မဲပေးပြီးသားပါ။")
                     s["decisions"][str(uid)]=data[3]
-                    if len(s["decisions"])>=len(s["players"]):s["deadline"]=0
+                    if len(s["decisions"])>=len(_eligible(s)):s["deadline"]=0
                     _save(chat_id,s);_edit(bot,chat_id,s)
                     return bot.answer_callback_query(q.id,"မဲပေးပြီးပါပြီ။")
                 if action=="tiebreak" and s["phase"]=="tie":
@@ -383,8 +386,9 @@ def register(bot):
                     idx=int(data[3])
                     if idx<0 or idx>=len(s["players"]):return bot.answer_callback_query(q.id,"ရွေးချယ်မှု မမှန်ပါ။")
                     if s["players"][idx]["id"]==uid:return bot.answer_callback_query(q.id,"ကိုယ့်ကိုယ်ကို မဲပေးလို့မရပါ။")
+                    if s["players"][idx].get("removed"):return bot.answer_callback_query(q.id,"ဒီ Player ကို AFK ကြောင့် ဖယ်ထားပါတယ်။")
                     s["votes"][str(uid)]=idx
-                    if len(s["votes"])>=len(s["players"]):
+                    if len(s["votes"])>=len(_eligible(s)):
                         _finish(bot,chat_id,s)
                     else:_save(chat_id,s);_edit(bot,chat_id,s)
                     return bot.answer_callback_query(q.id,"မဲပေးပြီးပါပြီ။")
