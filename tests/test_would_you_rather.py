@@ -10,7 +10,7 @@ class WouldYouRatherTests(unittest.TestCase):
         self.assertGreaterEqual(len(PAIRS), 75)
 
     def test_all_combinations_unique_and_valid(self):
-        questions = set()
+        choices = set()
         for ix in range(CAPACITY):
             item = generate_by_index(ix)
             self.assertEqual(len(item["options"]),2)
@@ -18,12 +18,13 @@ class WouldYouRatherTests(unittest.TestCase):
             self.assertTrue(all(len(option)<=100 for option in item["options"]))
             self.assertTrue(any(0x1000 <= ord(c) <= 0x109F for c in item["question"]))
             self.assertNotEqual(*item["options"])
-            self.assertIn(item["options"][0],item["question"])
-            self.assertIn(item["options"][1],item["question"])
+            self.assertNotIn(item["options"][0],item["question"])
+            self.assertNotIn(item["options"][1],item["question"])
+            self.assertTrue(item["question"].startswith("🎲 Would You Rather?"))
             self.assertEqual(item["id"],"WYR-MM-"+str(ix))
-            self.assertNotIn(item["question"], questions)
-            questions.add(item["question"])
-        self.assertEqual(len(questions), CAPACITY)
+            self.assertNotIn(item["options"], choices)
+            choices.add(item["options"])
+        self.assertEqual(len(choices), CAPACITY)
 
     def test_invalid_indices(self):
         with self.assertRaises(ValueError): generate_by_index(-1)
