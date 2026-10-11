@@ -80,8 +80,18 @@ def nasa_images_question():
         title=row["title"]
         if not 12<=len(title)<=95:continue
         year=row["date_created"][:4]
-        if not year.isdigit():continue
-        others=[r["date_created"][:4] for r in rows if r["date_created"][:4]!=year]
-        item=_quiz("In which year was this NASA image created: "+title+"?",year,others,"nasa:image_year")
-        if item:return item
+        kinds=["year","center"]
+        random.shuffle(kinds)
+        for kind in kinds:
+            if kind=="year":
+                if not year.isdigit():
+                    continue
+                others=[r["date_created"][:4] for r in rows if r["date_created"][:4]!=year]
+                item=_quiz("What year does NASA's catalog give for the image titled "+title+"?",year,others,"nasa:catalog_year")
+            else:
+                center=row["center"]
+                others=[r["center"] for r in rows if r.get("center") and r["center"]!=center]
+                item=_quiz("Which NASA center is credited for the image titled "+title+"?",center,others,"nasa:center")
+            if item:
+                return item
     return None
