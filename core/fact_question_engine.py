@@ -36,7 +36,8 @@ def _quiz(question, correct, distractors, source):
     return make_mcq(question,correct,distractors,source)
 
 def wikidata_question():
-    title,subject_filter,relation,template=random.choice(TOPICS)
+    from core.wikidata_more_topics import MORE_TOPICS
+    title,subject_filter,relation,template=random.choice(TOPICS + MORE_TOPICS)
     offset=random.choice((0,100,250,500,1000))
     query=("SELECT ?subjectLabel ?valueLabel WHERE { ?subject "+subject_filter+
            "; "+relation+" ?value. SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". } } "+
