@@ -22,6 +22,7 @@ def _init_db():
           active BOOLEAN NOT NULL DEFAULT TRUE, broadcast_opt_out BOOLEAN NOT NULL DEFAULT FALSE,
           last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS owner_source_messages (id BIGSERIAL PRIMARY KEY, chat_id BIGINT NOT NULL, message_id BIGINT NOT NULL, preview TEXT NOT NULL DEFAULT '', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())""")
         cur.execute("""CREATE TABLE IF NOT EXISTS owner_broadcasts (
           id BIGSERIAL PRIMARY KEY, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           message TEXT NOT NULL, total INT NOT NULL DEFAULT 0,
@@ -141,8 +142,19 @@ def broadcast():
     if request.method=="POST":
         _verify_csrf()
         message=(request.form.get("message") or "").strip()
-        if not message or len(message)>1500: return ("Message must be 1–1500 characters",400)
+        if len(message)>1500:return ("Message too long",400)
+        source=request.form.get("source","text")
+        if source=="text" and not message:return ("Message required",400)
         if request.form.get("confirm")!="yes":return ("Confirmation required",400)
+        source_chat=source_msg=None
+        if source!="text":
+            try:source_id=int(source)
+            except ValueError:return ("Invalid Telegram source",400)
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("SELECT chat_id,message_id FROM owner_source_messages WHERE id=%s",(source_id,))
+                row=cur.fetchone()
+                if not row:return ("Telegram source not found",400)
+                source_chat,source_msg=row
         target=request.form.get("target","all")
         if target!="all":
             try:target=int(target)
@@ -164,7 +176,7 @@ def broadcast():
                 cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",
                             (message,len(ids)))
                 jobid=cur.fetchone()[0]
-            threading.Thread(target=_send_broadcast,args=(jobid,message,ids),daemon=True).start()
+            threading.Thread(target=_send_broadcast,args=(jobid,message,ids,source_chat,source_msg),daemon=True).start()
         except Exception:
             with _job_lock:_running=False
             raise
@@ -173,24 +185,32 @@ def broadcast():
         cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY title")
         groups=cur.fetchall()
         count=len(groups)
+        cur.execute("SELECT id,preview FROM owner_source_messages ORDER BY id DESC LIMIT 30")
+        originals=cur.fetchall()
+    source_options="<option value='text'>Write text in website</option>"
+    for sid,preview in originals:
+        source_options+=f"<option value='{sid}'>Telegram Original #{sid}: {html.escape(preview[:70])}</option>"
     choices="<option value='all'>All groups</option>"
     for gid,title in groups:
         choices+=f"<option value='{gid}'>{html.escape(title or str(gid))}</option>"
     body=f"""<h1>📢 Broadcast Center</h1><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
 <p class='muted'>Group admins can opt out using /broadcastoff in their group. Broadcasts are plain text and rate limited.</p>
 <form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}">
-<label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" required placeholder="Write the announcement..."></textarea>
+<label>Message Source</label><select name="source" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{source_options}</select><p class="muted">For original formatting and Premium emoji, send the message to the bot in Telegram private chat first. Configure OWNER_TELEGRAM_ID on Render.</p><label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" required placeholder="Write the announcement..."></textarea>
 <label><input style="width:auto" type="checkbox" name="confirm" value="yes" required> I confirm sending to selected destination.</label>
 <p><button>Send to groups</button></p></form></div>"""
     return _shell(body)
 
-def _send_broadcast(jobid,message,ids):
+def _send_broadcast(jobid,message,ids,source_chat=None,source_msg=None):
     global _running
     sent=failed=0
     try:
         for gid in ids:
             try:
-                BOT.send_message(gid,message)
+                if source_chat is not None:
+                    BOT.copy_message(gid,source_chat,source_msg)
+                else:
+                    BOT.send_message(gid,message)
                 sent+=1
             except Exception as exc:
                 failed+=1
@@ -228,6 +248,18 @@ def register_owner_dashboard(app,bot):
     def owner_membership(m):
         new=getattr(m.new_chat_member,"status","")
         record_group(m.chat,active=new not in ("left","kicked"))
+    @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document"])
+    def capture_owner_message(msg):
+        owner_id=os.getenv("OWNER_TELEGRAM_ID","").strip()
+        if not owner_id or str(msg.from_user.id)!=owner_id:return ContinueHandling()
+        if msg.content_type=="text" and (msg.text or "").startswith("/"):return ContinueHandling()
+        try:
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
+                    (msg.chat.id,msg.message_id,(msg.text or msg.caption or "["+msg.content_type+"]")[:180]))
+            bot.reply_to(msg,"✅ မူရင်း Message ကို သိမ်းထားပြီ။ Web Dashboard မှာ Telegram Original ကို ရွေးပြီး Broadcast ပို့နိုင်ပါပြီ။")
+        except Exception as exc:print("Owner message capture:",type(exc).__name__)
+        return ContinueHandling()
     @bot.message_handler(commands=["broadcastoff","broadcaston"])
     def toggle_broadcast(msg):
         if msg.chat.type not in ("group","supergroup"):return ContinueHandling()
