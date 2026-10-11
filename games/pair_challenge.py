@@ -56,13 +56,39 @@ def _allowed_kinds(game):
         return {"quiz", "puzzle", "math"}
     return {"quiz", "puzzle", "sync"}
 
+def _generated_challenge(game):
+    """Generate varied, answer-checked puzzles with scaling difficulty."""
+    count = len(game["players"])
+    level = max(1, count - 1) if game["mode"] == "squad" else 1
+    if game["mode"] == "versus":
+        level = 3
+    level += min(2, game["round_no"] // 2)
+    a = random.randint(6 * level, 16 * level)
+    b = random.randint(3 * level, 12 * level)
+    kind = random.choice(("math", "puzzle"))
+    if kind == "math":
+        correct = a * b if level >= 3 else a + b
+        question = f"{a} x {b} = ?" if level >= 3 else f"{a} + {b} = ?"
+    else:
+        step = random.randint(level + 2, level + 8)
+        question = f"Complete: {a}, {a+step}, {a+2*step}, ?"
+        correct = a + 3 * step
+    wrong = correct + random.choice((-1, 1)) * random.randint(2, 4 + level * 2)
+    if wrong == correct:
+        wrong += 1
+    answer = random.choice(("a", "b"))
+    options = [str(correct), str(wrong)] if answer == "a" else [str(wrong), str(correct)]
+    return {"id": uuid.uuid4().hex[:12], "kind": kind, "question": question,
+            "options": options, "answer": answer, "difficulty": level}
+
 def _pick_challenge(game):
     used = set(game.get("used_challenges", []))
     pool = [q for q in CHALLENGES if q["kind"] in _allowed_kinds(game) and q["id"] not in used]
-    if not pool:
-        game["used_challenges"] = []
-        pool = [q for q in CHALLENGES if q["kind"] in _allowed_kinds(game)]
-    challenge = dict(random.choice(pool))
+    # Generated questions expand variety; for Squad, scale difficulty by player count.
+    if game["mode"] == "squad" or random.random() < 0.65 or not pool:
+        challenge = _generated_challenge(game)
+    else:
+        challenge = dict(random.choice(pool))
     game["used_challenges"].append(challenge["id"])
     return challenge
 
