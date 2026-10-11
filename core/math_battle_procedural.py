@@ -73,7 +73,7 @@ def _build(level, kind, rng):
         h,k,a=n(-15,15),n(-30,30),n(2,7)
         return f"For y = {a}(x - ({h}))² + ({k}), y at vertex = ?",k
     if kind == "combinatorics":
-        nitems=n(8,24)
+        nitems=n(8,150)
         return f"Choose 3 from {nitems} distinct objects. Number of combinations = ?",nitems*(nitems-1)*(nitems-2)//6
     if kind == "geometry_composite":
         r=n(3,18); w=n(3,21);h=n(4,22)
