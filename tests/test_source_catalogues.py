@@ -39,7 +39,7 @@ class SourceCatalogueTests(unittest.TestCase):
              "value":1000000+i*100000}
             for i in range(8)]
         countries=[{"id":"ISO"+str(i),"iso2Code":"C"+str(i),"region":{"id":"EAS"}} for i in range(8)]
-        def response(url):
+        def response(url, **kwargs):
             return [{},countries] if "/v2/country?" in url else [{},rows]
         with patch("core.extra_question_sources._get",side_effect=response):
             result=world_bank_question()
