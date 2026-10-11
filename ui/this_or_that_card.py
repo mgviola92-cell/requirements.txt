@@ -7,6 +7,16 @@ from PIL import Image, ImageDraw, ImageFont
 from ui.card_generator import create_card, draw_panel, draw_text, paste_image, card_to_bytes, load_font
 from core.this_or_that_visuals import get_visuals
 
+
+def _fitted_size(text, max_width=414, start=36):
+    """Scale Burmese choice labels to the available panel width."""
+    painter=ImageDraw.Draw(Image.new("RGBA",(1,1)))
+    for size in range(start,15,-1):
+        bounds=painter.textbbox((0,0),str(text),font=load_font(size))
+        if bounds[2]-bounds[0] <= max_width:
+            return size
+    return 16
+
 W,H=1000,640
 
 def round_card(question, round_no, votes=(0,0), manifest=None):
@@ -22,7 +32,7 @@ def round_card(question, round_no, votes=(0,0), manifest=None):
         paste_image(card,path,(left,145,left+445,440),rounded_radius=23)
         draw_panel(card,(left,454,left+445,571),fill=(41,52,75,255),radius=18)
         text=question["options"][i]
-        text_size=28 if len(text)>18 else 36
+        text_size=_fitted_size(text)
         draw_text(card,text,(left+222,500),size=text_size,anchor="mm")
         count=votes[i]
         draw_text(card,f"{'A' if i==0 else 'B'}  •  {count} Votes",
@@ -44,7 +54,7 @@ def illustrated_card(question, round_no, votes=(0, 0)):
         left=45+i*460
         draw_panel(card,(left,225,left+444,548),fill=(42,55,84,255) if i==0 else (63,46,80,255),radius=28)
         draw_text(card,"A" if i==0 else "B",(left+222,278),size=64,anchor="mm")
-        size=26 if len(choice)>27 else (31 if len(choice)>19 else 37)
+        size=_fitted_size(choice)
         draw_text(card,choice,(left+222,380),size=size,anchor="mm")
         pct=round(votes[i]*100/total) if total else 0
         draw_text(card,f"{pct}%  •  {votes[i]} Votes",(left+222,490),
