@@ -338,16 +338,27 @@ def register(app,bot,replace_card,clear_broadcast):
             lines.append(f'#{sid} · {target} · {when.astimezone(MMT):%m-%d %H:%M} · {status}')
             if status=='pending':rows.append((f'❌ Cancel #{sid}',f'ops:cancel:{sid}'))
         rows.append(('⬅️ Back','ops:home'));card(uid,'\n'.join(lines)[:3500],rows)
-    def group_list(uid,action,page):
+    def group_list(uid,action,page,notice=''):
         entries=groups();rows=[]
         refresh()
+        selected=[title or str(cid) for cid,title in entries if cid in _cache['groups']]
         for cid,title in entries[page*10:(page+1)*10]:
-            suffix=' 🧪' if cid in _cache['groups'] else ''
-            data=f'ops:test:{cid}:{0 if cid in _cache["groups"] else 1}' if action=='tests' else f'ops:leave:{cid}'
-            rows.append(((title or str(cid))[:45]+suffix,data))
+            enabled=cid in _cache['groups']
+            label=('✅ ' if enabled else '⬜ ')+(title or str(cid))[:45] if action=='tests' else (title or str(cid))[:45]
+            data=f'ops:test:{cid}:{0 if enabled else 1}:{page}' if action=='tests' else f'ops:leave:{cid}'
+            rows.append((label,data))
         if page:rows.append(('← Previous',f'ops:{action}:{page-1}'))
         if (page+1)*10<len(entries):rows.append(('Next →',f'ops:{action}:{page+1}'))
-        rows.append(('⬅️ Back','ops:home'));card(uid,'🧪 Test Groups' if action=='tests' else '🚪 ထွက်ခိုင်းချင်တဲ့ Group ရွေးပါ။',rows)
+        if action=='tests':rows.append(('🚀 Feature Rollout → Test only','ops:features:0'))
+        rows.append(('⬅️ Back','ops:home'))
+        if action=='tests':
+            text='🧪 TEST GROUPS\n\n'
+            if notice:text+=notice+'\n\n'
+            text+=f'✅ ရွေးထားသော Group: {len(selected)} ခု\n'
+            text+='\n'.join('• '+name[:70] for name in selected[:10]) if selected else 'မရွေးရသေးပါ။'
+            text+='\n\n✅ = ရွေးထားပြီး · ⬜ = မရွေးရသေး\nပြန်နှိပ်ရင် ရွေးထားတာကို ဖယ်ပါမယ်။\n\nGroup ရွေးပြီးရင် Feature Rollout မှာ Game ရွေးပြီး Test only နှိပ်ပါ။'
+        else:text='🚪 ထွက်ခိုင်းချင်တဲ့ Group ရွေးပါ။'
+        card(uid,text,rows)
     def targets(uid,page=0):
         entries=groups();rows=[('🌍 All Groups','ops:target:all')]
         rows += [((title or str(cid))[:50],f'ops:target:{cid}') for cid,title in entries[page*10:(page+1)*10]]
@@ -377,7 +388,12 @@ def register(app,bot,replace_card,clear_broadcast):
             if action not in ('target','targets','confirm','sendnow','confirmnow'):draft(uid,{})
             if action=='home':home(uid)
             elif action in ('tests','leavegroups'):group_list(uid,action,int(parts[2]))
-            elif action=='test':test_group(uid,int(parts[2]),parts[3]=='1');group_list(uid,'tests',0)
+            elif action=='test':
+                cid=int(parts[2]);enabled=parts[3]=='1';page=max(0,int(parts[4])) if len(parts)>4 else 0
+                test_group(uid,cid,enabled)
+                title=dict(groups()).get(cid,str(cid))
+                notice=('✅ '+title+' ကို Test Group အဖြစ် သိမ်းပြီးပါပြီ။') if enabled else ('☑️ '+title+' ကို Test Group စာရင်းမှ ဖယ်ပြီးပါပြီ။')
+                group_list(uid,'tests',page,notice[:250])
             elif action=='features':
                 page=int(parts[2]);entries=list(release_features().items());rows=[]
                 for ix,(key,label) in enumerate(entries[page*8:(page+1)*8],page*8):rows.append((label[:48],f'ops:feature:{ix}'))

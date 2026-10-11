@@ -140,3 +140,22 @@ class OwnerOperationsTests(unittest.TestCase):
         with patch.object(owner,'_load_panel_state',return_value=(42,8,None)),patch.object(ops,'leave_group') as leave:
             handlers['owner_tools_action'](q)
         leave.assert_not_called();bot.answer_callback_query.assert_called_once()
+
+    def test_testgroup_selection_is_visible_and_keeps_its_page(self):
+        _,bot,handlers,replace=self.handlers()
+        conn,cur=self.connection();cur.fetchall.return_value=[(-100-i,'Group '+str(i)) for i in range(12)]
+        q=NS(id='q',data='ops:test:-111:1:1',from_user=NS(id=42),message=NS(message_id=7,chat=NS(id=42,type='private')))
+        def select(actor,cid,enabled):
+            if enabled:ops._cache['groups'].add(cid)
+            else:ops._cache['groups'].discard(cid)
+        with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'),patch.object(ops,'test_group',side_effect=select):
+            handlers['owner_tools_action'](q)
+            text,markup=replace.call_args.args[2:]
+            self.assertIn('Group 11 ကို Test Group အဖြစ် သိမ်းပြီးပါပြီ။',text)
+            buttons=[b for row in markup.keyboard for b in row]
+            self.assertTrue(any(b.text=='✅ Group 11' and b.callback_data=='ops:test:-111:0:1' for b in buttons))
+            self.assertTrue(any(b.callback_data=='ops:features:0' for b in buttons))
+            q.data='ops:test:-111:0:1';handlers['owner_tools_action'](q)
+            text,markup=replace.call_args.args[2:]
+            self.assertIn('စာရင်းမှ ဖယ်ပြီးပါပြီ။',text)
+            self.assertTrue(any(b.text=='⬜ Group 11' for row in markup.keyboard for b in row))
