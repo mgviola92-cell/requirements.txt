@@ -336,6 +336,12 @@ def register(bot):
             refresh=now-_last_edits.get(chat_id,0)>2.0
             if refresh:_last_edits[chat_id]=now
         bot.answer_callback_query(call.id,"✅ Vote counted")
+        # One participation reward per user/round; successful DB insertion
+        # guarantees repeat button presses cannot grant extra points.
+        try:
+            add_bonus_points(chat_id, uid, 1, reason="would_you_rather_vote")
+        except Exception as exc:
+            print("WYR participation reward:", exc)
         if refresh:update(g)
 
     @bot.message_handler(func=lambda m:True,content_types=["text"])
