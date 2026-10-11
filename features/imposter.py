@@ -232,7 +232,20 @@ def _tick(bot,chat_id,s):
                   "\n".join(f"{i+1:02d}. {_name(p)}" for i,p in enumerate(s["players"][:100]))+
                   ("\n… ကျန်သူတွေကို List Button နဲ့ကြည့်ပါ။" if len(s["players"])>100 else "")+
                   "\n\n🔐 Game Message မှာ SECRET ကြည့်မယ် နှိပ်ပြီး ကိုယ့် Role ကို ကြည့်ပါ။")
-        _edit(bot,chat_id,s)
+        # Put the interactive controller directly below the player roster.
+        # The original recruitment message is far up the chat and must not
+        # remain the only place where the secret button is reachable.
+        previous_id=s.get("message_id")
+        try:
+            main=bot.send_message(chat_id,_view(s),parse_mode="HTML",reply_markup=_keyboard(s))
+            s["message_id"]=main.message_id
+            _save(chat_id,s)
+            if previous_id:
+                try:bot.edit_message_reply_markup(chat_id,previous_id,reply_markup=None)
+                except Exception as exc:print("Imposter old join buttons:",exc)
+        except Exception as exc:
+            print("Imposter new controller:",exc)
+            _edit(bot,chat_id,s)
     elif s["phase"]=="clue":
         p=s["players"][s["turn"]]
         if not s.get("warned"):
