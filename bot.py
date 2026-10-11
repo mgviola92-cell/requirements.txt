@@ -7382,6 +7382,9 @@ import threading
 
 app = Flask(__name__)
 
+from features.owner_dashboard import register_owner_dashboard
+register_owner_dashboard(app, bot)
+
 @app.route("/")
 def home():
     return "Bot server is running!"
