@@ -5190,8 +5190,8 @@ def boss_raid_finish(chat_id,raid,won):
     art=state.get("art");variant=state.get("variant")
     result_art=get_boss_artwork(raid["boss"]["name"],"normal" if won else "final") or art
 
-    try:boss_raid_edit(chat_id,raid,force=True)
-    except Exception as ex:print("Boss final live-card edit error:",ex)
+    # Skip the final live-card edit: send the outcome before any optional cleanup.
+    # A slow media edit or Telegram 429 must not delay the result.
 
     # Unpin is independent: a failed edit/result render must never leave the raid pinned.
     if raid.get("message_id"):
