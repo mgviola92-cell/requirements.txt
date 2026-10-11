@@ -45,20 +45,22 @@ INDICATORS={
     "SE.ADT.LITR.ZS":("literacy rate","What was the adult literacy rate in {} in {}?"),
 }
 def world_bank_question():
-    code=random.choice(tuple(INDICATORS))
-    name,template=INDICATORS[code]
+    from core.world_bank_indicators import METRICS
+    code=random.choice(tuple(METRICS))
+    name,unit=METRICS[code]
+    template='What was the {} ({}) in {{}} in {{}}?'.format(name,unit)
     year=random.randint(2010,2022)
     params=urllib.parse.urlencode({"format":"json","date":str(year),"per_page":300})
     data=_get("https://api.worldbank.org/v2/country/all/indicator/"+code+"?"+params)
     if not isinstance(data,list) or len(data)<2 or not isinstance(data[1],list):return None
-    rows=[r for r in data[1] if r.get("value") is not None and r.get("countryiso3code")]
+    rows=[r for r in data[1] if isinstance(r.get("value"),(int,float)) and r.get("countryiso3code") and len(r["countryiso3code"])==3 and r.get("country",{}).get("value")]
     if len(rows)<5:return None
     row=random.choice(rows)
     country=row["country"]["value"]
     value=row["value"]
-    if code in ("SP.POP.TOTL","AG.SRF.TOTL.K2"):fmt=lambda x:f"{x:,.0f}"
-    elif code=="NY.GDP.MKTP.CD":fmt=lambda x:f"{x/1e9:,.1f} billion"
-    else:fmt=lambda x:f"{x:.1f}"
+    if unit=="current US dollars" and abs(value)>1e9:fmt=lambda x:f"{x/1e9:,.2f} billion"
+    elif unit in ("people","sq km","current US dollars"):fmt=lambda x:f"{x:,.0f}"
+    else:fmt=lambda x:f"{x:.2f}"
     correct=fmt(value)
     others=[fmt(r["value"]) for r in rows if r["country"]["value"]!=country]
     return _quiz(template.format(country,year),correct,others,"worldbank:"+name)
