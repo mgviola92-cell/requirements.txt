@@ -86,7 +86,7 @@ def openalex_question():
             kinds.append("language")
         if row.get("type"):
             kinds.append("type")
-        if (row.get("primary_topic") or {}).get("field",{}).get("display_name"):
+        if ((row.get("primary_topic") or {}).get("field") or {}).get("display_name"):
             kinds.append("field")
         if author_names:kinds.append("author")
         if journal:kinds.append("journal")
