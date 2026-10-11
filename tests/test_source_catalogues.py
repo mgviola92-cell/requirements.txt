@@ -26,7 +26,7 @@ class SourceCatalogueTests(unittest.TestCase):
 
     def test_wikipedia_question_from_mocked_memberships(self):
         def members(category):
-            return [category+" example"]
+            return [category+" example "+str(i) for i in range(5)]
         with patch("core.wikipedia_questions._members",side_effect=members):
             result=wikipedia_question()
         self.assertIsNotNone(result)
