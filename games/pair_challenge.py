@@ -1,3 +1,4 @@
+from features.owner_operations import game_launch
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import random
 import threading
@@ -111,6 +112,7 @@ def _pick_challenge(game):
         return challenge
     return None
 
+@game_launch('pair_challenge')
 def create_lobby(chat_id, owner_id, owner_name):
     with _lock:
         current = _games.get(chat_id)

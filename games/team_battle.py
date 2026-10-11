@@ -1,3 +1,4 @@
+from features.owner_operations import game_launch
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import random
 import threading
@@ -30,6 +31,7 @@ def _copy(b):
     out["scores"] = dict(b["scores"])
     return out
 
+@game_launch('team_battle')
 def start_battle(chat_id):
     with _lock:
         cur = _battles.get(chat_id)

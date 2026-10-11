@@ -57,6 +57,8 @@ def _init_db():
             owner_id BIGINT PRIMARY KEY, chat_id BIGINT, card_id BIGINT,
             draft TEXT, updated_at TIMESTAMPTZ DEFAULT NOW()
         )""")
+        from features.owner_operations import initialize as initialize_operations
+        initialize_operations(cur)
 
 def _queue_broadcast(message, ids, source_chat=None, source_msg=None, request_id=None):
     """Serialize jobs using a PostgreSQL transaction lock, not process-local RAM."""
@@ -176,6 +178,7 @@ SHELL=CSS+"""<main><nav><strong>👑 BOT CONTROL</strong>
 <a href="{{url_for('owner_dashboard.index')}}">Dashboard</a>
 <a href="{{url_for('owner_dashboard.broadcast')}}">Broadcast</a>
 <a href="/owner/control/">⚙️ Group Control & Messages</a>
+<a href="/owner/tools/">🛠️ Owner Tools</a>
 <a href="{{url_for('owner_dashboard.edit_welcome')}}">✏️ Welcome Editor</a>
 <form action="{{url_for('owner_dashboard.logout')}}" method="post">
 <input type="hidden" name="csrf" value="{{csrf}}"><button style="padding:5px 12px">Logout</button></form>
@@ -442,6 +445,8 @@ def register_owner_dashboard(app,bot):
     observed_lock=threading.Lock()
     @bot.message_handler(func=lambda m:m.chat.type in ("group","supergroup"),content_types=["text"])
     def observe_group(msg):
+        from features.owner_operations import usage
+        usage(msg.chat.id,'message',event_key=f'msg:{msg.chat.id}:{msg.message_id}')
         now=time.monotonic()
         with observed_lock:
             if now-observed.get(msg.chat.id,-1000000)<21600:
@@ -458,6 +463,9 @@ def register_owner_dashboard(app,bot):
         old_joined=old_status not in ("left","kicked")
         new_joined=new_status not in ("left","kicked")
         record_group(m.chat,active=new_joined)
+        if old_joined != new_joined:
+            from features.owner_operations import usage
+            usage(m.chat.id,'joined' if new_joined else 'left')
         if not old_joined and new_joined:
             try:
                 with get_db_connection() as conn,conn.cursor() as cur:
@@ -506,6 +514,7 @@ def register_owner_dashboard(app,bot):
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
         kb.add(types.InlineKeyboardButton("⚙️ Group Control & Messages",callback_data="ctl:home:0"))
+        kb.add(types.InlineKeyboardButton("🛠️ Owner Tools",callback_data="ops:home"))
         kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.f12c1d4700', '📢 Broadcast', {}),callback_data="own:broadcast"),
                types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.4957a560df', '👥 Groups', {}),callback_data="own:groups"))
         kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.6a9d439083', '📜 History', {}),callback_data="own:history"),
@@ -692,3 +701,6 @@ def register_owner_dashboard(app,bot):
 
     from features.owner_controls import register as register_owner_controls
     register_owner_controls(app,bot,owner_replace_card,owner_back_button,clear_owner_draft)
+
+    from features.owner_operations import register as register_operations
+    register_operations(app,bot,owner_replace_card,clear_owner_draft)

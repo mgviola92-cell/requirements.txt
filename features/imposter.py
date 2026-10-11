@@ -327,7 +327,7 @@ def register(bot):
             cur.execute("SELECT chat_id FROM imposter_games WHERE state->>'phase' IN ('join','clue','decision','tie','final')")
             for (chat_id,) in cur.fetchall():
                 ACTIVE_CHATS.add(chat_id)
-                start_session(chat_id,"imposter",duration=24*3600)
+                start_session(chat_id,"imposter",duration=24*3600,recover=True)
     if not _schedulers_started:
         threading.Thread(target=_watch,args=(bot,),daemon=True,name="imposter-watch").start()
         _schedulers_started=True

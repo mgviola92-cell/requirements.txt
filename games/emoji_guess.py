@@ -1,3 +1,4 @@
+from features.owner_operations import game_launch
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 😀 EMOJI GUESS GAME
@@ -224,6 +225,7 @@ def get_random_question(
 # ▶️ START GAME
 # =========================================================
 
+@game_launch('emoji_guess')
 def start_emoji_game(
     chat_id,
     question,

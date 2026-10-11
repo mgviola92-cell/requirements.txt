@@ -184,7 +184,8 @@ def get_chat_sessions(chat_id):
 def can_start_session(
     chat_id,
     session_type,
-    allow_with=None
+    allow_with=None,
+    recover=False
 ):
     """
     Return:
@@ -196,6 +197,10 @@ def can_start_session(
         set/list of session types which are explicitly
         allowed to run together.
     """
+
+    from features.owner_operations import feature_allowed
+    if not recover and not feature_allowed('game:'+session_type,chat_id):
+        return False, 'test_group_only'
 
     allow_with = set(allow_with or [])
 
@@ -238,7 +243,8 @@ def start_session(
     session_type,
     data=None,
     duration=None,
-    allow_with=None
+    allow_with=None,
+    recover=False
 ):
     """
     duration:
@@ -250,10 +256,15 @@ def start_session(
         (False, blocking_session_type)
     """
 
+    from features.owner_operations import feature_allowed,usage
+    if not recover and not feature_allowed('game:'+session_type,chat_id):
+        return False, 'test_group_only'
+
     allowed, blocker = can_start_session(
         chat_id,
         session_type,
-        allow_with=allow_with
+        allow_with=allow_with,
+        recover=recover
     )
 
     if not allowed:
@@ -278,6 +289,7 @@ def start_session(
     with _sessions_lock:
         _active_sessions[key] = session
 
+    if not recover:usage(chat_id,'game',session_type)
     return True, session
 
 

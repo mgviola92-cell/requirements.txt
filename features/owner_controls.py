@@ -119,7 +119,8 @@ def register(app,bot,replace_card,back_button,clear_draft):
 
     def owner(update):
         chat=getattr(update,'chat',None) or getattr(getattr(update,'message',None),'chat',None)
-        return bool(chat and chat.type=='private' and update.from_user and str(update.from_user.id)==os.getenv('OWNER_TELEGRAM_ID','').strip())
+        from features.owner_operations import can
+        return bool(chat and chat.type=='private' and update.from_user and can(update.from_user.id,'edit'))
     def button(text,data):return types.InlineKeyboardButton(text,callback_data=data)
     def card(uid,text,kb):replace_card(uid,uid,text,kb)
     def clear_edit(uid):
@@ -130,7 +131,8 @@ def register(app,bot,replace_card,back_button,clear_draft):
         for cid,title in entries[page*15:(page+1)*15]:kb.add(button((title or str(cid))[:50],f'ctl:scope:{cid}'))
         if page:kb.add(button('← Previous',f'ctl:home:{page-1}'))
         if (page+1)*15<len(entries):kb.add(button('Next →',f'ctl:home:{page+1}'))
-        kb.add(button('⬅️ Owner Panel','own:menu'))
+        from features.owner_operations import is_owner
+        kb.add(button('⬅️ Owner Panel' if is_owner(uid) else '⬅️ Staff Panel','own:menu' if is_owner(uid) else 'ops:home'))
         card(uid,'⚙️ GROUP CONTROL\n\nDefault သို့မဟုတ် ပြင်ချင်တဲ့ Group ကို ရွေးပါ။',kb)
     def menu(uid,scope):
         kb=types.InlineKeyboardMarkup(row_width=1)

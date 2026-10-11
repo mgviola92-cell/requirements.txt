@@ -1,3 +1,4 @@
+from features.owner_operations import game_launch
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # ⚡ SPEED TAP GAME ENGINE
@@ -36,6 +37,7 @@ _speed_tap_lock = threading.RLock()
 # 🌌 CREATE PENDING ROUND
 # =========================================================
 
+@game_launch('speed_tap')
 def create_speed_tap_game(
     chat_id,
     pending_seconds,

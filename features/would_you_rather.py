@@ -246,7 +246,7 @@ def register(bot):
                         with conn.cursor() as cur:
                             cur.execute("UPDATE wyr_rounds SET status='finished' WHERE chat_id=%s AND round_id=%s",(cid,gid))
                     continue
-                ok,_=start_session(cid,"would_you_rather",duration=float(ends)-time.time()+15)
+                ok,_=start_session(cid,"would_you_rather",duration=float(ends)-time.time()+15,recover=True)
                 if not ok:continue
                 g={"id":gid,"chat_id":cid,"owner_id":owner,"poll_id":pid,
                    "message_id":mid,"ends":float(ends)}

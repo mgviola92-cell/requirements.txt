@@ -237,11 +237,26 @@ def install_handler_controls(bot):
                         if cid>0 and _ready:
                             text=getattr(update,'text','') or ''
                             data=getattr(update,'data','') or ''
-                            if text.lstrip().startswith('/') or data.startswith(('own:','ctl:')):
+                            if text.lstrip().startswith('/') or data.startswith(('own:','ctl:','ops:')):
                                 from database.db import get_db_connection
                                 with get_db_connection() as conn,conn.cursor() as cur:
                                     cur.execute('DELETE FROM owner_control_edit WHERE owner_id=%s',(update.from_user.id,))
+                                    from features.owner_operations import _ready as ops_ready
+                                    if ops_ready and (text.lstrip().startswith('/') or data.startswith(('own:','ctl:'))):
+                                        cur.execute('DELETE FROM owner_operation_drafts WHERE user_id=%s',(update.from_user.id,))
                         with group_scope(cid):
+                            if method=='message_handler' and cid<0:
+                                from features.owner_operations import feature_allowed,usage,COMMAND_GAMES
+                                if kwargs.get('commands'):
+                                    usage(cid,'command',((getattr(update,'text','') or '').split() or [''])[0],f'cmd:{cid}:{getattr(update,"message_id",0)}')
+                                command=((getattr(update,'text','') or '').split() or [''])[0].lstrip('/').split('@')[0].lower()
+                                game_key=COMMAND_GAMES.get(command) if kwargs.get('commands') else None
+                                if not feature_allowed(key,cid) or (game_key and not feature_allowed('game:'+game_key,cid)):
+                                    from telebot.handler_backends import ContinueHandling
+                                    if kwargs.get('commands'):
+                                        bot.reply_to(update,message_text('system.test_group_only','🧪 ဒီ feature ကို Test Group မှာပဲ စမ်းနေပါတယ်။'))
+                                        return None
+                                    return ContinueHandling()
                             if method=='message_handler' and cid<0 and key in CATALOG and not effective(key,cid):
                                 from telebot.handler_backends import ContinueHandling
                                 if kwargs.get('commands'):
