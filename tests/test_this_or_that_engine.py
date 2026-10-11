@@ -1,4 +1,5 @@
 import unittest
+import random
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 from games import this_or_that as game
@@ -34,3 +35,17 @@ class ThisOrThatEngineTests(unittest.TestCase):
         with patch.object(game,"get_db_connection",return_value=connection):
             self.assertFalse(game.vote(100,"match",1,123,0))
         self.assertEqual(cursor.execute.call_count,1)
+
+    def test_five_rounds_choose_distinct_categories(self):
+        cursor=MagicMock()
+        cursor.fetchone.return_value=None
+        cursor.fetchall.return_value=[]
+        connection=MagicMock()
+        connection.__enter__.return_value.cursor.return_value.__enter__.return_value=cursor
+        with patch.object(game,"get_db_connection",return_value=connection):
+            state=game.start(-100,rng=random.Random(2026))
+        self.assertEqual(state["round"],1)
+        last=cursor.execute.call_args
+        picks=list(map(int,last.args[1][2].split(",")))
+        self.assertEqual(len(picks),5)
+        self.assertEqual(len({ix//276 for ix in picks}),5)
