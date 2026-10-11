@@ -28,8 +28,9 @@ jobs:
       - name: Audit all 50 procedural templates
         if: always()
         run: python -m tests.question_audit --samples 100 --output reports
-      - name: Optional live provider probes
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.live }}
+      - name: Live provider probes (7 sources, bounded)
+        if: always() && (github.event_name == 'push' || inputs.live)
+        timeout-minutes: 8
         run: python -m tests.question_audit --samples 100 --live --live-samples 2 --output reports
       - name: Upload readable and machine-readable reports
         if: always()
