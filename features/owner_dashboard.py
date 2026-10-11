@@ -186,9 +186,9 @@ def _shell(body):
 @_protect
 def index():
     with get_db_connection() as conn,conn.cursor() as cur:
-        cur.execute("SELECT COUNT(*),COUNT(*) FILTER(WHERE active),COUNT(*) FILTER(WHERE active AND NOT broadcast_opt_out) FROM owner_groups")
+        cur.execute("SELECT COUNT(*),COUNT(*) FILTER(WHERE active),COUNT(*) FILTER(WHERE active) FROM owner_groups")
         total,active,subscribed=cur.fetchone()
-        cur.execute("SELECT title,chat_id,active,broadcast_opt_out,last_seen FROM owner_groups ORDER BY last_seen DESC LIMIT 200")
+        cur.execute("SELECT title,chat_id,active,last_seen FROM owner_groups ORDER BY last_seen DESC LIMIT 200")
         groups=cur.fetchall()
         cur.execute("SELECT id,created_at,total,sent,failed,status FROM owner_broadcasts ORDER BY id DESC LIMIT 15")
         history=cur.fetchall()
@@ -196,8 +196,8 @@ def index():
     for name,n in [("Known groups",total),("Active groups",active),("Broadcast enabled",subscribed)]:
         body+=f"<div class='panel'><small>{name}</small><div class='big'>{n}</div></div>"
     body+="</div><div class='panel'><h2>Group Welcome Message</h2><p>Customize the message posted when the bot joins a new group.</p><a href='/owner/welcome'>✏️ Edit Welcome Message</a></div><div class='panel'><h2>Tracked Groups</h2><p class='muted'>Only groups discovered after tracking starts; total is not a historical Telegram-wide count.</p><div class='wrap'><table><tr><th>Group</th><th>Chat ID</th><th>Status</th><th>Last seen UTC</th></tr>"
-    for title,gid,is_active,optout,last in groups:
-        body+=f"<tr><td>{html.escape(title or 'Unnamed')}</td><td>{gid}</td><td>{'Active' if is_active else 'Left'}{' · Opted out' if optout else ''}</td><td>{html.escape(str(last)[:19])}</td></tr>"
+    for title,gid,is_active,last in groups:
+        body+=f"<tr><td>{html.escape(title or 'Unnamed')}</td><td>{gid}</td><td>{'Active' if is_active else 'Left'}</td><td>{html.escape(str(last)[:19])}</td></tr>"
     body+="</table></div></div><div class='panel'><h2>Broadcast History</h2><div class='wrap'><table><tr><th>ID</th><th>Sent</th><th>Failed</th><th>Total</th><th>Status</th></tr>"
     for rid,created,all_count,sent,failed,status in history:
         body+=f"<tr><td>{rid}</td><td>{sent}</td><td>{failed}</td><td>{all_count}</td><td>{html.escape(status)}</td></tr>"
@@ -277,10 +277,10 @@ def broadcast():
             except ValueError:return ("Invalid target",400)
         if target!="all":
             with get_db_connection() as conn,conn.cursor() as cur:
-                cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active=TRUE AND broadcast_opt_out=FALSE",(target,))
+                cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active=TRUE",(target,))
                 if not cur.fetchone():return ("Destination not available",400)
         with get_db_connection() as conn,conn.cursor() as cur:
-            cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
+            cur.execute("SELECT chat_id FROM owner_groups WHERE active ORDER BY chat_id")
             ids=[x[0] for x in cur.fetchall()]
         if target!="all":ids=[i for i in ids if i==target]
         if not ids:return ("No eligible groups",400)
@@ -289,7 +289,7 @@ def broadcast():
         threading.Thread(target=_send_broadcast,args=(jobid,),daemon=True).start()
         return redirect(url_for("owner_dashboard.index"))
     with get_db_connection() as conn,conn.cursor() as cur:
-        cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY title")
+        cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE ORDER BY title")
         groups=cur.fetchall()
         count=len(groups)
         cur.execute("SELECT id,preview FROM owner_source_messages ORDER BY id DESC LIMIT 5")
@@ -300,8 +300,8 @@ def broadcast():
     choices="<option value='all'>All groups</option>"
     for gid,title in groups:
         choices+=f"<option value='{gid}'>{html.escape(title or str(gid))}</option>"
-    body=f"""<h1>📢 Broadcast Center</h1><p><a href="/owner/saved">Manage saved messages</a></p><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
-<p class='muted'>Group admins can opt out using /broadcastoff in their group. Broadcasts are plain text and rate limited.</p>
+    body=f"""<h1>📢 Broadcast Center</h1><p><a href="/owner/saved">Manage saved messages</a></p><div class='panel'><h2>Send announcement to {count} active groups</h2>
+<p class='muted'>Announcements go to every tracked active group selected below. Delivery requires Telegram message permissions and is rate limited.</p>
 <form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}"><input type="hidden" name="request_id" value="{secrets.token_hex(20)}">
 <label>Message Source</label><select name="source" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{source_options}</select><p class="muted">For original formatting and Premium emoji, send the message to the bot in Telegram private chat first. Configure OWNER_TELEGRAM_ID on Render.</p><label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" placeholder="Write the announcement..."></textarea>
 <label><input style="width:auto" type="checkbox" name="confirm" value="yes" required> I confirm sending to selected destination.</label>
@@ -346,7 +346,7 @@ def _process_broadcast(jobid, conn):
                 cur.execute("""SELECT t.chat_id FROM owner_broadcast_targets t
                     JOIN owner_groups g ON g.chat_id=t.chat_id
                     WHERE t.job_id=%s AND t.status='pending'
-                      AND g.active AND NOT g.broadcast_opt_out
+                      AND g.active
                     ORDER BY t.chat_id LIMIT 1 FOR UPDATE OF t SKIP LOCKED""",(jobid,))
                 row=cur.fetchone()
                 if row:
@@ -362,7 +362,7 @@ def _process_broadcast(jobid, conn):
                     # Abort delivery if the lock-owning connection has been lost.
                     with conn.cursor() as lock_cur:lock_cur.execute("SELECT 1")
                     with get_db_connection() as consent_conn, consent_conn.cursor() as consent_cur:
-                        consent_cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active AND NOT broadcast_opt_out",(gid,))
+                        consent_cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active",(gid,))
                         if not consent_cur.fetchone():
                             skipped=True
                             break
@@ -406,7 +406,7 @@ def _process_broadcast(jobid, conn):
             with get_db_connection() as delivery_conn, delivery_conn.cursor() as cur:
                 cur.execute("""UPDATE owner_broadcast_targets t SET status='skipped'
                     FROM owner_groups g WHERE t.job_id=%s AND t.chat_id=g.chat_id
-                    AND t.status='pending' AND (NOT g.active OR g.broadcast_opt_out)""",(jobid,))
+                    AND t.status='pending' AND NOT g.active""",(jobid,))
                 cur.execute("""UPDATE owner_broadcasts SET
                     sent=(SELECT COUNT(*) FROM owner_broadcast_targets WHERE job_id=%s AND status='sent'),
                     failed=(SELECT COUNT(*) FROM owner_broadcast_targets WHERE job_id=%s AND status IN ('failed','uncertain')),
@@ -516,7 +516,7 @@ def register_owner_dashboard(app,bot):
 
     def owner_home(uid,chat_id):
         with get_db_connection() as conn,conn.cursor() as cur:
-            cur.execute("SELECT COUNT(*),COUNT(*) FILTER(WHERE active),COUNT(*) FILTER(WHERE active AND NOT broadcast_opt_out) FROM owner_groups")
+            cur.execute("SELECT COUNT(*),COUNT(*) FILTER(WHERE active),COUNT(*) FILTER(WHERE active) FROM owner_groups")
             total,active,enabled=cur.fetchone()
         owner_replace_card(uid,chat_id,f"👑 OWNER PANEL\n\n👥 Groups: {total}\n🟢 Active: {active}\n📢 Broadcast enabled: {enabled}\n\nအောက်က Menu ကို ရွေးပါ။",owner_buttons())
     @bot.message_handler(commands=["owner"])
@@ -550,9 +550,9 @@ def register_owner_dashboard(app,bot):
                 owner_replace_card(uid,q.message.chat.id,"📢 ပို့ချင်တဲ့စာကို ဒီမှာ တန်းရေးပို့ပါ၊ ဒါမှမဟုတ် Message / ပုံကို Forward လုပ်ပါ။\n\nရှိပြီးသား Message ကို Reply နှိပ်ပြီး /ownersend နဲ့လည်း ရွေးနိုင်ပါတယ်။\n/ownercancel နဲ့ ရပ်နိုင်ပါတယ်။",owner_back_button())
             elif action=="groups":
                 with get_db_connection() as conn,conn.cursor() as cur:
-                    cur.execute("SELECT title,active,broadcast_opt_out FROM owner_groups ORDER BY last_seen DESC LIMIT 30")
+                    cur.execute("SELECT title,active FROM owner_groups ORDER BY last_seen DESC LIMIT 30")
                     groups=cur.fetchall()
-                lines=[f"{i}. {title or 'Unnamed'} — {'🟢' if active else '⚪'}{' 🔕' if muted else ''}" for i,(title,active,muted) in enumerate(groups,1)]
+                lines=[f"{i}. {title or 'Unnamed'} — {'🟢' if active else '⚪'}" for i,(title,active) in enumerate(groups,1)]
                 owner_replace_card(uid,q.message.chat.id,"👥 Group List\n\n"+("\n".join(lines) if lines else "Group မရှိသေးပါ။"),owner_back_button())
             elif action=="history":
                 with get_db_connection() as conn,conn.cursor() as cur:
@@ -585,7 +585,7 @@ def register_owner_dashboard(app,bot):
                     _save_panel_state(uid,draft=None)
                 try:
                     with get_db_connection() as conn,conn.cursor() as cur:
-                        cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
+                        cur.execute("SELECT chat_id FROM owner_groups WHERE active ORDER BY chat_id")
                         ids=[r[0] for r in cur.fetchall()]
                     if draft["target"]!="all":ids=[i for i in ids if str(i)==draft["target"]]
                     jobid=_queue_broadcast("[Telegram original]",ids,draft["chat_id"],draft["message_id"],draft.get("request_id"))
@@ -613,7 +613,7 @@ def register_owner_dashboard(app,bot):
         kb=types.InlineKeyboardMarkup(row_width=1)
         kb.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
         with get_db_connection() as conn,conn.cursor() as cur:
-            cur.execute("SELECT chat_id,title FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY last_seen DESC LIMIT 20")
+            cur.execute("SELECT chat_id,title FROM owner_groups WHERE active ORDER BY last_seen DESC LIMIT 20")
             groups=cur.fetchall()
         for gid,title in groups:
             kb.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
@@ -685,19 +685,4 @@ def register_owner_dashboard(app,bot):
             except Exception as exc:
                 print("Owner direct message:",type(exc).__name__)
                 bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။")
-        return ContinueHandling()
-    @bot.message_handler(commands=["broadcastoff","broadcaston"])
-    def toggle_broadcast(msg):
-        if msg.chat.type not in ("group","supergroup"):return ContinueHandling()
-        try:
-            member=bot.get_chat_member(msg.chat.id,msg.from_user.id)
-            if member.status not in ("administrator","creator"):
-                bot.reply_to(msg,"Group Admin သာ Announcement Setting ပြောင်းနိုင်ပါတယ်။")
-                return ContinueHandling()
-            record_group(msg.chat)
-            optout=(msg.text or "").split()[0].split("@")[0]=="/broadcastoff"
-            with get_db_connection() as conn,conn.cursor() as cur:
-                cur.execute("UPDATE owner_groups SET broadcast_opt_out=%s WHERE chat_id=%s",(optout,msg.chat.id))
-            bot.reply_to(msg,"📢 Announcement ပိတ်ထားပါပြီ။" if optout else "📢 Announcement ပြန်ဖွင့်ထားပါပြီ။")
-        except Exception as exc:print("Owner broadcast setting:",type(exc).__name__)
         return ContinueHandling()

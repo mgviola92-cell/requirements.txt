@@ -44,8 +44,8 @@ class OwnerStabilityTests(unittest.TestCase):
             owner._send_broadcast(8)
         process.assert_not_called()
 
-    def delivery(self, error=None, original=False, opted_out=False):
-        conn,cur=self.connection([('hello',9 if original else None,10 if original else None),(-100,)]+([None] if opted_out else [(1,)]*(3 if error and getattr(error,'error_code',None)==429 else 1))+[None])
+    def delivery(self, error=None, original=False, inactive=False):
+        conn,cur=self.connection([('hello',9 if original else None,10 if original else None),(-100,)]+([None] if inactive else [(1,)]*(3 if error and getattr(error,'error_code',None)==429 else 1))+[None])
         bot=MagicMock()
         method=bot.copy_message if original else bot.send_message
         if error:method.side_effect=error
@@ -54,10 +54,30 @@ class OwnerStabilityTests(unittest.TestCase):
         states=[c.args[1][0] for c in cur.execute.call_args_list if 'SET status=%s,last_error=%s' in c.args[0]]
         return bot,states,sleep,cur
 
-    def test_opt_out_after_queue_prevents_delivery(self):
-        bot,states,_,_=self.delivery(opted_out=True)
+    def test_inactive_group_after_queue_prevents_delivery(self):
+        bot,states,_,_=self.delivery(inactive=True)
         bot.send_message.assert_not_called()
         self.assertEqual(states,['skipped'])
+
+    def test_legacy_opt_out_is_not_a_delivery_filter(self):
+        bot,states,_,cur=self.delivery()
+        self.assertEqual(states,['sent'])
+        queries=[c.args[0] for c in cur.execute.call_args_list]
+        self.assertTrue(any('g.active' in query for query in queries))
+        self.assertFalse(any('broadcast_opt_out' in query for query in queries))
+
+    def test_removed_commands_have_no_handlers_or_menu_entries(self):
+        import ast
+        from pathlib import Path
+        bot,handlers=self.handlers()
+        registered=[command for call in bot.message_handler.call_args_list for command in call.kwargs.get('commands',[])]
+        source=Path('bot.py').read_text()
+        tree=ast.parse(source)
+        menu=next(node for node in tree.body if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)) and any(isinstance(dec,ast.Call) and isinstance(dec.func,ast.Attribute) and dec.func.attr=='message_handler' and any(kw.arg=='commands' and 'cmd' in ast.literal_eval(kw.value) for kw in dec.keywords) for dec in node.decorator_list))
+        text=ast.get_source_segment(source,menu)
+        for command in ['broadcastoff','broadcaston']:
+            self.assertNotIn(command,registered)
+            self.assertNotIn('/'+command,text)
 
     def test_original_uses_copy_message(self):
         bot,states,_,_=self.delivery(original=True)
