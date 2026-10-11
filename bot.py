@@ -309,6 +309,11 @@ def get_next_emoji_question(chat_id):
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
+from flask import Flask
+from features.owner_dashboard import register_owner_dashboard
+app = Flask(__name__)
+register_owner_dashboard(app, bot)
+
 register_daily_challenge(bot)
 from features.would_you_rather import register as register_would_you_rather
 register_would_you_rather(bot)
@@ -7377,13 +7382,7 @@ configure_speed_tap_auto(
     can_spawn_callback=can_auto_spawn_speed_tap,
 )
 
-from flask import Flask
 import threading
-
-app = Flask(__name__)
-
-from features.owner_dashboard import register_owner_dashboard
-register_owner_dashboard(app, bot)
 
 @app.route("/")
 def home():
