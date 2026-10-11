@@ -276,6 +276,21 @@ def register_owner_dashboard(app,bot):
         return (msg.chat.type=="private" and msg.from_user is not None and
                 os.getenv("OWNER_TELEGRAM_ID","").strip()==str(msg.from_user.id))
 
+    def owner_edit(bot_chat,message_id,text,keyboard=None):
+        try:
+            bot.edit_message_text(text,bot_chat,message_id,reply_markup=keyboard)
+        except Exception as exc:
+            print("Owner panel edit:",type(exc).__name__)
+
+    def owner_clear_old(uid,chat_id):
+        with _owner_draft_lock:
+            previous=_owner_drafts.get(uid,{}).get("card_id")
+        if previous:
+            try:bot.delete_message(chat_id,previous)
+            except Exception:
+                try:bot.edit_message_reply_markup(chat_id,previous,reply_markup=None)
+                except Exception:pass
+
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
         kb.add(types.InlineKeyboardButton("📢 Broadcast",callback_data="own:broadcast"),
@@ -303,7 +318,7 @@ def register_owner_dashboard(app,bot):
         try:
             if action=="broadcast":
                 with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.monotonic()+600}
-                bot.send_message(q.message.chat.id,"📢 ပို့ချင်တဲ့ Message ကို ဒီ Chat ထဲ ပို့ပါ (သို့) Forward လုပ်ပါ။\n\nPremium Emoji နဲ့ Formatting ကို Copy လုပ်ပေးမယ်။ /ownercancel နဲ့ ရပ်နိုင်ပါတယ်။")
+                owner_edit(q.message.chat.id,q.message.message_id,"📢 ပို့ချင်တဲ့စာကို Forward လုပ်ပါ။\n\nပြီးရင် အဲဒီစာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။\n/ownercancel နဲ့ ရပ်နိုင်ပါတယ်။")
             elif action=="groups":
                 with get_db_connection() as conn,conn.cursor() as cur:
                     cur.execute("SELECT title,active,broadcast_opt_out FROM owner_groups ORDER BY last_seen DESC LIMIT 30")
@@ -318,7 +333,7 @@ def register_owner_dashboard(app,bot):
                 bot.send_message(q.message.chat.id,"📜 Broadcast History\n\n"+("\n".join(lines) if lines else "မရှိသေးပါ။"))
             elif action=="cancel":
                 with _owner_draft_lock:_owner_drafts.pop(uid,None)
-                bot.send_message(q.message.chat.id,"❌ Cancelled. /owner နဲ့ ပြန်ဖွင့်နိုင်ပါတယ်။")
+                owner_edit(q.message.chat.id,q.message.message_id,"❌ Cancelled. /owner နဲ့ ပြန်ဖွင့်နိုင်ပါတယ်။")
             elif action.startswith("to:"):
                 target=action[3:]
                 with _owner_draft_lock:
@@ -329,7 +344,7 @@ def register_owner_dashboard(app,bot):
                 kb=types.InlineKeyboardMarkup()
                 kb.add(types.InlineKeyboardButton("✅ Confirm Send",callback_data="own:send"),
                        types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
-                bot.send_message(q.message.chat.id,"📢 ဒီ Message ကို "+("Group အားလုံး" if target=="all" else "ရွေးထားတဲ့ Group")+" ဆီ ပို့မှာလား။",reply_markup=kb)
+                owner_edit(q.message.chat.id,q.message.message_id,"📢 ဒီ Message ကို "+("Group အားလုံး" if target=="all" else "ရွေးထားတဲ့ Group")+" ဆီ ပို့မှာလား။",kb)
             elif action=="send":
                 global _running
                 with _owner_draft_lock:
@@ -350,10 +365,10 @@ def register_owner_dashboard(app,bot):
                         cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",("[Telegram original]",len(ids)))
                         jobid=cur.fetchone()[0]
                     threading.Thread(target=_send_broadcast,args=(jobid,"",ids,draft["chat_id"],draft["message_id"]),daemon=True).start()
-                    bot.send_message(q.message.chat.id,f"✅ Broadcast #{jobid} စတင်ပို့နေပြီ။ Group {len(ids)} ခု။")
+                    owner_edit(q.message.chat.id,q.message.message_id,f"✅ Broadcast #{jobid} စတင်ပို့နေပြီ။ Group {len(ids)} ခု။")
                 except Exception as exc:
                     with _job_lock:_running=False
-                    bot.send_message(q.message.chat.id,"⚠️ Broadcast စတင်မရပါ။ Eligible Group ရှိ/မရှိ စစ်ပါ။")
+                    owner_edit(q.message.chat.id,q.message.message_id,"⚠️ Broadcast စတင်မရပါ။ Eligible Group ရှိ/မရှိ စစ်ပါ။")
             bot.answer_callback_query(q.id)
         except Exception as exc:
             print("Owner panel action:",type(exc).__name__)
@@ -378,7 +393,9 @@ def register_owner_dashboard(app,bot):
         for gid,title in groups:
             kb.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
         kb.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
-        bot.reply_to(msg,"✅ Original Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=kb)
+        owner_clear_old(msg.from_user.id,msg.chat.id)
+        sent=bot.send_message(msg.chat.id,"✅ Original Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=kb)
+        with _owner_draft_lock:_owner_drafts[msg.from_user.id]["card_id"]=sent.message_id
 
     @bot.message_handler(commands=["ownersend"])
     def owner_send_reply(msg):
