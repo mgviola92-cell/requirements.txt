@@ -106,3 +106,9 @@ def active_games():
         with db.cursor() as c:
             c.execute("SELECT chat_id,match_id,ends_at FROM tot_games WHERE status='active'")
             return c.fetchall()
+
+def stop(chat_id, match_id):
+    with get_db_connection() as db:
+        with db.cursor() as c:
+            c.execute("UPDATE tot_games SET status='finished' WHERE chat_id=%s AND match_id=%s AND status='active' RETURNING match_id", (chat_id,match_id))
+            return c.fetchone() is not None
