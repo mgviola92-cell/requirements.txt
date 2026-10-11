@@ -62,29 +62,33 @@ def _allowed_kinds(game):
     return {"quiz", "puzzle", "sync"}
 
 def _generated_challenge(game):
-    """Generate varied, answer-checked puzzles with scaling difficulty."""
-    count = len(game["players"])
-    level = max(1, count - 1) if game["mode"] == "squad" else 1
-    if game["mode"] == "versus":
-        level = 3
-    level += min(2, game["round_no"] // 2)
-    a = random.randint(6 * level, 16 * level)
-    b = random.randint(3 * level, 12 * level)
-    kind = random.choice(("math", "puzzle"))
-    if kind == "math":
-        correct = a * b if level >= 3 else a + b
-        question = f"{a} x {b} = ?" if level >= 3 else f"{a} + {b} = ?"
+    """Validated arithmetic, number series and logic puzzles."""
+    level = min(5, max(1, len(game["players"]) - 1) + game["round_no"] // 2)
+    a = random.randint(5 * level, 15 * level)
+    b = random.randint(2 * level, 9 * level)
+    kind = random.choice(("add", "subtract", "multiply", "series", "square", "logic"))
+    if kind == "add":
+        correct, question = a + b, f"{a} + {b} = ?"
+    elif kind == "subtract":
+        correct, question = a, f"{a+b} - {b} = ?"
+    elif kind == "multiply":
+        correct, question = a * b, f"{a} x {b} = ?"
+    elif kind == "square":
+        correct, question = a * a, f"{a} squared = ?"
+    elif kind == "series":
+        step = random.randint(2, 4 + level * 3)
+        correct, question = a + 3 * step, f"Next: {a}, {a+step}, {a+2*step}, ?"
     else:
-        step = random.randint(level + 2, level + 8)
-        question = f"Complete: {a}, {a+step}, {a+2*step}, ?"
-        correct = a + 3 * step
-    wrong = correct + random.choice((-1, 1)) * random.randint(2, 4 + level * 2)
-    if wrong == correct:
-        wrong += 1
+        correct, question = a + b, f"Two numbers total {a+b}. One is {a}. Other = ?"
+        correct = b
+    offset = random.choice((-1, 1)) * random.randint(1, max(3, level * 4))
+    wrong = correct + offset
+    if wrong < 0:
+        wrong = correct + abs(offset)
     answer = random.choice(("a", "b"))
     options = [str(correct), str(wrong)] if answer == "a" else [str(wrong), str(correct)]
-    return {"id": uuid.uuid4().hex[:12], "kind": kind, "question": question,
-            "options": options, "answer": answer, "difficulty": level}
+    return {"id": uuid.uuid4().hex[:12], "kind": "math" if game["mode"] == "versus" else "puzzle",
+            "question": question, "options": options, "answer": answer, "difficulty": level}
 
 def _online_quiz(game):
     from core.question_sources import fetch_question
