@@ -190,7 +190,7 @@ def _send_broadcast(jobid,message,ids):
     try:
         for gid in ids:
             try:
-                BOT.send_message(gid,"📢 Bot Announcement\n\n"+message)
+                BOT.send_message(gid,message)
                 sent+=1
             except Exception as exc:
                 failed+=1
