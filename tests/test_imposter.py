@@ -47,3 +47,24 @@ class ImposterOfflineTests(unittest.TestCase):
         import features.imposter as mod
         source=inspect.getsource(mod._finish)
         self.assertNotIn(chr(92)+chr(92)+"n",source[source.index("    result=("):source.index("    _announce(bot,chat_id,result)")])
+
+    def test_final_voting_has_discussion_window(self):
+        import time
+        from features.imposter import _start_final, FINAL_VOTE_SECONDS, FINAL_MIN_DISCUSSION
+        state=self.state()
+        before=time.time()
+        _start_final(state)
+        self.assertEqual(state["phase"],"final")
+        self.assertEqual(FINAL_VOTE_SECONDS,240)
+        self.assertEqual(FINAL_MIN_DISCUSSION,120)
+        self.assertGreaterEqual(state["vote_earliest_finish"],before+119)
+        self.assertGreaterEqual(state["deadline"],before+239)
+
+    def test_secret_not_in_public_turn(self):
+        from features.imposter import _view
+        state=self.state()
+        state["round"]=1
+        state["phase"]="clue"
+        text=_view(state)
+        self.assertIn("ROUND 1",text)
+        self.assertNotIn(state["word"],text)
