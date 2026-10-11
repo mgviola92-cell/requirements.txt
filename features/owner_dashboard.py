@@ -271,8 +271,28 @@ def register_owner_dashboard(app,bot):
         return ContinueHandling()
     @bot.my_chat_member_handler(func=lambda m:True)
     def owner_membership(m):
-        new=getattr(m.new_chat_member,"status","")
-        record_group(m.chat,active=new not in ("left","kicked"))
+        if m.chat.type not in ("group","supergroup"):
+            return
+        old_status=getattr(m.old_chat_member,"status","")
+        new_status=getattr(m.new_chat_member,"status","")
+        old_joined=old_status not in ("left","kicked")
+        new_joined=new_status not in ("left","kicked")
+        record_group(m.chat,active=new_joined)
+        if not old_joined and new_joined:
+            try:
+                bot.send_message(
+                    m.chat.id,
+                    "🎮 <b>မင်္ဂလာပါ!</b> 👋\n\n"
+                    "ဒီ Group ထဲကို Bot ရောက်လာပါပြီ။\n"
+                    "သူငယ်ချင်းတွေနဲ့ Games တွေ အတူကစားကြမယ်! 🎉\n\n"
+                    "🎭 /imposter — Imposter Game\n"
+                    "👤 /profile — Player Profile\n"
+                    "🏆 /rank — Leaderboard\n\n"
+                    "စကစားချင်ရင် Command တစ်ခုကို ရွေးလိုက်ပါ။ ✨",
+                    parse_mode="HTML"
+                )
+            except Exception as exc:
+                print("Bot group welcome failed:",type(exc).__name__)
     def is_owner(msg):
         return (msg.chat.type=="private" and msg.from_user is not None and
                 os.getenv("OWNER_TELEGRAM_ID","").strip()==str(msg.from_user.id))
