@@ -44,7 +44,7 @@ def generate(level=1, mode="duo"):
     elif kind=="lcm":q,v=f"LCM of {a} and {b} = ?",a*b//_gcd(a,b)
     elif kind=="fraction":q,v=f"One third of {a*3} = ?",a
     elif kind=="ratio":q,v=f"Ratio {a}:{b}. If first becomes {a*3}, second = ?",b*3
-    elif kind=="linear_equation":q,v=f"Find x: {b}x + {c} = {b*a+c}",a
+    elif kind=="linear_equation":q,v=f"Find x: {b}x + {c} = {b*a+c}. x = ?",a
     elif kind=="area_rectangle":q,v=f"Rectangle area: length {a}, width {b} = ?",a*b
     elif kind=="perimeter_rectangle":q,v=f"Rectangle perimeter: sides {a} and {b} = ?",2*(a+b)
     elif kind=="area_triangle":q,v=f"Triangle area: base {a*2}, height {b} = ?",a*b
@@ -55,7 +55,7 @@ def generate(level=1, mode="duo"):
     elif kind=="discount":q,v=f"25% off {a*4}. New price = ?",a*3
     elif kind=="tax":q,v=f"10% tax on {a*10}. Total = ?",a*11
     elif kind=="simple_interest":q,v=f"Simple interest: {a*100} at 5% for {b} years = ?",a*5*b
-    elif kind=="probability":q,v=f"Bag: {a} red, {b} blue. How many total outcomes? ",a+b
+    elif kind=="probability":q,v=f"Bag: {a} red, {b} blue. How many balls in total? ",a+b
     elif kind=="combinations":q,v=f"Number of ways to choose 2 from {b} distinct items = ?",b*(b-1)//2
     elif kind=="binary":q,v=f"Binary {b:b} equals decimal ?",b
     elif kind=="hexadecimal":q,v=f"Hex {b:X} equals decimal ?",b
