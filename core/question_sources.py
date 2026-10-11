@@ -102,7 +102,8 @@ def wikidata_facts():
 
 def fetch_question():
     from core.fact_question_engine import wikidata_question, openalex_question
-    sources = [trivia_api, wikidata_question, openalex_question, wikidata_capital, wikidata_facts, openalex_research]
+    from core.extra_question_sources import open_library_question, world_bank_question, nasa_images_question
+    sources = [trivia_api, wikidata_question, openalex_question, open_library_question, world_bank_question, nasa_images_question]
     random.shuffle(sources)
     for source in sources:
         try:
