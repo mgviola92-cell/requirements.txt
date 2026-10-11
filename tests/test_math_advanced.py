@@ -47,20 +47,20 @@ class MathAdvancedTests(unittest.TestCase):
         for seed in range(100):
             rng = random.Random(seed)
             q = generate(3, rng=rng, kind="fraction_equation")
-            m = re.fullmatch(r"Solve: x/(\\d+) \\+ (\\d+) = (-?\\d+); x = \\?", q["question"])
+            m = re.fullmatch(r"Solve: x/(\d+) \+ (\d+) = (-?\d+); x = \?", q["question"])
             self.assertIsNotNone(m)
             d, a, result = map(int, m.groups())
             self.assertEqual(q["answer"] // d + a, result)
             self.assertEqual(q["answer"] % d, 0)
 
             q = generate(4, rng=random.Random(seed), kind="simultaneous")
-            m = re.fullmatch(r"If 2x \\+ y = (-?\\d+) and x - y = (-?\\d+), find x = \\?", q["question"])
+            m = re.fullmatch(r"If 2x \+ y = (-?\d+) and x - y = (-?\d+), find x = \?", q["question"])
             self.assertIsNotNone(m)
             total, diff = map(int, m.groups())
             self.assertEqual(3*q["answer"], total + diff)
 
             q = generate(4, rng=random.Random(seed), kind="probability")
-            m = re.fullmatch(r"A bag has (\\d+) red and (\\d+) blue balls\\. With replacement, red then blue: numerator of probability over denominator (\\d+) = \\?", q["question"])
+            m = re.fullmatch(r"A bag has (\d+) red and (\d+) blue balls\. With replacement, red then blue: numerator of probability over denominator (\d+) = \?", q["question"])
             self.assertIsNotNone(m)
             red, blue, denominator = map(int, m.groups())
             self.assertEqual(denominator, (red + blue)**2)
