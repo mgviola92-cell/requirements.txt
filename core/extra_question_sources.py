@@ -3,12 +3,11 @@ import random
 import urllib.parse
 import urllib.request
 import json
+from core.question_quality import cached_json
 from core.fact_question_engine import _quiz
 
 def _get(url):
-    request=urllib.request.Request(url,headers={"User-Agent":"MyanmarGroupGamesBot/1.0 (educational quiz)","Accept":"application/json"})
-    with urllib.request.urlopen(request,timeout=5) as response:
-        return json.load(response)
+    return cached_json(url)
 
 def open_library_question():
     subject=random.choice(("science","history","astronomy","mathematics","biology","technology","geography","fiction"))
