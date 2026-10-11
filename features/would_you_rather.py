@@ -66,7 +66,7 @@ TWISTS = ("but only for one day","but only once a month","but you must decide ri
 FRAMES = ("Would you rather {a} or {b} {context}, {twist}?",
           "Imagine you could {a} or {b} {context}, {twist}. Which would you pick?",
           "Big choice: {a} versus {b} {context}, {twist}. Which one?",
-          "Your next adventure: {a} or {b} {context}, {twist}. Choose!")
+          "Your next adventure: {a} or {b} {context}, {twist}. Which would you choose?")
 # 80+ paired ideas x 8 contexts x 8 twists x 4 frames > 20,000 variants.
 CAPACITY = len(PAIRS) * len(CONTEXTS) * len(TWISTS) * len(FRAMES)
 _lock = threading.RLock()
@@ -207,6 +207,8 @@ def register(bot):
         update(g,final=True)
 
     def spawn(chat_id):
+        if not _db_ready:
+            return False
         with _lock:
             if chat_id in _rounds:return False
             duration=random.randint(*_DURATION)
@@ -238,10 +240,16 @@ def register(bot):
                               datetime.fromtimestamp(g["ends"],timezone.utc),g["message_id"]))
             except Exception as exc:
                 print("WYR start:",exc)
-                if g.get("message_id"):
-                    _rounds[chat_id]=g
-                    return True
+                if not g.get("message_id"):
+                    end_session(chat_id,"would_you_rather")
+                    return False
+                _rounds.pop(chat_id,None)
                 end_session(chat_id,"would_you_rather")
+                try:
+                    bot.edit_message_text("⚠️ WYR start failed; please try again.",
+                        chat_id=chat_id,message_id=g["message_id"],reply_markup=None)
+                except Exception:
+                    pass
                 return False
         threading.Thread(target=wait_finish,args=(chat_id,g["id"]),daemon=True).start()
         return True
