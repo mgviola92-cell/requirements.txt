@@ -108,7 +108,7 @@ def _pick_challenge(game):
         local_seen.add(question)
         game["used_challenges"].append(challenge["id"])
         return challenge
-    raise RuntimeError("No unseen Pair Challenge question could be generated")
+    return None
 
 def create_lobby(chat_id, owner_id, owner_name):
     with _lock:
@@ -213,8 +213,11 @@ def start_round(chat_id, game_id, duration=90):
             return None
         if game["round_no"] >= game["total_rounds"]:
             return None
+        challenge = _pick_challenge(game)
+        if challenge is None:
+            return None
         game["round_no"] += 1
-        game["challenge"] = _pick_challenge(game)
+        game["challenge"] = challenge
         game["answers"] = {}
         game["team_scores"] = {"red": 0, "blue": 0}
         game["state"] = "playing"
