@@ -367,6 +367,31 @@ def register_owner_dashboard(app,bot):
         bot.reply_to(msg,"❌ Cancelled.")
         return ContinueHandling()
 
+    def offer_destinations(msg,source):
+        with _owner_draft_lock:
+            _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.monotonic()+600}
+        kb=types.InlineKeyboardMarkup(row_width=1)
+        kb.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
+        with get_db_connection() as conn,conn.cursor() as cur:
+            cur.execute("SELECT chat_id,title FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY last_seen DESC LIMIT 20")
+            groups=cur.fetchall()
+        for gid,title in groups:
+            kb.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
+        kb.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+        bot.reply_to(msg,"✅ Original Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=kb)
+
+    @bot.message_handler(commands=["ownersend"])
+    def owner_send_reply(msg):
+        if not is_owner(msg):return ContinueHandling()
+        if not msg.reply_to_message:
+            bot.reply_to(msg,"Forward လုပ်ထားတဲ့စာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။")
+            return ContinueHandling()
+        try:offer_destinations(msg,msg.reply_to_message)
+        except Exception as exc:
+            print("Owner send:",type(exc).__name__)
+            bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။")
+        return ContinueHandling()
+
     @bot.message_handler(commands=["broadcastsave"])
     def broadcast_save_reply(msg):
         if msg.chat.type!="private":return ContinueHandling()
@@ -400,7 +425,7 @@ def register_owner_dashboard(app,bot):
         if not owner_id or str(msg.from_user.id)!=owner_id:
             bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
             return ContinueHandling()
-        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
+        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None) and not _owner_drafts.get(msg.from_user.id):return ContinueHandling()
         with _owner_draft_lock:
             draft=_owner_drafts.get(msg.from_user.id)
             if draft and draft.get("phase")=="waiting" and time.monotonic()<draft["expires"]:
