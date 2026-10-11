@@ -119,6 +119,7 @@ def logout():
 SHELL=CSS+"""<main><nav><strong>👑 BOT CONTROL</strong>
 <a href="{{url_for('owner_dashboard.index')}}">Dashboard</a>
 <a href="{{url_for('owner_dashboard.broadcast')}}">Broadcast</a>
+<a href="{{url_for('owner_dashboard.edit_welcome')}}">✏️ Welcome Editor</a>
 <form action="{{url_for('owner_dashboard.logout')}}" method="post">
 <input type="hidden" name="csrf" value="{{csrf}}"><button style="padding:5px 12px">Logout</button></form>
 </nav>{{ body|safe }}</main>"""
@@ -139,7 +140,7 @@ def index():
     body="<h1>Owner Dashboard</h1><div class='grid'>"
     for name,n in [("Known groups",total),("Active groups",active),("Broadcast enabled",subscribed)]:
         body+=f"<div class='panel'><small>{name}</small><div class='big'>{n}</div></div>"
-    body+="</div><div class='panel'><h2>Tracked Groups</h2><p class='muted'>Only groups discovered after tracking starts; total is not a historical Telegram-wide count.</p><div class='wrap'><table><tr><th>Group</th><th>Chat ID</th><th>Status</th><th>Last seen UTC</th></tr>"
+    body+="</div><div class='panel'><h2>Group Welcome Message</h2><p>Customize the message posted when the bot joins a new group.</p><a href='/owner/welcome'>✏️ Edit Welcome Message</a></div><div class='panel'><h2>Tracked Groups</h2><p class='muted'>Only groups discovered after tracking starts; total is not a historical Telegram-wide count.</p><div class='wrap'><table><tr><th>Group</th><th>Chat ID</th><th>Status</th><th>Last seen UTC</th></tr>"
     for title,gid,is_active,optout,last in groups:
         body+=f"<tr><td>{html.escape(title or 'Unnamed')}</td><td>{gid}</td><td>{'Active' if is_active else 'Left'}{' · Opted out' if optout else ''}</td><td>{html.escape(str(last)[:19])}</td></tr>"
     body+="</table></div></div><div class='panel'><h2>Broadcast History</h2><div class='wrap'><table><tr><th>ID</th><th>Sent</th><th>Failed</th><th>Total</th><th>Status</th></tr>"
