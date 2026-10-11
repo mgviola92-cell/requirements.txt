@@ -87,42 +87,21 @@ def _generated_challenge(game):
             "options": options, "answer": answer, "difficulty": level}
 
 def _online_quiz(game):
-    """Fetch two-option trivia; fallback to local/generated challenges on errors."""
-    global _online_last_fetch
-    now = time.time()
-    with _lock:
-        if not _online_cache and now - _online_last_fetch >= 8:
-            _online_last_fetch = now
-            difficulty = "easy" if len(game["players"]) <= 2 else (
-                "medium" if len(game["players"]) == 3 else "hard"
-            )
-            url = "https://opentdb.com/api.php?" + urllib.parse.urlencode({
-                "amount": 20, "type": "multiple", "difficulty": difficulty
-            })
-            try:
-                request = urllib.request.Request(url, headers={"User-Agent": "PairChallengeBot/1.0"})
-                with urllib.request.urlopen(request, timeout=3) as response:
-                    payload = __import__("json").load(response)
-                if payload.get("response_code") == 0:
-                    _online_cache.extend(payload.get("results", []))
-            except Exception as exc:
-                print("Pair online question fallback:", exc)
-        if not _online_cache:
-            return None
-        row = _online_cache.pop(random.randrange(len(_online_cache)))
-    question = html.unescape(row.get("question", ""))
-    correct = html.unescape(row.get("correct_answer", ""))
-    incorrect = [html.unescape(x) for x in row.get("incorrect_answers", [])]
-    if not question or not correct or not incorrect:
+    from core.question_sources import fetch_question
+    item = fetch_question()
+    if not item:
+        return None
+    correct = item["answers"][item["correct_index"]]
+    incorrect = [v for i, v in enumerate(item["answers"]) if i != item["correct_index"]]
+    if not incorrect:
         return None
     wrong = random.choice(incorrect)
-    if wrong == correct:
-        return None
     answer = random.choice(("a", "b"))
     options = [correct, wrong] if answer == "a" else [wrong, correct]
     return {"id": "online:" + uuid.uuid4().hex[:12], "kind": "quiz",
-            "question": question[:180], "options": [x[:90] for x in options],
-            "answer": answer, "source": "OpenTDB"}
+            "question": item["question"][:180], "options": [str(x)[:90] for x in options],
+            "answer": answer, "source": item["source"]}
+
 
 def _pick_challenge(game):
     used = set(game.get("used_challenges", []))
