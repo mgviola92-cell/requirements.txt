@@ -1,11 +1,11 @@
 """Offline tests for Would You Rather's scenario bank and vote rendering."""
 import unittest
 from unittest.mock import patch, MagicMock
-from features.would_you_rather import PAIRS, CAPACITY, generate_by_index, generate, FRAMES
+from features.would_you_rather import PAIRS, CAPACITY, generate_by_index, generate
 
 
 class WouldYouRatherTests(unittest.TestCase):
-    def test_more_than_twenty_thousand_scenarios(self):
+    def test_distinct_myanmar_question_pairs(self):
         self.assertGreaterEqual(CAPACITY, 80)
         self.assertGreaterEqual(len(PAIRS), 75)
 
