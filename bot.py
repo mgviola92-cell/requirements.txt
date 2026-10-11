@@ -6705,12 +6705,44 @@ def commands_list(message):
         "📋 INFORMATION\n"
         "📜 /rules ၊ /စည်းကမ်း — Group Rules\n"
         "👮 /admins ၊ /အက်မင် — Admin List\n"
+        "📣 /calladmins — Admin တွေကို Mention ခေါ်ရန်\n"
         "🆔 /id — User / Chat ID\n"
         "🏓 /ping — Bot Ping\n"
         "⏱️ /uptime — Bot Uptime\n"
         "📋 /cmd — Command List"
     )
 
+
+_admin_call_cooldowns = {}
+_admin_call_lock = threading.Lock()
+
+@bot.message_handler(commands=["calladmins"])
+def call_group_admins(message):
+    if message.chat.type not in ("group","supergroup"):
+        bot.reply_to(message,"👥 Group ထဲမှာပဲ Admin တွေကို ခေါ်လို့ရပါတယ်။")
+        return
+    now=time.monotonic()
+    with _admin_call_lock:
+        last=_admin_call_cooldowns.get(message.chat.id,0)
+        if now-last<120:
+            bot.reply_to(message,"⏳ Admin တွေကို ထပ်ခေါ်ဖို့ ခဏစောင့်ပါ။")
+            return
+        _admin_call_cooldowns[message.chat.id]=now
+    try:
+        admins=bot.get_chat_administrators(message.chat.id)
+        names=[]
+        for member in admins:
+            user=member.user
+            if user.is_bot:continue
+            name=html.escape((user.first_name or "Admin")[:50])
+            names.append(f'<a href="tg://user?id={user.id}">{name}</a>')
+        if not names:
+            bot.reply_to(message,"⚠️ ခေါ်လို့ရတဲ့ Admin မတွေ့ပါ။")
+            return
+        bot.send_message(message.chat.id,"📣 <b>Group Admin များကို ခေါ်နေပါတယ်</b>\n\n"+" · ".join(names[:30]),parse_mode="HTML")
+    except Exception as exc:
+        print("Call admins:",type(exc).__name__)
+        bot.reply_to(message,"⚠️ Admin စာရင်းကို ယူမရသေးပါ။")
 
 @bot.message_handler(commands=["admincmd"])
 def admin_commands_list(message):
