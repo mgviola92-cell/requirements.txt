@@ -4,6 +4,7 @@ import random
 import urllib.parse
 import urllib.request
 import json
+from core.question_quality import cached_json, make_mcq
 
 TOPICS = [
  ("capital","wdt:P31 wd:Q6256","wdt:P36","What is the capital of {}?"),
@@ -29,18 +30,10 @@ TOPICS = [
 ]
 
 def _read(url):
-    req=urllib.request.Request(url,headers={"User-Agent":"MyanmarGroupGamesBot/1.0 (quiz)","Accept":"application/json"})
-    with urllib.request.urlopen(req,timeout=5) as resp:
-        return json.load(resp)
+    return cached_json(url)
 
 def _quiz(question, correct, distractors, source):
-    correct=str(correct).strip()
-    others=list(dict.fromkeys(str(x).strip() for x in distractors if str(x).strip()!=correct))
-    if not correct or len(others)<3:
-        return None
-    answers=[correct]+random.sample(others,3)
-    random.shuffle(answers)
-    return {"question":question,"answers":answers,"correct_index":answers.index(correct),"source":source}
+    return make_mcq(question,correct,distractors,source)
 
 def wikidata_question():
     title,subject_filter,relation,template=random.choice(TOPICS)
