@@ -55,10 +55,10 @@ class ImposterOfflineTests(unittest.TestCase):
         before=time.time()
         _start_final(state)
         self.assertEqual(state["phase"],"final")
-        self.assertEqual(FINAL_VOTE_SECONDS,240)
-        self.assertEqual(FINAL_MIN_DISCUSSION,120)
-        self.assertGreaterEqual(state["vote_earliest_finish"],before+119)
-        self.assertGreaterEqual(state["deadline"],before+239)
+        self.assertEqual(FINAL_VOTE_SECONDS,60)
+        self.assertEqual(FINAL_MIN_DISCUSSION,60)
+        self.assertGreaterEqual(state["vote_earliest_finish"],before+59)
+        self.assertGreaterEqual(state["deadline"],before+59)
 
     def test_secret_not_in_public_turn(self):
         from features.imposter import _view
