@@ -6666,7 +6666,7 @@ threading.Thread(
 # /cmds = NEVER AUTO DELETE
 # =========================================================
 
-@bot.message_handler(commands=["cmd", "cmds"])
+@bot.message_handler(commands=["cmd"])
 def commands_list(message):
 
     bot.send_message(
@@ -6696,7 +6696,7 @@ def commands_list(message):
         "🛑 /stop — Mention ရပ်ရန်\n"
         "🛑 /နား — Mention ရပ်ရန်\n\n"
 
-        "🛡️ ADMIN COMMANDS\n"
+        "🛡️ ADMIN COMMANDS (Details: /admincmd)\n"
         "🚫 /ဘမ်း — User Ban\n"
         "🔓 /မဘမ်း — User Unban\n"
         "🔇 /တိတ်စမ်း — User Mute\n"
@@ -6708,9 +6708,33 @@ def commands_list(message):
         "🆔 /id — User / Chat ID\n"
         "🏓 /ping — Bot Ping\n"
         "⏱️ /uptime — Bot Uptime\n"
-        "📋 /cmd ၊ /cmds — Command List"
+        "📋 /cmd — Command List"
     )
 
+
+@bot.message_handler(commands=["admincmd"])
+def admin_commands_list(message):
+    if message.chat.type not in ("group","supergroup"):
+        bot.reply_to(message,"🛡️ Group Admin တွေအတွက်သာဖြစ်ပါတယ်။")
+        return
+    try:
+        member=bot.get_chat_member(message.chat.id,message.from_user.id)
+        if member.status not in ("administrator","creator"):
+            bot.reply_to(message,"🛡️ Group Admin တွေသာ ကြည့်နိုင်ပါတယ်။")
+            return
+    except Exception:
+        bot.reply_to(message,"⚠️ Admin permission စစ်မရပါ။")
+        return
+    bot.send_message(message.chat.id,
+        "🛡️ ADMIN COMMANDS\n\n"
+        "🚫 /ဘမ်း — Ban member (reply)\n"
+        "🔓 /မဘမ်း — Unban member (reply)\n"
+        "🔇 /တိတ်စမ်း — Mute member (reply)\n"
+        "🔊 /ဖွင့်လိုက် — Unmute member (reply)\n"
+        "⚠️ /warn — Warn member (reply)\n"
+        "📢 /broadcastoff — Owner announcements ပိတ်ရန်\n"
+        "📢 /broadcaston — Owner announcements ပြန်ဖွင့်ရန်\n\n"
+        "🔐 Member management လုပ်ဖို့ Bot မှာ သက်ဆိုင်ရာ Admin permissions လိုအပ်ပါတယ်။")
 
 # ---------------------------------------------------------
 # 🚨 BAN WORD + SPAM FILTER
