@@ -101,7 +101,8 @@ def wikidata_facts():
             "correct_index": answers.index(correct), "source": "wikidata"}
 
 def fetch_question():
-    sources = [trivia_api, wikidata_capital, wikidata_facts, openalex_research]
+    from core.fact_question_engine import wikidata_question, openalex_question
+    sources = [trivia_api, wikidata_question, openalex_question, wikidata_capital, wikidata_facts, openalex_research]
     random.shuffle(sources)
     for source in sources:
         try:
