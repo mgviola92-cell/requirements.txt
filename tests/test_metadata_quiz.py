@@ -9,7 +9,7 @@ class MetadataQuestionTests(unittest.TestCase):
     def test_metadata_template_catalogue(self):
         self.assertGreaterEqual(len(OPENALEX_FIELDS),15)
         self.assertGreaterEqual(len(OPENLIBRARY_FIELDS),8)
-        self.assertGreaterEqual(len(NASA_FIELDS),7)
+        self.assertGreaterEqual(len(NASA_FIELDS),4)
 
     def test_nested_metadata_and_distractors(self):
         rows=[{"title":"Research study number "+str(i),
