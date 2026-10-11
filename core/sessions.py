@@ -42,6 +42,7 @@ SESSION_PRIORITIES = {
     # -----------------------------------------
 
     "pair_challenge": 80,
+    "imposter": 78,
     "roast_battle": 75,
     "word_chain": 70,
 
@@ -87,6 +88,7 @@ EXCLUSIVE_SESSIONS = {
     "team_battle",
     "math_battle",
     "pair_challenge",
+    "imposter",
     "roast_battle",
     "word_chain",
     "emoji_guess",
