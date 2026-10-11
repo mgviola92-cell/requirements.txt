@@ -3843,6 +3843,8 @@ def trivia_command(
 
             return
 
+        original_question_text = question["question"]
+
         # ---------------------------------
         # Myanmar Translation
         # ---------------------------------
@@ -4059,7 +4061,7 @@ def trivia_command(
                     question_key
                 )
                 from database.question_history import mark as mark_question
-                mark_question(chat_id, game['question'])
+                mark_question(chat_id, original_question_text)
 
         # ---------------------------------
         # Start Countdown
