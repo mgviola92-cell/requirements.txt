@@ -248,17 +248,29 @@ def register_owner_dashboard(app,bot):
     def owner_membership(m):
         new=getattr(m.new_chat_member,"status","")
         record_group(m.chat,active=new not in ("left","kicked"))
-    @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document"])
+    @bot.message_handler(commands=["broadcastcheck"])
+    def broadcast_check(msg):
+        if msg.chat.type!="private":return ContinueHandling()
+        configured=os.getenv("OWNER_TELEGRAM_ID","").strip()
+        matched=configured==str(msg.from_user.id)
+        status="✅ Owner ID ကိုက်ညီပါတယ်။" if matched else "❌ Owner ID မကိုက်ပါ၊ သို့မဟုတ် Render မှာ မသတ်မှတ်ရသေးပါ။"
+        bot.reply_to(msg,f"🔐 Broadcast Check\\n\\nYour Telegram ID: <code>{msg.from_user.id}</code>\\n{status}\\n\\nRender Environment က OWNER_TELEGRAM_ID ကို စစ်ပါ။",parse_mode="HTML")
+        return ContinueHandling()
+    @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document","audio","voice","video_note","sticker"])
     def capture_owner_message(msg):
         owner_id=os.getenv("OWNER_TELEGRAM_ID","").strip()
-        if not owner_id or str(msg.from_user.id)!=owner_id:return ContinueHandling()
+        if not owner_id or str(msg.from_user.id)!=owner_id:
+            bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
+            return ContinueHandling()
         if msg.content_type=="text" and (msg.text or "").startswith("/"):return ContinueHandling()
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
                     (msg.chat.id,msg.message_id,(msg.text or msg.caption or "["+msg.content_type+"]")[:180]))
             bot.reply_to(msg,"✅ မူရင်း Message ကို သိမ်းထားပြီ။ Web Dashboard မှာ Telegram Original ကို ရွေးပြီး Broadcast ပို့နိုင်ပါပြီ။")
-        except Exception as exc:print("Owner message capture:",type(exc).__name__)
+        except Exception as exc:
+            print("Owner message capture:",type(exc).__name__)
+            bot.reply_to(msg,"⚠️ Message သိမ်းမရသေးပါ။ Render Logs ကို စစ်ရန်လိုပါတယ်။")
         return ContinueHandling()
     @bot.message_handler(commands=["broadcastoff","broadcaston"])
     def toggle_broadcast(msg):
