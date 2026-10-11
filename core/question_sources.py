@@ -73,8 +73,35 @@ def openalex_research():
             "answers": answers, "correct_index": answers.index(str(year)),
             "source": "openalex"}
 
+def wikidata_facts():
+    """Wikidata countries/currencies and elements/atomic numbers."""
+    category = random.choice(("currency", "element"))
+    if category == "currency":
+        pattern, relation, template = "wdt:P31 wd:Q6256", "wdt:P38", "Which currency is used in {}?"
+    else:
+        pattern, relation, template = "wdt:P31 wd:Q11344", "wdt:P1086", "What is the atomic number of {}?"
+    query = ("SELECT ?subjectLabel ?valueLabel WHERE { ?subject " + pattern +
+             "; " + relation + " ?value. SERVICE wikibase:label { " +
+             'bd:serviceParam wikibase:language "en". } } LIMIT 180')
+    url = "https://query.wikidata.org/sparql?" + urllib.parse.urlencode({"query": query, "format": "json"})
+    data = _json(url, timeout=5)
+    pairs = [(r["subjectLabel"]["value"], r["valueLabel"]["value"])
+             for r in data.get("results", {}).get("bindings", [])
+             if "subjectLabel" in r and "valueLabel" in r]
+    pairs = [(a, b) for a, b in dict.fromkeys(pairs) if len(a) < 60 and len(b) < 50]
+    if len(pairs) < 4:
+        return None
+    subject, correct = random.choice(pairs)
+    others = list({v for _, v in pairs if v != correct})
+    if len(others) < 3:
+        return None
+    answers = [correct] + random.sample(others, 3)
+    random.shuffle(answers)
+    return {"question": template.format(subject), "answers": answers,
+            "correct_index": answers.index(correct), "source": "wikidata"}
+
 def fetch_question():
-    sources = [trivia_api, wikidata_capital, openalex_research]
+    sources = [trivia_api, wikidata_capital, wikidata_facts, openalex_research]
     random.shuffle(sources)
     for source in sources:
         try:
