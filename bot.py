@@ -6668,105 +6668,60 @@ threading.Thread(
 
 @bot.message_handler(commands=["cmd"])
 def commands_list(message):
-
     bot.send_message(
         message.chat.id,
         "🤖 BOT COMMANDS\n\n"
-
-        "🎮 GAME COMMANDS\n"
-        "🎭 /imposter — Imposter Game\n"
+        "🎮 GAMES & EVENTS\n"
+        "🎭 /imposter — Imposter\n"
+        "🎯 /guess — Number Guess\n"
         "🧠 /trivia — Trivia\n"
-        "👤 /profile — Player Profile\n"
-        "🏆 /rank ၊ /top — Leaderboard\n"
-        "📅 /daily — Daily Challenges\n"
-        "🎲 /dice — Dice လှိမ့်ရန်\n"
-        "🎰 /slot — Slot animation\n"
-        "❤️ /love — Love calculator\n"
         "🪙 /coin — Coin Flip\n"
+        "🎲 /dice — Dice\n"
+        "🎰 /slot — Slot\n"
         "✊ /rps — Rock Paper Scissors\n"
-        "🎱 /8ball ၊ /ဗေဒင်  — 8 Ball\n"
-        "🎯 /guess ၊ /ခန့်မှန်း — Number Guess\n"
-        "🎲 /random ၊ /ကျပမ်း — Random Number\n\n"
-
-        "👥 GROUP COMMANDS\n"
-
-        "📢 /all — Members ခေါ်ရန်\n"
-        "📢 /everyone — Members ခေါ်ရန်\n"
-        "📢 /လာကြစမ်း — Members ခေါ်ရန်\n"
-        "🛑 /stop — Mention ရပ်ရန်\n"
-        "🛑 /နား — Mention ရပ်ရန်\n\n"
-
-        "🛡️ ADMIN COMMANDS (Details: /admincmd)\n"
-        "🚫 /ဘမ်း — User Ban\n"
-        "🔓 /မဘမ်း — User Unban\n"
-        "🔇 /တိတ်စမ်း — User Mute\n"
-        "🔊 /ဖွင့်လိုက် — User Unmute\n\n"
-
-        "📋 INFORMATION\n"
-        "📜 /rules ၊ /စည်းကမ်း — Group Rules\n"
-        "👮 /admins ၊ /အက်မင် — Admin List\n"
-        "📣 /calladmins — Admin တွေကို Mention ခေါ်ရန်\n"
+        "🎱 /8ball — Magic 8 Ball\n"
+        "❤️ /love — Love Calculator\n"
+        "🎲 /random — Random Number\n"
+        "⚔️ /boss — Boss Raid\n"
+        "🔴 /teambattle — Team Battle (Admin)\n"
+        "👥 /pair — Pair Challenge\n"
+        "🧮 /mathbattle — Math Battle\n"
+        "🛑 /endmath — Stop Math Battle\n"
+        "🔗 /wordchain — Word Chain\n"
+        "🛑 /endwordchain — Stop Word Chain\n"
+        "🧩 /emoji — Emoji Guess\n"
+        "⚡ /speedtap — Speed Tap\n"
+        "🤔 /wyr — Would You Rather\n"
+        "📅 /daily — Daily Challenge\n"
+        "🎭 /imposterstop — Stop Imposter (Admin)\n"
+        "🛑 /wyrstop — Stop WYR\n\n"
+        "🏆 PROFILE & ACTIVITY\n"
+        "👤 /profile — Profile\n"
+        "🏆 /rank ၊ /top — Leaderboard\n"
+        "🎁 /dailyclaim — Daily Reward Claim\n"
+        "👥 /dailygroupclaim — Group Daily Claim\n\n"
+        "📣 GROUP & ADMIN\n"
+        "📢 /all ၊ /everyone — Mention Members\n"
+        "📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n"
+        "🛑 /stop — Stop Mentions\n"
+        "⚠️ /warn — Warn Member\n"
+        "🚫 /ဘမ်း — Ban\n"
+        "🔓 /မဘမ်း — Unban\n"
+        "🔇 /တိတ်စမ်း — Mute\n"
+        "🔊 /ဖွင့်လိုက် — Unmute\n"
+        "📢 /broadcaston — Enable Announcements (Admin)\n"
+        "🔕 /broadcastoff — Disable Announcements (Admin)\n\n"
+        "📋 INFORMATION & UTILITIES\n"
+        "📜 /rules — Group Rules\n"
+        "👮 /admins — Admin List\n"
         "🆔 /id — User / Chat ID\n"
-        "🏓 /ping — Bot Ping\n"
-        "⏱️ /uptime — Bot Uptime\n"
-        "📋 /cmd — Command List"
+        "🏓 /ping — Ping\n"
+        "⏱️ /uptime — Uptime\n"
+        "🎵 /play — Search Music\n"
+        "📋 /cmd — This Command List\n\n"
+        "ℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။"
     )
 
-
-_admin_call_cooldowns = {}
-_admin_call_lock = threading.Lock()
-
-@bot.message_handler(commands=["calladmins"])
-def call_group_admins(message):
-    if message.chat.type not in ("group","supergroup"):
-        bot.reply_to(message,"👥 Group ထဲမှာပဲ Admin တွေကို ခေါ်လို့ရပါတယ်။")
-        return
-    now=time.monotonic()
-    with _admin_call_lock:
-        last=_admin_call_cooldowns.get(message.chat.id,0)
-        if now-last<120:
-            bot.reply_to(message,"⏳ Admin တွေကို ထပ်ခေါ်ဖို့ ခဏစောင့်ပါ။")
-            return
-        _admin_call_cooldowns[message.chat.id]=now
-    try:
-        admins=bot.get_chat_administrators(message.chat.id)
-        names=[]
-        for member in admins:
-            user=member.user
-            if user.is_bot:continue
-            name=html.escape((user.first_name or "Admin")[:50])
-            names.append(f'<a href="tg://user?id={user.id}">{name}</a>')
-        if not names:
-            bot.reply_to(message,"⚠️ ခေါ်လို့ရတဲ့ Admin မတွေ့ပါ။")
-            return
-        bot.send_message(message.chat.id,"📣 <b>Group Admin များကို ခေါ်နေပါတယ်</b>\n\n"+" · ".join(names[:30]),parse_mode="HTML")
-    except Exception as exc:
-        print("Call admins:",type(exc).__name__)
-        bot.reply_to(message,"⚠️ Admin စာရင်းကို ယူမရသေးပါ။")
-
-@bot.message_handler(commands=["admincmd"])
-def admin_commands_list(message):
-    if message.chat.type not in ("group","supergroup"):
-        bot.reply_to(message,"🛡️ Group Admin တွေအတွက်သာဖြစ်ပါတယ်။")
-        return
-    try:
-        member=bot.get_chat_member(message.chat.id,message.from_user.id)
-        if member.status not in ("administrator","creator"):
-            bot.reply_to(message,"🛡️ Group Admin တွေသာ ကြည့်နိုင်ပါတယ်။")
-            return
-    except Exception:
-        bot.reply_to(message,"⚠️ Admin permission စစ်မရပါ။")
-        return
-    bot.send_message(message.chat.id,
-        "🛡️ ADMIN COMMANDS\n\n"
-        "🚫 /ဘမ်း — Ban member (reply)\n"
-        "🔓 /မဘမ်း — Unban member (reply)\n"
-        "🔇 /တိတ်စမ်း — Mute member (reply)\n"
-        "🔊 /ဖွင့်လိုက် — Unmute member (reply)\n"
-        "⚠️ /warn — Warn member (reply)\n"
-        "📢 /broadcastoff — Owner announcements ပိတ်ရန်\n"
-        "📢 /broadcaston — Owner announcements ပြန်ဖွင့်ရန်\n\n"
-        "🔐 Member management လုပ်ဖို့ Bot မှာ သက်ဆိုင်ရာ Admin permissions လိုအပ်ပါတယ်။")
 
 # ---------------------------------------------------------
 # 🚨 BAN WORD + SPAM FILTER
