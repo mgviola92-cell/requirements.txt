@@ -25,6 +25,7 @@ DECISION_TIME = 60
 MAX_ROUNDS = 5
 MIN_PLAYERS = 4
 _schedulers_started = False
+ACTIVE_CHATS = set()
 
 def _db_init():
     with get_db_connection() as con:
@@ -172,6 +173,7 @@ def _finish(bot,chat_id,s,reason="vote"):
               +"🎯 မှန်ကန်စွာရွေးသူ: "
               +((", ".join(_name(p) for p in s["players"] if p["id"] in correct)) or "မရှိ"))
     end_session(chat_id,"imposter")
+    ACTIVE_CHATS.discard(chat_id)
     # Reward participants only once. Claim before external DB side effects.
     if not s.get("rewards_claimed"):
         s["rewards_claimed"]=True
@@ -215,7 +217,7 @@ def _tick(bot,chat_id,s):
     if now<s.get("deadline",now+1):return
     if s["phase"]=="join":
         if len(s["players"])<MIN_PLAYERS:
-            s["phase"]="cancelled";_save(chat_id,s);end_session(chat_id,"imposter")
+            s["phase"]="cancelled";_save(chat_id,s);end_session(chat_id,"imposter");ACTIVE_CHATS.discard(chat_id)
             _announce(bot,chat_id,"🎭 ပါဝင်သူ 4 ယောက်မပြည့်လို့ Game ပယ်ဖျက်ပါပြီ။")
             return
         s["imposter"]=random.choice(s["players"])["id"]
@@ -279,6 +281,7 @@ def register(bot):
         with con.cursor() as cur:
             cur.execute("SELECT chat_id FROM imposter_games WHERE state->>'phase' IN ('join','clue','decision','tie','final')")
             for (chat_id,) in cur.fetchall():
+                ACTIVE_CHATS.add(chat_id)
                 start_session(chat_id,"imposter",duration=24*3600)
     if not _schedulers_started:
         threading.Thread(target=_watch,args=(bot,),daemon=True,name="imposter-watch").start()
@@ -296,6 +299,7 @@ def register(bot):
                "players":[],"imposter":None,"word":None,"round":0,"turn":0,
                "warned":False,"decisions":{},"votes":{},"message_id":None}
             _save(msg.chat.id,s)
+            ACTIVE_CHATS.add(msg.chat.id)
             try:
                 m=bot.send_message(msg.chat.id,_view(s),parse_mode="HTML",reply_markup=_keyboard(s))
                 s["message_id"]=m.message_id
@@ -318,6 +322,7 @@ def register(bot):
             s["phase"]="cancelled";_save(msg.chat.id,s)
             _edit(bot,msg.chat.id,s)
             end_session(msg.chat.id,"imposter")
+            ACTIVE_CHATS.discard(msg.chat.id)
             bot.send_message(msg.chat.id,"🎭 Imposter Game ကို Admin က ရပ်လိုက်ပါပြီ။")
 
     @bot.callback_query_handler(func=lambda q:(q.data or "").startswith("imp:"))
@@ -394,7 +399,9 @@ def register(bot):
         if (msg.chat.type not in ("group","supergroup") or not msg.from_user or
             msg.from_user.is_bot or not msg.text or msg.text.startswith("/")):
             return ContinueHandling()
-        # Fast path: only check Neon when there is a possible active game.
+        # Avoid a database query for every unrelated group message.
+        if msg.chat.id not in ACTIVE_CHATS:
+            return ContinueHandling()
         try:
             with LOCK:
                 s=_load(msg.chat.id)
