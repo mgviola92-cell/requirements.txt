@@ -39,7 +39,15 @@ def start(chat_id, rng=None):
             if len(available)<ROUNDS:
                 cur.execute("DELETE FROM tot_history WHERE chat_id=%s",(chat_id,))
                 available=list(range(TOTAL_QUESTIONS))
-            picks=rng.sample(available,ROUNDS)
+            # Prefer a different category each round for a more varied match.
+            buckets={}
+            for ix in available:
+                buckets.setdefault(ix//276,[]).append(ix)
+            categories=rng.sample(list(buckets),min(ROUNDS,len(buckets)))
+            picks=[rng.choice(buckets[category]) for category in categories]
+            if len(picks)<ROUNDS:
+                extras=[ix for ix in available if ix not in picks]
+                picks.extend(rng.sample(extras,ROUNDS-len(picks)))
             for i in picks:
                 cur.execute("INSERT INTO tot_history(chat_id,question_id) VALUES(%s,%s)",(chat_id,f"TOT-{i:05d}"))
             mid=uuid.uuid4().hex
