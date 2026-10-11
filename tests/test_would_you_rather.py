@@ -14,6 +14,9 @@ class WouldYouRatherTests(unittest.TestCase):
         for ix in range(CAPACITY):
             item = generate_by_index(ix)
             self.assertEqual(len(item["options"]),2)
+            self.assertLessEqual(len(item["question"]),300)
+            self.assertTrue(all(len(option)<=100 for option in item["options"]))
+            self.assertTrue(any("\\u1000" <= c <= "\\u109f" for c in item["question"]))
             self.assertNotEqual(*item["options"])
             self.assertIn(item["options"][0],item["question"])
             self.assertIn(item["options"][1],item["question"])
