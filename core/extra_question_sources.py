@@ -6,8 +6,8 @@ import json
 from core.question_quality import cached_json
 from core.fact_question_engine import _quiz
 
-def _get(url):
-    return cached_json(url)
+def _get(url,timeout=5):
+    return cached_json(url,timeout=timeout)
 
 def open_library_question():
     subject=random.choice(("science","history","astronomy","mathematics","biology","technology","geography","fiction"))
@@ -72,9 +72,9 @@ def world_bank_question():
     template='What was the {} ({}) in {{}} in {{}}?'.format(name,unit)
     year=random.randint(2010,2022)
     params=urllib.parse.urlencode({"format":"json","date":str(year),"per_page":300})
-    data=_get("https://api.worldbank.org/v2/country/all/indicator/"+code+"?"+params)
+    data=_get("https://api.worldbank.org/v2/country/all/indicator/"+code+"?"+params,timeout=12)
     if not isinstance(data,list) or len(data)<2 or not isinstance(data[1],list):return None
-    countries=_get("https://api.worldbank.org/v2/country?format=json&per_page=400")
+    countries=_get("https://api.worldbank.org/v2/country?format=json&per_page=400",timeout=12)
     valid=set()
     if isinstance(countries,list) and len(countries)>1 and isinstance(countries[1],list):
         valid={r.get("iso2Code") for r in countries[1] if (r.get("region") or {}).get("id")!="NA" and r.get("iso2Code")}
