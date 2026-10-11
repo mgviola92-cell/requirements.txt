@@ -555,15 +555,17 @@ def _pair_countdown(chat_id, game_id):
     if left <= 0:
         _pair_finish_round(chat_id, game_id)
         return
-    try:
-        bot.edit_message_caption(
-            _pair_caption(game, left),
-            chat_id=chat_id, message_id=game["message_id"],
-            reply_markup=_pair_answer_keyboard(game),
-        )
-    except Exception as exc:
-        if "message is not modified" not in str(exc).lower():
-            print("Pair countdown update error:", exc)
+    # Keep Telegram edits sparse to avoid 429; deadline is tracked by wall clock.
+    if left <= 10 or left % 5 == 0:
+        try:
+            bot.edit_message_caption(
+                _pair_caption(game, left),
+                chat_id=chat_id, message_id=game["message_id"],
+                reply_markup=_pair_answer_keyboard(game),
+            )
+        except Exception as exc:
+            if "message is not modified" not in str(exc).lower():
+                print("Pair countdown update error:", exc)
     schedule_task(1, _pair_countdown, chat_id, game_id, task_id=f"pair_tick:{chat_id}", replace=True)
 
 def _pair_finish_round(chat_id, game_id):
