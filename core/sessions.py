@@ -52,7 +52,6 @@ SESSION_PRIORITIES = {
     "emoji_guess": 60,
     "speed_tap": 55,
     "would_you_rather": 50,
-    "this_or_that": 50,
 
     # -----------------------------------------
     # EVENTS
@@ -93,7 +92,6 @@ EXCLUSIVE_SESSIONS = {
     "emoji_guess",
     "speed_tap",
     "would_you_rather",
-    "this_or_that",
     "random_event",
     "lucky_drop",
 }
