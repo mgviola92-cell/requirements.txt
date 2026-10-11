@@ -328,3 +328,15 @@ def cancel(chat_id, game_id):
             game["finished"] = True
             return _copy(game)
         return None
+
+
+def abort_unavailable(chat_id, game_id):
+    """Close a game whose next round cannot get an unseen question."""
+    with _lock:
+        game = _games.get(chat_id)
+        if not game or game["id"] != game_id or game["state"] not in ("lobby", "between"):
+            return None
+        game["state"] = "aborted"
+        game["finished"] = True
+        game["ends_at"] = None
+        return _copy(game)
