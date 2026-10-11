@@ -205,25 +205,25 @@ def _finish(bot,chat_id,s,reason="vote"):
     _edit(bot,chat_id,s)
     winners=", ".join(_name(p) for p in s["players"] if p["id"] in correct) or "မရှိပါ"
     win_label="🟢 NORMAL TEAM" if found else "🔴 IMPOSTER"
-    detail=("🎯 Secret Word မှန်အောင် ခန့်မှန်းနိုင်ခဲ့ပါတယ်။\\n\\n"
+    detail=("🎯 Secret Word မှန်အောင် ခန့်မှန်းနိုင်ခဲ့ပါတယ်။\n\n"
             if reason=="secret_right" else
-            "❌ Secret Word မှားယွင်းစွာ ခန့်မှန်းခဲ့ပါတယ်။\\n\\n"
+            "❌ Secret Word မှားယွင်းစွာ ခန့်မှန်းခဲ့ပါတယ်။\n\n"
             if reason=="secret_wrong" else "")
     vote_report=("" if reason.startswith("secret_") else
-                 "📊 <b>VOTE INTELLIGENCE</b>\\n"
-                 f"  ✅ မှန်ကန်သူ  {len(correct)} ယောက်\\n"
-                 f"  🗳️ မဲပေးသူ  {len(votes)} ယောက်\\n\\n"
-                 "⭐ <b>TOP INVESTIGATORS</b>\\n"
-                 f"  {winners}\\n\\n")
+                 "📊 <b>VOTE INTELLIGENCE</b>\n"
+                 f"  ✅ မှန်ကန်သူ  {len(correct)} ယောက်\n"
+                 f"  🗳️ မဲပေးသူ  {len(votes)} ယောက်\n\n"
+                 "⭐ <b>TOP INVESTIGATORS</b>\n"
+                 f"  {winners}\n\n")
     result=(
         "╔═══ 🎭 <b>CASE FILE CLOSED</b> ═══╗\n"
         "┃  <code>IMPOSTER • FINAL REPORT</code>\n"
         "╚══════════════════════╝\n\n"
         f"🏆 <b>{win_label} WINS</b>\n\n"
-        detail+
-        "🔎 <b>IDENTITY REVEALED</b>\\n"
-        f"  🎭 {_name(s['players'][imp_idx])}\\n"
-        f"  🔐 {html.escape(s['word'])}\\n\\n"
+        +detail+
+        "🔎 <b>IDENTITY REVEALED</b>\n"
+        f"  🎭 {_name(s['players'][imp_idx])}\n"
+        f"  🔐 {html.escape(s['word'])}\n\n"
         +vote_report+
         "━━━━━━━━━━━━━━━━━━\n"
         "🎮 နောက်ပွဲစရန် /imposter"
