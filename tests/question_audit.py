@@ -12,6 +12,7 @@ import pathlib
 import random
 import time
 import traceback
+import urllib.error
 
 from core.procedural_questions import KINDS, generate
 from core.question_quality import validate_question
@@ -72,7 +73,8 @@ def inspect_live(samples):
                                 "seconds":round(time.monotonic()-started,3),
                                 "error":None if valid else "Provider returned no valid question"})
             except Exception as exc:
-                results.append({"source":name,"type":name,"valid":False,
+                status="rate_limited" if isinstance(exc,urllib.error.HTTPError) and exc.code==429 else "error"
+                results.append({"source":name,"type":name,"valid":False,"status":status,
                                 "question":"","answer":"","seconds":round(time.monotonic()-started,3),
                                 "error":repr(exc)[:350]})
     return results
@@ -87,6 +89,7 @@ def build_report(rows, live):
         unique=len({x["question"].casefold().strip() for x in successes})
         summary[source]={
             "attempts":len(items),"valid":len(successes),"invalid":len(items)-len(successes),
+            "rate_limited":sum(x.get("status")=="rate_limited" for x in items),
             "unique_questions":unique,"duplicate_questions":len(successes)-unique,
             "avg_seconds":round(sum(x["seconds"] for x in items)/len(items),3),
             "observed_types":sorted({x["type"] for x in successes}),
@@ -119,6 +122,8 @@ def save_report(report, directory):
         lines.append("| "+name+" | "+str(stats["attempts"])+" | "+str(stats["valid"])+" | "+
                      str(stats["invalid"])+" | "+str(stats["duplicate_questions"])+" | "+
                      str(stats["avg_seconds"])+" |")
+    lines += ["","## Rate-limited attempts",""]
+    lines.extend("- "+name+": "+str(stats["rate_limited"]) for name,stats in report["summary"].items() if stats["rate_limited"])
     lines += ["","## Errors (first 8 per source)",""]
     for name,stats in report["summary"].items():
         if stats["errors"]:
