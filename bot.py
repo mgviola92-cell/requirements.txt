@@ -598,6 +598,13 @@ def _pair_finish_match(chat_id, game_id):
     cancel_task(f"pair_tick:{chat_id}")
     cancel_task(f"pair_next:{chat_id}")
     old_id = game.get("message_id")
+    # Reward processing is independent of Telegram photo delivery.
+    # finish_pair_match has a one-time state guard.
+    for uid in game.get("winners", []):
+        try:
+            add_bonus_points(chat_id, uid, PAIR_DUO_SUCCESS_REWARD, reason="pair_challenge")
+        except Exception as reward_exc:
+            print("Pair reward error:", reward_exc)
     try:
         caption = "👥 PAIR CHALLENGE • MATCH RESULT"
         if game.get("mode") == "versus":
@@ -610,9 +617,6 @@ def _pair_finish_match(chat_id, game_id):
         sent = bot.send_photo(chat_id, pair_challenge_result_card(game), caption=caption)
         if old_id:
             safe_delete_message(bot, chat_id, old_id)
-        if game.get("mode") == "duo" and game.get("success"):
-            for uid in game.get("winners", []):
-                add_bonus_points(chat_id, uid, PAIR_DUO_SUCCESS_REWARD, reason="pair_challenge")
         delay_delete_message(chat_id, sent.message_id, 120)
     except Exception as exc:
         print("Pair Challenge result error:", exc)
