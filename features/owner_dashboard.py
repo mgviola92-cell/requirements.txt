@@ -135,6 +135,27 @@ def index():
     body+="</table></div></div>"
     return _shell(body)
 
+@dashboard.route("/saved",methods=["GET"])
+@_protect
+def saved_messages():
+    with get_db_connection() as conn,conn.cursor() as cur:
+        cur.execute("SELECT id,preview,created_at FROM owner_source_messages ORDER BY id DESC LIMIT 100")
+        entries=cur.fetchall()
+    body="<h1>Saved Telegram Messages</h1><p>Latest 100 saved originals. Removing here does not delete the original Telegram message.</p><div class='panel'><table><tr><th>Message</th><th>Saved</th><th>Action</th></tr>"
+    for mid,preview,created in entries:
+        body+=f"<tr><td>#{mid}: {html.escape(preview[:100])}</td><td>{html.escape(str(created)[:16])}</td><td><form method='post' action='/owner/saved/delete'><input type='hidden' name='csrf' value='{html.escape(_csrf())}'><input type='hidden' name='id' value='{mid}'><button type='submit'>Remove</button></form></td></tr>"
+    return _shell(body+"</table></div>")
+
+@dashboard.route("/saved/delete",methods=["POST"])
+@_protect
+def delete_saved_message():
+    _verify_csrf()
+    try: mid=int(request.form.get("id",""))
+    except ValueError: abort(400)
+    with get_db_connection() as conn,conn.cursor() as cur:
+        cur.execute("DELETE FROM owner_source_messages WHERE id=%s",(mid,))
+    return redirect(url_for("owner_dashboard.saved_messages"))
+
 @dashboard.route("/broadcast",methods=["GET","POST"])
 @_protect
 def broadcast():
@@ -185,7 +206,7 @@ def broadcast():
         cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY title")
         groups=cur.fetchall()
         count=len(groups)
-        cur.execute("SELECT id,preview FROM owner_source_messages ORDER BY id DESC LIMIT 30")
+        cur.execute("SELECT id,preview FROM owner_source_messages ORDER BY id DESC LIMIT 5")
         originals=cur.fetchall()
     source_options="<option value='text'>Write text in website</option>"
     for sid,preview in originals:
@@ -193,7 +214,7 @@ def broadcast():
     choices="<option value='all'>All groups</option>"
     for gid,title in groups:
         choices+=f"<option value='{gid}'>{html.escape(title or str(gid))}</option>"
-    body=f"""<h1>📢 Broadcast Center</h1><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
+    body=f"""<h1>📢 Broadcast Center</h1><p><a href="/owner/saved">Manage saved messages</a></p><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
 <p class='muted'>Group admins can opt out using /broadcastoff in their group. Broadcasts are plain text and rate limited.</p>
 <form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}">
 <label>Message Source</label><select name="source" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{source_options}</select><p class="muted">For original formatting and Premium emoji, send the message to the bot in Telegram private chat first. Configure OWNER_TELEGRAM_ID on Render.</p><label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" placeholder="Write the announcement..."></textarea>
