@@ -16,7 +16,7 @@ DEFAULT_GROUP_WELCOME = (
     "🛡️ Admin များအတွက်: Bot ကို Admin ပေးပြီး Delete Messages, Pin Messages, "
     "Restrict Members permissions တွေ ဖွင့်ပေးပါ။\n\n"
     "📋 /cmd — Commands နဲ့ Games\n"
-    "🛡️ /admincmd — Admin Commands\n"
+    "📣 /အက်မင်ခေါ် — Admin တွေကို ခေါ်ရန်\n"
 )
 _job_lock = threading.Lock()
 _running = False
