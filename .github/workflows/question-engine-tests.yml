@@ -9,6 +9,7 @@ on:
       - 'features/would_you_rather.py'
       - 'features/imposter.py'
       - 'features/owner_dashboard.py'
+      - 'features/activity_spawn.py'
       - 'data/imposter_words.py'
       - 'tests/**'
       - '.github/workflows/question-engine-tests.yml'

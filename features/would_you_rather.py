@@ -5,7 +5,8 @@ import threading
 import time
 import uuid
 from datetime import datetime, timezone
-from core.sessions import start_session, end_session
+from core.sessions import start_session, end_session, can_start_session
+from features.activity_spawn import ActivitySpawner
 from core.rewards import add_bonus_points
 from database.db import get_db_connection
 from data.wyr_expansion import TOTAL as EXPANDED_TOTAL, choices_at
@@ -67,9 +68,6 @@ _rounds = {}
 _poll_rounds = {}
 _recent_questions = {}
 _recent_order = {}
-_auto_activity = {}
-_auto_threshold = {}
-_auto_last = {}
 _DURATION = (45, 120)
 
 def generate(rng=None):
@@ -262,6 +260,7 @@ def register(bot):
         if message.chat.type not in ("group","supergroup"):return
         if not spawn(message.chat.id,owner_id=message.from_user.id):
             bot.reply_to(message,"🎮 အခု Round တစ်ခုရှိနေနိုင်ပါတယ်။ ခဏနေပြီး ထပ်စမ်းပါ။")
+        else:auto_spawner.note_spawn(message.chat.id)
 
     @bot.message_handler(commands=["wyrstop"])
     def wyr_stop_command(message):
@@ -310,18 +309,15 @@ def register(bot):
             try:add_bonus_points(cid,ans.user.id,1,reason="would_you_rather_vote")
             except Exception as exc:print("WYR participation reward:",exc)
 
+    auto_spawner=ActivitySpawner(
+        spawn, threshold=(18,40), chance=0.70, quiet=(6*60,12*60),
+        can_spawn=lambda cid: can_start_session(cid,"would_you_rather")[0],
+    )
     @bot.message_handler(func=lambda m:True,content_types=["text"])
     def wyr_activity(m):
         from telebot.handler_backends import ContinueHandling
         if (m.chat.type in ("group","supergroup") and m.from_user
-            and not m.from_user.is_bot and m.text and not m.text.startswith("/")):
-            cid=m.chat.id
-            count=_auto_activity.get(cid,0)+1
-            threshold=_auto_threshold.setdefault(cid,random.randint(65,170))
-            if count>=threshold:
-                _auto_activity[cid]=0
-                _auto_threshold[cid]=random.randint(65,170)
-                if time.monotonic()-_auto_last.get(cid,0)>1800 and random.random()<0.30:
-                    if spawn(cid):_auto_last[cid]=time.monotonic()
-            else:_auto_activity[cid]=count
+            and not m.from_user.is_bot and m.text and not m.text.lstrip().startswith("/")):
+            try:auto_spawner.record(m.chat.id,m.from_user.id)
+            except Exception as exc:print("WYR auto spawn:",type(exc).__name__)
         return ContinueHandling()

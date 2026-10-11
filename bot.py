@@ -811,6 +811,15 @@ def speed_tap_activity_middleware(message):
     return ContinueHandling()
 
 
+@bot.message_handler(func=lambda m:True,content_types=["text"])
+def boss_activity_middleware(message):
+    if (message.chat.type in ("group","supergroup") and message.from_user
+            and not message.from_user.is_bot and message.text
+            and not message.text.lstrip().startswith("/")):
+        try:boss_auto_spawner.record(message.chat.id,message.from_user.id)
+        except Exception as exc:print("Boss auto activity:",type(exc).__name__)
+    return ContinueHandling()
+
 # =========================================================
 # 🚨 EARLY TEXT SPAM MIDDLEWARE
 # Exact rule: 5 non-command text messages from one user inside 10 seconds
@@ -5257,25 +5266,46 @@ def boss_raid_timeout(chat_id,raid_id):
 def boss_raid_command(message):
     if message.chat.type not in ('group','supergroup'):
         bot.reply_to(message,'👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။');return
-    chat_id=message.chat.id;allowed,blocker=can_start_session(chat_id,"boss_raid")
+    if spawn_boss_raid(message.chat.id,message):
+        boss_auto_spawner.note_spawn(message.chat.id)
+
+
+def spawn_boss_raid(chat_id,message=None):
+    allowed,blocker=can_start_session(chat_id,"boss_raid")
     if not allowed:
-        sent=bot.reply_to(message,f'⏳ {blocker} game/event ရှိနေပါတယ်။');delay_delete_message(chat_id,sent.message_id,15);return
+        if message:
+            sent=bot.reply_to(message,f'⏳ {blocker} game/event ရှိနေပါတယ်။')
+            delay_delete_message(chat_id,sent.message_id,15)
+        return False
     created,raid=start_boss_raid(chat_id)
-    if not created:bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။');return
+    if not created:
+        if message:bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။')
+        return False
     ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=BOSS_RAID_DURATION)
-    if not ok:finish_boss_raid(chat_id,raid["id"],"cancelled");return
-    art=get_boss_artwork(raid["boss"]["name"],get_boss_visual_stage(raid))
+    if not ok:
+        finish_boss_raid(chat_id,raid["id"],"cancelled")
+        return False
     try:
-        live,variant,composition=generate_boss_live_card(raid,art=art)
-        sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-        boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"composition":composition,"stage":get_boss_visual_stage(raid)}
-    except Exception as ex:
-        print("Boss live card error:",ex)
-        sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-        boss_raid_visual_state[chat_id]={"art":art,"variant":None,"stage":get_boss_visual_stage(raid)}
-    set_boss_raid_message_id(chat_id,raid["id"],sent.message_id);raid=get_boss_raid(chat_id)
-    safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True);delay_delete_message(chat_id,message.message_id,10)
-    schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
+        art=get_boss_artwork(raid["boss"]["name"],get_boss_visual_stage(raid))
+        try:
+            live,variant,composition=generate_boss_live_card(raid,art=art)
+            sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+            boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"composition":composition,"stage":get_boss_visual_stage(raid)}
+        except Exception as ex:
+            print("Boss live card error:",ex)
+            sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
+            boss_raid_visual_state[chat_id]={"art":art,"variant":None,"stage":get_boss_visual_stage(raid)}
+        set_boss_raid_message_id(chat_id,raid["id"],sent.message_id)
+        safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True)
+        if message:delay_delete_message(chat_id,message.message_id,10)
+        schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
+        return True
+    except Exception as exc:
+        finish_boss_raid(chat_id,raid["id"],"cancelled")
+        end_session(chat_id,"boss_raid")
+        boss_raid_visual_state.pop(chat_id,None)
+        print("Boss spawn failed:",type(exc).__name__)
+        return False
 
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("boss:"))
 def boss_raid_callback(call):
@@ -7401,6 +7431,22 @@ configure_speed_tap_auto(
     spawn_callback=spawn_auto_speed_tap,
     can_spawn_callback=can_auto_spawn_speed_tap,
 )
+
+from features.activity_spawn import ActivitySpawner
+
+
+def can_auto_spawn_boss(chat_id):
+    raid=get_boss_raid(chat_id)
+    return bool(can_start_session(chat_id,"boss_raid")[0]
+                and not (raid and not raid.get("finished"))
+                and not get_emoji_game(chat_id) and not get_speed_tap_game(chat_id))
+
+
+boss_auto_spawner=ActivitySpawner(
+    spawn_boss_raid, threshold=(25,55), chance=0.75, quiet=(10*60,18*60),
+    can_spawn=can_auto_spawn_boss,
+)
+
 
 import threading
 
