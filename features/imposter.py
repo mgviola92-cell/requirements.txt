@@ -231,8 +231,10 @@ def _start_clues(s):
     s["warned"]=False
 
 def _start_final(s):
+    now=time.time()
     s["phase"]="final"
-    s["deadline"]=time.time()+60
+    s["deadline"]=now+FINAL_VOTE_SECONDS
+    s["vote_earliest_finish"]=now+FINAL_MIN_DISCUSSION
     s["votes"]={}
 
 def _decide(s,decision):
