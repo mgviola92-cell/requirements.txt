@@ -168,10 +168,17 @@ def register(bot):
         bar=lambda p: "█"*(p//10)+"░"*(10-p//10)
         t=max(0,int(g["ends"]-time.time()))
         heading="🏁 WOULD YOU RATHER — RESULT" if final else "🎲 WOULD YOU RATHER"
-        return (f"{heading}\n\n{g['question']['question']}\n\n"
-                f"🅰️ {a}\n{bar(pa)} {pa}% ({count_a})\n\n"
-                f"🅱️ {b}\n{bar(pb)} {pb}% ({count_b})\n\n"
-                f"👥 {total} voters" + ("" if final else f"  |  ⏳ {t//60:02d}:{t%60:02d}"))
+        text=(f"{heading}\n\n{g['question']['question']}\n\n"
+              f"🅰️ {a}\n{bar(pa)} {pa}% ({count_a})\n\n"
+              f"🅱️ {b}\n{bar(pb)} {pb}% ({count_b})\n\n"
+              f"👥 {total} voters" + ("" if final else f"  |  ⏳ {t//60:02d}:{t%60:02d}"))
+        if final and total >= 4:
+            mode=int(hashlib.sha256(g["id"].encode()).hexdigest()[:4],16)
+            if count_a and count_b and min(count_a,count_b)*100 <= 30*total and mode % 3 == 0:
+                text+="\n\n👀 Minority Alert! The smaller team made an unusual choice."
+            elif mode % 5 == 0:
+                text+="\n\n💬 Debate Mode: Which choice would you defend, and why?"
+        return text
 
     def keyboard(g):
         from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
