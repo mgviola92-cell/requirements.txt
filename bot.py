@@ -3335,39 +3335,56 @@ def get_local_trivia_question():
 
 
 def get_trivia_question(chat_id=None):
-    """Find an unseen question with one batched DB lookup per round."""
+    """Prefer unseen online questions; use local bank only as fallback."""
     from core.question_sources import fetch_question
     from core.question_quality import validate_question
     from database.question_history import seen_many, _key
-    candidates = []
-    item = fetch_question()
-    if item:
-        candidates.append(item)
-    item = get_online_trivia_question()
-    if item:
-        candidates.append(item)
-    candidates.extend(load_local_trivia_questions_normalized())
-    random.shuffle(candidates)
-    eligible = []
-    for item in candidates:
-        item = validate_question(item)
-        if not item:
-            continue
-        correct = item["answers"][item["correct_index"]]
-        key = make_trivia_question_key("shared", item["question"], correct)
-        if key not in trivia_used_questions:
+
+    def unseen(items):
+        eligible = []
+        for raw in items:
+            item = validate_question(raw)
+            if not item:
+                continue
+            correct = item["answers"][item["correct_index"]]
+            key = make_trivia_question_key("shared", item["question"], correct)
+            if key in trivia_used_questions:
+                continue
             item["question_key"] = key
             eligible.append(item)
-    if not eligible:
+        if not eligible:
+            return None
+        seen_hashes = seen_many(chat_id, [q["question"] for q in eligible]) if chat_id is not None else set()
+        if seen_hashes is None:
+            seen_hashes = set()
+        random.shuffle(eligible)
+        for item in eligible:
+            if _key(item["question"]) not in seen_hashes:
+                return item
         return None
-    seen_hashes = seen_many(chat_id, [q["question"] for q in eligible]) if chat_id is not None else set()
-    if seen_hashes is None:
-        # DB unavailable: prefer in-process history rather than failing every round.
-        seen_hashes = set()
-    for item in eligible:
-        if _key(item["question"]) not in seen_hashes:
-            return item
-    return None
+
+    # First, prefer newly fetched facts/trivia rather than the much larger
+    # local bank. Either online API can be temporarily unavailable.
+    online = []
+    try:
+        item = fetch_question()
+        if item:
+            online.append(item)
+    except Exception as exc:
+        print("Trivia online question provider error:", exc)
+    try:
+        item = get_online_trivia_question()
+        if item:
+            online.append(item)
+    except Exception as exc:
+        print("Trivia OpenTDB provider error:", exc)
+    selected = unseen(online)
+    if selected:
+        return selected
+
+    # Keep the existing offline fallback when providers fail or only
+    # previously used online questions are available.
+    return unseen(load_local_trivia_questions_normalized())
 
 
 def load_local_trivia_questions_normalized():
