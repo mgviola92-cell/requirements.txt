@@ -13,7 +13,7 @@ class SourceCatalogueTests(unittest.TestCase):
     def test_wikidata_fifty_distinct_rules(self):
         rules=TOPICS+MORE_TOPICS
         self.assertGreaterEqual(len(rules),50)
-        self.assertEqual(len({name for name,*_ in rules}),len(rules))
+        self.assertEqual(len({(subject,property_id,template) for _,subject,property_id,template in rules}),len(rules))
 
     def test_world_bank_fifty_distinct_indicators(self):
         self.assertGreaterEqual(len(METRICS),50)
