@@ -41,3 +41,9 @@ class ImposterOfflineTests(unittest.TestCase):
         payload=[b.callback_data for row in kb.keyboard for b in row]
         self.assertIn("imp:abc123:vote:8",payload)
         self.assertIn("imp:abc123:page:2",payload)
+
+    def test_final_report_uses_real_newlines(self):
+        import inspect
+        import features.imposter as mod
+        source=inspect.getsource(mod._finish)
+        self.assertNotIn(chr(92)+chr(92)+"n",source[source.index("    result=("):source.index("    _announce(bot,chat_id,result)")])
