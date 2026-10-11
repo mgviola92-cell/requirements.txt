@@ -100,3 +100,9 @@ def advance(chat_id,match_id,rng=None):
                 cur.execute("UPDATE tot_games SET round_no=%s,ends_at=%s WHERE chat_id=%s AND match_id=%s",(num+1,deadline,chat_id,match_id))
                 result.update({"finished":False,"round":num+1,"ends_at":deadline,"question":get_question(ids[num])})
     return result
+
+def active_games():
+    with get_db_connection() as db:
+        with db.cursor() as c:
+            c.execute("SELECT chat_id,match_id,ends_at FROM tot_games WHERE status='active'")
+            return c.fetchall()
