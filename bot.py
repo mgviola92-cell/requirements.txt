@@ -5197,6 +5197,8 @@ def boss_raid_finish(chat_id,raid,won):
     owned=claim_boss_raid_ending(chat_id,raid["id"])
     if not owned:return
     raid=owned
+    # Raid recovery quiet starts at the actual end, including manually started raids.
+    boss_auto_spawner.note_spawn(chat_id)
     try:end_session(chat_id,"boss_raid")
     except Exception as ex:print("Boss end_session error:",ex)
 
@@ -7443,7 +7445,7 @@ def can_auto_spawn_boss(chat_id):
 
 
 boss_auto_spawner=ActivitySpawner(
-    spawn_boss_raid, threshold=(25,55), chance=0.75, quiet=(10*60,18*60),
+    spawn_boss_raid, threshold=(60,125), chance=0.70, quiet=(50*60,125*60),
     can_spawn=can_auto_spawn_boss,
 )
 
