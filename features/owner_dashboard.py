@@ -272,23 +272,14 @@ def broadcast():
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active=TRUE AND broadcast_opt_out=FALSE",(target,))
                 if not cur.fetchone():return ("Destination not available",400)
-        with _job_lock:
-            if _running:return ("A broadcast is already in progress",409)
-            _running=True
-        try:
-            with get_db_connection() as conn,conn.cursor() as cur:
-                cur.execute("SELECT chat_id FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY chat_id")
-                ids=[x[0] for x in cur.fetchall()]
-                if target!="all":
-                    if target not in ids:raise RuntimeError("Destination no longer available")
-                    ids=[target]
-                cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",
-                            (message,len(ids)))
-                jobid=cur.fetchone()[0]
-            threading.Thread(target=_send_broadcast,args=(jobid,message,ids,source_chat,source_msg),daemon=True).start()
-        except Exception:
-            with _job_lock:_running=False
-            raise
+        with get_db_connection() as conn,conn.cursor() as cur:
+            cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
+            ids=[x[0] for x in cur.fetchall()]
+        if target!="all":ids=[i for i in ids if i==target]
+        if not ids:return ("No eligible groups",400)
+        try:jobid=_queue_broadcast(message,ids,source_chat,source_msg)
+        except ValueError as exc:return (str(exc),409)
+        threading.Thread(target=_send_broadcast,args=(jobid,),daemon=True).start()
         return redirect(url_for("owner_dashboard.index"))
     with get_db_connection() as conn,conn.cursor() as cur:
         cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY title")
@@ -406,6 +397,7 @@ def register_owner_dashboard(app,bot):
                       PERMANENT_SESSION_LIFETIME=3600)
     app.register_blueprint(dashboard)
     _init_db()
+    threading.Thread(target=_resume_broadcasts,daemon=True).start()
     observed={}
     observed_lock=threading.Lock()
     @bot.message_handler(func=lambda m:m.chat.type in ("group","supergroup"),content_types=["text"])
@@ -439,11 +431,16 @@ def register_owner_dashboard(app,bot):
                 os.getenv("OWNER_TELEGRAM_ID","").strip()==str(msg.from_user.id))
 
     def owner_replace_card(uid,chat_id,text,keyboard=None):
-        """Send the next card at the bottom, then delete only our previous card."""
+        """Persist latest card ID so old cards are cleaned after Render restarts."""
         new_card=bot.send_message(chat_id,text,reply_markup=keyboard)
         with _owner_draft_lock:
             old_id=_owner_card_ids.get(uid)
+            if not old_id:
+                try:_,old_id,_=_load_panel_state(uid)
+                except Exception as exc:print("Load owner card:",type(exc).__name__)
             _owner_card_ids[uid]=new_card.message_id
+            try:_save_panel_state(uid,chat_id,new_card.message_id,_owner_drafts.get(uid))
+            except Exception as exc:print("Save owner card:",type(exc).__name__)
         if old_id and old_id!=new_card.message_id:
             try:bot.delete_message(chat_id,old_id)
             except Exception:
@@ -479,6 +476,12 @@ def register_owner_dashboard(app,bot):
         if not q.from_user or str(q.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip() or q.message.chat.type!="private":
             bot.answer_callback_query(q.id,"Owner သာ အသုံးပြုနိုင်ပါတယ်။",show_alert=True)
             return
+        try:
+            _,latest_card,_=_load_panel_state(q.from_user.id)
+            if latest_card and q.message.message_id!=latest_card:
+                bot.answer_callback_query(q.id,"အရင် Menu ဟောင်းပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။",show_alert=True)
+                return
+        except Exception as exc:print("Owner callback state:",type(exc).__name__)
         action=q.data.split(":",1)[1]
         uid=q.from_user.id
         try:
@@ -520,23 +523,17 @@ def register_owner_dashboard(app,bot):
                     draft=_owner_drafts.get(uid)
                     if not draft or draft.get("phase")!="ready" or "target" not in draft or time.monotonic()>draft["expires"]:
                         bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
-                    with _job_lock:
-                        if _running:
-                            bot.answer_callback_query(q.id,"Broadcast တစ်ခု ပို့နေပါတယ်။",show_alert=True);return
-                        _running=True
                     draft=_owner_drafts.pop(uid)
+                    _save_panel_state(uid,draft=None)
                 try:
                     with get_db_connection() as conn,conn.cursor() as cur:
                         cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
                         ids=[r[0] for r in cur.fetchall()]
-                        if draft["target"]!="all":ids=[i for i in ids if str(i)==draft["target"]]
-                        if not ids:raise ValueError("No eligible groups")
-                        cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",("[Telegram original]",len(ids)))
-                        jobid=cur.fetchone()[0]
-                    threading.Thread(target=_send_broadcast,args=(jobid,"",ids,draft["chat_id"],draft["message_id"]),daemon=True).start()
+                    if draft["target"]!="all":ids=[i for i in ids if str(i)==draft["target"]]
+                    jobid=_queue_broadcast("[Telegram original]",ids,draft["chat_id"],draft["message_id"])
+                    threading.Thread(target=_send_broadcast,args=(jobid,),daemon=True).start()
                     owner_replace_card(uid,q.message.chat.id,f"✅ Broadcast #{jobid} စတင်ပို့နေပြီ။ Group {len(ids)} ခု။",owner_back_button())
                 except Exception as exc:
-                    with _job_lock:_running=False
                     owner_replace_card(uid,q.message.chat.id,"⚠️ Broadcast စတင်မရပါ။ Eligible Group ရှိ/မရှိ စစ်ပါ။",owner_back_button())
             bot.answer_callback_query(q.id)
         except Exception as exc:
