@@ -185,7 +185,8 @@ def _start_clues(s):
     s["phase"]="clue"
     s["round"]+=1
     s["turn"]=0
-    s["deadline"]=time.time()+TURN_TIME
+    s["deadline"]=time.time()+45
+    s["warned"]=False
 
 def _start_final(s):
     s["phase"]="final"
@@ -205,7 +206,7 @@ def _next_turn(bot,chat_id,s):
         s["phase"]="decision"
         s["decisions"]={}
         s["deadline"]=time.time()+DECISION_TIME
-    else:s["deadline"]=time.time()+TURN_TIME
+    else:s["deadline"]=time.time()+45
     _save(chat_id,s)
     _edit(bot,chat_id,s)
 
