@@ -2,11 +2,14 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from features.would_you_rather import PAIRS, CAPACITY, generate_by_index, generate
+from data.wyr_expansion import TOTAL, OPTIONS, choices_at
 
 
 class WouldYouRatherTests(unittest.TestCase):
     def test_distinct_myanmar_question_pairs(self):
-        self.assertGreaterEqual(CAPACITY, 80)
+        self.assertGreaterEqual(CAPACITY, 20000)
+        self.assertEqual(TOTAL, 25560)
+        self.assertEqual(CAPACITY, 84 + TOTAL)
         self.assertGreaterEqual(len(PAIRS), 75)
 
     def test_all_combinations_unique_and_valid(self):
@@ -21,10 +24,17 @@ class WouldYouRatherTests(unittest.TestCase):
             self.assertNotIn(item["options"][0],item["question"])
             self.assertNotIn(item["options"][1],item["question"])
             self.assertTrue(item["question"].startswith("🎲 Would You Rather?"))
-            self.assertEqual(item["id"],"WYR-MM-"+str(ix))
+            self.assertEqual(item["id"], ("WYR-MM-"+str(ix)) if ix < 84 else ("WYR-CAT-"+str(ix-84)))
             self.assertNotIn(item["options"], choices)
             choices.add(item["options"])
         self.assertEqual(len(choices), CAPACITY)
+
+    def test_all_categories_have_72_meaningful_choices(self):
+        self.assertEqual(len(OPTIONS), 10)
+        for options in OPTIONS:
+            self.assertEqual(len(options), 72)
+            self.assertEqual(len(set(options)),72)
+            self.assertTrue(all(len(opt) <= 100 for opt in options))
 
     def test_invalid_indices(self):
         with self.assertRaises(ValueError): generate_by_index(-1)
