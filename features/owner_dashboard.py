@@ -10,6 +10,14 @@ from telebot import types
 
 dashboard = Blueprint("owner_dashboard", __name__, url_prefix="/owner")
 BOT = None
+DEFAULT_GROUP_WELCOME = (
+    "🤖 Group ထဲကို ကြိုဆိုပါတယ်!\n\n"
+    "Bot ကို Add လုပ်ပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ်။ 🎉\n\n"
+    "🛡️ Admin များအတွက်: Bot ကို Admin ပေးပြီး Delete Messages, Pin Messages, "
+    "Restrict Members permissions တွေ ဖွင့်ပေးပါ။\n\n"
+    "📋 /cmd — Commands နဲ့ Games\n"
+    "🛡️ /admincmd — Admin Commands\n"
+)
 _job_lock = threading.Lock()
 _running = False
 _owner_drafts = {}
@@ -21,6 +29,7 @@ def _ready():
 
 def _init_db():
     with get_db_connection() as conn, conn.cursor() as cur:
+        cur.execute("CREATE TABLE IF NOT EXISTS owner_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
         cur.execute("""CREATE TABLE IF NOT EXISTS owner_groups (
           chat_id BIGINT PRIMARY KEY, title TEXT NOT NULL DEFAULT '',
           active BOOLEAN NOT NULL DEFAULT TRUE, broadcast_opt_out BOOLEAN NOT NULL DEFAULT FALSE,
@@ -137,6 +146,30 @@ def index():
     for rid,created,all_count,sent,failed,status in history:
         body+=f"<tr><td>{rid}</td><td>{sent}</td><td>{failed}</td><td>{all_count}</td><td>{html.escape(status)}</td></tr>"
     body+="</table></div></div>"
+    return _shell(body)
+
+@dashboard.route("/welcome",methods=["GET","POST"])
+@_protect
+def edit_welcome():
+    notice=""
+    if request.method=="POST":
+        _verify_csrf()
+        value=request.form.get("welcome","")
+        if not (1<=len(value)<=3500):return ("Welcome text must be 1–3500 characters",400)
+        with get_db_connection() as conn,conn.cursor() as cur:
+            cur.execute("INSERT INTO owner_settings(key,value) VALUES('group_welcome',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",(value,))
+        notice="✅ Welcome text saved. Only future group joins will use it."
+    with get_db_connection() as conn,conn.cursor() as cur:
+        cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
+        row=cur.fetchone()
+    value=row[0] if row else DEFAULT_GROUP_WELCOME
+    body=("<h1>Group Welcome Message</h1><p class='muted'>Changes apply only when the bot joins a group. "
+          "Text and line breaks are preserved. HTML is not interpreted.</p>"
+          f"<p class='ok'>{html.escape(notice)}</p>"
+          "<div class='panel'><form method='post'>"
+          f"<input type='hidden' name='csrf' value='{html.escape(_csrf())}'>"
+          f"<textarea name='welcome' maxlength='3500' required style='min-height:300px'>{html.escape(value)}</textarea>"
+          "<button>Save Welcome</button></form></div>")
     return _shell(body)
 
 @dashboard.route("/saved",methods=["GET"])
@@ -280,19 +313,10 @@ def register_owner_dashboard(app,bot):
         record_group(m.chat,active=new_joined)
         if not old_joined and new_joined:
             try:
-                bot.send_message(
-                    m.chat.id,
-                    "🤖 <b>Group ထဲကို ကြိုဆိုပါတယ်!</b>\n\n"
-                    "Bot ကို Add လုပ်ပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ်။ 🎉\n\n"
-                    "🛡️ <b>Group Admin များအတွက်</b>\n"
-                    "Game Messages စီမံဖို့နဲ့ Group Management Functions တွေ သုံးနိုင်ဖို့ "
-                    "Bot ကို Admin ပေးထားပြီး လိုအပ်တဲ့ Delete Messages၊ Pin Messages နဲ့ "
-                    "Restrict Members permissions တွေ ဖွင့်ပေးပါ။\n\n"
-                    "📋 <b>/cmd</b> — Commands နဲ့ Functions စာရင်း\n"
-                    "🎮 <b>/cmds</b> — Game နဲ့ Admin Commands ကြည့်ရန်\n\n"
-                    "✨ Admin Permission မပြည့်သေးလည်း ခွင့်ပြုချက်မလိုတဲ့ Functions တွေကို သုံးနိုင်ပါတယ်။",
-                    parse_mode="HTML"
-                )
+                with get_db_connection() as conn,conn.cursor() as cur:
+                    cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
+                    row=cur.fetchone()
+                bot.send_message(m.chat.id,row[0] if row else DEFAULT_GROUP_WELCOME)
             except Exception as exc:
                 print("Bot group welcome failed:",type(exc).__name__)
     def is_owner(msg):
