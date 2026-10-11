@@ -169,17 +169,6 @@ def register(bot):
             _rounds.pop(chat_id,None)
             end_session(chat_id,"would_you_rather")
 
-        # Native Telegram polls do not support a custom lock badge.
-        # Reply to the poll so the closure is unmistakable in a busy group.
-        try:
-            counts=[opt.voter_count for opt in result.options]
-            total=sum(counts)
-            summary=(f"🔒 WYR Vote ပိတ်ပြီးပါပြီ!\n"
-                     f"{'🛑 စတင်သူက ရပ်လိုက်ပါတယ်။' if force else '⏰ အချိန်ပြည့်သွားပါပြီ။'}\n"
-                     f"🗳 စုစုပေါင်း Vote: {total}")
-            bot.send_message(chat_id,summary,reply_to_message_id=g["message_id"])
-        except Exception as exc:
-            print("WYR closure notice:",exc)
         return True
 
     def wait_finish(chat_id,gid):
