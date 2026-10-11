@@ -6,6 +6,7 @@ on:
       - 'core/**'
       - 'bot.py'
       - 'games/pair_challenge.py'
+      - 'features/would_you_rather.py'
       - 'tests/**'
       - '.github/workflows/question-engine-tests.yml'
   workflow_dispatch:
@@ -25,7 +26,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Compile bot and question source modules
-        run: python -m compileall -q bot.py core tests
+        run: python -m compileall -q bot.py core features tests
       - name: Install test database driver
         run: python -m pip install 'psycopg[binary]'
       - name: Run offline unit tests
