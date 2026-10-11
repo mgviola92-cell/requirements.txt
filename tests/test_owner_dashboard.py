@@ -127,9 +127,33 @@ class OwnerStabilityTests(unittest.TestCase):
 
     def test_forward_alone_does_not_save_or_open_cards(self):
         bot,handlers=self.handlers()
-        handlers['capture_owner_message'](NS())
+        msg=NS(chat=NS(type='private',id=42),from_user=NS(id=42),content_type='text',text='hello')
+        with patch.dict(os.environ,OWNER_TELEGRAM_ID='42'),patch.object(owner,'_load_panel_state',return_value=(None,None,None)):
+            handlers['capture_owner_message'](msg)
         bot.send_message.assert_not_called()
         bot.reply_to.assert_not_called()
+
+    def test_direct_text_after_broadcast_offers_destinations(self):
+        import time
+        owner._owner_drafts.clear();owner._owner_card_ids.clear()
+        bot,handlers=self.handlers()
+        msg=NS(chat=NS(type='private',id=42),from_user=NS(id=42),content_type='text',text='announcement',message_id=25)
+        bot.send_message.return_value=NS(message_id=26)
+        conn,cur=self.connection([]);cur.fetchall.return_value=[(-100,'Test Group')]
+        draft={'phase':'waiting','expires':time.time()+600}
+        with patch.dict(os.environ,OWNER_TELEGRAM_ID='42'),patch.object(owner,'_load_panel_state',return_value=(42,24,draft)),patch.object(owner,'_save_panel_state'),patch.object(owner,'get_db_connection',return_value=conn):
+            handlers['capture_owner_message'](msg)
+        self.assertEqual(owner._owner_drafts[42]['phase'],'ready')
+        self.assertEqual(owner._owner_drafts[42]['message_id'],25)
+        self.assertEqual(bot.send_message.call_count,1)
+        self.assertFalse(any('owner_source_messages' in c.args[0] for c in cur.execute.call_args_list))
+
+    def test_command_is_not_captured_as_announcement(self):
+        bot,handlers=self.handlers()
+        msg=NS(chat=NS(type='private',id=42),from_user=NS(id=42),content_type='text',text='/ownersave')
+        with patch.dict(os.environ,OWNER_TELEGRAM_ID='42'):
+            handlers['capture_owner_message'](msg)
+        bot.send_message.assert_not_called()
 
     def test_welcome_preview_escapes_saved_text(self):
         app=Flask(__name__);app.secret_key='test'

@@ -547,7 +547,7 @@ def register_owner_dashboard(app,bot):
                 owner_home(uid,q.message.chat.id)
             elif action=="broadcast":
                 with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.time()+600}
-                owner_replace_card(uid,q.message.chat.id,"📢 ပို့ချင်တဲ့စာကို Forward လုပ်ပါ။\n\nပြီးရင် အဲဒီစာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။\n/ownercancel နဲ့ ရပ်နိုင်ပါတယ်။",owner_back_button())
+                owner_replace_card(uid,q.message.chat.id,"📢 ပို့ချင်တဲ့စာကို ဒီမှာ တန်းရေးပို့ပါ၊ ဒါမှမဟုတ် Message / ပုံကို Forward လုပ်ပါ။\n\nရှိပြီးသား Message ကို Reply နှိပ်ပြီး /ownersend နဲ့လည်း ရွေးနိုင်ပါတယ်။\n/ownercancel နဲ့ ရပ်နိုင်ပါတယ်။",owner_back_button())
             elif action=="groups":
                 with get_db_connection() as conn,conn.cursor() as cur:
                     cur.execute("SELECT title,active,broadcast_opt_out FROM owner_groups ORDER BY last_seen DESC LIMIT 30")
@@ -674,8 +674,17 @@ def register_owner_dashboard(app,bot):
         return ContinueHandling()
     @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document","audio","voice","video_note","sticker"])
     def capture_owner_message(msg):
-        # Forwarding alone neither saves a source nor advances the draft.
-        # /ownersend and /ownersave are the explicit, separate entry points.
+        if not is_owner(msg):return ContinueHandling()
+        if msg.content_type=="text" and (msg.text or "").startswith("/"):
+            return ContinueHandling()
+        # Capture only after the owner explicitly selects Broadcast. Never autosave.
+        with _owner_draft_lock:
+            draft=get_owner_draft(msg.from_user.id)
+            if not draft or draft.get("phase")!="waiting":return ContinueHandling()
+            try:offer_destinations(msg,msg)
+            except Exception as exc:
+                print("Owner direct message:",type(exc).__name__)
+                bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။")
         return ContinueHandling()
     @bot.message_handler(commands=["broadcastoff","broadcaston"])
     def toggle_broadcast(msg):
