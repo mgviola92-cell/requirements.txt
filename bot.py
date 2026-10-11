@@ -3321,7 +3321,7 @@ def get_local_trivia_question():
     )
 
 
-def get_trivia_question():
+def get_trivia_question(chat_id=None):
     """Try diverse sources, reject previously seen questions, then local fallback."""
     from core.question_sources import fetch_question
     for _ in range(5):
@@ -3330,7 +3330,7 @@ def get_trivia_question():
             break
         correct = item["answers"][item["correct_index"]]
         key = make_trivia_question_key("shared", item["question"], correct)
-        if key not in trivia_used_questions:
+        if key not in trivia_used_questions and (chat_id is None or not __import__("database.question_history", fromlist=["seen"]).seen(chat_id, item["question"])):
             item["question_key"] = key
             return item
     for _ in range(3):
@@ -3802,7 +3802,7 @@ def trivia_command(
         # ---------------------------------
 
         question = (
-            get_trivia_question()
+            get_trivia_question(chat_id)
         )
 
         if not question:
@@ -4034,6 +4034,8 @@ def trivia_command(
                 trivia_used_questions.add(
                     question_key
                 )
+                from database.question_history import mark as mark_question
+                mark_question(chat_id, game['question'])
 
         # ---------------------------------
         # Start Countdown
