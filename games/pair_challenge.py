@@ -84,31 +84,31 @@ def _online_quiz(game):
 
 
 def _pick_challenge(game):
-    from database.question_history import seen, mark
+    from database.question_history import claim
     used = set(game.get("used_challenges", []))
     pool = [q for q in CHALLENGES if q["kind"] in _allowed_kinds(game) and q["id"] not in used]
     chat_id = game["chat_id"]
-    for _ in range(12):
+    local_seen = _recent.setdefault(chat_id, set())
+    for attempt in range(50):
         roll = random.random()
-        if roll < 0.25 and pool:
+        if roll < 0.20 and pool:
             challenge = dict(random.choice(pool))
-        elif roll < 0.60:
+        elif roll < 0.65:
             challenge = _online_quiz(game) or _generated_challenge(game)
         else:
             challenge = _generated_challenge(game)
         if challenge["kind"] == "math" and game["mode"] != "versus":
             challenge["kind"] = "puzzle"
-        if challenge["id"] in used or seen(chat_id, challenge["question"]):
+        question = challenge["question"]
+        if challenge["id"] in used or question in local_seen:
             continue
-        mark(chat_id, challenge["question"])
+        claimed = claim(chat_id, question)
+        if claimed is False:
+            continue
+        local_seen.add(question)
         game["used_challenges"].append(challenge["id"])
         return challenge
-    challenge = _generated_challenge(game)
-    if game["mode"] != "versus" and challenge["kind"] == "math":
-        challenge["kind"] = "puzzle"
-    mark(chat_id, challenge["question"])
-    game["used_challenges"].append(challenge["id"])
-    return challenge
+    raise RuntimeError("No unseen Pair Challenge question could be generated")
 
 def create_lobby(chat_id, owner_id, owner_name):
     with _lock:
