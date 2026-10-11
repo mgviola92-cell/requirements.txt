@@ -38,7 +38,7 @@ class SourceCatalogueTests(unittest.TestCase):
             {"country":{"id":"C"+str(i),"value":"Country "+str(i)},"countryiso3code":"AAA",
              "value":1000000+i*100000}
             for i in range(8)]
-        countries=[{"id":"C"+str(i),"region":{"id":"EAS"}} for i in range(8)]
+        countries=[{"id":"ISO"+str(i),"iso2Code":"C"+str(i),"region":{"id":"EAS"}} for i in range(8)]
         def response(url):
             return [{},countries] if "/v2/country?" in url else [{},rows]
         with patch("core.extra_question_sources._get",side_effect=response):
