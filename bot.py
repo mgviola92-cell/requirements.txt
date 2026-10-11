@@ -312,6 +312,8 @@ bot = telebot.TeleBot(BOT_TOKEN)
 register_daily_challenge(bot)
 from features.would_you_rather import register as register_would_you_rather
 register_would_you_rather(bot)
+from features.grammar_coach import register as register_grammar_coach
+register_grammar_coach(bot)
 
 
 # =========================================================
