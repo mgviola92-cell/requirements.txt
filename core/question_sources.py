@@ -104,7 +104,7 @@ def fetch_question():
     from core.extra_question_sources import open_library_question, world_bank_question, nasa_images_question
     sources = [trivia_api, wikidata_question, openalex_question, open_library_question, world_bank_question, nasa_images_question]
     random.shuffle(sources)
-    for source in sources:
+    for source in sources[:2]:
         try:
             item = source()
             item = validate_question(item)
