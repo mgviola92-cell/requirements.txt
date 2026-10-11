@@ -50,3 +50,23 @@ def claim(chat_id, question):
     except Exception as exc:
         print("Question claim failed:", exc)
         return None
+
+def seen_many(chat_id, questions):
+    """Fetch seen status for a batch using one DB query instead of one per item."""
+    questions=list(questions)
+    if not questions:
+        return set()
+    hashes=list({_key(q) for q in questions})
+    try:
+        _init()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT question_hash FROM game_question_history "
+                    "WHERE chat_id=%s AND question_hash=ANY(%s)",
+                    (chat_id, hashes),
+                )
+                return {row[0] for row in cur.fetchall()}
+    except Exception as exc:
+        print("Question history batch lookup:", exc)
+        return None
