@@ -53,7 +53,13 @@ def world_bank_question():
     params=urllib.parse.urlencode({"format":"json","date":str(year),"per_page":300})
     data=_get("https://api.worldbank.org/v2/country/all/indicator/"+code+"?"+params)
     if not isinstance(data,list) or len(data)<2 or not isinstance(data[1],list):return None
-    rows=[r for r in data[1] if isinstance(r.get("value"),(int,float)) and r.get("countryiso3code") and len(r["countryiso3code"])==3 and r.get("country",{}).get("value")]
+    countries=_get("https://api.worldbank.org/v2/country?format=json&per_page=400")
+    valid=set()
+    if isinstance(countries,list) and len(countries)>1 and isinstance(countries[1],list):
+        valid={r.get("id") for r in countries[1] if r.get("region",{}).get("id")!="NA"}
+    rows=[r for r in data[1] if isinstance(r.get("value"),(int,float))
+          and r.get("country",{}).get("id") in valid
+          and r.get("country",{}).get("value")]
     if len(rows)<5:return None
     row=random.choice(rows)
     country=row["country"]["value"]
