@@ -415,15 +415,15 @@ def register_owner_dashboard(app,bot):
             bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။")
         return ContinueHandling()
 
-    @bot.message_handler(commands=["broadcastsave"])
-    def broadcast_save_reply(msg):
+    @bot.message_handler(commands=["ownersave"])
+    def owner_save_reply(msg):
         if msg.chat.type!="private":return ContinueHandling()
         if str(msg.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip():
             bot.reply_to(msg,"🔒 Owner သာ သုံးနိုင်ပါတယ်။")
             return ContinueHandling()
         source=msg.reply_to_message
         if source is None:
-            bot.reply_to(msg,"Forward လုပ်ထားတဲ့ Message ကို Reply ပြီး /broadcastsave ပို့ပါ။")
+            bot.reply_to(msg,"Forward လုပ်ထားတဲ့ Message ကို Reply ပြီး /ownersave ပို့ပါ။")
             return ContinueHandling()
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
@@ -448,7 +448,7 @@ def register_owner_dashboard(app,bot):
         if not owner_id or str(msg.from_user.id)!=owner_id:
             bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
             return ContinueHandling()
-        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None) and not _owner_drafts.get(msg.from_user.id):return ContinueHandling()
+        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
         with _owner_draft_lock:
             draft=_owner_drafts.get(msg.from_user.id)
             if draft and draft.get("phase")=="waiting" and time.monotonic()<draft["expires"]:
@@ -463,14 +463,7 @@ def register_owner_dashboard(app,bot):
                 choices.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
                 bot.reply_to(msg,"✅ Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=choices)
                 return ContinueHandling()
-        try:
-            with get_db_connection() as conn,conn.cursor() as cur:
-                cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
-                    (msg.chat.id,msg.message_id,(msg.text or msg.caption or "["+msg.content_type+"]")[:180]))
-            bot.reply_to(msg,"✅ မူရင်း Message ကို သိမ်းထားပြီ။ Web Dashboard မှာ Telegram Original ကို ရွေးပြီး Broadcast ပို့နိုင်ပါပြီ။")
-        except Exception as exc:
-            print("Owner message capture:",type(exc).__name__)
-            bot.reply_to(msg,"⚠️ Message သိမ်းမရသေးပါ။ Render Logs ကို စစ်ရန်လိုပါတယ်။")
+        # Only /ownersave stores originals. Ordinary private messages are not saved.
         return ContinueHandling()
     @bot.message_handler(commands=["broadcastoff","broadcaston"])
     def toggle_broadcast(msg):
