@@ -4,6 +4,7 @@ import random
 import threading
 import time
 import uuid
+from datetime import datetime, timezone
 from core.sessions import start_session, end_session
 from core.rewards import add_bonus_points
 from database.db import get_db_connection
@@ -56,22 +57,20 @@ PAIRS = [
 ("have a self-cleaning room", "have a self-organizing backpack"), ("meet your favorite fictional hero", "visit your favorite fictional world"),
 ("have a garden on your roof", "have a pond in your yard"), ("explore mountains by train", "explore islands by boat"),
 ]
-CONTEXTS = ("on a surprise weekend","during a school holiday","for a special adventure",
-            "with your best friends","during a big festival","on your next birthday",
-            "for an exciting challenge","on a once-in-a-lifetime trip")
-TWISTS = ("but only for one day","but only once a month","but you must decide right now",
-          "but you cannot switch later","but nobody else can choose for you",
-          "but you must share the experience","but you have to plan it yourself",
-          "but you only have one chance")
-FRAMES = ("Would you rather {a} or {b} {context}, {twist}?",
-          "Imagine you could {a} or {b} {context}, {twist}. Which would you pick?",
-          "Big choice: {a} versus {b} {context}, {twist}. Which one?",
-          "Your next adventure: {a} or {b} {context}, {twist}. Which would you choose?")
-# 80+ paired ideas x 8 contexts x 8 twists x 4 frames > 20,000 variants.
-CAPACITY = len(PAIRS) * len(CONTEXTS) * len(TWISTS) * len(FRAMES)
+MYANMAR_PAIRS = tuple(tuple(line.split("|", 1)) for line in "ဘယ်နေရာမဆို ပျံသန်းနိုင်မယ်|ကိုယ်ပျောက်နိုင်မယ်\nအချိန်ကို ရပ်ထားနိုင်မယ်|အချိန်ကို နောက်ပြန်လှည့်နိုင်မယ်\nလူတွေရဲ့စိတ်ကို ဖတ်နိုင်မယ်|အနာဂတ်ကို မြင်နိုင်မယ်\nတိရစ္ဆာန်တွေနဲ့ စကားပြောနိုင်မယ်|ဘာသာစကားအားလုံး နားလည်မယ်\nလပေါ်သွားမယ်|ပင်လယ်အနက်ဆုံးကို စူးစမ်းမယ်\nအတိတ်ကို သွားမယ်|အနာဂတ်ကို သွားမယ်\nချက်ချင်း နေရာရွှေ့နိုင်မယ်|အလွန်မြန်မြန် ပြေးနိုင်မယ်\nရာသီဥတုကို ထိန်းချုပ်မယ်|ဆွဲငင်အားကို ထိန်းချုပ်မယ်\nစက်ရုပ်အကူရှိမယ်|AI ဆရာရှိမယ်\nအာကာသယာဉ်ပိုင်မယ်|ရေငုပ်သင်္ဘောပိုင်မယ်\nမိုဘိုင်းဒေတာ အကန့်အသတ်မရှိသုံးမယ်|ဖုန်းဘက်ထရီ အမြဲပြည့်နေမယ်\nဂိမ်းဆော့တိုင်း လုံးဝမလေးတော့ဘူး|ဂိမ်းတိုးတက်မှု ဘယ်တော့မှ မပျောက်ဘူး\nဂိမ်းတိုင်း ကျွမ်းကျင်မယ်|ဂိမ်းအသစ် တီထွင်မယ်\nသူငယ်ချင်းတွေနဲ့ တစ်ညလုံးဂိမ်းဆော့မယ်|သူငယ်ချင်းတွေနဲ့ တစ်ညလုံးရုပ်ရှင်ကြည့်မယ်\nမှော်ဆန်တဲ့ RPG ကမ္ဘာထဲနေမယ်|အနာဂတ်သိပ္ပံဂိမ်းကမ္ဘာထဲနေမယ်\nအရာရာ မှတ်မိမယ်|ပညာရပ်အသစ် ချက်ချင်းတတ်မယ်\nစက်တွေ ဘယ်တော့မှ အားသွင်းစရာမလိုဘူး|Wi-Fi ဘယ်တော့မှ မလိုတော့ဘူး\nနာမည်ကြီးဂိမ်း တီထွင်မယ်|နာမည်ကြီး App တီထွင်မယ်\nနဂါးလေးတစ်ကောင် မွေးမယ်|ဖီးနစ်ငှက်တစ်ကောင် မွေးမယ်\nမိုးပေါ်ရဲတိုက်မှာနေမယ်|ရေအောက်မြို့မှာနေမယ်\nလျှို့ဝှက်ဘုရားကျောင်းကို စူးစမ်းမယ်|ဂြိုဟ်အသစ် ရှာတွေ့မယ်\nနာမည်ကြီးပဟေဠိ ဖြေရှင်းမယ်|ပျောက်ဆုံးမြို့ကို ရှာတွေ့မယ်\nနာမည်ကြီးတီထွင်ရှင်ဖြစ်မယ်|နာမည်ကြီးစူးစမ်းရှာဖွေသူဖြစ်မယ်\nမှော်ကျောပိုးအိတ်ရမယ်|မှော်ဖိနပ်ရမယ်\nမီးကိုထိန်းချုပ်မယ်|ရေခဲကိုထိန်းချုပ်မယ်\nရေအောက်မှာ အသက်ရှူမယ်|တိမ်ပေါ် လမ်းလျှောက်မယ်\nသစ်ပင်ပေါ် အိမ်ကြီးရှိမယ်|ရေပေါ်အိမ်ကြီးရှိမယ်\nတောင်ပေါ်မှာနေမယ်|ပင်လယ်ကမ်းစပ်မှာနေမယ်\nတူရိယာအားလုံး တီးတတ်မယ်|ဘာသာစကားအားလုံး ပြောတတ်မယ်\nပန်းချီဆရာကောင်းဖြစ်မယ်|ဂီတပညာရှင်ကောင်းဖြစ်မယ်\nနေ့တိုင်း အချိန်တစ်နာရီပိုရမယ်|အပတ်တိုင်း တစ်ရက်ပိုရမယ်\nပျောက်တဲ့ပစ္စည်း အမြဲရှာတွေ့မယ်|အရေးကြီးတာ ဘယ်တော့မှမမေ့ဘူး\nဘာမဆို ပုံဆွဲနိုင်မယ်|ဘာမဆို တည်ဆောက်နိုင်မယ်\nစာကြည့်တိုက်အဆုံးမရှိရှိမယ်|ရုပ်ရှင်စုဆောင်းမှုအဆုံးမရှိရှိမယ်\nဟင်းချက် အရမ်းတော်မယ်|မုန့်ဖုတ် အရမ်းတော်မယ်\nအကြိုက်ဆုံးမနက်စာကို ရွေးမယ်|အကြိုက်ဆုံးညစာကို ရွေးမယ်\nပျံသန်းနေတဲ့ရထားစီးမယ်|ပျံကားစီးမယ်\nကြယ်တွေအောက် စခန်းချမယ်|မှန်လုံကြယ်ကြည့်ခန်းမှာအိပ်မယ်\nမိတ်ဆွေဂြိုဟ်သားနဲ့ တွေ့မယ်|အချိန်ခရီးသွားနဲ့ တွေ့မယ်\nတိရစ္ဆာန်မျိုးစိတ်အသစ် ရှာတွေ့မယ်|ကျွန်းအသစ် ရှာတွေ့မယ်\nနက္ခတ္တဗေဒ လေ့လာမယ်|ရှေးဟောင်းသုတေသန လေ့လာမယ်\nစက်ရုပ်အသေးလေး တည်ဆောက်မယ်|ဂြိုဟ်တုအသေးလေး တည်ဆောက်မယ်\nငါးပြတိုက်ကြီး သွားမယ်|ကြယ်တာရာပြတိုက် သွားမယ်\nမိုးသစ်တောကို စူးစမ်းမယ်|သန္တာကျောက်တန်းကို စူးစမ်းမယ်\nစာဖတ်ခန်းအေးအေးလေးရှိမယ်|ကိုယ်ပိုင်ဂိမ်းခန်းရှိမယ်\nအဖွဲ့လိုက် Trivia ပြိုင်ပွဲနိုင်မယ်|အဖွဲ့လိုက်ပဟေဠိပြိုင်ပွဲနိုင်မယ်\nကိုယ်ပိုင်ကာတွန်းရေးမယ်|ကိုယ်ပိုင် Animation ဖန်တီးမယ်\nစစ်တုရင်ကျွမ်းကျင်မယ်|Rubik's Cube မြန်မြန်ဖြေနိုင်မယ်\nအိပ်မက်တိုင်းမှတ်မိမယ်|အိပ်မက်ကို စိတ်ကြိုက်ရွေးနိုင်မယ်\nကိုယ်ပိုင်ပျော်ပွဲရွှင်ပွဲဥယျာဉ်ရှိမယ်|ကိုယ်ပိုင်ပြတိုက်ရှိမယ်\nကွန်ပျူတာတိုင်းပြင်တတ်မယ်|စက်ဘီးတိုင်းပြင်တတ်မယ်\nဥယျာဉ်ကြီး စိုက်မယ်|ဖန်လုံအိမ်ကြီး တည်ဆောက်မယ်\nအမျိုးသားဥယျာဉ်အားလုံး သွားမယ်|ပြတိုက်ကြီးအားလုံး သွားမယ်\nကြယ်ကြွေတာကြည့်မယ်|နေကြတ်တာကြည့်မယ်\nရေခဲဂူထဲ စူးစမ်းမယ်|ချော်ရည်ဂူထဲ စူးစမ်းမယ်\nလိမ္မာတဲ့လိပ်ကြီးစီးမယ်|လိမ္မာတဲ့ငှက်ကြီးစီးမယ်\nစကားပြောတတ်တဲ့မြေပုံရှိမယ်|စကားပြောတတ်တဲ့အိမ်မြှောင်ရှိမယ်\nသန့်ရှင်းတဲ့စွမ်းအင် တီထွင်မယ်|လေထုသန့်စင်စက် တီထွင်မယ်\nသင်္ချာမှာ အရမ်းတော်မယ်|Coding မှာ အရမ်းတော်မယ်\nဓာတ်ပုံပညာသင်မယ်|ရုပ်ရှင်ဖန်တီးပညာသင်မယ်\nအာကာသခရီးကို ဦးဆောင်မယ်|သမုဒ္ဒရာစူးစမ်းရေး ဦးဆောင်မယ်\nကိုယ်ပိုင်ကြယ်ကြည့်စင်ရှိမယ်|ကိုယ်ပိုင်အသံသွင်းခန်းရှိမယ်\nကိုယ်ပိုင်ဂိမ်းဆိုင်လေးတည်မယ်|ကိုယ်ပိုင်ရုပ်ရှင်ရုံလေးတည်မယ်\nလျှို့ဝှက်ရတနာ ရှာတွေ့မယ်|ရှေးဟောင်းစာဝှက် ဖော်နိုင်မယ်\nမိုးပျံပူဖောင်းစီးမယ်|ရွက်သင်္ဘောကြီးစီးမယ်\nဒိုင်နိုဆောတွေကို ဘေးကင်းကင်းကြည့်မယ်|အနာဂတ်မြို့ကို ဘေးကင်းကင်းကြည့်မယ်\nမှော်ပုံဆွဲစာအုပ်ရှိမယ်|မှော်မှတ်စုစာအုပ်ရှိမယ်\nပီယာနိုတီးတတ်မယ်|ဗိုင်အိုလင်တီးတတ်မယ်\nပဟေဠိဖြေ အမြန်ဆုံးဖြစ်မယ်|ဉာဏ်စမ်းဖြေ အမြန်ဆုံးဖြစ်မယ်\nအားကစားအသစ် တီထွင်မယ်|ဘုတ်ဂိမ်းအသစ် တီထွင်မယ်\nစက်ရုပ်ပွဲတော်သွားမယ်|သိပ္ပံပွဲတော်သွားမယ်\nမှော်သစ်တောကို စူးစမ်းမယ်|မိုးပေါ်ပျံမြို့ကို စူးစမ်းမယ်\nHologram Screen ရမယ်|အိတ်ဆောင် Projector ရမယ်\nအပတ်တိုင်း စာအုပ်အံ့အားသင့်လက်ဆောင်ရမယ်|အပတ်တိုင်း ဂိမ်းအံ့အားသင့်လက်ဆောင်ရမယ်\nနေထွက်ချိန်မြင်ကွင်းရမယ်|နေဝင်ချိန်မြင်ကွင်းရမယ်\nတိတ်ဆိတ်တဲ့ရွာလေးမှာနေမယ်|ခေတ်မီမြို့ကြီးမှာနေမယ်\nရှားပါးကျောက်ဖြစ်ရုပ်ကြွင်းစုမယ်|ရှားပါးဥက္ကာခဲစုမယ်\nမှတ်တမ်းရုပ်ရှင်ရိုက်မယ်|ဝတ္ထုရေးမယ်\nသဘာဝဥယျာဉ်စောင့်ဖြစ်မယ်|ပင်လယ်ဇီဝဗေဒပညာရှင်ဖြစ်မယ်\nစက်ရုပ်ဒီဇိုင်းပညာသင်မယ်|အာကာသယာဉ်ဒီဇိုင်းပညာသင်မယ်\nအလိုအလျောက်သန့်ရှင်းတဲ့အခန်းရှိမယ်|ပစ္စည်းတွေ အလိုအလျောက်စီတဲ့အိတ်ရှိမယ်\nအကြိုက်ဆုံးဇာတ်ကောင်နဲ့တွေ့မယ်|အကြိုက်ဆုံးစိတ်ကူးယဉ်ကမ္ဘာထဲသွားမယ်\nခေါင်မိုးပေါ်ဥယျာဉ်ရှိမယ်|အိမ်ခြံထဲမှာ ရေကန်ရှိမယ်\nတောင်တန်းတွေကို ရထားနဲ့လည်မယ်|ကျွန်းတွေကို လှေနဲ့လည်မယ်".splitlines())
+CONTEXTS = ("အားလပ်ရက်မှာ", "ကျောင်းပိတ်ရက်မှာ", "အထူးစွန့်စားခန်းတစ်ခုမှာ", "သူငယ်ချင်းတွေနဲ့အတူ",
+            "ပွဲတော်ကြီးတစ်ခုမှာ", "နောက်မွေးနေ့မှာ", "စိန်ခေါ်မှုတစ်ခုအတွက်", "တစ်သက်တစ်ခါခရီးမှာ")
+TWISTS = ("တစ်ရက်ပဲရမယ်ဆိုရင်", "တစ်လတစ်ခါပဲရမယ်ဆိုရင်", "အခုပဲဆုံးဖြတ်ရမယ်ဆိုရင်",
+          "နောက်ပြန်ပြောင်းမရဘူးဆိုရင်", "ကိုယ်တိုင်ပဲရွေးရမယ်ဆိုရင်",
+          "အတွေ့အကြုံကို မျှဝေရမယ်ဆိုရင်", "ကိုယ်တိုင်စီစဉ်ရမယ်ဆိုရင်", "တစ်ကြိမ်တည်းအခွင့်အရေးရမယ်ဆိုရင်")
+FRAMES = ("{context} {twist} ဘယ်ဟာရွေးမလဲ — {a} ဒါမှမဟုတ် {b}?",
+          "{context} {a} နဲ့ {b} ထဲက {twist} ဘယ်ဟာပိုကြိုက်လဲ?",
+          "ရွေးချယ်ရမယ်ဆိုရင် {a} လား၊ {b} လား? {context} {twist}",
+          "{context} အတွက် {a} နဲ့ {b} နှစ်ခုထဲက ဘာကိုရွေးမလဲ? {twist}")
+CAPACITY = len(MYANMAR_PAIRS) * len(CONTEXTS) * len(TWISTS) * len(FRAMES)
 _lock = threading.RLock()
 _rounds = {}
-_last_edits = {}
+_poll_rounds = {}
 _recent_questions = {}
 _recent_order = {}
 _auto_activity = {}
@@ -79,25 +78,22 @@ _auto_threshold = {}
 _auto_last = {}
 _DURATION = (300, 900)
 
-
 def generate(rng=None):
     rng = rng or random
-    ix = rng.randrange(CAPACITY)
-    return generate_by_index(ix)
-
+    return generate_by_index(rng.randrange(CAPACITY))
 
 def generate_by_index(ix):
     if not 0 <= ix < CAPACITY:
         raise ValueError("invalid scenario index")
-    pair_idx, rest = divmod(ix, len(CONTEXTS) * len(TWISTS) * len(FRAMES))
-    context_idx, rest = divmod(rest, len(TWISTS) * len(FRAMES))
-    twist_idx, frame_idx = divmod(rest, len(FRAMES))
-    a, b = PAIRS[pair_idx]
-    context, twist = CONTEXTS[context_idx], TWISTS[twist_idx]
-    question = FRAMES[frame_idx].format(a=a, b=b, context=context, twist=twist)
-    return {"id": "WYR-"+str(ix), "question": question, "options": (a, b),
-            "category": "scenario"}
-
+    pair_idx, rem = divmod(ix, len(CONTEXTS)*len(TWISTS)*len(FRAMES))
+    ci, rem = divmod(rem, len(TWISTS)*len(FRAMES))
+    ti, fi = divmod(rem, len(FRAMES))
+    a,b = MYANMAR_PAIRS[pair_idx]
+    q = FRAMES[fi].format(a=a,b=b,context=CONTEXTS[ci],twist=TWISTS[ti])
+    # Telegram Poll: question <=300 chars, each option <=100 chars.
+    if len(q) > 300 or len(a)>100 or len(b)>100:
+        raise ValueError("Telegram Poll text too long")
+    return {"id": "WYR-"+str(ix), "question": q, "options": (a,b), "category":"scenario"}
 
 def initialize_db():
     try:
@@ -109,6 +105,10 @@ def initialize_db():
                     option_a TEXT NOT NULL, option_b TEXT NOT NULL,
                     ends_at TIMESTAMPTZ NOT NULL, message_id BIGINT,
                     status TEXT NOT NULL DEFAULT 'active')""")
+                cur.execute("""ALTER TABLE wyr_rounds
+                    ADD COLUMN IF NOT EXISTS poll_id TEXT""")
+                cur.execute("""ALTER TABLE wyr_rounds
+                    ADD COLUMN IF NOT EXISTS owner_id BIGINT""")
                 cur.execute("""CREATE TABLE IF NOT EXISTS wyr_votes (
                     chat_id BIGINT NOT NULL, round_id TEXT NOT NULL,
                     user_id BIGINT NOT NULL, choice SMALLINT NOT NULL,
@@ -119,147 +119,56 @@ def initialize_db():
                     PRIMARY KEY(chat_id,question_id))""")
         return True
     except Exception as exc:
-        print("WYR database initialization:", exc)
+        print("WYR database init:",exc)
         return False
 
-
+_db_ready=False
 def _next_question(chat_id):
     recent = _recent_questions.setdefault(chat_id, set())
-    history = _recent_order.setdefault(chat_id, [])
+    order = _recent_order.setdefault(chat_id, [])
     for _ in range(35):
-        ix = random.randrange(CAPACITY)
-        q = generate_by_index(ix)
-        if q["id"] in recent:
-            continue
-        if _db_ready:
-            try:
-                with get_db_connection() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute("""INSERT INTO wyr_history(chat_id,question_id)
-                                       VALUES (%s,%s) ON CONFLICT DO NOTHING RETURNING question_id""",
-                                    (chat_id,q["id"]))
-                        inserted = cur.fetchone()
-                if not inserted:
-                    continue
-            except Exception as exc:
-                print("WYR history DB:",exc)
+        q=generate()
+        if q["id"] in recent:continue
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""INSERT INTO wyr_history(chat_id,question_id) VALUES (%s,%s)
+                        ON CONFLICT DO NOTHING RETURNING question_id""",(chat_id,q["id"]))
+                    inserted=cur.fetchone()
+            if not inserted:continue
+        except Exception as exc:
+            print("WYR history:",exc)
+            return None
         recent.add(q["id"])
-        history.append(q["id"])
-        if len(history)>300:
-            recent.discard(history.pop(0))
+        order.append(q["id"])
+        if len(order)>300:recent.discard(order.pop(0))
         return q
     return None
 
-
-_db_ready = False
-
-
 def register(bot):
     global _db_ready
-    _db_ready = initialize_db()
+    _db_ready=initialize_db()
 
-    def render(g, final=False):
-        a,b=g["question"]["options"]
-        count_a=g["a"]
-        count_b=g["b"]
-        total=count_a+count_b
-        pa=round(100*count_a/total) if total else 0
-        pb=100-pa if total else 0
-        bar=lambda p: "█"*(p//10)+"░"*(10-p//10)
-        t=max(0,int(g["ends"]-time.time()))
-        heading="🏁 WOULD YOU RATHER — RESULT" if final else "🎲 WOULD YOU RATHER"
-        text=(f"{heading}\n\n{g['question']['question']}\n\n"
-              f"🅰️ {a}\n{bar(pa)} {pa}% ({count_a})\n\n"
-              f"🅱️ {b}\n{bar(pb)} {pb}% ({count_b})\n\n"
-              f"👥 {total} voters" + ("" if final else f"  |  ⏳ {t//60:02d}:{t%60:02d}"))
-        if final and total >= 4:
-            mode=int(hashlib.sha256(g["id"].encode()).hexdigest()[:4],16)
-            if count_a and count_b and min(count_a,count_b)*100 <= 30*total and mode % 3 == 0:
-                text+="\n\n👀 Minority Alert! The smaller team made an unusual choice."
-            elif mode % 5 == 0:
-                text+="\n\n💬 Debate Mode: Which choice would you defend, and why?"
-        return text
-
-    def keyboard(g):
-        from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-        k=InlineKeyboardMarkup(row_width=2)
-        k.add(InlineKeyboardButton("🅰️ Option A",callback_data=f"wyr:{g['id']}:0"),
-              InlineKeyboardButton("🅱️ Option B",callback_data=f"wyr:{g['id']}:1"))
-        return k
-
-    def update(g,final=False):
-        try:
-            bot.edit_message_text(render(g,final),chat_id=g["chat_id"],
-                                  message_id=g["message_id"],
-                                  reply_markup=None if final else keyboard(g))
-        except Exception as exc:
-            if "not modified" not in str(exc).lower():
-                print("WYR edit:",exc)
-
-    def finish(chat_id, game_id):
+    def stop(chat_id, gid, *, force=False):
         with _lock:
             g=_rounds.get(chat_id)
-            if not g or g["id"]!=game_id or g.get("done"):return
-            if time.time()<g["ends"]:return
-            g["done"]=True
+            if not g or g["id"]!=gid:return False
+            if not force and time.time()<g["ends"]:return False
+            try:
+                bot.stop_poll(chat_id,g["message_id"])
+            except Exception as exc:
+                print("WYR stop_poll:",exc)
+            try:
+                with get_db_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("UPDATE wyr_rounds SET status='finished' WHERE chat_id=%s AND round_id=%s",
+                                    (chat_id,gid))
+            except Exception as exc:
+                print("WYR finish storage:",exc)
+            _poll_rounds.pop(g["poll_id"],None)
             _rounds.pop(chat_id,None)
             end_session(chat_id,"would_you_rather")
-            if _db_ready:
-                try:
-                    with get_db_connection() as conn:
-                        with conn.cursor() as cur:
-                            cur.execute("UPDATE wyr_rounds SET status='finished' WHERE chat_id=%s AND round_id=%s",
-                                        (chat_id,game_id))
-                except Exception as exc:print("WYR finish DB:",exc)
-        update(g,final=True)
-
-    def spawn(chat_id):
-        if not _db_ready:
-            return False
-        with _lock:
-            if chat_id in _rounds:return False
-            duration=random.randint(*_DURATION)
-            ok,_=start_session(chat_id,"would_you_rather",duration=duration+15)
-            if not ok:return False
-            q=_next_question(chat_id)
-            if not q:
-                end_session(chat_id,"would_you_rather")
-                return False
-            g={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"question":q,
-               "ends":time.time()+duration,"a":0,"b":0,"message_id":None,"done":False}
-            try:
-                m=bot.send_message(chat_id,render(g),reply_markup=keyboard(g))
-                g["message_id"]=m.message_id
-                _rounds[chat_id]=g
-                if _db_ready:
-                    from datetime import datetime,timezone
-                    with get_db_connection() as conn:
-                        with conn.cursor() as cur:
-                            cur.execute("""INSERT INTO wyr_rounds
-                             (chat_id,round_id,question_id,question,option_a,option_b,ends_at,message_id,status)
-                             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'active')
-                             ON CONFLICT (chat_id) DO UPDATE SET
-                             round_id=EXCLUDED.round_id,question_id=EXCLUDED.question_id,
-                             question=EXCLUDED.question,option_a=EXCLUDED.option_a,
-                             option_b=EXCLUDED.option_b,ends_at=EXCLUDED.ends_at,
-                             message_id=EXCLUDED.message_id,status='active'""",
-                             (chat_id,g["id"],q["id"],q["question"],*q["options"],
-                              datetime.fromtimestamp(g["ends"],timezone.utc),g["message_id"]))
-            except Exception as exc:
-                print("WYR start:",exc)
-                if not g.get("message_id"):
-                    end_session(chat_id,"would_you_rather")
-                    return False
-                _rounds.pop(chat_id,None)
-                end_session(chat_id,"would_you_rather")
-                try:
-                    bot.edit_message_text("⚠️ WYR start failed; please try again.",
-                        chat_id=chat_id,message_id=g["message_id"],reply_markup=None)
-                except Exception:
-                    pass
-                return False
-        threading.Thread(target=wait_finish,args=(chat_id,g["id"]),daemon=True).start()
-        return True
+            return True
 
     def wait_finish(chat_id,gid):
         while True:
@@ -269,87 +178,135 @@ def register(bot):
                 remaining=g["ends"]-time.time()
             if remaining<=0:break
             time.sleep(min(10,max(1,remaining)))
-        finish(chat_id,gid)
+        stop(chat_id,gid)
 
-    # Recover recorded rounds after hosting restarts. End elapsed rounds without
-    # restarting them, preserve votes from Neon for unexpired rounds.
+    def spawn(chat_id, owner_id=None):
+        if not _db_ready:return False
+        with _lock:
+            if chat_id in _rounds:return False
+            duration=random.randint(*_DURATION)
+            ok,_=start_session(chat_id,"would_you_rather",duration=duration+15)
+            if not ok:return False
+            q=_next_question(chat_id)
+            if not q:
+                end_session(chat_id,"would_you_rather")
+                return False
+            gid=uuid.uuid4().hex[:12]
+            ends=time.time()+duration
+            try:
+                sent=bot.send_poll(chat_id,q["question"],list(q["options"]),
+                    is_anonymous=False,allows_multiple_answers=False,
+                    type="regular")
+                poll_id=sent.poll.id
+                with get_db_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("""INSERT INTO wyr_rounds
+                          (chat_id,round_id,question_id,question,option_a,option_b,
+                           ends_at,message_id,poll_id,owner_id,status)
+                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'active')
+                          ON CONFLICT (chat_id) DO UPDATE SET
+                           round_id=EXCLUDED.round_id,question_id=EXCLUDED.question_id,
+                           question=EXCLUDED.question,option_a=EXCLUDED.option_a,
+                           option_b=EXCLUDED.option_b,ends_at=EXCLUDED.ends_at,
+                           message_id=EXCLUDED.message_id,poll_id=EXCLUDED.poll_id,
+                           owner_id=EXCLUDED.owner_id,status='active'""",
+                          (chat_id,gid,q["id"],q["question"],*q["options"],
+                           datetime.fromtimestamp(ends,timezone.utc),
+                           sent.message_id,poll_id,owner_id))
+            except Exception as exc:
+                print("WYR start:",exc)
+                if "sent" in locals():
+                    try:bot.stop_poll(chat_id,sent.message_id)
+                    except Exception:pass
+                end_session(chat_id,"would_you_rather")
+                return False
+            g={"id":gid,"chat_id":chat_id,"owner_id":owner_id,"poll_id":poll_id,
+               "message_id":sent.message_id,"ends":ends}
+            _rounds[chat_id]=g
+            _poll_rounds[poll_id]=chat_id
+        threading.Thread(target=wait_finish,args=(chat_id,gid),daemon=True).start()
+        return True
+
+    # Restore polls and owner after Render restart. Old keyboard-era rounds
+    # have no poll_id and are not reactivated.
     if _db_ready:
         try:
-            from datetime import datetime,timezone
             with get_db_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute("""SELECT chat_id,round_id,question_id,question,option_a,option_b,
-                                EXTRACT(EPOCH FROM ends_at),message_id FROM wyr_rounds WHERE status='active'""")
+                    cur.execute("""SELECT chat_id,round_id,EXTRACT(EPOCH FROM ends_at),
+                           message_id,poll_id,owner_id
+                           FROM wyr_rounds WHERE status='active'""")
                     rows=cur.fetchall()
-                    for chat_id,gid,qid,question,a,b,ends,mid in rows:
-                        cur.execute("""SELECT choice,COUNT(*) FROM wyr_votes
-                                       WHERE chat_id=%s AND round_id=%s GROUP BY choice""",(chat_id,gid))
-                        votes=dict(cur.fetchall())
-                        g={"id":gid,"chat_id":chat_id,"question":{"id":qid,"question":question,"options":(a,b)},
-                           "ends":float(ends),"a":votes.get(0,0),"b":votes.get(1,0),
-                           "message_id":mid,"done":False}
-                        if g["ends"]<=time.time():
-                            g["done"]=True
-                            update(g,final=True)
-                            cur.execute("UPDATE wyr_rounds SET status='finished' WHERE chat_id=%s",(chat_id,))
-                        else:
-                            ok,_=start_session(chat_id,"would_you_rather",duration=g["ends"]-time.time()+15)
-                            if ok:
-                                _rounds[chat_id]=g
-                                threading.Thread(target=wait_finish,args=(chat_id,gid),daemon=True).start()
+            for cid,gid,ends,mid,pid,owner in rows:
+                if not pid or ends<=time.time():
+                    if pid:
+                        try:bot.stop_poll(cid,mid)
+                        except Exception:pass
+                    with get_db_connection() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute("UPDATE wyr_rounds SET status='finished' WHERE chat_id=%s AND round_id=%s",(cid,gid))
+                    continue
+                ok,_=start_session(cid,"would_you_rather",duration=float(ends)-time.time()+15)
+                if not ok:continue
+                g={"id":gid,"chat_id":cid,"owner_id":owner,"poll_id":pid,
+                   "message_id":mid,"ends":float(ends)}
+                with _lock:
+                    _rounds[cid]=g
+                    _poll_rounds[pid]=cid
+                threading.Thread(target=wait_finish,args=(cid,gid),daemon=True).start()
         except Exception as exc:print("WYR recovery:",exc)
 
     @bot.message_handler(commands=["wyr","wouldyourather"])
     def wyr_command(message):
         if message.chat.type not in ("group","supergroup"):return
-        if not spawn(message.chat.id):
-            bot.reply_to(message,"🎮 Another game is active, or WYR is already running.")
+        if not spawn(message.chat.id,owner_id=message.from_user.id):
+            bot.reply_to(message,"🎮 အခု Round တစ်ခုရှိနေနိုင်ပါတယ်။ ခဏနေပြီး ထပ်စမ်းပါ။")
 
-    @bot.callback_query_handler(func=lambda call:bool(call.data) and call.data.startswith("wyr:"))
-    def wyr_callback(call):
-        try:
-            _,gid,choice_text=call.data.split(":")
-            choice=int(choice_text)
-        except (ValueError,AttributeError):
-            bot.answer_callback_query(call.id,"Invalid option")
-            return
-        chat_id=call.message.chat.id
-        uid=call.from_user.id
+    @bot.message_handler(commands=["wyrstop"])
+    def wyr_stop_command(message):
+        if message.chat.type not in ("group","supergroup"):return
         with _lock:
-            g=_rounds.get(chat_id)
-            if not g or g["id"]!=gid or time.time()>=g["ends"] or g["done"]:
-                bot.answer_callback_query(call.id,"Round already ended")
+            g=_rounds.get(message.chat.id)
+            if not g:
+                response="❌ ရပ်စရာ WYR Poll မရှိသေးဘူး။"
+            elif g["owner_id"] is None:
+                response="🤖 Auto WYR Poll ကတော့ အချိန်ပြည့်မှ ပိတ်ပါမယ်။"
+            elif g["owner_id"]!=message.from_user.id:
+                response="🔒 ဒီ Poll ကို /wyr နဲ့ စခဲ့တဲ့သူပဲ ရပ်လို့ရတယ်။"
+            else:
+                response="✅ Poll ကို ရပ်လိုက်ပြီ။" if stop(message.chat.id,g["id"],force=True) else "❌ ရပ်လို့မရသေးပါ။"
+        bot.reply_to(message,response)
+
+    @bot.poll_answer_handler(func=lambda ans:True)
+    def wyr_poll_answer(ans):
+        with _lock:
+            cid=_poll_rounds.get(ans.poll_id)
+            if cid is None:return
+            g=_rounds.get(cid)
+            if not g or g["poll_id"]!=ans.poll_id or time.time()>=g["ends"]:return
+            if len(ans.option_ids)!=1:
+                # Removing a vote is handled by Telegram; it cannot earn points.
+                # We only reward the first ever recorded selection.
                 return
-            if not _db_ready:
-                # Never accept unverifiable duplicates when persistent storage is absent.
-                bot.answer_callback_query(call.id,"Voting temporarily unavailable")
-                return
+            choice=int(ans.option_ids[0])
+            if choice not in (0,1):return
             try:
                 with get_db_connection() as conn:
                     with conn.cursor() as cur:
                         cur.execute("""INSERT INTO wyr_votes(chat_id,round_id,user_id,choice)
-                            VALUES(%s,%s,%s,%s) ON CONFLICT DO NOTHING RETURNING user_id""",
-                            (chat_id,gid,uid,choice))
-                        inserted=cur.fetchone()
+                               VALUES(%s,%s,%s,%s) ON CONFLICT DO NOTHING
+                               RETURNING user_id""",(cid,g["id"],ans.user.id,choice))
+                        first=cur.fetchone() is not None
+                        if not first:
+                            cur.execute("""UPDATE wyr_votes SET choice=%s
+                                WHERE chat_id=%s AND round_id=%s AND user_id=%s""",
+                                (choice,cid,g["id"],ans.user.id))
             except Exception as exc:
-                print("WYR vote DB:",exc)
-                bot.answer_callback_query(call.id,"Please try again")
+                print("WYR poll answer storage:",exc)
                 return
-            if not inserted:
-                bot.answer_callback_query(call.id,"You have already voted")
-                return
-            g["a" if choice==0 else "b"]+=1
-            now=time.monotonic()
-            refresh=now-_last_edits.get(chat_id,0)>2.0
-            if refresh:_last_edits[chat_id]=now
-        bot.answer_callback_query(call.id,"✅ Vote counted")
-        # One participation reward per user/round; successful DB insertion
-        # guarantees repeat button presses cannot grant extra points.
-        try:
-            add_bonus_points(chat_id, uid, 1, reason="would_you_rather_vote")
-        except Exception as exc:
-            print("WYR participation reward:", exc)
-        if refresh:update(g)
+        if first:
+            try:add_bonus_points(cid,ans.user.id,1,reason="would_you_rather_vote")
+            except Exception as exc:print("WYR participation reward:",exc)
 
     @bot.message_handler(func=lambda m:True,content_types=["text"])
     def wyr_activity(m):
