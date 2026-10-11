@@ -90,3 +90,109 @@ def register(bot):
                 return False
             _start_watcher(chat_id,state["match_id"])
         return True
+
+    def _watch(chat_id,match_id):
+        try:
+            try:
+                state=engine.snapshot(chat_id)
+                if state and state["status"]=="active":
+                    _update(chat_id,state)
+            except Exception as exc:
+                print("This or That resume card:",exc)
+            while True:
+                with _lock:
+                    state=engine.snapshot(chat_id)
+                    if not state or state["match_id"]!=match_id or state["status"]!="active":
+                        break
+                    if state["ends_at"]>datetime.now(timezone.utc):
+                        pass
+                    else:
+                        result=engine.advance(chat_id,match_id)
+                        if result:
+                            if result["finished"]:
+                                try:_update(chat_id,{"people":len(result["participants"])},finished=True)
+                                except Exception as exc:print("This or That final card:",exc)
+                                end_session(chat_id,"this_or_that")
+                                break
+                            else:
+                                new_state=engine.snapshot(chat_id)
+                                try:_update(chat_id,new_state)
+                                except Exception as exc:print("This or That next round:",exc)
+                time.sleep(2)
+        except Exception as exc:
+            print("This or That watcher:",exc)
+        finally:
+            with _lock:
+                _threads.discard((chat_id,match_id))
+
+    def _start_watcher(chat_id,match_id):
+        key=(chat_id,match_id)
+        if key in _threads:return
+        _threads.add(key)
+        threading.Thread(target=_watch,args=key,daemon=True).start()
+
+    @bot.message_handler(commands=["tot","thisorthat"])
+    def tot_command(message):
+        if message.chat.type not in ("group","supergroup"):return
+        if not _launch(message.chat.id):
+            bot.reply_to(message,"🎮 ဒီ Group မှာ Game တစ်ခုရှိနေပါတယ်။ ခဏနေမှ ပြန်စမ်းပါ။")
+
+    @bot.callback_query_handler(func=lambda c:bool(c.data) and c.data.startswith("tot:"))
+    def tot_answer(call):
+        try:
+            _,match_id,num_text,choice_text=call.data.split(":")
+            round_no=int(num_text)
+            choice=int(choice_text)
+        except Exception:
+            bot.answer_callback_query(call.id,"ရွေးချယ်မှု မှားနေပါတယ်။")
+            return
+        chat_id=call.message.chat.id
+        with _lock:
+            try:
+                inserted=engine.vote(chat_id,match_id,round_no,call.from_user.id,choice)
+            except Exception as exc:
+                print("This or That vote error:",exc)
+                bot.answer_callback_query(call.id,"ခဏနေပြီး ထပ်စမ်းပါ။")
+                return
+            if not inserted:
+                bot.answer_callback_query(call.id,"Vote ပြီးသားဖြစ်နိုင်ပါတယ်၊ ဒါမှမဟုတ် Round ပိတ်သွားပါပြီ။")
+                return
+        bot.answer_callback_query(call.id,"✅ Vote လက်ခံပြီးပါပြီ")
+        try:
+            add_bonus_points(chat_id,call.from_user.id,1,reason="this_or_that_vote")
+        except Exception as exc:
+            print("This or That reward:",exc)
+        with _lock:
+            now=time.monotonic()
+            if now-_last_updates.get(chat_id,0)>=2:
+                _last_updates[chat_id]=now
+                try:
+                    state=engine.snapshot(chat_id)
+                    if state and state["match_id"]==match_id and state["round"]==round_no:
+                        _update(chat_id,state)
+                except Exception as exc:
+                    print("This or That count refresh:",exc)
+
+    try:
+        for chat_id,match_id,deadline in engine.active_games():
+            allowed,_=start_session(chat_id,"this_or_that",duration=900)
+            if allowed:_start_watcher(chat_id,match_id)
+    except Exception as exc:
+        print("This or That recovery:",exc)
+
+    @bot.message_handler(func=lambda m:True,content_types=["text"])
+    def tot_auto(m):
+        from telebot.handler_backends import ContinueHandling
+        if (m.chat.type in ("group","supergroup") and m.from_user
+                and not m.from_user.is_bot and m.text and not m.text.startswith("/")):
+            chat_id=m.chat.id
+            n=_auto_counts.get(chat_id,0)+1
+            target=_auto_threshold.setdefault(chat_id,random.randint(100,220))
+            if n>=target:
+                _auto_counts[chat_id]=0
+                _auto_threshold[chat_id]=random.randint(100,220)
+                if time.monotonic()-_auto_last.get(chat_id,0)>1800 and random.random()<0.25:
+                    if _launch(chat_id):_auto_last[chat_id]=time.monotonic()
+            else:
+                _auto_counts[chat_id]=n
+        return ContinueHandling()
