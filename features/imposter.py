@@ -120,14 +120,20 @@ def _view(s):
         idx=s["turn"]
         p=names[idx]
         done=sum(1 for i in range(idx) if not names[i].get("removed"))
+        duration=15 if s.get("warned") else 45
+        remaining=max(0,min(duration,int(s.get("deadline",time.time())-time.time()+0.99)))
+        filled=max(0,min(10,int(10*(duration-remaining)/duration)))
+        progress="▰"*filled+"▱"*(10-filled)
+        urgency="⚠️ နောက်ဆုံး ၁၅ စက္ကန့်!" if s.get("warned") else "⏱️ Clue ပြောရန်"
         return (f"🎭 <b>IMPOSTER · ROUND {s['round']}</b>\n"
                 "━━━━━━━━━━━━━━━━━━\n\n"
                 f"🎙️ <b>Player {idx+1} — {_name(p)}</b>\n"
-                "⏱️ <b>00:45</b> + 15s သတိပေးချိန်\n"
-                "▰▰▰▰▰▰▰▰▱▱\n\n"
+                f"{urgency}  <b>00:{remaining:02d}</b>\n"
+                f"<code>{progress}</code>\n\n"
                 "💬 ကိုယ့်အလှည့်ရောက်ရင် Group မှာ Clue တစ်ခု ရေးပါ။\n"
                 f"✅ ပြီးသွားသူ {done} / {len(names)}\n\n"
                 "🔐 ကိုယ့် Secret ကို အောက်က Button မှာ ပြန်ကြည့်နိုင်ပါတယ်။")
+
     if phase=="decision":
         choices=s["decisions"]
         a=sum(x=="more" for x in choices.values())
@@ -261,6 +267,12 @@ def _tick(bot,chat_id,s):
         _finish(bot,chat_id,s)
         return
     if now<s.get("deadline",now+1):
+        if s["phase"]=="clue":
+            bucket=int(now//10)
+            if s.get("last_timer_bucket")!=bucket:
+                s["last_timer_bucket"]=bucket
+                _save(chat_id,s)
+                _edit(bot,chat_id,s)
         return
     if s["phase"]=="join":
         if len(s["players"])<MIN_PLAYERS:
