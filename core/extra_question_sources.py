@@ -11,11 +11,16 @@ def _get(url):
 
 def open_library_question():
     subject=random.choice(("science","history","astronomy","mathematics","biology","technology","geography","fiction"))
-    params=urllib.parse.urlencode({"q":"subject:"+subject,"fields":"title,author_name,first_publish_year,language,edition_count,first_sentence,subject",
+    params=urllib.parse.urlencode({"q":"subject:"+subject,"fields":"title,author_name,first_publish_year,language,edition_count,ratings_count,readinglog_count,want_to_read_count,currently_reading_count,already_read_count,number_of_pages_median,cover_i",
                                     "limit":60,"page":random.randint(1,8)})
     rows=_get("https://openlibrary.org/search.json?"+params).get("docs",[])
     rows=[r for r in rows if r.get("title") and r.get("author_name") and isinstance(r.get("first_publish_year"),int)]
     random.shuffle(rows)
+    from core.metadata_quiz import field_quiz, OPENLIBRARY_FIELDS
+    if random.random()<0.65:
+        item=field_quiz(rows,OPENLIBRARY_FIELDS,"title","openlibrary")
+        if item:
+            return item
     for row in rows:
         title=row["title"]
         if not 5<=len(title)<=90:continue
@@ -98,6 +103,11 @@ def nasa_images_question():
             rows.append(meta)
     if len(rows)<5:return None
     random.shuffle(rows)
+    from core.metadata_quiz import field_quiz, NASA_FIELDS
+    if random.random()<0.7:
+        item=field_quiz(rows,NASA_FIELDS,"title","nasa")
+        if item:
+            return item
     for row in rows:
         title=row["title"]
         if not 12<=len(title)<=95:continue
