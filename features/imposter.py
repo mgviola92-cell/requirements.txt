@@ -22,8 +22,8 @@ LOCK = threading.RLock()
 JOIN_TIME = 40
 TURN_TIME = 60
 DECISION_TIME = 60
-FINAL_VOTE_SECONDS = 240
-FINAL_MIN_DISCUSSION = 120
+FINAL_VOTE_SECONDS = 60
+FINAL_MIN_DISCUSSION = 60
 MAX_ROUNDS = 5
 MIN_PLAYERS = 4
 _schedulers_started = False
@@ -150,8 +150,8 @@ def _view(s):
         return (head+"<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\n"
                 "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
                 f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
-                "🎧 VC မှာ တိုင်ပင်ဖို့ ၂ မိနစ် အနည်းဆုံးပေးမယ်။\n"
-                "⏳ Vote စုစုပေါင်း ၄ မိနစ် · မပေးသူ Abstain")
+                "🎧 VC မှာ တိုင်ပင်ပြီး မဲပေးပါ။\n"
+                "⏳ Voting ၁ မိနစ် · ပြည့်မှ Result ထုတ်မယ်")
     return head+"🏁 Game ပြီးဆုံးပါပြီ။"
 
 def _edit(bot,chat_id,s):
