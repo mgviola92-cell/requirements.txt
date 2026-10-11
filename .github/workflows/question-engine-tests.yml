@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'core/**'
+      - 'bot.py'
       - 'games/pair_challenge.py'
       - 'tests/**'
       - '.github/workflows/question-engine-tests.yml'
@@ -23,6 +24,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Compile bot and question source modules
+        run: python -m compileall -q bot.py core tests
       - name: Run offline unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Audit all 50 procedural templates
