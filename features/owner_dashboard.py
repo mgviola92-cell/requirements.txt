@@ -282,13 +282,15 @@ def register_owner_dashboard(app,bot):
             try:
                 bot.send_message(
                     m.chat.id,
-                    "🎮 <b>မင်္ဂလာပါ!</b> 👋\n\n"
-                    "ဒီ Group ထဲကို Bot ရောက်လာပါပြီ။\n"
-                    "သူငယ်ချင်းတွေနဲ့ Games တွေ အတူကစားကြမယ်! 🎉\n\n"
-                    "🎭 /imposter — Imposter Game\n"
-                    "👤 /profile — Player Profile\n"
-                    "🏆 /rank — Leaderboard\n\n"
-                    "စကစားချင်ရင် Command တစ်ခုကို ရွေးလိုက်ပါ။ ✨",
+                    "🤖 <b>Group ထဲကို ကြိုဆိုပါတယ်!</b>\n\n"
+                    "Bot ကို Add လုပ်ပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ်။ 🎉\n\n"
+                    "🛡️ <b>Group Admin များအတွက်</b>\n"
+                    "Game Messages စီမံဖို့နဲ့ Group Management Functions တွေ သုံးနိုင်ဖို့ "
+                    "Bot ကို Admin ပေးထားပြီး လိုအပ်တဲ့ Delete Messages၊ Pin Messages နဲ့ "
+                    "Restrict Members permissions တွေ ဖွင့်ပေးပါ။\n\n"
+                    "📋 <b>/cmd</b> — Commands နဲ့ Functions စာရင်း\n"
+                    "🎮 <b>/cmds</b> — Game နဲ့ Admin Commands ကြည့်ရန်\n\n"
+                    "✨ Admin Permission မပြည့်သေးလည်း ခွင့်ပြုချက်မလိုတဲ့ Functions တွေကို သုံးနိုင်ပါတယ်။",
                     parse_mode="HTML"
                 )
             except Exception as exc:
