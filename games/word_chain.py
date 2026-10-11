@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Group Word Chain. EN: last letter; MY: last pronounced syllable's initial consonant."""
 import json
 import random
@@ -33,11 +34,7 @@ def _english_words():
 
 
 def _myanmar_onsets(value):
-    """Extract base consonants, excluding codas killed by asat (e.g., င်, ည်).
-
-    Myanmar orthography is more complex than Unicode character boundaries. This
-    handles ordinary unstacked written words (e.g., ပင်စည် => ပ,စ).
-    """
+    _custom_text('msg.games.word_chain._myanmar_onsets.6a5688d373', 'Extract base consonants, excluding codas killed by asat (e.g., င်, ည်).\n\n    Myanmar orthography is more complex than Unicode character boundaries. This\n    handles ordinary unstacked written words (e.g., ပင်စည် => ပ,စ).\n    ', {})
     result = []
     for i, ch in enumerate(value):
         if not _MY_CONSONANT.fullmatch(ch):
@@ -85,7 +82,7 @@ def start_game(chat_id, mode='en'):
         allowed, blocker = can_start_session(chat_id, 'word_chain')
         if not allowed:
             return False, blocker
-        round_seconds = random.randint(ROUND_MIN_SECONDS, ROUND_MAX_SECONDS)
+        round_seconds = random.randint(_custom_setting('cfg.games.word_chain.ROUND_MIN_SECONDS', ROUND_MIN_SECONDS), _custom_setting('cfg.games.word_chain.ROUND_MAX_SECONDS', ROUND_MAX_SECONDS))
         started, session = start_session(chat_id, 'word_chain', duration=round_seconds + 5)
         if not started:
             return False, session
@@ -96,7 +93,7 @@ def start_game(chat_id, mode='en'):
             'word': starter, 'required': _last(starter, mode),
             'used': {starter}, 'last_user': None, 'last_move_at': None, 'scores': {}, 'names': {},
             'started': now, 'round_seconds': round_seconds, 'deadline': now + round_seconds,
-            'idle_deadline': now + IDLE_SECONDS, 'moves': 0,
+            'idle_deadline': now + _custom_setting('cfg.games.word_chain.IDLE_SECONDS', IDLE_SECONDS), 'moves': 0,
             'message_id': None,
         }
         _games[chat_id] = game
@@ -130,7 +127,7 @@ def submit(chat_id, game_id, user_id, user_name, text):
         if word in game['used']:
             return {'status': 'used'}
         self_retry = game['last_user'] == user_id
-        if self_retry and now - (game.get('last_move_at') or now) < SELF_RETRY_SECONDS:
+        if self_retry and now - (game.get('last_move_at') or now) < _custom_setting('cfg.games.word_chain.SELF_RETRY_SECONDS', SELF_RETRY_SECONDS):
             return {'status': 'same_user'}
         game['used'].add(word)
         game['word'] = word
@@ -141,7 +138,7 @@ def submit(chat_id, game_id, user_id, user_name, text):
             game['scores'][user_id] = game['scores'].get(user_id, 0) + 1
         game['names'][user_id] = (user_name or 'Player')[:40]
         game['moves'] += 1
-        game['idle_deadline'] = min(game['deadline'], now + IDLE_SECONDS)
+        game['idle_deadline'] = min(game['deadline'], now + _custom_setting('cfg.games.word_chain.IDLE_SECONDS', IDLE_SECONDS))
         return {
             'status': 'valid', 'word': word, 'required': game['required'],
             'self_retry': self_retry,

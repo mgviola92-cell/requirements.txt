@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Five-round group Math Battle; scores are match-only until final rewards."""
 import random
 import threading
@@ -139,7 +140,7 @@ def snapshot(chat_id):
 def start(chat_id):
     with _lock:
         if chat_id in _games: return False, 'math_battle'
-        ok, sess=start_session(chat_id,'math_battle',duration=sum(TIMES)+180)
+        ok, sess=start_session(chat_id,'math_battle',duration=sum(_custom_setting('cfg.games.math_battle.TIMES', TIMES))+180)
         if not ok: return False,sess
         try: q=_next_question(chat_id,0)
         except Exception:
@@ -147,7 +148,7 @@ def start(chat_id):
             raise
         now=time.monotonic()
         g={'id':uuid.uuid4().hex[:14], 'chat_id':chat_id,'round':0,'question':q,
-           'deadline':now+TIMES[0], 'answered':set(),'podium':[],'scores':{},'names':{},
+           'deadline':now+_custom_setting('cfg.games.math_battle.TIMES', TIMES)[0], 'answered':set(),'podium':[],'scores':{},'names':{},
            'message_id':None,'version':0,'next_at':None}
         _games[chat_id]=g
         return True,snapshot(chat_id)
@@ -194,7 +195,7 @@ def advance(chat_id, game_id, round_index):
             return 'finished',result
         nxt=round_index+1
         q=_next_question(chat_id,nxt)
-        g.update(round=nxt,question=q,deadline=time.monotonic()+TIMES[nxt],answered=set(),podium=[],message_id=None,version=g['version']+1)
+        g.update(round=nxt,question=q,deadline=time.monotonic()+_custom_setting('cfg.games.math_battle.TIMES', TIMES)[nxt],answered=set(),podium=[],message_id=None,version=g['version']+1)
         return 'next',snapshot(chat_id)
 
 def stop(chat_id):

@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Would You Rather: group voting with reproducible scenario combinations."""
 import hashlib
 import random
@@ -83,7 +84,7 @@ def generate_by_index(ix):
     else:
         category, a, b = choices_at(ix - len(MYANMAR_PAIRS))
         question_id = "WYR-CAT-" + str(ix - len(MYANMAR_PAIRS))
-    question = "🎲 Would You Rather?\n\nမင်းသာ တစ်ခုတည်း ရွေးခွင့်ရမယ်ဆို ဘယ်ဟာကို ရွေးမလဲ?"
+    question = _custom_text('msg.features.would_you_rather.generate_by_index.44d6881993', '🎲 Would You Rather?\n\nမင်းသာ တစ်ခုတည်း ရွေးခွင့်ရမယ်ဆို ဘယ်ဟာကို ရွေးမလဲ?', {})
     if len(question) > 300 or len(a) > 100 or len(b) > 100:
         raise ValueError("Telegram Poll text too long")
     return {"id": question_id, "question": question,
@@ -183,7 +184,7 @@ def register(bot):
         if not _db_ready:return False
         with _lock:
             if chat_id in _rounds:return False
-            duration=random.randint(*_DURATION)
+            duration=random.randint(*_custom_setting('cfg.features.would_you_rather._DURATION', _DURATION))
             ok,_=start_session(chat_id,"would_you_rather",duration=duration+15)
             if not ok:return False
             q=_next_question(chat_id)
@@ -259,7 +260,7 @@ def register(bot):
     def wyr_command(message):
         if message.chat.type not in ("group","supergroup"):return
         if not spawn(message.chat.id,owner_id=message.from_user.id):
-            bot.reply_to(message,"🎮 အခု Round တစ်ခုရှိနေနိုင်ပါတယ်။ ခဏနေပြီး ထပ်စမ်းပါ။")
+            bot.reply_to(message,_custom_text('msg.features.would_you_rather.wyr_command.82120921be', '🎮 အခု Round တစ်ခုရှိနေနိုင်ပါတယ်။ ခဏနေပြီး ထပ်စမ်းပါ။', {}))
         else:auto_spawner.note_spawn(message.chat.id)
 
     @bot.message_handler(commands=["wyrstop"])
@@ -268,13 +269,13 @@ def register(bot):
         with _lock:
             g=_rounds.get(message.chat.id)
             if not g:
-                response="❌ ရပ်စရာ WYR Poll မရှိသေးဘူး။"
+                response=_custom_text('msg.features.would_you_rather.wyr_stop_command.760a1ccc7f', '❌ ရပ်စရာ WYR Poll မရှိသေးဘူး။', {})
             elif g["owner_id"] is None:
-                response="🤖 Auto WYR Poll ကတော့ အချိန်ပြည့်မှ ပိတ်ပါမယ်။"
+                response=_custom_text('msg.features.would_you_rather.wyr_stop_command.55626f69ec', '🤖 Auto WYR Poll ကတော့ အချိန်ပြည့်မှ ပိတ်ပါမယ်။', {})
             elif g["owner_id"]!=message.from_user.id:
-                response="🔒 ဒီ Poll ကို /wyr နဲ့ စခဲ့တဲ့သူပဲ ရပ်လို့ရတယ်။"
+                response=_custom_text('msg.features.would_you_rather.wyr_stop_command.2dd8b2df73', '🔒 ဒီ Poll ကို /wyr နဲ့ စခဲ့တဲ့သူပဲ ရပ်လို့ရတယ်။', {})
             else:
-                response=None if stop(message.chat.id,g["id"],force=True) else "❌ Poll ပိတ်မရသေးပါ။ ထပ်စမ်းပါ။"
+                response=None if stop(message.chat.id,g["id"],force=True) else _custom_text('msg.features.would_you_rather.wyr_stop_command.e49287f4f3', '❌ Poll ပိတ်မရသေးပါ။ ထပ်စမ်းပါ။', {})
         if response:
             bot.reply_to(message,response)
 
@@ -311,7 +312,7 @@ def register(bot):
 
     auto_spawner=ActivitySpawner(
         spawn, threshold=(18,40), chance=0.70, quiet=(6*60,12*60),
-        can_spawn=lambda cid: can_start_session(cid,"would_you_rather")[0],
+        can_spawn=lambda cid: can_start_session(cid,"would_you_rather")[0], config_key="wyr_auto",
     )
     @bot.message_handler(func=lambda m:True,content_types=["text"])
     def wyr_activity(m):

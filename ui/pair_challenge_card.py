@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 from PIL import Image
 from ui.card_generator import draw_text, draw_panel, card_to_bytes
 
@@ -19,14 +20,14 @@ def lobby_card(game):
     labels = {"duo":"CO-OP DUO • 2", "squad":"CO-OP SQUAD • 2-4", "versus":"TEAM VERSUS • 2v2"}
     image = _base("PAIR CHALLENGE", labels.get(game.get("mode"), "CHOOSE A MODE"))
     players = list(game.get("players", {}).values())
-    draw_text(image, f"PLAYERS  {len(players)}", (550, 190), size=27, anchor="mm")
+    draw_text(image, _custom_text('msg.ui.pair_challenge_card.lobby_card.31b4520298', 'PLAYERS  {len_players}', {'len_players': f'{len(players)}'}), (550, 190), size=27, anchor="mm")
     y = 245
     for index, row in enumerate(players[:4], 1):
         draw_panel(image, (170, y-28, 930, y+30), fill=(34, 40, 60, 255), radius=18)
         draw_text(image, f"{index}. {_short(row.get('name','Player'), 28)}", (550, y), size=25, anchor="mm")
         y += 75
     if not players:
-        draw_text(image, "Waiting for players…", (550, 320), size=28, anchor="mm")
+        draw_text(image, _custom_text('msg.ui.pair_challenge_card.lobby_card.cfcad563bc', 'Waiting for players…', {}), (550, 320), size=28, anchor="mm")
     return card_to_bytes(image, "JPEG", 94)
 
 def challenge_card(game):
@@ -62,8 +63,8 @@ def result_card(game):
     else:
         cleared = game.get("cleared_rounds", 0)
         total = game.get("total_rounds", 5)
-        draw_text(image, "TEAM RESULT", (550, 230), size=30, anchor="mm")
+        draw_text(image, _custom_text('msg.ui.pair_challenge_card.result_card.0890796138', 'TEAM RESULT', {}), (550, 230), size=30, anchor="mm")
         draw_text(image, f"{cleared} / {total}", (550, 350), size=82, anchor="mm")
-        draw_text(image, "CHALLENGES CLEARED", (550, 455), size=29, anchor="mm")
-        draw_text(image, "SUCCESS" if game.get("success") else "TRY AGAIN", (550, 530), size=35, anchor="mm")
+        draw_text(image, _custom_text('msg.ui.pair_challenge_card.result_card.98517903a0', 'CHALLENGES CLEARED', {}), (550, 455), size=29, anchor="mm")
+        draw_text(image, "SUCCESS" if game.get("success") else _custom_text('msg.ui.pair_challenge_card.result_card.b2ca916eeb', 'TRY AGAIN', {}), (550, 530), size=35, anchor="mm")
     return card_to_bytes(image, "JPEG", 94)

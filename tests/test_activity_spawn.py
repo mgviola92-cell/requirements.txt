@@ -94,6 +94,8 @@ class ActivitySpawnTests(unittest.TestCase):
             'get_boss_artwork','get_boss_visual_stage','generate_boss_live_card','boss_raid_text',
             'boss_attack_keyboard','set_boss_raid_message_id','safe_pin_message','delay_delete_message',
             'schedule_task','finish_boss_raid','end_session']}
+        from core.customization import message_text,setting_value,bank_text
+        env.update(_custom_text=message_text,_custom_setting=setting_value,_custom_bank=bank_text)
         env.update(BOSS_RAID_DURATION=180,boss_raid_visual_state={},boss_raid_timeout=Mock(),bot=Mock())
         env['can_start_session'].return_value=(True,None)
         env['start_boss_raid'].return_value=(True,raid)

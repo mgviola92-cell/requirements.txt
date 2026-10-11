@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import telebot
 from telebot import types
 print("TEST 1 - bot.py started")
@@ -308,6 +309,9 @@ def get_next_emoji_question(chat_id):
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
+from core.customization import initialize as initialize_customization, install_handler_controls
+initialize_customization()
+install_handler_controls(bot)
 
 from flask import Flask
 from features.owner_dashboard import register_owner_dashboard
@@ -334,13 +338,13 @@ def _team_battle_caption(battle, stage="live"):
     blue = int(battle.get("scores", {}).get("blue", 0))
     if stage == "final":
         if red > blue:
-            return "🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!"
+            return _custom_text('msg.bot._team_battle_caption.0a991c547e', '🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!', {})
         if blue > red:
-            return "🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!"
-        return "🏁 TEAM BATTLE FINAL — 🤝 DRAW!"
+            return _custom_text('msg.bot._team_battle_caption.f71d09da98', '🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!', {})
+        return _custom_text('msg.bot._team_battle_caption.1b1530be8b', '🏁 TEAM BATTLE FINAL — 🤝 DRAW!', {})
     if stage == "half":
-        return "⚔️ TEAM BATTLE — HALF-TIME"
-    return "⚔️ TEAM BATTLE — RED vs BLUE"
+        return _custom_text('msg.bot._team_battle_caption.2c103557f6', '⚔️ TEAM BATTLE — HALF-TIME', {})
+    return _custom_text('msg.bot._team_battle_caption.e20210a5a7', '⚔️ TEAM BATTLE — RED vs BLUE', {})
 
 def _team_battle_replace_card(battle, stage):
     chat_id = battle["chat_id"]
@@ -404,7 +408,7 @@ def _team_battle_hype(chat_id, battle_id):
         try:
             msg = bot.send_message(
                 chat_id,
-                f"⚡ <b>TEAM BATTLE UPDATE</b>\n\n{mentions}\n{team_battle_hype_line()}",
+                _custom_text('msg.bot._team_battle_hype.84d59cead4', '⚡ <b>TEAM BATTLE UPDATE</b>\n\n{mentions}\n{team_battle_hype_line}', {'mentions': f'{mentions}', 'team_battle_hype_line': f'{team_battle_hype_line()}'}),
                 parse_mode="HTML",
             )
             threading.Timer(35, lambda: safe_delete_message(bot, chat_id, msg.message_id)).start()
@@ -442,11 +446,11 @@ def team_battle_command(message):
     if message.chat.type not in ("group", "supergroup"):
         return
     if not is_user_admin(bot, message.chat.id, message.from_user.id):
-        bot.reply_to(message, "❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.team_battle_command.bbb78c78da', '❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။', {}))
         return
     started, battle = start_team_battle(message.chat.id)
     if not started:
-        bot.reply_to(message, "⚔️ Team Battle က လက်ရှိ run နေပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.team_battle_command.51cf3349c8', '⚔️ Team Battle က လက်ရှိ run နေပါတယ်။', {}))
         return
     try:
         sent = bot.send_photo(
@@ -491,19 +495,19 @@ PAIR_DUO_SUCCESS_REWARD = 20
 def _pair_mode_keyboard(game):
     kb = InlineKeyboardMarkup()
     gid = game["id"]
-    kb.row(InlineKeyboardButton("👥 Duo (2)", callback_data=f"pairmode:{gid}:duo"))
-    kb.row(InlineKeyboardButton("🧩 Squad (2-4)", callback_data=f"pairmode:{gid}:squad"))
-    kb.row(InlineKeyboardButton("⚔️ Team Versus (2v2)", callback_data=f"pairmode:{gid}:versus"))
+    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.f0b01ce392', '👥 Duo (2)', {}), callback_data=f"pairmode:{gid}:duo"))
+    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.4082c66196', '🧩 Squad (2-4)', {}), callback_data=f"pairmode:{gid}:squad"))
+    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.97797cba6d', '⚔️ Team Versus (2v2)', {}), callback_data=f"pairmode:{gid}:versus"))
     return kb
 
 def _pair_lobby_keyboard(game):
     kb = InlineKeyboardMarkup()
     gid = game["id"]
     kb.row(
-        InlineKeyboardButton("➕ JOIN", callback_data=f"pairjoin:{gid}"),
-        InlineKeyboardButton("➖ LEAVE", callback_data=f"pairleave:{gid}"),
+        InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.af96eed561', '➕ JOIN', {}), callback_data=f"pairjoin:{gid}"),
+        InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.3477a92e7d', '➖ LEAVE', {}), callback_data=f"pairleave:{gid}"),
     )
-    kb.row(InlineKeyboardButton("▶️ START", callback_data=f"pairstart:{gid}"))
+    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.9bbba5cd50', '▶️ START', {}), callback_data=f"pairstart:{gid}"))
     return kb
 
 def _pair_answer_keyboard(game):
@@ -511,23 +515,23 @@ def _pair_answer_keyboard(game):
     gid = game["id"]
     options = (game.get("challenge") or {}).get("options", ["A", "B"])
     kb.row(
-        InlineKeyboardButton("A • " + options[0], callback_data=f"pairans:{gid}:a"),
-        InlineKeyboardButton("B • " + options[1], callback_data=f"pairans:{gid}:b"),
+        InlineKeyboardButton(_custom_text('msg.bot._pair_answer_keyboard.cb16ac41d1', 'A • ', {}) + options[0], callback_data=f"pairans:{gid}:a"),
+        InlineKeyboardButton(_custom_text('msg.bot._pair_answer_keyboard.a2c9189d10', 'B • ', {}) + options[1], callback_data=f"pairans:{gid}:b"),
     )
     return kb
 
 def _pair_caption(game, seconds=None):
-    mode = PAIR_MODES.get(game.get("mode"), {}).get("title", "PAIR CHALLENGE")
+    mode = _custom_setting('cfg.games.pair_challenge.MODES', PAIR_MODES).get(game.get("mode"), {}).get("title", "PAIR CHALLENGE")
     if game.get("state") == "mode":
-        return "👥 PAIR CHALLENGE • Mode ရွေးပါ"
+        return _custom_text('msg.bot._pair_caption.26b1ab5a21', '👥 PAIR CHALLENGE • Mode ရွေးပါ', {})
     if game.get("state") == "lobby":
-        info = PAIR_MODES[game["mode"]]
-        return f"👥 {mode} • {len(game['players'])}/{info['max']} players"
+        info = _custom_setting('cfg.games.pair_challenge.MODES', PAIR_MODES)[game["mode"]]
+        return _custom_text('msg.bot._pair_caption.f7eb741797', '👥 {mode} • {len_game__players}/{info__max} players', {'mode': f'{mode}', 'len_game__players': f"{len(game['players'])}", 'info__max': f"{info['max']}"})
     if game.get("state") == "playing":
         if seconds is None:
             seconds = max(0, int(game.get("ends_at", time.time()) - time.time() + 0.999))
-        return f"👥 {mode} • ROUND {game.get('round_no', 1)}/{game.get('total_rounds', 5)} • ⏳ {seconds}s"
-    return f"👥 {mode} • ROUND {game.get('round_no', 0)}/{game.get('total_rounds', 5)}"
+        return _custom_text('msg.bot._pair_caption.544825d56e', '👥 {mode} • ROUND {game_get__round_no___1}/{game_get__total_rounds___5} • ⏳ {seconds}s', {'mode': f'{mode}', 'game_get__round_no___1': f"{game.get('round_no', 1)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}", 'seconds': f'{seconds}'})
+    return _custom_text('msg.bot._pair_caption.04c93385cc', '👥 {mode} • ROUND {game_get__round_no___0}/{game_get__total_rounds___5}', {'mode': f'{mode}', 'game_get__round_no___0': f"{game.get('round_no', 0)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}"})
 
 def _pair_edit_lobby(game):
     mid = game.get("message_id")
@@ -545,7 +549,7 @@ def _pair_edit_lobby(game):
 def _pair_show_round(game):
     try:
         bot.edit_message_media(
-            InputMediaPhoto(pair_challenge_card(game), caption=_pair_caption(game, PAIR_ROUND_SECONDS)),
+            InputMediaPhoto(pair_challenge_card(game), caption=_pair_caption(game, _custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))),
             chat_id=game["chat_id"], message_id=game["message_id"],
             reply_markup=_pair_answer_keyboard(game),
         )
@@ -587,7 +591,7 @@ def _pair_finish_round(chat_id, game_id):
         return
     try:
         bot.edit_message_caption(
-            f"👥 PAIR CHALLENGE • ROUND {game['round_no']}/{game['total_rounds']} ပြီးပြီ\nနောက် round စနေပြီ…",
+            _custom_text('msg.bot._pair_finish_round.28f9087847', '👥 PAIR CHALLENGE • ROUND {game__round_no}/{game__total_rounds} ပြီးပြီ\nနောက် round စနေပြီ…', {'game__round_no': f"{game['round_no']}", 'game__total_rounds': f"{game['total_rounds']}"}),
             chat_id=chat_id, message_id=game["message_id"], reply_markup=None,
         )
     except Exception:
@@ -598,7 +602,7 @@ def _pair_finish_round(chat_id, game_id):
     )
 
 def _pair_next_round(chat_id, game_id):
-    game = start_pair_round(chat_id, game_id, duration=PAIR_ROUND_SECONDS)
+    game = start_pair_round(chat_id, game_id, duration=_custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))
     if game:
         _pair_show_round(game)
         return
@@ -609,7 +613,7 @@ def _pair_next_round(chat_id, game_id):
     cancel_task(f"pair_tick:{chat_id}")
     cancel_task(f"pair_next:{chat_id}")
     try:
-        bot.send_message(chat_id, "⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ပိတ်လိုက်ပါတယ်။ /pair နဲ့ အသစ်ပြန်စနိုင်ပါတယ်။")
+        bot.send_message(chat_id, _custom_text('msg.bot._pair_next_round.b0b5c03920', '⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ပိတ်လိုက်ပါတယ်။ /pair နဲ့ အသစ်ပြန်စနိုင်ပါတယ်။', {}))
         if aborted.get("message_id"):
             safe_delete_message(bot, chat_id, aborted["message_id"])
     except Exception as exc:
@@ -626,18 +630,18 @@ def _pair_finish_match(chat_id, game_id):
     # finish_pair_match has a one-time state guard.
     for uid in game.get("winners", []):
         try:
-            add_bonus_points(chat_id, uid, PAIR_DUO_SUCCESS_REWARD, reason="pair_challenge")
+            add_bonus_points(chat_id, uid, _custom_setting('cfg.bot.PAIR_DUO_SUCCESS_REWARD', PAIR_DUO_SUCCESS_REWARD), reason="pair_challenge")
         except Exception as reward_exc:
             print("Pair reward error:", reward_exc)
     try:
-        caption = "👥 PAIR CHALLENGE • MATCH RESULT"
+        caption = _custom_text('msg.bot._pair_finish_match.4726dc17a0', '👥 PAIR CHALLENGE • MATCH RESULT', {})
         if game.get("mode") == "versus":
             score = game.get("match_scores", {})
             winner = game.get("match_winner", "draw")
-            caption += f"\n🔴 {score.get('red',0)} - {score.get('blue',0)} 🔵\n"
-            caption += "🤝 DRAW" if winner == "draw" else ("🔴 RED TEAM WINS" if winner == "red" else "🔵 BLUE TEAM WINS")
+            caption += _custom_text('msg.bot._pair_finish_match.32dfb409ae', '\n🔴 {score_get__red___0} - {score_get__blue___0} 🔵\n', {'score_get__red___0': f"{score.get('red', 0)}", 'score_get__blue___0': f"{score.get('blue', 0)}"})
+            caption += _custom_text('msg.bot._pair_finish_match.e529391bb2', '🤝 DRAW', {}) if winner == "draw" else (_custom_text('msg.bot._pair_finish_match.a27b7b43e0', '🔴 RED TEAM WINS', {}) if winner == "red" else _custom_text('msg.bot._pair_finish_match.76a08cf0cd', '🔵 BLUE TEAM WINS', {}))
         else:
-            caption += f"\n✅ Cleared: {game.get('cleared_rounds',0)}/{game.get('total_rounds',5)}"
+            caption += _custom_text('msg.bot._pair_finish_match.040076b839', '\n✅ Cleared: {game_get__cleared_rounds___0}/{game_get__total_rounds___5}', {'game_get__cleared_rounds___0': f"{game.get('cleared_rounds', 0)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}"})
         sent = bot.send_photo(chat_id, pair_challenge_result_card(game), caption=caption)
         if old_id:
             safe_delete_message(bot, chat_id, old_id)
@@ -654,7 +658,7 @@ def pair_challenge_command(message):
         message.from_user.first_name or message.from_user.username or "Player",
     )
     if not created:
-        bot.reply_to(message, "👥 Pair Challenge က run နေပြီးသားပါ။")
+        bot.reply_to(message, _custom_text('msg.bot.pair_challenge_command.55567e57d4', '👥 Pair Challenge က run နေပြီးသားပါ။', {}))
         return
     try:
         sent = bot.send_photo(
@@ -672,12 +676,12 @@ def pair_mode_callback(call):
     result = select_pair_mode(call.message.chat.id, gid, call.from_user.id, mode)
     status = result.get("status")
     if status == "owner_only":
-        bot.answer_callback_query(call.id, "Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.cf1c7a4e77', 'Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။', {}))
         return
     if status != "ok":
-        bot.answer_callback_query(call.id, "ဒီ lobby ပိတ်သွားပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.9f10429d85', 'ဒီ lobby ပိတ်သွားပြီ။', {}))
         return
-    bot.answer_callback_query(call.id, "Mode ရွေးပြီးပြီ။")
+    bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.a4671ed879', 'Mode ရွေးပြီးပြီ။', {}))
     _pair_edit_lobby(result["game"])
 
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairjoin:"))
@@ -689,14 +693,14 @@ def pair_join_callback(call):
     )
     status = result.get("status")
     if status == "ok":
-        bot.answer_callback_query(call.id, "ဝင်ပြီးပြီ 👥")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.cea0027a59', 'ဝင်ပြီးပြီ 👥', {}))
         _pair_edit_lobby(result["game"])
     elif status == "already":
-        bot.answer_callback_query(call.id, "ဝင်ထားပြီးသား။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.996f5cd83c', 'ဝင်ထားပြီးသား။', {}))
     elif status == "full":
-        bot.answer_callback_query(call.id, "Player ပြည့်ပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.78229ee298', 'Player ပြည့်ပြီ။', {}))
     else:
-        bot.answer_callback_query(call.id, "Lobby ပိတ်သွားပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.1123b0a3c2', 'Lobby ပိတ်သွားပြီ။', {}))
 
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairleave:"))
 def pair_leave_callback(call):
@@ -704,31 +708,31 @@ def pair_leave_callback(call):
     result = leave_pair_challenge(call.message.chat.id, gid, call.from_user.id)
     status = result.get("status")
     if status == "ok":
-        bot.answer_callback_query(call.id, "Lobby က ထွက်ပြီးပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.72e71ab9b8', 'Lobby က ထွက်ပြီးပြီ။', {}))
         _pair_edit_lobby(result["game"])
     elif status == "owner":
-        bot.answer_callback_query(call.id, "Game owner က lobby ကနေ leave မလုပ်နိုင်ဘူး။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.3b81798531', 'Game owner က lobby ကနေ leave မလုပ်နိုင်ဘူး။', {}))
     else:
-        bot.answer_callback_query(call.id, "Leave လုပ်လို့မရဘူး။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.916cf89eea', 'Leave လုပ်လို့မရဘူး။', {}))
 
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairstart:"))
 def pair_start_callback(call):
     _, gid = call.data.split(":", 1)
     current = get_pair_challenge(call.message.chat.id)
     if not current or current["id"] != gid:
-        bot.answer_callback_query(call.id, "Lobby ပိတ်သွားပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.1123b0a3c2', 'Lobby ပိတ်သွားပြီ။', {}))
         return
     if call.from_user.id != current["owner_id"]:
-        bot.answer_callback_query(call.id, "Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.63f5a7da8b', 'Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။', {}))
         return
     if not can_start_pair_challenge(current):
-        bot.answer_callback_query(call.id, "Player မလုံလောက်သေးဘူး။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.d9d683780d', 'Player မလုံလောက်သေးဘူး။', {}))
         return
-    game = start_pair_round(call.message.chat.id, gid, duration=PAIR_ROUND_SECONDS)
+    game = start_pair_round(call.message.chat.id, gid, duration=_custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))
     if not game:
-        bot.answer_callback_query(call.id, "Start မရသေးဘူး။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.c60febed91', 'Start မရသေးဘူး။', {}))
         return
-    bot.answer_callback_query(call.id, "Challenge စပြီ!")
+    bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.950bcaed57', 'Challenge စပြီ!', {}))
     _pair_show_round(game)
 
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairans:"))
@@ -738,15 +742,15 @@ def pair_answer_callback(call):
     status = result.get("status")
     if status == "ok":
         updated = result.get("game") or {}
-        bot.answer_callback_query(call.id, "Answer သိမ်းထားပြီ ✅")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.dd3a25b6e6', 'Answer သိမ်းထားပြီ ✅', {}))
         if len(updated.get("answers", {})) >= len(updated.get("players", {})):
             _pair_finish_round(call.message.chat.id, gid)
     elif status == "already":
-        bot.answer_callback_query(call.id, "ဒီ round မှာ တစ်ခါဖြေပြီးပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.a903118b5b', 'ဒီ round မှာ တစ်ခါဖြေပြီးပြီ။', {}))
     elif status == "not_player":
-        bot.answer_callback_query(call.id, "ဒီ match ရဲ့ player မဟုတ်ဘူး။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.da44f34257', 'ဒီ match ရဲ့ player မဟုတ်ဘူး။', {}))
     else:
-        bot.answer_callback_query(call.id, "Round ပိတ်သွားပြီ။")
+        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.dcb97827a6', 'Round ပိတ်သွားပြီ။', {}))
 
 
 # =========================================================
@@ -857,11 +861,11 @@ def early_text_spam_middleware(message):
     with _text_spam_lock:
         recent = [
             item for item in _text_spam_events.get(key, [])
-            if now - item[0] <= TEXT_SPAM_WINDOW
+            if now - item[0] <= _custom_setting('cfg.bot.TEXT_SPAM_WINDOW', TEXT_SPAM_WINDOW)
         ]
         recent.append((now, message.message_id))
         _text_spam_events[key] = recent
-        hit_limit = len(recent) >= TEXT_SPAM_LIMIT
+        hit_limit = len(recent) >= _custom_setting('cfg.bot.TEXT_SPAM_LIMIT', TEXT_SPAM_LIMIT)
         burst_ids = [item[1] for item in recent] if hit_limit else []
         if hit_limit:
             _text_spam_events[key] = []
@@ -880,12 +884,11 @@ def early_text_spam_middleware(message):
             message.chat.id,
             message.from_user.id,
             permissions=ChatPermissions(can_send_messages=False),
-            until_date=int(time.time() + TEXT_SPAM_MUTE_SECONDS),
+            until_date=int(time.time() + _custom_setting('cfg.bot.TEXT_SPAM_MUTE_SECONDS', TEXT_SPAM_MUTE_SECONDS)),
         )
         warning = bot.send_message(
             message.chat.id,
-            f"🔇 {message.from_user.first_name or 'User'} — 10 စက္ကန့်အတွင်း စာ 5 စောင် ဆက်တိုက်ပို့လို့ "
-            f"{TEXT_SPAM_MUTE_SECONDS} စက္ကန့် Mute လုပ်ထားပါတယ်။",
+            _custom_text('msg.bot.early_text_spam_middleware.461c489e1b', '🔇 {message_from_user_first_name_or__User} — 10 စက္ကန့်အတွင်း စာ 5 စောင် ဆက်တိုက်ပို့လို့ {TEXT_SPAM_MUTE_SECONDS} စက္ကန့် Mute လုပ်ထားပါတယ်။', {'message_from_user_first_name_or__User': f"{message.from_user.first_name or 'User'}", 'TEXT_SPAM_MUTE_SECONDS': f"{_custom_setting('cfg.bot.TEXT_SPAM_MUTE_SECONDS', TEXT_SPAM_MUTE_SECONDS)}"}),
         )
         delay_delete_message(message.chat.id, warning.message_id, 8)
     except Exception as exc:
@@ -951,7 +954,7 @@ def stop_mention(message):
     if message.chat.type in ['group', 'supergroup']:
         with mention_state_lock:
             mention_stopped[message.chat.id] = True
-        bot.reply_to(message, "🛑 ရပ်လိုက်ပြီ စောက်အမျိုးမျိုးပဲ မသာကောင်")
+        bot.reply_to(message, _custom_text('msg.bot.stop_mention.edee1aa619', '🛑 ရပ်လိုက်ပြီ စောက်အမျိုးမျိုးပဲ မသာကောင်', {}))
 
 
 MENTION_COOLDOWN = 140
@@ -966,10 +969,10 @@ def _mention_cooldown_check(message):
 
     with mention_state_lock:
         last_called = mention_last_called.get(chat_id, 0)
-        elapsed = now - last_called if last_called else MENTION_COOLDOWN
+        elapsed = now - last_called if last_called else _custom_setting('cfg.bot.MENTION_COOLDOWN', MENTION_COOLDOWN)
 
-        if elapsed < MENTION_COOLDOWN:
-            remaining = max(1, int(MENTION_COOLDOWN - elapsed))
+        if elapsed < _custom_setting('cfg.bot.MENTION_COOLDOWN', MENTION_COOLDOWN):
+            remaining = max(1, int(_custom_setting('cfg.bot.MENTION_COOLDOWN', MENTION_COOLDOWN) - elapsed))
             return False, remaining
 
         mention_last_called[chat_id] = now
@@ -982,13 +985,12 @@ def _send_mention_cooldown_notice(message, remaining_time):
     if remaining_time > 60:
         notice = bot.reply_to(
             message,
-            "⏳ လူခေါ်တာမပြီးသေးဘဲ လီးမို့ထပ်ခေါ်နေတာလား ဖြတ်ထိုးလိုက်ရ စောက်တောသား ⏳"
+            _custom_text('msg.bot._send_mention_cooldown_notice.1cc68a4ba5', '⏳ လူခေါ်တာမပြီးသေးဘဲ လီးမို့ထပ်ခေါ်နေတာလား ဖြတ်ထိုးလိုက်ရ စောက်တောသား ⏳', {})
         )
     else:
         notice = bot.reply_to(
             message,
-            f"⏳ ဆက်တိုက်ခေါ်လို့ မရဘူး စောက်ရူးကောင် ငါလည်း ငြောင်းတတ်တယ် "
-            f"နောက်ထပ် {remaining_time} စက္ကန့် စောင့်ပြီးမှဆက်ခေါ် ကမကလ"
+            _custom_text('msg.bot._send_mention_cooldown_notice.adda5cc4c0', '⏳ ဆက်တိုက်ခေါ်လို့ မရဘူး စောက်ရူးကောင် ငါလည်း ငြောင်းတတ်တယ် နောက်ထပ် {remaining_time} စက္ကန့် စောင့်ပြီးမှဆက်ခေါ် ကမကလ', {'remaining_time': f'{remaining_time}'})
         )
 
     delay_delete_message(message.chat.id, notice.message_id, 15)
@@ -1003,11 +1005,11 @@ def _send_mention_rounds(chat_id, user_ids, input_line):
     # Telegram text/entity limits အတွက် member များရင် batch ခွဲမယ်။
     # အရင် behavior အတိုင်း 30 rounds ပြန်ခေါ်မယ်။
     batches = [
-        user_ids[i:i + MENTION_BATCH_SIZE]
-        for i in range(0, len(user_ids), MENTION_BATCH_SIZE)
+        user_ids[i:i + _custom_setting('cfg.bot.MENTION_BATCH_SIZE', MENTION_BATCH_SIZE)]
+        for i in range(0, len(user_ids), _custom_setting('cfg.bot.MENTION_BATCH_SIZE', MENTION_BATCH_SIZE))
     ]
 
-    for round_no in range(MENTION_ROUNDS):
+    for round_no in range(_custom_setting('cfg.bot.MENTION_ROUNDS', MENTION_ROUNDS)):
         if _mention_is_stopped(chat_id):
             break
 
@@ -1035,8 +1037,8 @@ def _send_mention_rounds(chat_id, user_ids, input_line):
             )
             delay_delete_message(chat_id, sent_msg.message_id, 60)
 
-        if round_no < MENTION_ROUNDS - 1 and not _mention_is_stopped(chat_id):
-            time.sleep(MENTION_ROUND_DELAY)
+        if round_no < _custom_setting('cfg.bot.MENTION_ROUNDS', MENTION_ROUNDS) - 1 and not _mention_is_stopped(chat_id):
+            time.sleep(_custom_setting('cfg.bot.MENTION_ROUND_DELAY', MENTION_ROUND_DELAY))
 
 
 def _send_common_mention_finish(chat_id):
@@ -1047,13 +1049,13 @@ def _send_common_mention_finish(chat_id):
         started_at = mention_last_called.get(chat_id, time.time())
 
     remaining_cooldown = int(
-        MENTION_COOLDOWN - (time.time() - started_at)
+        _custom_setting('cfg.bot.MENTION_COOLDOWN', MENTION_COOLDOWN) - (time.time() - started_at)
     )
     remaining_cooldown = max(0, min(60, remaining_cooldown))
 
     finish_msg = bot.send_message(
         chat_id,
-        f"ခေါ်ပြီးဘီ လီးဖစ်နေလား (နောက်ထပ် {remaining_cooldown} စက္ကန့် စောင့်ဦး)"
+        _custom_text('msg.bot._send_common_mention_finish.d00310aafa', 'ခေါ်ပြီးဘီ လီးဖစ်နေလား (နောက်ထပ် {remaining_cooldown} စက္ကန့် စောင့်ဦး)', {'remaining_cooldown': f'{remaining_cooldown}'})
     )
     delay_delete_message(chat_id, finish_msg.message_id, 60)
 
@@ -1062,7 +1064,7 @@ def _send_common_mention_finish(chat_id):
 @bot.message_handler(commands=['all', 'everyone', 'လာကြစမ်း'])
 def mention_all_users(message):
     if message.chat.type not in ('group', 'supergroup'):
-        bot.reply_to(message, "This command can only be used in Telegram Groups.")
+        bot.reply_to(message, _custom_text('msg.bot.mention_all_users.3a36395db8', 'This command can only be used in Telegram Groups.', {}))
         return
 
     chat_id = message.chat.id
@@ -1074,7 +1076,7 @@ def mention_all_users(message):
         return
 
     parts = (message.text or "").split(maxsplit=1)
-    input_line = parts[1].strip() if len(parts) > 1 else "တောသားတွေလာကြစမ်း"
+    input_line = parts[1].strip() if len(parts) > 1 else _custom_text('msg.bot.mention_all_users.b0319cb750', 'တောသားတွေလာကြစမ်း', {})
 
     try:
         # Admins ကို registry ထဲသေချာထည့်ထားပြီး known members နဲ့ပေါင်းမယ်။
@@ -1109,7 +1111,7 @@ def mention_all_users(message):
         if not user_list:
             notice = bot.reply_to(
                 message,
-                "❌ ခေါ်လို့ရမယ့် member data မရှိသေးပါဘူး။"
+                _custom_text('msg.bot.mention_all_users.6a37d585ae', '❌ ခေါ်လို့ရမယ့် member data မရှိသေးပါဘူး။', {})
             )
             delay_delete_message(chat_id, notice.message_id, 15)
             return
@@ -1125,7 +1127,7 @@ def mention_all_users(message):
         try:
             notice = bot.reply_to(
                 message,
-                "❌ Member တွေကို ခေါ်တဲ့အချိန် Error ဖြစ်သွားတယ်။"
+                _custom_text('msg.bot.mention_all_users.afffab976b', '❌ Member တွေကို ခေါ်တဲ့အချိန် Error ဖြစ်သွားတယ်။', {})
             )
             delay_delete_message(chat_id, notice.message_id, 15)
         except Exception:
@@ -1138,10 +1140,10 @@ def mention_all_users(message):
 # Uses the SAME cooldown/round/finish behavior as /လာကြစမ်း,
 # but mentions admins only.
 # =========================================================
-@bot.message_handler(commands=["admincall", "အက်မင်ခေါ်"])
+@bot.message_handler(commands=["admincall", 'အက်မင်ခေါ်'])
 def mention_admins_only(message):
     if message.chat.type not in ("group", "supergroup"):
-        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.mention_admins_only.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {}))
         return
 
     chat_id = message.chat.id
@@ -1163,7 +1165,7 @@ def mention_admins_only(message):
         if not admin_ids:
             notice = bot.reply_to(
                 message,
-                "❌ ခေါ်လို့ရမယ့် Admin မတွေ့ပါဘူး။"
+                _custom_text('msg.bot.mention_admins_only.26ce28ce5c', '❌ ခေါ်လို့ရမယ့် Admin မတွေ့ပါဘူး။', {})
             )
             delay_delete_message(chat_id, notice.message_id, 15)
             return
@@ -1172,7 +1174,7 @@ def mention_admins_only(message):
         input_line = (
             parts[1].strip()
             if len(parts) > 1
-            else "အက်မင်တို့ ခဏလာကြည့်ပေးပါဦး 👮"
+            else _custom_text('msg.bot.mention_admins_only.c6e00e352e', 'အက်မင်တို့ ခဏလာကြည့်ပေးပါဦး 👮', {})
         )
 
         _send_mention_rounds(chat_id, admin_ids, input_line)
@@ -1186,7 +1188,7 @@ def mention_admins_only(message):
         try:
             notice = bot.reply_to(
                 message,
-                "❌ Admin တွေကို ခေါ်လို့မရသေးပါဘူး။"
+                _custom_text('msg.bot.mention_admins_only.04c814db22', '❌ Admin တွေကို ခေါ်လို့မရသေးပါဘူး။', {})
             )
             delay_delete_message(chat_id, notice.message_id, 15)
         except Exception:
@@ -1211,8 +1213,7 @@ def play_music(message):
 
             bot.reply_to(
                 message,
-                "❌ သီချင်းနာမည်ထည့်ပေးပါ။\n"
-                "ဥပမာ - /play Alan Walker Faded"
+                _custom_text('msg.bot.play_music.ca6f4d8e17', '❌ သီချင်းနာမည်ထည့်ပေးပါ။\nဥပမာ - /play Alan Walker Faded', {})
             )
 
             return
@@ -1222,7 +1223,7 @@ def play_music(message):
 
         reply_msg = bot.reply_to(
             message,
-            f"🎵 '{song_name}' ပို့ပေးမယ်။ ခဏစောင့်ပါ..."
+            _custom_text('msg.bot.play_music.45b8d5f61d', "🎵 '{song_name}' ပို့ပေးမယ်။ ခဏစောင့်ပါ...", {'song_name': f'{song_name}'})
         )
 
         # -----------------------------------------
@@ -1287,8 +1288,7 @@ def play_music(message):
 
             bot.send_message(
                 message.chat.id,
-                "❌ သီချင်း download မအောင်မြင်ဘူး။\n"
-                "Console မှာ Error ကိုကြည့်ပါ။"
+                _custom_text('msg.bot.play_music.5c85ac8fd2', '❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error ကိုကြည့်ပါ။', {})
             )
 
             return
@@ -1306,7 +1306,7 @@ def play_music(message):
             bot.send_audio(
                 message.chat.id,
                 audio,
-                caption="🎧 သီချင်းရပြီ။ နားထောင်တော့"
+                caption=_custom_text('msg.bot.play_music.4083ffa049', '🎧 သီချင်းရပြီ။ နားထောင်တော့', {})
             )
 
         # -----------------------------------------
@@ -1364,8 +1364,7 @@ def play_music(message):
 
             bot.reply_to(
                 message,
-                "❌ သီချင်း download မအောင်မြင်ဘူး။\n"
-                "Console မှာ Error အစစ်ကိုကြည့်ပါ။"
+                _custom_text('msg.bot.play_music.d20fba766b', '❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error အစစ်ကိုကြည့်ပါ။', {})
             )
 
         except:
@@ -1379,11 +1378,11 @@ def play_music(message):
 def roll_dice(message):
     try:
         user_name = message.from_user.first_name
-        dice_msg = bot.send_dice(message.chat.id, emoji='🎲')
+        dice_msg = bot.send_dice(message.chat.id, emoji=_custom_text('msg.bot.roll_dice.1950b4e582', '🎲', {}))
         dice_value = dice_msg.dice.value
 
         time.sleep(3)
-        bot.reply_to(dice_msg, f"🎲 တောသား <b>{user_name}</b> ရဲ့ အန်စာတုံးရလဒ်ကတော့ <b>{dice_value} မှတ်</b> ဖြစ်ပါတယ်။", parse_mode='HTML')
+        bot.reply_to(dice_msg, _custom_text('msg.bot.roll_dice.6b5751fffd', '🎲 တောသား <b>{user_name}</b> ရဲ့ အန်စာတုံးရလဒ်ကတော့ <b>{dice_value} မှတ်</b> ဖြစ်ပါတယ်။', {'user_name': f'{user_name}', 'dice_value': f'{dice_value}'}), parse_mode='HTML')
     except Exception as e:
         print(f"Dice Error: {e}")
 
@@ -1392,17 +1391,17 @@ def roll_dice(message):
 def roll_slot(message):
     try:
         user_name = message.from_user.first_name
-        slot_msg = bot.send_dice(message.chat.id, emoji='🎰')
+        slot_msg = bot.send_dice(message.chat.id, emoji=_custom_text('msg.bot.roll_slot.a7f41e82c4', '🎰', {}))
         slot_value = slot_msg.dice.value
 
         time.sleep(2)
         # 🎯 ဤနေရာတွင် Jackpot ကျမည့် ဂဏန်းတန်ဖိုးများကို ကွက်တိ ဖြည့်သွင်းပေးထားပါသည်
         if slot_value in [1, 22, 43, 64]:
-            result_text = "🎰 <b>JACKPOT!!! LUCK 999%!!!</b> လုံးဝ ပုံတူကျတယ် စောက်ရူးရေ ပေါက်သွားပြီ။"
+            result_text = _custom_text('msg.bot.roll_slot.b03d8711a3', '🎰 <b>JACKPOT!!! LUCK 999%!!!</b> လုံးဝ ပုံတူကျတယ် စောက်ရူးရေ ပေါက်သွားပြီ။', {})
         else:
-            result_text = "🎰 မပေါက်ပါဘူး တောသားရာ၊ နောက်တစ်ယောက်ဆက်လှည့်"
+            result_text = _custom_text('msg.bot.roll_slot.85bddb384b', '🎰 မပေါက်ပါဘူး တောသားရာ၊ နောက်တစ်ယောက်ဆက်လှည့်', {})
 
-        bot.reply_to(slot_msg, f"👤 <b>{user_name}</b>\n{result_text}", parse_mode='HTML')
+        bot.reply_to(slot_msg, _custom_text('msg.bot.roll_slot.55e5e8c25a', '👤 <b>{user_name}</b>\n{result_text}', {'user_name': f'{user_name}', 'result_text': f'{result_text}'}), parse_mode='HTML')
     except Exception as e:
         print(f"Slot Error: {e}")
 
@@ -1415,9 +1414,9 @@ def love_calculator(message):
 
         if len(user_text) > 1:
             targets = str (user_text[1])
-            response_text = f"❤️ <b>တွက်ချက်မှုရလဒ် -</b>\n\n💞 {targets} တို့နှစ်ယောက်ရဲ့ လိုက်ဖက်ညီမှု ရာခိုင်နှုန်းကတော့ <b>{love_percentage}%</b> ဖစ်ပါတယ် တောသားတို့ရေ။"
+            response_text = _custom_text('msg.bot.love_calculator.feb1bec79f', '❤️ <b>တွက်ချက်မှုရလဒ် -</b>\n\n💞 {targets} တို့နှစ်ယောက်ရဲ့ လိုက်ဖက်ညီမှု ရာခိုင်နှုန်းကတော့ <b>{love_percentage}%</b> ဖစ်ပါတယ် တောသားတို့ရေ။', {'targets': f'{targets}', 'love_percentage': f'{love_percentage}'})
         else:
-            response_text = f"❤️ ကျေးဇူးပြု၍ မိမိတွက်ချက်လိုသော နာမည် (၂) ခုကို ရိုက်ပေးပါဗျာ။\nဥပမာ - `/love ကောင်လေး ကောင်မလေး` သို့မဟုတ် `/love @သူငယ်ချင်း၁ @သူငယ်ချင်း၂`"
+            response_text = _custom_text('msg.bot.love_calculator.70bc7d8315', '❤️ ကျေးဇူးပြု၍ မိမိတွက်ချက်လိုသော နာမည် (၂) ခုကို ရိုက်ပေးပါဗျာ။\nဥပမာ - `/love ကောင်လေး ကောင်မလေး` သို့မဟုတ် `/love @သူငယ်ချင်း၁ @သူငယ်ချင်း၂`', {})
 
         bot.send_message(message.chat.id, response_text, parse_mode='HTML')
     except Exception as e:
@@ -1468,21 +1467,21 @@ def is_admin(message):
 # 🚫 BAN
 # အသုံးပြုပုံ: target user ကို Reply လုပ်ပြီး /ban
 # ---------------------------------------------------------
-@bot.message_handler(commands=["ဘမ်း"])
+@bot.message_handler(commands=['ဘမ်း'])
 def ban_user(message):
 
     if message.chat.type not in ["group", "supergroup"]:
-        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.ban_user.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {}))
         return
 
     if not is_admin(message):
-        bot.reply_to(message, "❌ တောသားကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်")
+        bot.reply_to(message, _custom_text('msg.bot.ban_user.366371696a', '❌ တောသားကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်', {}))
         return
 
     if not message.reply_to_message:
         bot.reply_to(
             message,
-            "❌ Ban လုပ်ချင်တဲ့ user ရဲ့ message ကို Reply လုပ်ပြီး /ban ရိုက်ပါ။"
+            _custom_text('msg.bot.ban_user.fb5d147bdd', '❌ Ban လုပ်ချင်တဲ့ user ရဲ့ message ကို Reply လုပ်ပြီး /ban ရိုက်ပါ။', {})
         )
         return
 
@@ -1496,14 +1495,14 @@ def ban_user(message):
 
         bot.reply_to(
             message,
-            f"🚫 {target.first_name} စောက်တောသား အားအားယားယား အာချောင်နေတာ ဘမ်းပြီ လစ်တော့"
+            _custom_text('msg.bot.ban_user.4cd206694f', '🚫 {target_first_name} စောက်တောသား အားအားယားယား အာချောင်နေတာ ဘမ်းပြီ လစ်တော့', {'target_first_name': f'{target.first_name}'})
         )
 
     except Exception as e:
         print(f"Ban Error: {e}")
         bot.reply_to(
             message,
-            "❌ Ban လုပ်လို့မရပါဘူး။ Bot ကို Admin ပေးထားပြီး Ban Users permission ရှိ/မရှိ စစ်ပါ။"
+            _custom_text('msg.bot.ban_user.6bd46583ca', '❌ Ban လုပ်လို့မရပါဘူး။ Bot ကို Admin ပေးထားပြီး Ban Users permission ရှိ/မရှိ စစ်ပါ။', {})
         )
 
 
@@ -1511,21 +1510,21 @@ def ban_user(message):
 # 🔓 UNBAN
 # အသုံးပြုပုံ: user message ကို Reply လုပ်ပြီး /unban
 # ---------------------------------------------------------
-@bot.message_handler(commands=["မဘမ်း"])
+@bot.message_handler(commands=['မဘမ်း'])
 def unban_user(message):
 
     if message.chat.type not in ["group", "supergroup"]:
-        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.unban_user.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {}))
         return
 
     if not is_admin(message):
-        bot.reply_to(message, "❌ တောသားကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.unban_user.0b8ea467f7', '❌ တောသားကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်။', {}))
         return
 
     if not message.reply_to_message:
         bot.reply_to(
             message,
-            "❌ Unban လုပ်ချင်တဲ့ user ရဲ့ message ကို Reply လုပ်ပြီး /unban ရိုက်ပါ။"
+            _custom_text('msg.bot.unban_user.bd5b74db3a', '❌ Unban လုပ်ချင်တဲ့ user ရဲ့ message ကို Reply လုပ်ပြီး /unban ရိုက်ပါ။', {})
         )
         return
 
@@ -1540,14 +1539,14 @@ def unban_user(message):
 
         bot.reply_to(
             message,
-            f"🔓 {target.first_name} တောသား သနားလို့နော်"
+            _custom_text('msg.bot.unban_user.480c742e74', '🔓 {target_first_name} တောသား သနားလို့နော်', {'target_first_name': f'{target.first_name}'})
         )
 
     except Exception as e:
         print(f"Unban Error: {e}")
         bot.reply_to(
             message,
-            "❌ Unban လုပ်လို့မရပါဘူး။ Bot permission ကို စစ်ပါ။"
+            _custom_text('msg.bot.unban_user.64d788ab17', '❌ Unban လုပ်လို့မရပါဘူး။ Bot permission ကို စစ်ပါ။', {})
         )
 
 
@@ -1555,21 +1554,21 @@ def unban_user(message):
 # 🔇 MUTE
 # အသုံးပြုပုံ: user message ကို Reply လုပ်ပြီး /mute
 # ---------------------------------------------------------
-@bot.message_handler(commands=["တိတ်စမ်း", "မြု"])
+@bot.message_handler(commands=['တိတ်စမ်း', 'မြု'])
 def mute_user(message):
 
     if message.chat.type not in ["group", "supergroup"]:
-        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.mute_user.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {}))
         return
 
     if not is_admin(message):
-        bot.reply_to(message, "❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်")
+        bot.reply_to(message, _custom_text('msg.bot.mute_user.2bc1af2ec0', '❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်', {}))
         return
 
     if not message.reply_to_message:
         bot.reply_to(
             message,
-            "❌ စာမထောက်ဘဲ မင်းမေလင်ကို တိတ်စမ်း လုပ်ရမာလား တောသား"
+            _custom_text('msg.bot.mute_user.502083f019', '❌ စာမထောက်ဘဲ မင်းမေလင်ကို တိတ်စမ်း လုပ်ရမာလား တောသား', {})
         )
         return
 
@@ -1588,14 +1587,14 @@ def mute_user(message):
 
         bot.reply_to(
             message,
-            f"🔇 {target.first_name} ကို Mute လိုက်ပြီ စောက်ပေါစောက်ရမ်းစကားများတယ်။"
+            _custom_text('msg.bot.mute_user.572303f043', '🔇 {target_first_name} ကို Mute လိုက်ပြီ စောက်ပေါစောက်ရမ်းစကားများတယ်။', {'target_first_name': f'{target.first_name}'})
         )
 
     except Exception as e:
         print(f"Mute Error: {e}")
         bot.reply_to(
             message,
-            "❌ Mute လုပ်လို့မရဘူး မင်းဘော့ကို Admin ရာထူးနဲ့ Permissions မပေးထားလို့ အလုပ်မလုပ်ဘူး စောက်ရူးရဲ့။"
+            _custom_text('msg.bot.mute_user.2ca69d7b81', '❌ Mute လုပ်လို့မရဘူး မင်းဘော့ကို Admin ရာထူးနဲ့ Permissions မပေးထားလို့ အလုပ်မလုပ်ဘူး စောက်ရူးရဲ့။', {})
         )
 
 
@@ -1603,21 +1602,21 @@ def mute_user(message):
 # 🔊 UNMUTE
 # အသုံးပြုပုံ: user message ကို Reply လုပ်ပြီး /unmute
 # ---------------------------------------------------------
-@bot.message_handler(commands=["ဖွင့်လိုက်", "မမြု"])
+@bot.message_handler(commands=['ဖွင့်လိုက်', 'မမြု'])
 def unmute_user(message):
 
     if message.chat.type not in ["group", "supergroup"]:
-        bot.reply_to(message, "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။")
+        bot.reply_to(message, _custom_text('msg.bot.unmute_user.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {}))
         return
 
     if not is_admin(message):
-        bot.reply_to(message, "❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်")
+        bot.reply_to(message, _custom_text('msg.bot.unmute_user.2bc1af2ec0', '❌  တောသားအက်ကများ အက်မင်မဟုတ်ရင် လီးပဲရမယ်', {}))
         return
 
     if not message.reply_to_message:
         bot.reply_to(
             message,
-            "❌ စာမထောက်ဘဲ မင်းမေလင်ကို ပြန်ဖွင့် ရမာလား တောသား"
+            _custom_text('msg.bot.unmute_user.14084808f7', '❌ စာမထောက်ဘဲ မင်းမေလင်ကို ပြန်ဖွင့် ရမာလား တောသား', {})
         )
         return
 
@@ -1645,14 +1644,14 @@ def unmute_user(message):
 
         bot.reply_to(
             message,
-            f"🔊 {target.first_name} စကားပြန်ပြောခွင့် ပေးလိုက်ပြီ တောသား လိမ္မာအောင်နေတော့။"
+            _custom_text('msg.bot.unmute_user.863bff8e16', '🔊 {target_first_name} စကားပြန်ပြောခွင့် ပေးလိုက်ပြီ တောသား လိမ္မာအောင်နေတော့။', {'target_first_name': f'{target.first_name}'})
         )
 
     except Exception as e:
         print(f"Unmute Error: {e}")
         bot.reply_to(
             message,
-            "❌ Unmute လုပ်လို့မရပါဘူး။ Bot permission ကို စစ်ပါ။"
+            _custom_text('msg.bot.unmute_user.8e01c5d68a', '❌ Unmute လုပ်လို့မရပါဘူး။ Bot permission ကို စစ်ပါ။', {})
         )
 
 
@@ -1682,7 +1681,7 @@ def send_game_message(chat_id, text, **kwargs):
         delay_delete_message(
             chat_id,
             sent.message_id,
-            GAME_DELETE_TIME
+            _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
         )
 
         return sent
@@ -1703,7 +1702,7 @@ def reply_game_message(message, text, **kwargs):
         delay_delete_message(
             message.chat.id,
             sent.message_id,
-            GAME_DELETE_TIME
+            _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
         )
 
         return sent
@@ -1724,7 +1723,7 @@ def send_info_message(chat_id, text, **kwargs):
         delay_delete_message(
             chat_id,
             sent.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
         return sent
@@ -1745,7 +1744,7 @@ def reply_info_message(message, text, **kwargs):
         delay_delete_message(
             message.chat.id,
             sent.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
         return sent
@@ -1776,7 +1775,7 @@ COIN_ALIASES = {
 
 def flip_coin():
     # OS-backed unbiased 50/50 bit. Independent from the bot's normal PRNG state.
-    return "ခေါင်း" if secrets.randbelow(2) == 0 else "အမြီး"
+    return _custom_text('msg.bot.flip_coin.b47e5dae73', 'ခေါင်း', {}) if secrets.randbelow(2) == 0 else _custom_text('msg.bot.flip_coin.5e8d4277ad', 'အမြီး', {})
 
 
 # =========================================================
@@ -1897,7 +1896,7 @@ def coin_command(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME,
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME),
     )
 
     args = message.text.split()
@@ -1926,16 +1925,14 @@ def coin_command(message):
             if target.is_bot:
                 reply_game_message(
                     message,
-                    "❌ Bot ကို Coin challenge "
-                    "လုပ်လို့မရပါဘူး။",
+                    _custom_text('msg.bot.coin_command.481dafc446', '❌ Bot ကို Coin challenge လုပ်လို့မရပါဘူး။', {}),
                 )
                 return
 
             if target.id == challenger.id:
                 reply_game_message(
                     message,
-                    "😂 ကိုယ့်ကိုယ်ကို challenge "
-                    "လုပ်လို့မရဘူး။",
+                    _custom_text('msg.bot.coin_command.e92ab2888e', '😂 ကိုယ့်ကိုယ်ကို challenge လုပ်လို့မရဘူး။', {}),
                 )
                 return
 
@@ -1945,8 +1942,7 @@ def coin_command(message):
             ):
                 reply_game_message(
                     message,
-                    "❌ လူချင်း Coin ကစားတာကို "
-                    "Group ထဲမှာပဲ သုံးပါ။",
+                    _custom_text('msg.bot.coin_command.f005df13f9', '❌ လူချင်း Coin ကစားတာကို Group ထဲမှာပဲ သုံးပါ။', {}),
                 )
                 return
 
@@ -1962,8 +1958,7 @@ def coin_command(message):
             ):
                 reply_game_message(
                     message,
-                    "⚠️ မင်းမှာ Coin game "
-                    "တစ်ခုရှိပြီးသားပါ။",
+                    _custom_text('msg.bot.coin_command.257610804e', '⚠️ မင်းမှာ Coin game တစ်ခုရှိပြီးသားပါ။', {}),
                 )
                 return
 
@@ -1974,8 +1969,7 @@ def coin_command(message):
             ):
                 reply_game_message(
                     message,
-                    "⚠️ အဲဒီ Player က Coin game "
-                    "တစ်ခုကစားနေပြီးသားပါ။",
+                    _custom_text('msg.bot.coin_command.f067379904', '⚠️ အဲဒီ Player က Coin game တစ်ခုကစားနေပြီးသားပါ။', {}),
                 )
                 return
 
@@ -2014,14 +2008,7 @@ def coin_command(message):
 
             reply_game_message(
                 message,
-                f"🪙 COIN CHALLENGE!\n\n"
-                f"👤 {challenger.first_name}\n"
-                f"⚔️ vs {target_name}\n\n"
-                f"နှစ်ယောက်လုံးက\n"
-                f"🔴 ခေါင်း / 🔵 အမြီး\n"
-                f"ထဲက တစ်ခုရွေးပါ။\n\n"
-                f"နှစ်ယောက်လုံးရွေးပြီးမှ "
-                f"Result ပြမယ်။",
+                _custom_text('msg.bot.coin_command.38a9fc0ad7', '🪙 COIN CHALLENGE!\n\n👤 {challenger_first_name}\n⚔️ vs {target_name}\n\nနှစ်ယောက်လုံးက\n🔴 ခေါင်း / 🔵 အမြီး\nထဲက တစ်ခုရွေးပါ။\n\nနှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။', {'challenger_first_name': f'{challenger.first_name}', 'target_name': f'{target_name}'}),
             )
 
             return
@@ -2032,16 +2019,7 @@ def coin_command(message):
 
         reply_game_message(
             message,
-            "🪙 COIN FLIP\n\n"
-            "🤖 Bot နဲ့ကစားရန်\n"
-            "/coin ခေါင်း\n"
-            "/coin အမြီး\n\n"
-            "👥 သူငယ်ချင်းနဲ့ကစားရန်\n"
-            "/coin @username\n\n"
-            "👤 Username ရှိ/မရှိ မလိုပါဘူး။\n"
-            "သူ့ message ကို Reply လုပ်ပြီး "
-            "/coin လို့လည်း Challenge "
-            "လုပ်နိုင်ပါတယ်။",
+            _custom_text('msg.bot.coin_command.875bfdeae1', '🪙 COIN FLIP\n\n🤖 Bot နဲ့ကစားရန်\n/coin ခေါင်း\n/coin အမြီး\n\n👥 သူငယ်ချင်းနဲ့ကစားရန်\n/coin @username\n\n👤 Username ရှိ/မရှိ မလိုပါဘူး။\nသူ့ message ကို Reply လုပ်ပြီး /coin လို့လည်း Challenge လုပ်နိုင်ပါတယ်။', {}),
         )
 
         return
@@ -2063,7 +2041,7 @@ def coin_command(message):
         if player_choice == result:
 
             result_text = (
-                "🎉 မင်းမှန်တယ်! +5 Points"
+                _custom_text('msg.bot.coin_command.26daac8ce6', '🎉 မင်းမှန်တယ်! +5 Points', {})
             )
 
             apply_game_result(
@@ -2076,7 +2054,7 @@ def coin_command(message):
         else:
 
             result_text = (
-                "😂 မမှန်ဘူး! -1 Point"
+                _custom_text('msg.bot.coin_command.f20922c4d0', '😂 မမှန်ဘူး! -1 Point', {})
             )
 
             apply_game_result(
@@ -2088,10 +2066,7 @@ def coin_command(message):
 
         reply_game_message(
             message,
-            f"🪙 COIN FLIP\n\n"
-            f"👤 မင်း — {player_choice}\n"
-            f"🪙 Coin — {result}\n\n"
-            f"{result_text}",
+            _custom_text('msg.bot.coin_command.800a9d930e', '🪙 COIN FLIP\n\n👤 မင်း — {player_choice}\n🪙 Coin — {result}\n\n{result_text}', {'player_choice': f'{player_choice}', 'result': f'{result}', 'result_text': f'{result_text}'}),
         )
 
         return
@@ -2108,8 +2083,7 @@ def coin_command(message):
         ):
             reply_game_message(
                 message,
-                "❌ လူချင်း Coin ကစားတာကို "
-                "Group ထဲမှာပဲ သုံးပါ။",
+                _custom_text('msg.bot.coin_command.f005df13f9', '❌ လူချင်း Coin ကစားတာကို Group ထဲမှာပဲ သုံးပါ။', {}),
             )
             return
 
@@ -2124,7 +2098,7 @@ def coin_command(message):
         if not target_username:
             reply_game_message(
                 message,
-                "❌ Username ထည့်ပေးပါ။",
+                _custom_text('msg.bot.coin_command.91c01d1ae2', '❌ Username ထည့်ပေးပါ။', {}),
             )
             return
 
@@ -2135,8 +2109,7 @@ def coin_command(message):
         ):
             reply_game_message(
                 message,
-                "😂 ကိုယ့်ကိုယ်ကို challenge "
-                "လုပ်လို့မရဘူး။",
+                _custom_text('msg.bot.coin_command.e92ab2888e', '😂 ကိုယ့်ကိုယ်ကို challenge လုပ်လို့မရဘူး။', {}),
             )
             return
 
@@ -2147,8 +2120,7 @@ def coin_command(message):
         ):
             reply_game_message(
                 message,
-                "⚠️ မင်းမှာ Coin game "
-                "တစ်ခုရှိပြီးသားပါ။",
+                _custom_text('msg.bot.coin_command.257610804e', '⚠️ မင်းမှာ Coin game တစ်ခုရှိပြီးသားပါ။', {}),
             )
             return
 
@@ -2158,8 +2130,7 @@ def coin_command(message):
         ):
             reply_game_message(
                 message,
-                "⚠️ အဲဒီ Player က Coin game "
-                "တစ်ခုကစားနေပြီးသားပါ။",
+                _custom_text('msg.bot.coin_command.f067379904', '⚠️ အဲဒီ Player က Coin game တစ်ခုကစားနေပြီးသားပါ။', {}),
             )
             return
 
@@ -2191,14 +2162,7 @@ def coin_command(message):
 
         reply_game_message(
             message,
-            f"🪙 COIN CHALLENGE!\n\n"
-            f"👤 {challenger.first_name}\n"
-            f"⚔️ vs @{target_username}\n\n"
-            f"နှစ်ယောက်လုံးက\n"
-            f"🔴 ခေါင်း / 🔵 အမြီး\n"
-            f"ထဲက တစ်ခုရွေးပါ။\n\n"
-            f"နှစ်ယောက်လုံးရွေးပြီးမှ "
-            f"Result ပြမယ်။",
+            _custom_text('msg.bot.coin_command.428d8b2258', '🪙 COIN CHALLENGE!\n\n👤 {challenger_first_name}\n⚔️ vs @{target_username}\n\nနှစ်ယောက်လုံးက\n🔴 ခေါင်း / 🔵 အမြီး\nထဲက တစ်ခုရွေးပါ။\n\nနှစ်ယောက်လုံးရွေးပြီးမှ Result ပြမယ်။', {'challenger_first_name': f'{challenger.first_name}', 'target_username': f'{target_username}'}),
         )
 
         return
@@ -2209,12 +2173,7 @@ def coin_command(message):
 
     reply_game_message(
         message,
-        "❌ Coin command မမှန်ပါ။\n\n"
-        "/coin ခေါင်း\n"
-        "/coin အမြီး\n"
-        "/coin @username\n\n"
-        "သို့မဟုတ်\n"
-        "သူ့ message ကို Reply လုပ်ပြီး /coin",
+        _custom_text('msg.bot.coin_command.47db0245c4', '❌ Coin command မမှန်ပါ။\n\n/coin ခေါင်း\n/coin အမြီး\n/coin @username\n\nသို့မဟုတ်\nသူ့ message ကို Reply လုပ်ပြီး /coin', {}),
     )
 
 
@@ -2266,7 +2225,7 @@ def coin_player_choice(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME,
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME),
     )
 
     # =====================================================
@@ -2285,7 +2244,7 @@ def coin_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 1 choice ပြီးပြီ။",
+            _custom_text('msg.bot.coin_player_choice.8e5a8c01a4', '🔒 Player 1 choice ပြီးပြီ။', {}),
         )
 
     # =====================================================
@@ -2310,7 +2269,7 @@ def coin_player_choice(message):
 
         send_game_message(
             message.chat.id,
-            "🔒 Player 2 choice ပြီးပြီ။",
+            _custom_text('msg.bot.coin_player_choice.615172c2d1', '🔒 Player 2 choice ပြီးပြီ။', {}),
         )
 
     # =====================================================
@@ -2345,8 +2304,7 @@ def coin_player_choice(message):
     if p1_correct and p2_correct:
 
         result_text = (
-            "🤝 နှစ်ယောက်လုံးမှန်တယ်!\n"
-            "Points မတိုး/မနုတ်ပါ။"
+            _custom_text('msg.bot.coin_player_choice.3b73653c4f', '🤝 နှစ်ယောက်လုံးမှန်တယ်!\nPoints မတိုး/မနုတ်ပါ။', {})
         )
 
         apply_game_result(
@@ -2370,9 +2328,7 @@ def coin_player_choice(message):
     elif p1_correct:
 
         result_text = (
-            "🏆 Player 1 နိုင်တယ်!\n"
-            "Player 1 +5 Points\n"
-            "Player 2 -1 Point"
+            _custom_text('msg.bot.coin_player_choice.845b7cf8d4', '🏆 Player 1 နိုင်တယ်!\nPlayer 1 +5 Points\nPlayer 2 -1 Point', {})
         )
 
         apply_game_result(
@@ -2396,9 +2352,7 @@ def coin_player_choice(message):
     elif p2_correct:
 
         result_text = (
-            "🏆 Player 2 နိုင်တယ်!\n"
-            "Player 2 +5 Points\n"
-            "Player 1 -1 Point"
+            _custom_text('msg.bot.coin_player_choice.c35cd6562c', '🏆 Player 2 နိုင်တယ်!\nPlayer 2 +5 Points\nPlayer 1 -1 Point', {})
         )
 
         apply_game_result(
@@ -2422,8 +2376,7 @@ def coin_player_choice(message):
     else:
 
         result_text = (
-            "😂 နှစ်ယောက်လုံး မမှန်ဘူး!\n"
-            "နှစ်ယောက်လုံး -1 Point"
+            _custom_text('msg.bot.coin_player_choice.be42687bfc', '😂 နှစ်ယောက်လုံး မမှန်ဘူး!\nနှစ်ယောက်လုံး -1 Point', {})
         )
 
         apply_game_result(
@@ -2442,11 +2395,7 @@ def coin_player_choice(message):
 
     send_game_message(
         message.chat.id,
-        f"🪙 COIN RESULT\n\n"
-        f"👤 Player 1 — {p1}\n"
-        f"👤 Player 2 — {p2}\n\n"
-        f"🪙 Coin — {result}\n\n"
-        f"{result_text}",
+        _custom_text('msg.bot.coin_player_choice.13bcd635af', '🪙 COIN RESULT\n\n👤 Player 1 — {p1}\n👤 Player 2 — {p2}\n\n🪙 Coin — {result}\n\n{result_text}', {'p1': f'{p1}', 'p2': f'{p2}', 'result': f'{result}', 'result_text': f'{result_text}'}),
     )
 
     coin_games.pop(
@@ -2554,13 +2503,13 @@ EIGHT_BALL_MESSAGES = (
 )
 
 
-@bot.message_handler(commands=["8ball", "ဗေဒင်"])
+@bot.message_handler(commands=["8ball", 'ဗေဒင်'])
 def eight_ball_command(message):
 
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
     )
 
     parts = message.text.split(
@@ -2571,22 +2520,18 @@ def eight_ball_command(message):
 
         reply_game_message(
             message,
-            "🎱 မေးခွန်းထည့်ပြီးမေးဟ လီလားး\n\n"
-            "ဥပမာ\n"
-            "/ဗေဒင် ရီးဇားဟောင်းပြန်လာမှာလား?"
+            _custom_text('msg.bot.eight_ball_command.598953cb46', '🎱 မေးခွန်းထည့်ပြီးမေးဟ လီလားး\n\nဥပမာ\n/ဗေဒင် ရီးဇားဟောင်းပြန်လာမှာလား?', {})
         )
 
         return
 
     answer = random.choice(
-        EIGHT_BALL_MESSAGES
+        _custom_bank('bot', EIGHT_BALL_MESSAGES)
     )
 
     reply_game_message(
         message,
-        f"🎱 8 BALL\n\n"
-        f"❓ {parts[1]}\n\n"
-        f"{answer}"
+        _custom_text('msg.bot.eight_ball_command.58747308c8', '🎱 8 BALL\n\n❓ {parts_1}\n\n{answer}', {'parts_1': f'{parts[1]}', 'answer': f'{answer}'})
     )
 
 
@@ -2601,7 +2546,7 @@ guess_games = {}
 # /guess COMMAND
 # ---------------------------------------------------------
 
-@bot.message_handler(commands=["guess", "ခန့်မှန်း"])
+@bot.message_handler(commands=["guess", 'ခန့်မှန်း'])
 def guess_command(message):
 
     # Group ထဲမှာပဲ ကစားခွင့်
@@ -2612,7 +2557,7 @@ def guess_command(message):
 
         reply_game_message(
             message,
-            "❌ Group ထဲမှာပဲ Guess Game ကစားလို့ရပါတယ်။"
+            _custom_text('msg.bot.guess_command.39a79b2876', '❌ Group ထဲမှာပဲ Guess Game ကစားလို့ရပါတယ်။', {})
         )
 
         return
@@ -2621,7 +2566,7 @@ def guess_command(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
     )
 
     chat_id = message.chat.id
@@ -2634,9 +2579,7 @@ def guess_command(message):
 
         reply_game_message(
             message,
-            "🎯 Guess Game ကစားနေပြီးသားပါ။\n\n"
-            "👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရပါတယ်။\n"
-            "🏆 တစ်ယောက်မှန်သွားရင် Game ပြီးပါပြီ။"
+            _custom_text('msg.bot.guess_command.5017e796d5', '🎯 Guess Game ကစားနေပြီးသားပါ။\n\n👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရပါတယ်။\n🏆 တစ်ယောက်မှန်သွားရင် Game ပြီးပါပြီ။', {})
         )
 
         return
@@ -2663,20 +2606,7 @@ def guess_command(message):
     reply_game_message(
         message,
 
-        "🎯 GUESS GAME စပြီ!\n\n"
-
-        "1 ကနေ 100 အတွင်းက number "
-        "တစ်ခု ငါရွေးထားပြီ။\n\n"
-
-        "👥 Group ထဲက ဘယ်သူမဆို "
-        "ဝင်ခန့်မှန်းလို့ရတယ်။\n"
-
-        "🔢 1 ကနေ 100 အတွင်းက "
-        "number ပို့ပါ။\n\n"
-
-        "🏆 အရင်ဆုံးမှန်တဲ့သူက Winner!\n"
-
-        "⭐ Winner = +10 Points"
+        _custom_text('msg.bot.guess_command.0e892e16a0', '🎯 GUESS GAME စပြီ!\n\n1 ကနေ 100 အတွင်းက number တစ်ခု ငါရွေးထားပြီ။\n\n👥 Group ထဲက ဘယ်သူမဆို ဝင်ခန့်မှန်းလို့ရတယ်။\n🔢 1 ကနေ 100 အတွင်းက number ပို့ပါ။\n\n🏆 အရင်ဆုံးမှန်တဲ့သူက Winner!\n⭐ Winner = +10 Points', {})
     )
 
 
@@ -2731,7 +2661,7 @@ def guess_number(message):
 
         reply_game_message(
             message,
-            "❌ 1 ကနေ 100 အတွင်းက number ပဲ ပို့ပါ။"
+            _custom_text('msg.bot.guess_number.ec7bd11bda', '❌ 1 ကနေ 100 အတွင်းက number ပဲ ပို့ပါ။', {})
         )
 
         return
@@ -2741,7 +2671,7 @@ def guess_number(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
     )
 
     # Race safety အတွက်
@@ -2807,16 +2737,7 @@ def guess_number(message):
         reply_game_message(
             message,
 
-            "🎯 CORRECT!\n\n"
-
-            f"🏆 Number က {target} ပါ!\n"
-
-            f"📊 {game['tries']} ကြိမ်နဲ့ "
-            "မှန်သွားပြီ!\n\n"
-
-            f"👑 Winner — {winner_display}\n"
-
-            "⭐ +10 Points"
+            _custom_text('msg.bot.guess_number.55445a4820', '🎯 CORRECT!\n\n🏆 Number က {target} ပါ!\n📊 {game__tries} ကြိမ်နဲ့ မှန်သွားပြီ!\n\n👑 Winner — {winner_display}\n⭐ +10 Points', {'target': f'{target}', 'game__tries': f"{game['tries']}", 'winner_display': f'{winner_display}'})
         )
 
         # Game ပိတ်
@@ -2835,7 +2756,7 @@ def guess_number(message):
 
         reply_game_message(
             message,
-            "📈 ပိုကြီးတဲ့ number ဖြစ်တယ်။"
+            _custom_text('msg.bot.guess_number.b0b5cc6e3f', '📈 ပိုကြီးတဲ့ number ဖြစ်တယ်။', {})
         )
 
     # =====================================================
@@ -2846,7 +2767,7 @@ def guess_number(message):
 
         reply_game_message(
             message,
-            "📉 ပိုသေးတဲ့ number ဖြစ်တယ်။"
+            _custom_text('msg.bot.guess_number.9fb4e83a2c', '📉 ပိုသေးတဲ့ number ဖြစ်တယ်။', {})
         )
 
 
@@ -2892,7 +2813,7 @@ def send_trivia_result(chat_id, text):
         delay_delete_message(
             chat_id,
             sent.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
         return sent
@@ -3550,10 +3471,10 @@ def format_trivia_message(
     seconds = remaining % 60
 
     lines = [
-        "🧠  TRIVIA CHALLENGE",
+        _custom_text('msg.bot.format_trivia_message.87919eb374', '🧠  TRIVIA CHALLENGE', {}),
         "━━━━━━━━━━━━━━━━━━",
         "",
-        "❓ မေးခွန်း",
+        _custom_text('msg.bot.format_trivia_message.a9094e6093', '❓ မေးခွန်း', {}),
         str(game.get("question", "")).strip(),
         "",
         "━━━━━━━━━━━━━━━━━━",
@@ -3566,11 +3487,11 @@ def format_trivia_message(
 
     lines.extend([
         "━━━━━━━━━━━━━━━━━━",
-        f"⏳ ကျန်ချိန်  {minutes:02d}:{seconds:02d}",
+        _custom_text('msg.bot.format_trivia_message.3590ac0732', '⏳ ကျန်ချိန်  {minutes}:{seconds}', {'minutes': f'{minutes:02d}', 'seconds': f'{seconds:02d}'}),
         "",
-        "💬 ဖြေဆိုရန် — A / B / C / D ထဲက တစ်လုံးပဲ ပို့ပါ။",
-        "👤 လူတစ်ယောက် တစ်ကြိမ်ပဲ ဖြေနိုင်ပါတယ်။",
-        "🏆 ပထမဆုံးအဖြေမှန်သူ  +10 Points",
+        _custom_text('msg.bot.format_trivia_message.d65bada089', '💬 ဖြေဆိုရန် — A / B / C / D ထဲက တစ်လုံးပဲ ပို့ပါ။', {}),
+        _custom_text('msg.bot.format_trivia_message.6d75fa7f11', '👤 လူတစ်ယောက် တစ်ကြိမ်ပဲ ဖြေနိုင်ပါတယ်။', {}),
+        _custom_text('msg.bot.format_trivia_message.7a2a2bc88f', '🏆 ပထမဆုံးအဖြေမှန်သူ  +10 Points', {}),
     ])
 
     return "\n".join(lines)
@@ -3684,18 +3605,7 @@ def trivia_countdown(
 
                 chat_id,
 
-                "⏰ TIME UP!\n\n"
-
-                "❌ ၃ မိနစ်အတွင်း "
-                "ဘယ်သူမှ "
-                "အဖြေမမှန်ပါဘူး။\n\n"
-
-                f"✅ အဖြေမှန် — "
-                f"{current_game['correct_letter']}. "
-                f"{current_game['answers'][current_game['correct_index']]}\n\n"
-
-                "🧠 နောက် Trivia ကို "
-                "/trivia နဲ့ စနိုင်ပါပြီ။"
+                _custom_text('msg.bot.trivia_countdown.7fd31ce803', '⏰ TIME UP!\n\n❌ ၃ မိနစ်အတွင်း ဘယ်သူမှ အဖြေမမှန်ပါဘူး။\n\n✅ အဖြေမှန် — {current_game__correct_letter}. {current_game__answers___current_game__correct}\n\n🧠 နောက် Trivia ကို /trivia နဲ့ စနိုင်ပါပြီ။', {'current_game__correct_letter': f"{current_game['correct_letter']}", 'current_game__answers___current_game__correct': f"{current_game['answers'][current_game['correct_index']]}"})
             )
 
             return
@@ -3766,8 +3676,7 @@ def trivia_command(
 
             message,
 
-            "❌ Group ထဲမှာပဲ "
-            "Trivia ကစားလို့ရပါတယ်။"
+            _custom_text('msg.bot.trivia_command.a95d00a5ab', '❌ Group ထဲမှာပဲ Trivia ကစားလို့ရပါတယ်။', {})
         )
 
         return
@@ -3787,7 +3696,7 @@ def trivia_command(
 
         chat_id,
         message.message_id,
-        GAME_DELETE_TIME
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
     )
 
     # ---------------------------------
@@ -3846,15 +3755,7 @@ def trivia_command(
 
             message,
 
-            "⚠️ Trivia Game "
-            "ကစားနေပြီးသားပါ။\n\n"
-
-            f"⏳ ကျန်ချိန် — "
-            f"{minutes:02d}:"
-            f"{seconds:02d}\n\n"
-
-            "လက်ရှိမေးခွန်းကိုပဲ "
-            "ဖြေပါ။"
+            _custom_text('msg.bot.trivia_command.dd445ee7a5', '⚠️ Trivia Game ကစားနေပြီးသားပါ။\n\n⏳ ကျန်ချိန် — {minutes}:{seconds}\n\nလက်ရှိမေးခွန်းကိုပဲ ဖြေပါ။', {'minutes': f'{minutes:02d}', 'seconds': f'{seconds:02d}'})
         )
 
         return
@@ -3869,9 +3770,7 @@ def trivia_command(
 
             message,
 
-            "⏳ Trivia question "
-            "ယူနေတုန်းပါ။ "
-            "ခဏလေးစောင့်ပါ။"
+            _custom_text('msg.bot.trivia_command.c181d286a6', '⏳ Trivia question ယူနေတုန်းပါ။ ခဏလေးစောင့်ပါ။', {})
         )
 
         return
@@ -3892,10 +3791,7 @@ def trivia_command(
 
                 message,
 
-                "❌ Trivia question "
-                "ရယူလို့မရသေးပါဘူး။\n"
-
-                "ခဏနေပြီး ပြန်စမ်းပါ။"
+                _custom_text('msg.bot.trivia_command.60aba39128', '❌ Trivia question ရယူလို့မရသေးပါဘူး။\nခဏနေပြီး ပြန်စမ်းပါ။', {})
             )
 
             return
@@ -3934,9 +3830,7 @@ def trivia_command(
 
                 message,
 
-                "❌ Trivia question "
-                "data မမှန်ပါဘူး။ "
-                "ပြန်စမ်းပါ။"
+                _custom_text('msg.bot.trivia_command.9a856004c3', '❌ Trivia question data မမှန်ပါဘူး။ ပြန်စမ်းပါ။', {})
             )
 
             return
@@ -3958,9 +3852,7 @@ def trivia_command(
 
                 message,
 
-                "❌ Trivia answer "
-                "data မပြည့်စုံပါဘူး။ "
-                "ပြန်စမ်းပါ။"
+                _custom_text('msg.bot.trivia_command.cdab3237ba', '❌ Trivia answer data မပြည့်စုံပါဘူး။ ပြန်စမ်းပါ။', {})
             )
 
             return
@@ -4006,7 +3898,7 @@ def trivia_command(
 
             "end_time":
                 time.time()
-                + TRIVIA_TIME,
+                + _custom_setting('cfg.bot.TRIVIA_TIME', TRIVIA_TIME),
 
             "attempted_users":
                 set(),
@@ -4045,7 +3937,7 @@ def trivia_command(
 
                 format_trivia_message(
                     game,
-                    TRIVIA_TIME
+                    _custom_setting('cfg.bot.TRIVIA_TIME', TRIVIA_TIME)
                 )
             )
 
@@ -4076,7 +3968,7 @@ def trivia_command(
 
             chat_id,
             sent.message_id,
-            TRIVIA_QUESTION_DELETE_TIME
+            _custom_setting('cfg.bot.TRIVIA_QUESTION_DELETE_TIME', TRIVIA_QUESTION_DELETE_TIME)
         )
 
         # ---------------------------------
@@ -4297,16 +4189,7 @@ def trivia_answer(message):
 
         chat_id,
 
-        "🏆 TRIVIA WINNER!\n\n"
-
-        f"👑 Winner — "
-        f"{winner_name}\n\n"
-
-        f"✅ အဖြေမှန် — "
-        f"{winner_game['correct_letter']}. "
-        f"{winner_game['answers'][winner_game['correct_index']]}\n\n"
-
-        "⭐ +10 Points"
+        _custom_text('msg.bot.trivia_answer.da650ee9c7', '🏆 TRIVIA WINNER!\n\n👑 Winner — {winner_name}\n\n✅ အဖြေမှန် — {winner_game__correct_letter}. {winner_game__answers___winner_game__correct_i}\n\n⭐ +10 Points', {'winner_name': f'{winner_name}', 'winner_game__correct_letter': f"{winner_game['correct_letter']}", 'winner_game__answers___winner_game__correct_i': f"{winner_game['answers'][winner_game['correct_index']]}"})
     )
     
 
@@ -4349,7 +4232,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
     else:
         if message is None or message.chat.type not in ("group", "supergroup"):
             if message is not None:
-                bot.reply_to(message, "❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။")
+                bot.reply_to(message, _custom_text('msg.bot.speed_tap_command.b063366d00', '❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {}))
             return False
         chat_id = message.chat.id
         delay_delete_message(
@@ -4384,7 +4267,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
         try:
             notice = bot.send_message(
                 chat_id,
-                "⚡ Speed Tap ပွဲက စနေပြီးသားပါ။"
+                _custom_text('msg.bot.speed_tap_command.8cc807b68f', '⚡ Speed Tap ပွဲက စနေပြီးသားပါ။', {})
             )
 
             delay_delete_message(
@@ -4403,8 +4286,8 @@ def speed_tap_command(message=None, auto_chat_id=None):
     # -----------------------------------------
 
     pending_seconds = random.randint(
-        SPEED_TAP_PENDING_MIN,
-        SPEED_TAP_PENDING_MAX,
+        _custom_setting('cfg.games.speed_tap.SPEED_TAP_PENDING_MIN', SPEED_TAP_PENDING_MIN),
+        _custom_setting('cfg.games.speed_tap.SPEED_TAP_PENDING_MAX', SPEED_TAP_PENDING_MAX),
     )
 
     created, game = create_speed_tap_game(
@@ -4436,8 +4319,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
             chat_id,
             pending_card,
             caption=(
-                "⚡ <b>SPEED TAP</b>\n"
-                "∞ <b>RANDOM START</b>"
+                _custom_text('msg.bot.speed_tap_command.5c6bb4b4a4', '⚡ <b>SPEED TAP</b>\n∞ <b>RANDOM START</b>', {})
             ),
             parse_mode="HTML",
         )
@@ -4494,8 +4376,8 @@ def speed_tap_command(message=None, auto_chat_id=None):
         # -------------------------------------
 
         wait_seconds = random.randint(
-            SPEED_TAP_WAIT_MIN,
-            SPEED_TAP_WAIT_MAX,
+            _custom_setting('cfg.games.speed_tap.SPEED_TAP_WAIT_MIN', SPEED_TAP_WAIT_MIN),
+            _custom_setting('cfg.games.speed_tap.SPEED_TAP_WAIT_MAX', SPEED_TAP_WAIT_MAX),
         )
 
         waiting_game = start_speed_tap_wait(
@@ -4543,8 +4425,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                 chat_id,
                 wait_card,
                 caption=(
-                    "⚡ <b>SPEED TAP</b>\n"
-                    "⏳ WAIT... GO ပေါ်လာမှနှိပ်!"
+                    _custom_text('msg.bot.begin_speed_tap_round.7b010ba55a', '⚡ <b>SPEED TAP</b>\n⏳ WAIT... GO ပေါ်လာမှနှိပ်!', {})
                 ),
                 parse_mode="HTML",
                 reply_markup=
@@ -4611,9 +4492,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                     telebot.types.InputMediaPhoto(
                         media=timeout_card,
                         caption=(
-                            "⏰ <b>TIME'S UP!</b>\n"
-                            "ဘယ်သူမှ အချိန်မီ "
-                            "မနှိပ်လိုက်ဘူး 😴"
+                            _custom_text('msg.bot.speed_tap_timeout.b54ae63ceb', "⏰ <b>TIME'S UP!</b>\nဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး 😴", {})
                         ),
                         parse_mode="HTML",
                     )
@@ -4698,8 +4577,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                     telebot.types.InputMediaPhoto(
                         media=go_card,
                         caption=(
-                            "🟢 <b>GO! GO! GO!</b>\n"
-                            "⚡ TAP NOW!"
+                            _custom_text('msg.bot.speed_tap_go.932695820e', '🟢 <b>GO! GO! GO!</b>\n⚡ TAP NOW!', {})
                         ),
                         parse_mode="HTML",
                     )
@@ -4743,14 +4621,14 @@ def speed_tap_command(message=None, auto_chat_id=None):
             active_game = activate_speed_tap(
                 chat_id,
                 active_time=
-                    SPEED_TAP_ACTIVE_TIME,
+                    _custom_setting('cfg.games.speed_tap.SPEED_TAP_ACTIVE_TIME', SPEED_TAP_ACTIVE_TIME),
             )
 
             if not active_game:
                 return
 
             schedule_task(
-                SPEED_TAP_ACTIVE_TIME,
+                _custom_setting('cfg.games.speed_tap.SPEED_TAP_ACTIVE_TIME', SPEED_TAP_ACTIVE_TIME),
                 speed_tap_timeout,
                 task_id=
                     f"speedtap_timeout:{chat_id}",
@@ -4802,7 +4680,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "❌ Invalid Speed Tap."
+            _custom_text('msg.bot.speed_tap_callback.c390037cc1', '❌ Invalid Speed Tap.', {})
         )
 
         return
@@ -4817,7 +4695,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "❌ Invalid Speed Tap."
+            _custom_text('msg.bot.speed_tap_callback.c390037cc1', '❌ Invalid Speed Tap.', {})
         )
 
         return
@@ -4828,7 +4706,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "🏁 ဒီ round ပြီးသွားပြီ။"
+            _custom_text('msg.bot.speed_tap_callback.df87e14430', '🏁 ဒီ round ပြီးသွားပြီ။', {})
         )
 
         return
@@ -4837,7 +4715,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "❌ Invalid action."
+            _custom_text('msg.bot.speed_tap_callback.621a4f997d', '❌ Invalid action.', {})
         )
 
         return
@@ -4849,7 +4727,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "❌ ဒီ game မဟုတ်ပါ။"
+            _custom_text('msg.bot.speed_tap_callback.f190fb0d2c', '❌ ဒီ game မဟုတ်ပါ။', {})
         )
 
         return
@@ -4881,7 +4759,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "🏁 Game ပြီးသွားပြီ။"
+            _custom_text('msg.bot.speed_tap_callback.d761e902ec', '🏁 Game ပြီးသွားပြီ။', {})
         )
 
         return
@@ -4896,7 +4774,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "∞ စောင့်ကြည့်ဦး 👀"
+            _custom_text('msg.bot.speed_tap_callback.0015deac90', '∞ စောင့်ကြည့်ဦး 👀', {})
         )
 
         return
@@ -4911,7 +4789,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "😏 စောသေးတယ်! GO ကိုစောင့်ဦး"
+            _custom_text('msg.bot.speed_tap_callback.2259093706', '😏 စောသေးတယ်! GO ကိုစောင့်ဦး', {})
         )
 
         return
@@ -4924,7 +4802,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "🏁 တခြားသူ အရင်နှိပ်သွားပြီ။"
+            _custom_text('msg.bot.speed_tap_callback.70acf92244', '🏁 တခြားသူ အရင်နှိပ်သွားပြီ။', {})
         )
 
         return
@@ -4937,7 +4815,7 @@ def speed_tap_callback(call):
 
         bot.answer_callback_query(
             call.id,
-            "⏰ အချိန်ကုန်သွားပြီ။"
+            _custom_text('msg.bot.speed_tap_callback.22a14429a9', '⏰ အချိန်ကုန်သွားပြီ။', {})
         )
 
         return
@@ -4984,7 +4862,7 @@ def speed_tap_callback(call):
 
     bot.answer_callback_query(
         call.id,
-        "⚡ မင်းအရင်ဆုံးနှိပ်လိုက်တယ်!"
+        _custom_text('msg.bot.speed_tap_callback.13906772c1', '⚡ မင်းအရင်ဆုံးနှိပ်လိုက်တယ်!', {})
     )
 
     # -----------------------------------------
@@ -5039,8 +4917,7 @@ def speed_tap_callback(call):
         if jackpot_bonus > 0:
 
             jackpot_text = (
-                f"\n✨ Jackpot Bonus: "
-                f"<b>+{jackpot_bonus}</b>"
+                _custom_text('msg.bot.speed_tap_callback.49261ce084', '\n✨ Jackpot Bonus: <b>+{jackpot_bonus}</b>', {'jackpot_bonus': f'{jackpot_bonus}'})
             )
 
         else:
@@ -5051,14 +4928,7 @@ def speed_tap_callback(call):
             telebot.types.InputMediaPhoto(
                 media=result_card,
                 caption=(
-                    "⚡ <b>SPEED TAP RESULT</b>\n\n"
-                    f"🏆 Winner: "
-                    f"<b>{user_name}</b>\n"
-                    f"⏱ Reaction: "
-                    f"<b>{reaction_ms} ms</b>\n"
-                    f"⭐ Reward: "
-                    f"<b>+{reward_points} Points</b>"
-                    f"{jackpot_text}"
+                    _custom_text('msg.bot.speed_tap_callback.c6b090162e', '⚡ <b>SPEED TAP RESULT</b>\n\n🏆 Winner: <b>{user_name}</b>\n⏱ Reaction: <b>{reaction_ms} ms</b>\n⭐ Reward: <b>+{reward_points} Points</b>{jackpot_text}', {'user_name': f'{user_name}', 'reaction_ms': f'{reaction_ms}', 'reward_points': f'{reward_points}', 'jackpot_text': f'{jackpot_text}'})
                 ),
                 parse_mode="HTML",
             )
@@ -5105,28 +4975,21 @@ boss_raid_visual_state={}
 
 def boss_raid_text(raid):
     boss=raid["boss"];hp=max(0,raid["hp"]);mx=raid["max_hp"];pct=(hp/mx*100) if mx else 0
-    filled=max(0,min(16,int(round(pct/100*16))));bar="🟥"*filled+"⬛"*(16-filled)
+    filled=max(0,min(16,int(round(pct/100*16))));bar=_custom_text('msg.bot.boss_raid_text.87248b6182', '🟥', {})*filled+"⬛"*(16-filled)
     left=max(0,int(raid["ends_at"]-time.time()));mins,secs=divmod(left,60)
-    top=boss_top_fighters(raid,3);medals=["🥇","🥈","🥉"]
+    top=boss_top_fighters(raid,3);medals=[_custom_text('msg.bot.boss_raid_text.f16aae7997', '🥇', {}),_custom_text('msg.bot.boss_raid_text.fcb8c5cba3', '🥈', {}),_custom_text('msg.bot.boss_raid_text.d7daab43e2', '🥉', {})]
     rows=[f'{medals[i]} <b>{html.escape(str(p["name"]))}</b>  •  {p["damage"]:,} DMG' for i,p in enumerate(top)]
     while len(rows)<3:rows.append(f'{medals[len(rows)]} —')
-    if raid.get("result")=="victory":state="🏆 RAID CLEARED"
-    elif raid.get("finished"):state="☠️ PARTY DEFEATED"
-    else:state=f'⚔️ PHASE {raid["phase"]}  •  RAID LIVE'
+    if raid.get("result")=="victory":state=_custom_text('msg.bot.boss_raid_text.3033eb7829', '🏆 RAID CLEARED', {})
+    elif raid.get("finished"):state=_custom_text('msg.bot.boss_raid_text.bf8c7e3470', '☠️ PARTY DEFEATED', {})
+    else:state=_custom_text('msg.bot.boss_raid_text.8800a01483', '⚔️ PHASE {raid__phase}  •  RAID LIVE', {'raid__phase': f"{raid['phase']}"})
     mod=raid.get("modifier")
-    mod_text={"rage":"🔥 RAGE • damage resisted","exposed":"💢 EXPOSED • bonus damage","fortify":"🛡 FORTIFY • heavy defense"}.get(mod)
+    mod_text={"rage":_custom_text('msg.bot.boss_raid_text.8205e7b0b3', '🔥 RAGE • damage resisted', {}),"exposed":_custom_text('msg.bot.boss_raid_text.f26ec6cdb0', '💢 EXPOSED • bonus damage', {}),"fortify":_custom_text('msg.bot.boss_raid_text.dd7c350667', '🛡 FORTIFY • heavy defense', {})}.get(mod)
     if mod_text:state+=f'\n{mod_text} • {raid.get("modifier_hits_left",0)} hits left'
     return (
-        f'╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n'
-        f'{boss["emoji"]} <b>{html.escape(boss["name"]).upper()}</b>\n'
-        f'🏷 {boss["tier"]}   │   {state}\n'
-        f'╚══════════════════════╝\n\n'
-        f'❤️ <b>BOSS HP</b>\n{bar}\n<b>{hp:,}</b> / {mx:,}  •  {pct:.1f}%\n\n'
-        f'⏳ <b>{mins:02d}:{secs:02d}</b>   ⚔️ <b>{raid["total_damage"]:,}</b> DMG   👥 <b>{len(raid["fighters"])}</b>\n'
-        f'━━━━━━━━━━━━━━━━━━━━\n'
-        f'🏆 <b>TOP RAIDERS</b>\n'+"\n".join(rows)+
+        _custom_text('msg.bot.boss_raid_text.b63264e85c', '╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n{boss__emoji} <b>{html_escape_boss__name____upper}</b>\n🏷 {boss__tier}   │   {state}\n╚══════════════════════╝\n\n❤️ <b>BOSS HP</b>\n{bar}\n<b>{hp}</b> / {mx}  •  {pct}%\n\n⏳ <b>{mins}:{secs}</b>   ⚔️ <b>{raid__total_damage}</b> DMG   👥 <b>{len_raid__fighters}</b>\n━━━━━━━━━━━━━━━━━━━━\n🏆 <b>TOP RAIDERS</b>\n', {'boss__emoji': f"{boss['emoji']}", 'html_escape_boss__name____upper': f"{html.escape(boss['name']).upper()}", 'boss__tier': f"{boss['tier']}", 'state': f'{state}', 'bar': f'{bar}', 'hp': f'{hp:,}', 'mx': f'{mx:,}', 'pct': f'{pct:.1f}', 'mins': f'{mins:02d}', 'secs': f'{secs:02d}', 'raid__total_damage': f"{raid['total_damage']:,}", 'len_raid__fighters': f"{len(raid['fighters'])}"})+"\n".join(rows)+
         '\n━━━━━━━━━━━━━━━━━━━━\n'
-        +('🔥 <b>ATTACK! ATTACK! ATTACK!</b>\nတားထားတဲ့ cooldown မရှိဘူး။ Boss မလွတ်ခင် ဝိုင်းချ!' if not raid.get("finished") else '🏁 <b>RAID ENDED</b>')
+        +(_custom_text('msg.bot.boss_raid_text.aad03feb79', '🔥 <b>ATTACK! ATTACK! ATTACK!</b>\nတားထားတဲ့ cooldown မရှိဘူး။ Boss မလွတ်ခင် ဝိုင်းချ!', {}) if not raid.get("finished") else _custom_text('msg.bot.boss_raid_text.7c0dfa4ec0', '🏁 <b>RAID ENDED</b>', {}))
     )
 
 def boss_raid_edit(chat_id,raid,force=False):
@@ -5147,10 +5010,10 @@ def boss_raid_edit(chat_id,raid,force=False):
         if "message is not modified" not in str(ex).lower():print("Boss Raid edit error:",ex)
 
 def boss_reaction_message(chat_id,raid,text,kind="phase"):
-    boss=raid["boss"];icons={"phase":"🔥","win":"💀","lose":"👑"}
+    boss=raid["boss"];icons={"phase":_custom_text('msg.bot.boss_reaction_message.d8f26c88ff', '🔥', {}),"win":_custom_text('msg.bot.boss_reaction_message.d7be117486', '💀', {}),"lose":_custom_text('msg.bot.boss_reaction_message.798373558e', '👑', {})}
     title={"phase":"BOSS REACTION","win":"BOSS DEFEATED","lose":"BOSS VICTORY"}
     try:
-        m=bot.send_message(chat_id,f'{icons[kind]} <b>{title[kind]}</b>\n{boss["emoji"]} <b>{html.escape(boss["name"])}</b>: “{html.escape(text)}”',parse_mode="HTML")
+        m=bot.send_message(chat_id,_custom_text('msg.bot.boss_reaction_message.b37ce1e384', '{icons_kind} <b>{title_kind}</b>\n{boss__emoji} <b>{html_escape_boss__name}</b>: “{html_escape_text}”', {'icons_kind': f'{icons[kind]}', 'title_kind': f'{title[kind]}', 'boss__emoji': f"{boss['emoji']}", 'html_escape_boss__name': f"{html.escape(boss['name'])}", 'html_escape_text': f'{html.escape(text)}'}),parse_mode="HTML")
         delay_delete_message(chat_id,m.message_id,45 if kind=="phase" else 75)
     except Exception as ex:print("Boss reaction error:",ex)
 
@@ -5226,12 +5089,12 @@ def boss_raid_finish(chat_id,raid,won):
     boss_raid_last_edit.pop(chat_id,None)
 
     # Always send a clear result. Visual rendering failure falls back to text.
-    title='🏆 <b>RAID VICTORY!</b>' if won else '☠️ <b>PARTY DEFEATED!</b>'
+    title=_custom_text('msg.bot.boss_raid_finish.2aaec2c533', '🏆 <b>RAID VICTORY!</b>', {}) if won else _custom_text('msg.bot.boss_raid_finish.d88c546a09', '☠️ <b>PARTY DEFEATED!</b>', {})
     caption=title+f'\n\n{raid["boss"]["emoji"]} <b>{html.escape(raid["boss"]["name"])}</b>\n“{html.escape(line)}”'
     if won:
-        caption+=f'\n\n⚔️ Total Damage: <b>{raid["total_damage"]:,}</b>\n👥 Raiders: <b>{len(raid["fighters"])}</b>'
+        caption+=_custom_text('msg.bot.boss_raid_finish.6b3b78bd58', '\n\n⚔️ Total Damage: <b>{raid__total_damage}</b>\n👥 Raiders: <b>{len_raid__fighters}</b>', {'raid__total_damage': f"{raid['total_damage']:,}", 'len_raid__fighters': f"{len(raid['fighters'])}"})
     else:
-        caption+=f'\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>'
+        caption+=_custom_text('msg.bot.boss_raid_finish.a6d051c7e1', '\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>', {'muted': f'{muted}', 'protected': f'{protected}'})
 
     try:
         card=generate_boss_result_card(raid,won,line,muted,protected,art=result_art,variant=variant,composition=state.get("composition"))
@@ -5267,7 +5130,7 @@ def boss_raid_timeout(chat_id,raid_id):
 @bot.message_handler(commands=['boss','bossraid','raid'])
 def boss_raid_command(message):
     if message.chat.type not in ('group','supergroup'):
-        bot.reply_to(message,'👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။');return
+        bot.reply_to(message,_custom_text('msg.bot.boss_raid_command.9d5a77359f', '👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {}));return
     if spawn_boss_raid(message.chat.id,message):
         boss_auto_spawner.note_spawn(message.chat.id)
 
@@ -5276,14 +5139,14 @@ def spawn_boss_raid(chat_id,message=None):
     allowed,blocker=can_start_session(chat_id,"boss_raid")
     if not allowed:
         if message:
-            sent=bot.reply_to(message,f'⏳ {blocker} game/event ရှိနေပါတယ်။')
+            sent=bot.reply_to(message,_custom_text('msg.bot.spawn_boss_raid.816e4abbc0', '⏳ {blocker} game/event ရှိနေပါတယ်။', {'blocker': f'{blocker}'}))
             delay_delete_message(chat_id,sent.message_id,15)
         return False
     created,raid=start_boss_raid(chat_id)
     if not created:
-        if message:bot.reply_to(message,'👹 Boss Raid တစ်ခု run နေပြီးသားပါ။')
+        if message:bot.reply_to(message,_custom_text('msg.bot.spawn_boss_raid.08d8d3cd3d', '👹 Boss Raid တစ်ခု run နေပြီးသားပါ။', {}))
         return False
-    ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=BOSS_RAID_DURATION)
+    ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=_custom_setting('cfg.games.boss_raid.RAID_DURATION', BOSS_RAID_DURATION))
     if not ok:
         finish_boss_raid(chat_id,raid["id"],"cancelled")
         return False
@@ -5300,7 +5163,7 @@ def spawn_boss_raid(chat_id,message=None):
         set_boss_raid_message_id(chat_id,raid["id"],sent.message_id)
         safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True)
         if message:delay_delete_message(chat_id,message.message_id,10)
-        schedule_task(BOSS_RAID_DURATION+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
+        schedule_task(_custom_setting('cfg.games.boss_raid.RAID_DURATION', BOSS_RAID_DURATION)+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
         return True
     except Exception as exc:
         finish_boss_raid(chat_id,raid["id"],"cancelled")
@@ -5312,15 +5175,15 @@ def spawn_boss_raid(chat_id,message=None):
 @bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("boss:"))
 def boss_raid_callback(call):
     parts=call.data.split(":")
-    if len(parts)!=3:bot.answer_callback_query(call.id,"❌ Invalid raid.");return
+    if len(parts)!=3:bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.40664a38b5', '❌ Invalid raid.', {}));return
     raid_id,action=parts[1],parts[2]
-    if action=="closed":bot.answer_callback_query(call.id,"🏁 ဒီ Raid ပြီးသွားပြီ။");return
-    if action!="attack":bot.answer_callback_query(call.id,"❌ Invalid action.");return
+    if action=="closed":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.297b636641', '🏁 ဒီ Raid ပြီးသွားပြီ။', {}));return
+    if action!="attack":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.621a4f997d', '❌ Invalid action.', {}));return
     chat_id=call.message.chat.id;name=call.from_user.first_name or call.from_user.username or "Player"
     result=attack_boss_raid(chat_id,raid_id,call.from_user.id,name)
-    if result["status"]!="ok":bot.answer_callback_query(call.id,"🏁 ဒီ Raid ပြီးသွားပြီ။");return
+    if result["status"]!="ok":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.297b636641', '🏁 ဒီ Raid ပြီးသွားပြီ။', {}));return
     raid=result["raid"]
-    note="🛡️ Boss BLOCK!" if result["blocked"] else (f'💥 CRITICAL! -{result["damage"]} HP' if result["crit"] else f'⚔️ -{result["damage"]} HP')
+    note=_custom_text('msg.bot.boss_raid_callback.5fd6ba05e7', '🛡️ Boss BLOCK!', {}) if result["blocked"] else (_custom_text('msg.bot.boss_raid_callback.abdf13fa28', '💥 CRITICAL! -{result__damage} HP', {'result__damage': f"{result['damage']}"}) if result["crit"] else _custom_text('msg.bot.boss_raid_callback.d224fdaed5', '⚔️ -{result__damage} HP', {'result__damage': f"{result['damage']}"}))
     bot.answer_callback_query(call.id,note)
     # Re-render the same pinned photo only when the boss crosses a visual HP stage.
     # 24 base images become Normal / Damaged / Rage / Final variants at runtime.
@@ -5350,7 +5213,7 @@ def boss_raid_callback(call):
                 extra=f'\nEffect: {event.get("hits")} attacks'
             if event.get("heal"):
                 extra=f'\nBoss recovered {event.get("heal")} HP'
-            ev=bot.send_message(chat_id,f'<b>{html.escape(event["title"])}</b>\n{html.escape(event["text"])}{extra}',parse_mode="HTML")
+            ev=bot.send_message(chat_id,_custom_text('msg.bot.boss_raid_callback.d10eb19c7e', '<b>{html_escape_event__title}</b>\n{html_escape_event__text}{extra}', {'html_escape_event__title': f"{html.escape(event['title'])}", 'html_escape_event__text': f"{html.escape(event['text'])}", 'extra': f'{extra}'}),parse_mode="HTML")
             delay_delete_message(chat_id,ev.message_id,28)
         except Exception as ex:print("Boss event message error:",ex)
     if raid.get("finished") and raid.get("result")=="victory":
@@ -5418,7 +5281,7 @@ def math_battle_next(chat_id, game_id, round_index):
             # Do not leave an unresponsive card on screen if question loading fails.
             stop_math_battle(chat_id)
             try:
-                bot.send_message(chat_id, '⚠️ Math Battle နောက်တစ်ချီ ဖွင့်မရပါ။ Render Logs မှာ Math next round error ကိုစစ်ပါ။')
+                bot.send_message(chat_id, _custom_text('msg.bot.math_battle_next.0a8bfed147', '⚠️ Math Battle နောက်တစ်ချီ ဖွင့်မရပါ။ Render Logs မှာ Math next round error ကိုစစ်ပါ။', {}))
             except Exception:
                 pass
             return
@@ -5448,7 +5311,7 @@ def math_battle_next(chat_id, game_id, round_index):
                     except Exception as e:
                         print('Math reward error:', e)
             try:
-                sent=bot.send_photo(chat_id, math_result_card(result, rewards), caption='🏁 MATH BATTLE — FINAL RESULT')
+                sent=bot.send_photo(chat_id, math_result_card(result, rewards), caption=_custom_text('msg.bot.math_battle_next.38b4dc7164', '🏁 MATH BATTLE — FINAL RESULT', {}))
                 delay_delete_message(chat_id, sent.message_id, 120)
             except Exception as e:
                 print('Math final card error:', e)
@@ -5456,7 +5319,7 @@ def math_battle_next(chat_id, game_id, round_index):
         if status != 'next': return
         old_id=current.get('message_id')
         try:
-            sent=bot.send_photo(chat_id, math_round_card(result), reply_markup=math_battle_keyboard(result), caption=f"🧮 MATH BATTLE · ROUND {result['round']+1}/5")
+            sent=bot.send_photo(chat_id, math_round_card(result), reply_markup=math_battle_keyboard(result), caption=_custom_text('msg.bot.math_battle_next.f8209dc30d', '🧮 MATH BATTLE · ROUND {result__round_____1}/5', {'result__round_____1': f"{result['round'] + 1}"}))
             if not set_math_message(chat_id,game_id,result['round'],sent.message_id):
                 bot.delete_message(chat_id,sent.message_id)
                 return
@@ -5486,8 +5349,7 @@ def math_battle_tick(chat_id, game_id, round_index, message_id):
 
         seconds_left = max(0, int(remaining + 0.999))
         caption = (
-            f"🧮 MATH BATTLE · ROUND {round_index + 1}/5\n"
-            f"⏳ Time left: {seconds_left}s"
+            _custom_text('msg.bot.math_battle_tick.8427e98671', '🧮 MATH BATTLE · ROUND {round_index___1}/5\n⏳ Time left: {seconds_left}s', {'round_index___1': f'{round_index + 1}', 'seconds_left': f'{seconds_left}'})
         )
         try:
             bot.edit_message_caption(
@@ -5523,16 +5385,16 @@ def math_battle_schedule_tick(chat_id, game):
 @bot.message_handler(commands=['mathbattle','math'])
 def math_battle_command(message):
     if message.chat.type not in ('group','supergroup'):
-        bot.reply_to(message,'🧮 Math Battle ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။')
+        bot.reply_to(message,_custom_text('msg.bot.math_battle_command.19a0333709', '🧮 Math Battle ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {}))
         return
     chat_id=message.chat.id
     try:
         created,game=start_math_battle(chat_id)
         if not created:
-            sent=bot.reply_to(message,f'⏳ {game} game/event ရှိနေပါတယ်။')
+            sent=bot.reply_to(message,_custom_text('msg.bot.math_battle_command.872485792f', '⏳ {game} game/event ရှိနေပါတယ်။', {'game': f'{game}'}))
             delay_delete_message(chat_id,sent.message_id,20)
             return
-        sent=bot.send_photo(chat_id,math_round_card(game),caption='🧮 MATH BATTLE · ROUND 1/5',reply_markup=math_battle_keyboard(game))
+        sent=bot.send_photo(chat_id,math_round_card(game),caption=_custom_text('msg.bot.math_battle_command.0036cff47e', '🧮 MATH BATTLE · ROUND 1/5', {}),reply_markup=math_battle_keyboard(game))
         set_math_message(chat_id,game['id'],0,sent.message_id)
         math_battle_schedule_tick(chat_id,get_math_battle(chat_id))
         math_battle_arm_deadline(get_math_battle(chat_id))
@@ -5545,13 +5407,13 @@ def math_battle_command(message):
 def math_battle_end_command(message):
     if message.chat.type not in ('group','supergroup'): return
     if not is_admin(message):
-        bot.reply_to(message,'❌ Admin ပဲ ရပ်နိုင်ပါတယ်။')
+        bot.reply_to(message,_custom_text('msg.bot.math_battle_end_command.d0ceab340d', '❌ Admin ပဲ ရပ်နိုင်ပါတယ်။', {}))
         return
     g=stop_math_battle(message.chat.id)
     if g and g.get('message_id'):
         try: bot.delete_message(message.chat.id,g['message_id'])
         except Exception: pass
-    bot.reply_to(message,'🛑 Math Battle ရပ်လိုက်ပြီ။' if g else 'Math Battle မရှိပါ။')
+    bot.reply_to(message,_custom_text('msg.bot.math_battle_end_command.a5b7f3dc84', '🛑 Math Battle ရပ်လိုက်ပြီ။', {}) if g else _custom_text('msg.bot.math_battle_end_command.2d0688422c', 'Math Battle မရှိပါ။', {}))
 
 @bot.callback_query_handler(func=lambda c: bool(c.data and c.data.startswith('math:')))
 def math_battle_callback(call):
@@ -5560,9 +5422,9 @@ def math_battle_callback(call):
         chat_id=call.message.chat.id
         if call.message.chat.type not in ('group','supergroup'): return
         status,g=answer_math_battle(chat_id,game_id,int(round_text),call.from_user.id,call.from_user.first_name,int(index_text))
-        alerts={'stale':'ဒီမေးခွန်းပြီးသွားပါပြီ။','closed':'အချိန်ကုန်ပြီ။',
-                'already':'တစ်ချီမှာ တစ်ကြိမ်ပဲ ဖြေလို့ရတယ်။','wrong':'❌ မမှန်ပါ။',
-                'late':'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', 'correct':'✅ မှန်တယ်!'}
+        alerts={'stale':_custom_text('msg.bot.math_battle_callback.844cda01db', 'ဒီမေးခွန်းပြီးသွားပါပြီ။', {}),'closed':_custom_text('msg.bot.math_battle_callback.d95b391741', 'အချိန်ကုန်ပြီ။', {}),
+                'already':_custom_text('msg.bot.math_battle_callback.f3a708037b', 'တစ်ချီမှာ တစ်ကြိမ်ပဲ ဖြေလို့ရတယ်။', {}),'wrong':_custom_text('msg.bot.math_battle_callback.b34b3156f8', '❌ မမှန်ပါ။', {}),
+                'late':_custom_text('msg.bot.math_battle_callback.367f02db30', 'မှန်တယ်။ Top 3 ပြည့်သွားပြီ။', {}), 'correct':_custom_text('msg.bot.math_battle_callback.cca296cef5', '✅ မှန်တယ်!', {})}
         bot.answer_callback_query(call.id,alerts.get(status,'OK'),show_alert=False)
         if status=='correct' and g:
             # Re-arm a deadline watchdog because the first winner reduces the timer to 10s.
@@ -5574,12 +5436,12 @@ def math_battle_callback(call):
             elif g.get('message_id'):
                 try:
                     bot.edit_message_media(
-                        InputMediaPhoto(math_round_card(g),caption=f"🧮 MATH BATTLE · ROUND {g['round']+1}/5"),
+                        InputMediaPhoto(math_round_card(g),caption=_custom_text('msg.bot.math_battle_callback.d78a7f99d6', '🧮 MATH BATTLE · ROUND {g__round_____1}/5', {'g__round_____1': f"{g['round'] + 1}"})),
                         chat_id=chat_id,message_id=g['message_id'],reply_markup=math_battle_keyboard(g))
                 except Exception: pass
     except Exception as e:
         print('Math callback error:',e)
-        try: bot.answer_callback_query(call.id,'⚠️ ပြန်စမ်းကြည့်ပါ။')
+        try: bot.answer_callback_query(call.id,_custom_text('msg.bot.math_battle_callback.5395c30861', '⚠️ ပြန်စမ်းကြည့်ပါ။', {}))
         except Exception: pass
 
 word_chain_finish_lock = threading.RLock()
@@ -5601,16 +5463,9 @@ def word_chain_status_text(game):
         f"{n}. {game['names'].get(uid, 'Player')}: {score}"
         for n, (uid, score) in enumerate(leaders[:3], 1)
     ) or "No scores yet"
-    mode = 'မြန်မာ (space ခြားထားတဲ့ စကားလုံး)' if game['mode'] == 'my' else 'English'
+    mode = _custom_text('msg.bot.word_chain_status_text.72731b0e4e', 'မြန်မာ (space ခြားထားတဲ့ စကားလုံး)', {}) if game['mode'] == 'my' else 'English'
     return (
-        f"🔤 WORD CHAIN — {mode}\n\n"
-        f"🔗 နောက်ဆုံး: {game['word']}\n"
-        f"➡️ ဆက်ရန်: {game['required']}\n"
-        f"✅ Valid moves: {game['moves']}\n"
-        f"⏳ အဖြေမရှိရင် {WORD_CHAIN_IDLE_SECONDS}s နဲ့ပြီးမယ်\n"
-        f"🏁 Round {game['round_seconds'] // 60} မိနစ်\n\n"
-        f"🏆 Top 3\n{standing}\n\n"
-        "⚠️ တစ်ယောက်တည်း နှစ်ခါဆက်တိုက် မဆက်ရ။"
+        _custom_text('msg.bot.word_chain_status_text.122fc112e7', '🔤 WORD CHAIN — {mode}\n\n🔗 နောက်ဆုံး: {game__word}\n➡️ ဆက်ရန်: {game__required}\n✅ Valid moves: {game__moves}\n⏳ အဖြေမရှိရင် {WORD_CHAIN_IDLE_SECONDS}s နဲ့ပြီးမယ်\n🏁 Round {game__round_seconds______60} မိနစ်\n\n🏆 Top 3\n{standing}\n\n⚠️ တစ်ယောက်တည်း နှစ်ခါဆက်တိုက် မဆက်ရ။', {'mode': f'{mode}', 'game__word': f"{game['word']}", 'game__required': f"{game['required']}", 'game__moves': f"{game['moves']}", 'WORD_CHAIN_IDLE_SECONDS': f"{_custom_setting('cfg.games.word_chain.IDLE_SECONDS', WORD_CHAIN_IDLE_SECONDS)}", 'game__round_seconds______60': f"{game['round_seconds'] // 60}", 'standing': f'{standing}'})
     )
 
 
@@ -5634,8 +5489,7 @@ def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
         try:
             bot.edit_message_caption(
                 caption=(
-                    "🔤 WORD CHAIN — စကားလုံးဆက်ပါ\n"
-                    f"⏳ Next answer: {seconds_left}s"
+                    _custom_text('msg.bot.word_chain_tick.c85b4aa789', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ\n⏳ Next answer: {seconds_left}s', {'seconds_left': f'{seconds_left}'})
                 ),
                 chat_id=chat_id,
                 message_id=expected_message_id,
@@ -5718,7 +5572,7 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
         }.get(reason, 'Game ended')
         try:
             result_image = word_chain_result_card(ended, reward_rows, reason_label)
-            sent = bot.send_photo(chat_id, result_image, caption='🏁 WORD CHAIN RESULT')
+            sent = bot.send_photo(chat_id, result_image, caption=_custom_text('msg.bot.word_chain_close.adf900914a', '🏁 WORD CHAIN RESULT', {}))
             delay_delete_message(chat_id, sent.message_id, 90)
         except Exception as error:
             print(f'Word Chain Result Card Error: {error}')
@@ -5730,8 +5584,8 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
             ]
             try:
                 sent = bot.send_message(
-                    chat_id, '🏁 WORD CHAIN END — ' + reason_label + '\n\n'
-                    + ('\n'.join(lines) if lines else 'No valid answers.'),
+                    chat_id, _custom_text('msg.bot.word_chain_close.656620b717', '🏁 WORD CHAIN END — ', {}) + reason_label + '\n\n'
+                    + ('\n'.join(lines) if lines else _custom_text('msg.bot.word_chain_close.9bb3280217', 'No valid answers.', {})),
                 )
                 delay_delete_message(chat_id, sent.message_id, 90)
             except Exception as fallback_error:
@@ -5755,23 +5609,23 @@ def word_chain_idle_check(chat_id, game_id, expected_idle):
 @bot.message_handler(commands=['wordchain', 'wc'])
 def word_chain_command(message):
     if message.chat.type not in ('group', 'supergroup'):
-        bot.reply_to(message, 'Group ထဲမှာပဲ ကစားလို့ရပါတယ်။')
+        bot.reply_to(message, _custom_text('msg.bot.word_chain_command.05c5ca2d4d', 'Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {}))
         return
     args = (message.text or '').split()
     if len(args) > 1 and args[1].lower() not in ('en', 'english', 'my', 'mm', 'burmese', 'မြန်မာ'):
-        bot.reply_to(message, 'အသုံးပြုရန်: /wordchain en သို့မဟုတ် /wordchain mm')
+        bot.reply_to(message, _custom_text('msg.bot.word_chain_command.0235276bb0', 'အသုံးပြုရန်: /wordchain en သို့မဟုတ် /wordchain mm', {}))
         return
     mode = args[1].lower() if len(args) > 1 else 'en'
     chat_id = message.chat.id
     if get_speed_tap_game(chat_id) or get_emoji_game(chat_id):
-        bot.reply_to(message, 'တခြား game ပြီးမှ Word Chain စနိုင်ပါတယ်။')
+        bot.reply_to(message, _custom_text('msg.bot.word_chain_command.3fffdf89dc', 'တခြား game ပြီးမှ Word Chain စနိုင်ပါတယ်။', {}))
         return
     created, game = start_word_chain_game(chat_id, mode)
     if not created:
-        bot.reply_to(message, f'Game တစ်ခု run နေပြီ: {game}')
+        bot.reply_to(message, _custom_text('msg.bot.word_chain_command.f761cd480c', 'Game တစ်ခု run နေပြီ: {game}', {'game': f'{game}'}))
         return
     try:
-        sent = bot.send_photo(chat_id, word_chain_status_card(game), caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ')
+        sent = bot.send_photo(chat_id, word_chain_status_card(game), caption=_custom_text('msg.bot.word_chain_command.12dddc207a', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ', {}))
         set_word_chain_message_id(chat_id, game['id'], sent.message_id)
         word_chain_start_live(chat_id, get_word_chain_game(chat_id))
         schedule_task(
@@ -5781,7 +5635,7 @@ def word_chain_command(message):
             task_id=f"wordchain_limit:{chat_id}:{game['id']}",
         )
         schedule_task(
-            WORD_CHAIN_IDLE_SECONDS,
+            _custom_setting('cfg.games.word_chain.IDLE_SECONDS', WORD_CHAIN_IDLE_SECONDS),
             word_chain_idle_check,
             chat_id, game['id'], game['idle_deadline'],
             task_id=f"wordchain_idle:{chat_id}:{game['id']}:0",
@@ -5798,7 +5652,7 @@ def word_chain_stop_command(message):
     if not game:
         return
     if not is_user_admin(bot, message.chat.id, message.from_user.id):
-        bot.reply_to(message, 'Admin ပဲ ဒီ game ကိုရပ်လို့ရပါတယ်။')
+        bot.reply_to(message, _custom_text('msg.bot.word_chain_stop_command.7b3a973356', 'Admin ပဲ ဒီ game ကိုရပ်လို့ရပါတယ်။', {}))
         return
     word_chain_close(message.chat.id, game['id'], 'stop')
 
@@ -5840,7 +5694,7 @@ def word_chain_answer(message):
             if latest and latest['id'] == game['id'] and latest['moves'] == result['moves']:
                 sent = bot.send_photo(
                     chat_id, word_chain_status_card(latest),
-                    caption='🔤 WORD CHAIN — စကားလုံးဆက်ပါ',
+                    caption=_custom_text('msg.bot.word_chain_answer.12dddc207a', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ', {}),
                 )
                 set_word_chain_message_id(chat_id, game['id'], sent.message_id)
                 if old_id:
@@ -5871,7 +5725,7 @@ def emoji_guess_command(message):
     ]:
         bot.reply_to(
             message,
-            "❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။"
+            _custom_text('msg.bot.emoji_guess_command.b063366d00', '❌ Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {})
         )
         return
 
@@ -5884,7 +5738,7 @@ def emoji_guess_command(message):
     if get_emoji_game(chat_id):
         bot.reply_to(
             message,
-            "😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။"
+            _custom_text('msg.bot.emoji_guess_command.736dfb3032', '😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။', {})
         )
         return
 
@@ -5899,7 +5753,7 @@ def emoji_guess_command(message):
     if not question:
         bot.reply_to(
             message,
-            "❌ Emoji question မရသေးပါ။"
+            _custom_text('msg.bot.emoji_guess_command.69163216dc', '❌ Emoji question မရသေးပါ။', {})
         )
         return
 
@@ -5910,13 +5764,13 @@ def emoji_guess_command(message):
     started, game = start_emoji_game(
         chat_id,
         question,
-        duration=EMOJI_GUESS_TIME,
+        duration=_custom_setting('cfg.games.emoji_guess.EMOJI_GUESS_TIME', EMOJI_GUESS_TIME),
     )
 
     if not started:
         bot.reply_to(
             message,
-            "😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။"
+            _custom_text('msg.bot.emoji_guess_command.736dfb3032', '😀 Emoji Guess game တစ်ပွဲ ကစားနေပြီးသားပါ။', {})
         )
         return
 
@@ -5937,11 +5791,7 @@ def emoji_guess_command(message):
     game_message = bot.send_message(
         chat_id,
         (
-            "😀 <b>EMOJI GUESS</b>\n\n"
-            f"{question['emojis']}\n\n"
-            f"📂 Category: <b>{question['category']}</b>\n"
-            f"⏳ Time: <b>{EMOJI_GUESS_TIME}s</b>\n\n"
-            "💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။"
+            _custom_text('msg.bot.emoji_guess_command.745f673958', '😀 <b>EMOJI GUESS</b>\n\n{question__emojis}\n\n📂 Category: <b>{question__category}</b>\n⏳ Time: <b>{EMOJI_GUESS_TIME}s</b>\n\n💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။', {'question__emojis': f"{question['emojis']}", 'question__category': f"{question['category']}", 'EMOJI_GUESS_TIME': f"{_custom_setting('cfg.games.emoji_guess.EMOJI_GUESS_TIME', EMOJI_GUESS_TIME)}"})
         ),
         parse_mode="HTML",
     )
@@ -5971,11 +5821,7 @@ def emoji_guess_command(message):
         try:
             bot.edit_message_text(
                 (
-                    "😀 <b>EMOJI GUESS</b>\n\n"
-                    f"{question['emojis']}\n\n"
-                    f"📂 Category: <b>{question['category']}</b>\n"
-                    f"⏳ Time: <b>{remaining}s</b>\n\n"
-                    "💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။"
+                    _custom_text('msg.bot.update_emoji_countdown.6167656256', '😀 <b>EMOJI GUESS</b>\n\n{question__emojis}\n\n📂 Category: <b>{question__category}</b>\n⏳ Time: <b>{remaining}s</b>\n\n💬 အဖြေကို group ထဲမှာ ရိုက်ပို့ပါ။', {'question__emojis': f"{question['emojis']}", 'question__category': f"{question['category']}", 'remaining': f'{remaining}'})
                 ),
                 chat_id=chat_id,
                 message_id=game_message.message_id,
@@ -6025,8 +5871,7 @@ def emoji_guess_command(message):
             hint_message = bot.send_message(
                 chat_id,
                 (
-                    "💡 <b>HINT</b>\n\n"
-                    f"{hint}"
+                    _custom_text('msg.bot.send_emoji_hint.6eef901602', '💡 <b>HINT</b>\n\n{hint}', {'hint': f'{hint}'})
                 ),
                 parse_mode="HTML",
             )
@@ -6085,8 +5930,7 @@ def emoji_guess_command(message):
             result_message = bot.send_message(
                 chat_id,
                 (
-                    "⏰ <b>TIME'S UP!</b>\n\n"
-                    f"✅ Answer: <b>{answer}</b>"
+                    _custom_text('msg.bot.emoji_timeout.0894ab238b', "⏰ <b>TIME'S UP!</b>\n\n✅ Answer: <b>{answer}</b>", {'answer': f'{answer}'})
                 ),
                 parse_mode="HTML",
             )
@@ -6104,7 +5948,7 @@ def emoji_guess_command(message):
             )
 
     schedule_task(
-        EMOJI_GUESS_TIME,
+        _custom_setting('cfg.games.emoji_guess.EMOJI_GUESS_TIME', EMOJI_GUESS_TIME),
         emoji_timeout,
         task_id=f"emoji_timeout:{chat_id}",
         replace=True,
@@ -6228,10 +6072,7 @@ def emoji_guess_answer(message):
         result_message = bot.send_message(
             chat_id,
             (
-                "🎉 <b>CORRECT!</b>\n\n"
-                f"👤 Winner: <b>{winner_name}</b>\n"
-                f"✅ Answer: <b>{result['answer']}</b>\n"
-                "🏆 Reward: <b>+10 Points</b>"
+                _custom_text('msg.bot.emoji_guess_answer.a641692ef5', '🎉 <b>CORRECT!</b>\n\n👤 Winner: <b>{winner_name}</b>\n✅ Answer: <b>{result__answer}</b>\n🏆 Reward: <b>+10 Points</b>', {'winner_name': f'{winner_name}', 'result__answer': f"{result['answer']}"})
             ),
             parse_mode="HTML",
         )
@@ -6311,24 +6152,22 @@ for base in RANDOM_BASE:
 RANDOM_MESSAGES = GENERATED_RANDOM_MESSAGES[:200]
 
 
-@bot.message_handler(commands=["random", "ကျပမ်း"])
+@bot.message_handler(commands=["random", 'ကျပမ်း'])
 def random_command(message):
 
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        GAME_DELETE_TIME
+        _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
     )
 
     number = random.randint(1, 100)
 
-    reaction = random.choice(RANDOM_MESSAGES)
+    reaction = random.choice(_custom_bank('bot', RANDOM_MESSAGES))
 
     reply_game_message(
         message,
-        f"🎲 RANDOM RESULT\n\n"
-        f"🔢 Number — {number}\n\n"
-        f"{reaction}"
+        _custom_text('msg.bot.random_command.c44bc74bed', '🎲 RANDOM RESULT\n\n🔢 Number — {number}\n\n{reaction}', {'number': f'{number}', 'reaction': f'{reaction}'})
     )
 
 
@@ -6336,25 +6175,18 @@ def random_command(message):
 # 6. RULES - 4 MINUTES
 # =========================================================
 
-@bot.message_handler(commands=["rules", "စည်းကမ်း"])
+@bot.message_handler(commands=["rules", 'စည်းကမ်း'])
 def rules_command(message):
 
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        INFO_DELETE_TIME
+        _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
     )
 
     reply_info_message(
         message,
-        "📜 GROUP RULES\n\n"
-        "1️⃣ Spam မလုပ်ရ။\n"
-        "2️⃣ Group ကို မနှောင့်ယှက်ရ။\n"
-        "3️⃣ မလိုအပ်ဘဲ message အများကြီး မပို့ရ။\n"
-        "4️⃣ အခြား members တွေကို လေးစားပါ။\n"
-        "5️⃣ Admin တွေရဲ့ moderation ကို လိုက်နာပါ။\n\n"
-        "🤖 Bot commands တွေကိုလည်း "
-        "စောက်တလွဲသုံးပါနဲ့။"
+        _custom_text('msg.bot.rules_command.3c729bf91f', '📜 GROUP RULES\n\n1️⃣ Spam မလုပ်ရ။\n2️⃣ Group ကို မနှောင့်ယှက်ရ။\n3️⃣ မလိုအပ်ဘဲ message အများကြီး မပို့ရ။\n4️⃣ အခြား members တွေကို လေးစားပါ။\n5️⃣ Admin တွေရဲ့ moderation ကို လိုက်နာပါ။\n\n🤖 Bot commands တွေကိုလည်း စောက်တလွဲသုံးပါနဲ့။', {})
     )
 
 
@@ -6362,13 +6194,13 @@ def rules_command(message):
 # 7. ID - 4 MINUTES
 # =========================================================
 
-@bot.message_handler(commands=["id", "အိုင်ဒီ"])
+@bot.message_handler(commands=["id", 'အိုင်ဒီ'])
 def id_command(message):
 
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        INFO_DELETE_TIME
+        _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
     )
 
     chat_id = message.chat.id
@@ -6381,10 +6213,7 @@ def id_command(message):
 
         reply_info_message(
             message,
-            f"🆔 USER ID\n"
-            f"<code>{target.id}</code>\n\n"
-            f"💬 CHAT ID\n"
-            f"<code>{chat_id}</code>",
+            _custom_text('msg.bot.id_command.f08a31f94a', '🆔 USER ID\n<code>{target_id}</code>\n\n💬 CHAT ID\n<code>{chat_id}</code>', {'target_id': f'{target.id}', 'chat_id': f'{chat_id}'}),
             parse_mode="HTML"
         )
 
@@ -6392,10 +6221,7 @@ def id_command(message):
 
     reply_info_message(
         message,
-        f"🆔 USER ID\n"
-        f"<code>{message.from_user.id}</code>\n\n"
-        f"💬 CHAT ID\n"
-        f"<code>{chat_id}</code>",
+        _custom_text('msg.bot.id_command.34e21e783e', '🆔 USER ID\n<code>{message_from_user_id}</code>\n\n💬 CHAT ID\n<code>{chat_id}</code>', {'message_from_user_id': f'{message.from_user.id}', 'chat_id': f'{chat_id}'}),
         parse_mode="HTML"
     )
 
@@ -6404,13 +6230,13 @@ def id_command(message):
 # 8. ADMINS - 4 MINUTES
 # =========================================================
 
-@bot.message_handler(commands=["admins", "အက်မင်"])
+@bot.message_handler(commands=["admins", 'အက်မင်'])
 def admins_command(message):
 
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        INFO_DELETE_TIME
+        _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
     )
 
     if message.chat.type not in [
@@ -6420,7 +6246,7 @@ def admins_command(message):
 
         reply_info_message(
             message,
-            "❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။"
+            _custom_text('msg.bot.admins_command.ad6f6980b3', '❌ Group ထဲမှာပဲ သုံးလို့ရပါတယ်။', {})
         )
 
         return
@@ -6432,7 +6258,7 @@ def admins_command(message):
         )
 
         lines = [
-            "👮 GROUP ADMINS",
+            _custom_text('msg.bot.admins_command.d80033c35c', '👮 GROUP ADMINS', {}),
             ""
         ]
 
@@ -6451,13 +6277,13 @@ def admins_command(message):
             if user.username:
 
                 lines.append(
-                    f"👤 {name} — @{user.username}"
+                    _custom_text('msg.bot.admins_command.1ea26dcd2c', '👤 {name} — @{user_username}', {'name': f'{name}', 'user_username': f'{user.username}'})
                 )
 
             else:
 
                 lines.append(
-                    f"👤 {name}"
+                    _custom_text('msg.bot.admins_command.d1e4b886d9', '👤 {name}', {'name': f'{name}'})
                 )
 
         reply_info_message(
@@ -6473,7 +6299,7 @@ def admins_command(message):
 
         reply_info_message(
             message,
-            "❌ Admin list ယူလို့မရပါဘူး။"
+            _custom_text('msg.bot.admins_command.70672c0a80', '❌ Admin list ယူလို့မရပါဘူး။', {})
         )
 
 
@@ -6487,7 +6313,7 @@ def ping_command(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        INFO_DELETE_TIME
+        _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
     )
 
     start = time.time()
@@ -6496,7 +6322,7 @@ def ping_command(message):
 
         msg = bot.reply_to(
             message,
-            "🏓 Pinging..."
+            _custom_text('msg.bot.ping_command.936ab7c6e7', '🏓 Pinging...', {})
         )
 
         ping_ms = int(
@@ -6506,12 +6332,11 @@ def ping_command(message):
         delay_delete_message(
             message.chat.id,
             msg.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
         bot.edit_message_text(
-            f"🏓 PONG!\n\n"
-            f"⚡ {ping_ms} ms",
+            _custom_text('msg.bot.ping_command.50afa20181', '🏓 PONG!\n\n⚡ {ping_ms} ms', {'ping_ms': f'{ping_ms}'}),
             message.chat.id,
             msg.message_id
         )
@@ -6533,7 +6358,7 @@ def uptime_command(message):
     delay_delete_message(
         message.chat.id,
         message.message_id,
-        INFO_DELETE_TIME
+        _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
     )
 
     total_seconds = int(
@@ -6575,8 +6400,7 @@ def uptime_command(message):
 
     reply_info_message(
         message,
-        "⏱️ BOT UPTIME\n\n"
-        f"🟢 {' '.join(parts)}"
+        _custom_text('msg.bot.uptime_command.1ca523d747', '⏱️ BOT UPTIME\n\n🟢 {join_parts}', {'join_parts': f"{' '.join(parts)}"})
     )
 
 
@@ -6596,21 +6420,18 @@ def welcome_new_member(message):
 
         name = (
             user.first_name
-            or "သူငယ်ချင်း"
+            or _custom_text('msg.bot.welcome_new_member.a2ee3dfcf6', 'သူငယ်ချင်း', {})
         )
 
         sent = bot.send_message(
             message.chat.id,
-            f"👋 Welcome {name}!\n\n"
-            f"🎉 Group ထဲကို ကြိုဆိုပါတယ်။\n"
-            f"📜 /rules နဲ့ Group Rules ကို "
-            f"ကြည့်နိုင်ပါတယ်။"
+            _custom_text('msg.bot.welcome_new_member.ec500ddef5', '👋 Welcome {name}!\n\n🎉 Group ထဲကို ကြိုဆိုပါတယ်။\n📜 /rules နဲ့ Group Rules ကို ကြည့်နိုင်ပါတယ်။', {'name': f'{name}'})
         )
 
         delay_delete_message(
             message.chat.id,
             sent.message_id,
-            WELCOME_DELETE_TIME
+            _custom_setting('cfg.bot.WELCOME_DELETE_TIME', WELCOME_DELETE_TIME)
         )
 
 
@@ -6632,7 +6453,7 @@ def clean_new_games():
 
         if (
             now - game["created"]
-            > GAME_DELETE_TIME
+            > _custom_setting('cfg.bot.GAME_DELETE_TIME', GAME_DELETE_TIME)
         ):
 
             expired_coin.append(
@@ -6702,60 +6523,7 @@ threading.Thread(
 def commands_list(message):
     bot.send_message(
         message.chat.id,
-        "🤖 BOT COMMANDS\n\n"
-        "🎮 GAMES & EVENTS\n"
-        "🎭 /imposter — Imposter\n"
-        "🎯 /guess — Number Guess\n"
-        "🧠 /trivia — Trivia\n"
-        "🪙 /coin — Coin Flip\n"
-        "🎲 /dice — Dice\n"
-        "🎰 /slot — Slot\n"
-        "✊ /rps — Rock Paper Scissors\n"
-        "🎱 /8ball — Magic 8 Ball\n"
-        "❤️ /love — Love Calculator\n"
-        "🎲 /random — Random Number\n"
-        "⚔️ /boss, /bossraid, /raid — Boss Raid\n"
-        "🔴 /teambattle — Team Battle (Admin)\n"
-        "👥 /pair — Pair Challenge\n"
-        "🧮 /mathbattle, /math — Math Battle\n"
-        "🛑 /endmath, /stopmath — Stop Math Battle\n"
-        "🔗 /wordchain, /wc — Word Chain\n"
-        "🛑 /endwordchain, /stopwc — Stop Word Chain\n"
-        "🧩 /emoji, /emojiguess — Emoji Guess\n"
-        "⚡ /speedtap — Speed Tap\n"
-        "🤔 /wyr, /wouldyourather — Would You Rather\n"
-        "📅 /daily, /dailychallenge — Daily Challenge\n"
-        "🎭 /imposterstop — Stop Imposter (Admin)\n"
-        "🛑 /wyrstop — Stop WYR\n\n"
-        "🏆 PROFILE & ACTIVITY\n"
-        "👤 /profile — Profile\n"
-        "🏆 /rank ၊ /top — Leaderboard\n"
-        "🎁 /dailyclaim — Daily Reward Claim\n"
-        "👥 /dailygroupclaim — Group Daily Claim\n\n"
-        "📣 GROUP & ADMIN\n"
-        "📢 /all ၊ /everyone — Mention Members\n"
-        "📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n"
-        "🛑 /stop, /နား — Stop Mentions\n"
-        "⚠️ /warn — Warn Member\n"
-        "🚫 /ဘမ်း — Ban\n"
-        "🔓 /မဘမ်း — Unban\n"
-        "🔇 /တိတ်စမ်း — Mute\n"
-        "🔊 /ဖွင့်လိုက် — Unmute\n\n"
-        "📋 INFORMATION & UTILITIES\n"
-        "📜 /rules — Group Rules\n"
-        "👮 /admins — Admin List\n"
-        "🆔 /id — User / Chat ID\n"
-        "🏓 /ping — Ping\n"
-        "⏱️ /uptime — Uptime\n"
-        "🎵 /play — Search Music\n"
-        "📋 /cmd — This Command List\n\n"
-        "👑 OWNER PRIVATE CHAT\n"
-        "🔐 /owner — Owner Control Panel\n"
-        "📨 /ownersend — Send replied message\n"
-        "💾 /ownersave — Save replied message\n"
-        "❌ /ownercancel — Cancel owner action\n"
-        "🔍 /broadcastcheck — Check owner access\n\n"
-        "ℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။"
+        _custom_text('msg.bot.commands_list.ae6c96f389', '🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n✊ /rps — Rock Paper Scissors\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။', {})
     )
 
 
@@ -6781,22 +6549,21 @@ def manual_warn(message):
     ]:
         bot.reply_to(
             message,
-            "❌ Group ထဲမှာပဲ /warn သုံးလို့ရပါတယ်။"
+            _custom_text('msg.bot.manual_warn.fd58050963', '❌ Group ထဲမှာပဲ /warn သုံးလို့ရပါတယ်။', {})
         )
         return
 
     if not is_admin(message):
         bot.reply_to(
             message,
-            "❌ Admin ပဲ /warn သုံးလို့ရပါတယ်။"
+            _custom_text('msg.bot.manual_warn.8c1e644cc6', '❌ Admin ပဲ /warn သုံးလို့ရပါတယ်။', {})
         )
         return
 
     if not message.reply_to_message:
         bot.reply_to(
             message,
-            "❌ Warn ပေးချင်တဲ့ user message ကို "
-            "Reply လုပ်ပြီး /warn ရိုက်ပါ။"
+            _custom_text('msg.bot.manual_warn.6730610523', '❌ Warn ပေးချင်တဲ့ user message ကို Reply လုပ်ပြီး /warn ရိုက်ပါ။', {})
         )
         return
 
@@ -6805,14 +6572,14 @@ def manual_warn(message):
     if target.is_bot:
         bot.reply_to(
             message,
-            "❌ Bot ကို Warn ပေးစရာမလိုပါဘူး။"
+            _custom_text('msg.bot.manual_warn.02497b29d1', '❌ Bot ကို Warn ပေးစရာမလိုပါဘူး။', {})
         )
         return
 
     if target.id == message.from_user.id:
         bot.reply_to(
             message,
-            "❌ ကိုယ့်ကိုယ်ကို Warn ပေးလို့မရပါဘူး။"
+            _custom_text('msg.bot.manual_warn.26545847f7', '❌ ကိုယ့်ကိုယ်ကို Warn ပေးလို့မရပါဘူး။', {})
         )
         return
 
@@ -6840,9 +6607,7 @@ def manual_warn(message):
 
             reply_info_message(
                 message,
-                f"🚫 {target.first_name}\n\n"
-                f"⚠️ Warn 3/3 ပြည့်သွားပါပြီ။\n"
-                f"🚫 Ban လုပ်လိုက်ပြီ။"
+                _custom_text('msg.bot.manual_warn.fef6eaa6a7', '🚫 {target_first_name}\n\n⚠️ Warn 3/3 ပြည့်သွားပါပြီ။\n🚫 Ban လုပ်လိုက်ပြီ။', {'target_first_name': f'{target.first_name}'})
             )
 
         except Exception as e:
@@ -6853,17 +6618,14 @@ def manual_warn(message):
 
             bot.reply_to(
                 message,
-                "❌ Ban လုပ်လို့မရပါဘူး။ "
-                "Bot မှာ Ban Users permission ရှိ/မရှိ စစ်ပါ။"
+                _custom_text('msg.bot.manual_warn.c3e47ad649', '❌ Ban လုပ်လို့မရပါဘူး။ Bot မှာ Ban Users permission ရှိ/မရှိ စစ်ပါ။', {})
             )
 
         return
 
     reply_info_message(
         message,
-        f"⚠️ WARN\n\n"
-        f"👤 {target.first_name}\n"
-        f"📊 Warn — {warns}/3"
+        _custom_text('msg.bot.manual_warn.63a158acd8', '⚠️ WARN\n\n👤 {target_first_name}\n📊 Warn — {warns}/3', {'target_first_name': f'{target.first_name}', 'warns': f'{warns}'})
     )
 
 
@@ -6904,7 +6666,7 @@ def profile_command(message):
         sent = bot.send_photo(
             message.chat.id,
             rank_image,
-            caption="🏆 PLAYER PROFILE",
+            caption=_custom_text('msg.bot.profile_command.2c5fbbc6fd', '🏆 PLAYER PROFILE', {}),
             reply_to_message_id=message.message_id,
         )
 
@@ -6913,7 +6675,7 @@ def profile_command(message):
         delay_delete_message(
             message.chat.id,
             sent.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
     except Exception as e:
@@ -6933,14 +6695,7 @@ def profile_command(message):
 
         reply_info_message(
             message,
-            f"👤 PROFILE\n\n"
-            f"👤 {user.first_name}\n"
-            f"🏆 Rank — {rank}\n"
-            f"💰 Points — {stats['points']}\n"
-            f"🎮 Games — {stats['games']}\n"
-            f"🥇 Wins — {stats['wins']}\n"
-            f"❌ Losses — {stats['losses']}\n"
-            f"🤝 Draws — {stats['draws']}"
+            _custom_text('msg.bot.profile_command.a03131e8e1', '👤 PROFILE\n\n👤 {user_first_name}\n🏆 Rank — {rank}\n💰 Points — {stats__points}\n🎮 Games — {stats__games}\n🥇 Wins — {stats__wins}\n❌ Losses — {stats__losses}\n🤝 Draws — {stats__draws}', {'user_first_name': f'{user.first_name}', 'rank': f'{rank}', 'stats__points': f"{stats['points']}", 'stats__games': f"{stats['games']}", 'stats__wins': f"{stats['wins']}", 'stats__losses': f"{stats['losses']}", 'stats__draws': f"{stats['draws']}"})
         )
 
 
@@ -7002,8 +6757,7 @@ def rank_command(message):
 
         reply_info_message(
             message,
-            "🏆 Rank data မရှိသေးပါဘူး။\n"
-            "Game ကစားပြီး Points ရယူပါ။"
+            _custom_text('msg.bot.rank_command.98b228d9b7', '🏆 Rank data မရှိသေးပါဘူး။\nGame ကစားပြီး Points ရယူပါ။', {})
         )
 
         return
@@ -7060,7 +6814,7 @@ def rank_command(message):
         sent = bot.send_photo(
             chat_id,
             rank_image,
-            caption="🏆 GROUP RANKING",
+            caption=_custom_text('msg.bot.rank_command.907014a800', '🏆 GROUP RANKING', {}),
             reply_to_message_id=
                 message.message_id,
         )
@@ -7068,7 +6822,7 @@ def rank_command(message):
         delay_delete_message(
             chat_id,
             sent.message_id,
-            INFO_DELETE_TIME
+            _custom_setting('cfg.bot.INFO_DELETE_TIME', INFO_DELETE_TIME)
         )
 
     except Exception as e:
@@ -7082,14 +6836,14 @@ def rank_command(message):
         # -------------------------------------
 
         lines = [
-            "🏆 GROUP RANKING",
+            _custom_text('msg.bot.rank_command.907014a800', '🏆 GROUP RANKING', {}),
             ""
         ]
 
         medals = {
-            1: "🥇",
-            2: "🥈",
-            3: "🥉",
+            1: _custom_text('msg.bot.rank_command.f16aae7997', '🥇', {}),
+            2: _custom_text('msg.bot.rank_command.fcb8c5cba3', '🥈', {}),
+            3: _custom_text('msg.bot.rank_command.d7daab43e2', '🥉', {}),
         }
 
         for index, player in enumerate(
@@ -7107,11 +6861,7 @@ def rank_command(message):
             )
 
             lines.append(
-                f"{icon} {player['name']}\n"
-                f"💰 {player['points']} pts • "
-                f"{rank}\n"
-                f"🥇 {player['wins']} Wins • "
-                f"🎮 {player['games']} Games"
+                _custom_text('msg.bot.rank_command.4b55b3986b', '{icon} {player__name}\n💰 {player__points} pts • {rank}\n🥇 {player__wins} Wins • 🎮 {player__games} Games', {'icon': f'{icon}', 'player__name': f"{player['name']}", 'player__points': f"{player['points']}", 'rank': f'{rank}', 'player__wins': f"{player['wins']}", 'player__games': f"{player['games']}"})
             )
 
         reply_info_message(
@@ -7161,7 +6911,7 @@ def check_spam(chat_id, user_id, key_type, message_id):
     spam_count[key] = [
         item
         for item in spam_count[key]
-        if now - item[0] <= SPAM_TIME
+        if now - item[0] <= _custom_setting('cfg.bot.SPAM_TIME', SPAM_TIME)
     ]
 
     # လက်ရှိ message ကို မှတ်ထား
@@ -7224,13 +6974,12 @@ def mute_user(chat_id, user_id, name, reason):
         chat_id,
         user_id,
         permissions=permissions,
-        until_date=int(now + MUTE_TIME)
+        until_date=int(now + _custom_setting('cfg.bot.MUTE_TIME', MUTE_TIME))
     )
 
     warning = bot.send_message(
         chat_id,
-        f"🔇 {name} {reason}\n"
-        f"{MUTE_TIME} စက္ကန့် Mute လိုက်ပါပြီ။"
+        _custom_text('msg.bot.mute_user.9e679dcde0', '🔇 {name} {reason}\n{MUTE_TIME} စက္ကန့် Mute လိုက်ပါပြီ။', {'name': f'{name}', 'reason': f'{reason}', 'MUTE_TIME': f"{_custom_setting('cfg.bot.MUTE_TIME', MUTE_TIME)}"})
     )
 
     delay_delete_message(
@@ -7269,7 +7018,7 @@ def ban_word_filter(message):
 
         text = message.text.lower()
 
-        for word in BAN_WORDS:
+        for word in _custom_setting('cfg.bot.BAN_WORDS', BAN_WORDS):
 
             if word.lower() in text:
 
@@ -7304,8 +7053,7 @@ def ban_word_filter(message):
 
                     warning = bot.send_message(
                         chat_id,
-                        f"🚫 {name} မအေလိုး ၃ ခါရှိနေပြီ လစ်လိုက်တော့"
-                        f"\nBan လိုက်ပြီ။"
+                        _custom_text('msg.bot.ban_word_filter.b70f04d515', '🚫 {name} မအေလိုး ၃ ခါရှိနေပြီ လစ်လိုက်တော့\nBan လိုက်ပြီ။', {'name': f'{name}'})
                     )
 
                     delay_delete_message(
@@ -7324,8 +7072,7 @@ def ban_word_filter(message):
 
                     warning = bot.send_message(
                         chat_id,
-                        f"⚠️ {name} မမအေလိုး မဆဲနဲ့..\n"
-                        f"Warn: {warns}/3"
+                        _custom_text('msg.bot.ban_word_filter.f11e474ac9', '⚠️ {name} မမအေလိုး မဆဲနဲ့..\nWarn: {warns}/3', {'name': f'{name}', 'warns': f'{warns}'})
                     )
 
                     delay_delete_message(
@@ -7380,7 +7127,7 @@ def sticker_spam_filter(message):
             message.message_id
         )
 
-        if count >= SPAM_LIMIT:
+        if count >= _custom_setting('cfg.bot.SPAM_LIMIT', SPAM_LIMIT):
 
             # Spam window ထဲက Sticker အားလုံးဖျက်
             delete_spam_messages(
@@ -7394,7 +7141,7 @@ def sticker_spam_filter(message):
                 chat_id,
                 user_id,
                 name,
-                "Sticker တွေလီးမို့ ဆက်တိုက်ပို့နေတာလားး"
+                _custom_text('msg.bot.sticker_spam_filter.98bcd32355', 'Sticker တွေလီးမို့ ဆက်တိုက်ပို့နေတာလားး', {})
             )
 
     except Exception as e:
@@ -7446,7 +7193,7 @@ def can_auto_spawn_boss(chat_id):
 
 boss_auto_spawner=ActivitySpawner(
     spawn_boss_raid, threshold=(60,125), chance=0.70, quiet=(50*60,125*60),
-    can_spawn=can_auto_spawn_boss,
+    can_spawn=can_auto_spawn_boss, config_key="boss_auto",
 )
 
 

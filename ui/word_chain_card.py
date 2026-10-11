@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Compact Word Chain card, optionally using user's own assets/word_chain images."""
 from io import BytesIO
 from functools import lru_cache
@@ -52,11 +53,11 @@ def status_card(game):
     d.rounded_rectangle((22,18,878,462),radius=28,outline=(125,213,235,135),width=2)
     d.rounded_rectangle((40,32,860,108),radius=20,fill=(8,18,36,190))
     d.rounded_rectangle((55,48,65,93),radius=5,fill=cyan)
-    d.text((82,50),'WORD CHAIN',font=font(35),fill=white)
+    d.text((82,50),_custom_text('msg.ui.word_chain_card.status_card.34fa94d927', 'WORD CHAIN', {}),font=font(35),fill=white)
     mode='MYANMAR' if game['mode']=='my' else 'ENGLISH'
     mf=font(20)
     d.text((824,72),mode,font=mf,fill=cyan,anchor='rm')
-    d.text((64,130),'CURRENT WORD',font=font(18),fill=muted)
+    d.text((64,130),_custom_text('msg.ui.word_chain_card.status_card.342ab59c3a', 'CURRENT WORD', {}),font=font(18),fill=muted)
     word=str(game['word'])
     d.text((63,161),word,font=fit_text(d,word,740,59,24,game['mode']=='my'),fill=white)
     d.rounded_rectangle((54,255,846,348),radius=22,fill=(12,33,51,205),outline=(93,245,220,185),width=2)
@@ -67,9 +68,9 @@ def status_card(game):
     idle=max(0,int(game['idle_deadline']-now+0.99))
     # Round duration is intentionally hidden; only the 60s answer timer is live.
     d.rounded_rectangle((54,370,846,448),radius=19,fill=(6,16,29,185))
-    d.text((73,383),f"MOVES  {game['moves']}",font=font(20),fill=white)
-    d.text((289,383),f'ANSWER  00:{idle:02d}',font=font(20),fill=cyan)
-    d.text((573,383),'ROUND  ∞',font=font(20),fill=muted)
+    d.text((73,383),_custom_text('msg.ui.word_chain_card.status_card.d636181d18', 'MOVES  {game__moves}', {'game__moves': f"{game['moves']}"}),font=font(20),fill=white)
+    d.text((289,383),_custom_text('msg.ui.word_chain_card.status_card.7f962780e4', 'ANSWER  00:{idle}', {'idle': f'{idle:02d}'}),font=font(20),fill=cyan)
+    d.text((573,383),_custom_text('msg.ui.word_chain_card.status_card.18d121def7', 'ROUND  ∞', {}),font=font(20),fill=muted)
     ranked = sorted(game['scores'].items(), key=lambda x: (-x[1], x[0]))[:3]
     # Compact three-column leaderboard fits inside the existing footer.
     # Show equal word counts as tied ranks, matching the end-result rewards.
@@ -86,7 +87,7 @@ def status_card(game):
         d.text((x, 419), label,
                font=fit_text(d, label, 235, 18, 12, True), fill=color)
     if not ranked:
-        d.text((73, 419), 'TOP 3  —', font=font(19), fill=gold)
+        d.text((73, 419), _custom_text('msg.ui.word_chain_card.status_card.ee5d2412a8', 'TOP 3  —', {}), font=font(19), fill=gold)
     out=BytesIO(); im.convert('RGB').save(out,'JPEG',quality=93,optimize=True)
     out.seek(0); out.name='word_chain.jpg'; return out
 
@@ -109,7 +110,7 @@ def result_card(game, rows, reason):
                         fill=(7, 16, 32, 100), outline=(125, 213, 235, 160), width=2)
     d.rounded_rectangle((40, 32, 860, 111), radius=20, fill=(8, 18, 36, 215))
     d.rounded_rectangle((55, 48, 65, 95), radius=5, fill=cyan)
-    d.text((82, 50), 'WORD CHAIN', font=font(34), fill=white)
+    d.text((82, 50), _custom_text('msg.ui.word_chain_card.result_card.34fa94d927', 'WORD CHAIN', {}), font=font(34), fill=white)
     d.text((824, 79), 'RESULT', font=font(21), fill=gold, anchor='rm')
 
     reason = str(reason or 'Game ended')
@@ -123,7 +124,7 @@ def result_card(game, rows, reason):
     d.text((822, head_y + 7), 'REWARD', font=font(19), fill=cyan, anchor='rm')
 
     if not rows:
-        d.text((450, 279), 'No valid answers', font=font(29), fill=white, anchor='mm')
+        d.text((450, 279), _custom_text('msg.ui.word_chain_card.result_card.20dd48d9c7', 'No valid answers', {}), font=font(29), fill=white, anchor='mm')
     else:
         # Five visible rows for legibility on compact Telegram photos.
         for idx, row in enumerate(rows[:5]):
@@ -141,7 +142,7 @@ def result_card(game, rows, reason):
             d.text((813, y + 7), reward, font=font(21),
                    fill=gold if row['points'] else muted, anchor='rm')
         if len(rows) > 5:
-            d.text((450, 449), f"+{len(rows)-5} more players", font=font(14),
+            d.text((450, 449), _custom_text('msg.ui.word_chain_card.result_card.1ee49a904e', '+{len_rows____5} more players', {'len_rows____5': f'{len(rows) - 5}'}), font=font(14),
                    fill=muted, anchor='mm')
 
     out = BytesIO()

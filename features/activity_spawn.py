@@ -7,7 +7,8 @@ from collections import deque
 
 class ActivitySpawner:
     def __init__(self, spawn, *, threshold, chance, quiet, can_spawn=lambda cid: True,
-                 clock=time.monotonic, rng=None):
+                 clock=time.monotonic, rng=None, config_key=None):
+        self.config_key=config_key
         self.spawn=spawn
         self.threshold=threshold
         self.chance=chance
@@ -18,20 +19,31 @@ class ActivitySpawner:
         self.lock=threading.RLock()
         self.groups={}
 
+    def _config(self, cid, name, default):
+        if not self.config_key:return default
+        from core.customization import setting_value
+        return setting_value('cfg.'+self.config_key+'.'+name,default,scope=cid)
+
     def _state(self, cid):
+        threshold=tuple(self._config(cid,'threshold',self.threshold))
         if cid not in self.groups:
             self.groups[cid]={'events':deque(), 'users':{},
-                'next_check':self.rng.randint(*self.threshold), 'quiet_until':0, 'checking':False}
-        return self.groups[cid]
+                'next_check':self.rng.randint(*threshold), 'threshold':threshold, 'quiet_until':0, 'checking':False}
+        state=self.groups[cid]
+        if state.get('threshold')!=threshold:
+            state['threshold']=threshold
+            state['next_check']=self.rng.randint(*threshold)
+        return state
 
     def note_spawn(self, cid):
         with self.lock:
             state=self._state(cid)
             state['events'].clear()
-            state['next_check']=self.rng.randint(*self.threshold)
-            state['quiet_until']=self.clock()+self.rng.randint(*self.quiet)
+            state['next_check']=self.rng.randint(*self._config(cid,'threshold',self.threshold))
+            state['quiet_until']=self.clock()+self.rng.randint(*self._config(cid,'quiet',self.quiet))
 
     def record(self, cid, uid):
+        if not self._config(cid,'enabled',True):return False
         now=self.clock()
         with self.lock:
             state=self._state(cid)
@@ -41,7 +53,7 @@ class ActivitySpawner:
                 state['events'].popleft()
                 expired+=1
             if expired:
-                state['next_check']=max(self.threshold[0],state['next_check']-expired)
+                state['next_check']=max(self._config(cid,'threshold',self.threshold)[0],state['next_check']-expired)
             state['users']={u:t for u,t in state['users'].items() if t>=now-600}
             if now-state['users'].get(uid,float('-inf'))<3:return False
             state['users'][uid]=now
@@ -52,7 +64,7 @@ class ActivitySpawner:
             state['checking']=True
         success=False
         try:
-            if self.can_spawn(cid) and self.rng.random()<self.chance:
+            if self.can_spawn(cid) and self.rng.random()<self._config(cid,'chance',self.chance):
                 success=bool(self.spawn(cid))
             return success
         finally:

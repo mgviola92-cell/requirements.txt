@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 🏆 VISUAL LEADERBOARD CARD
 # =========================================================
@@ -82,7 +83,7 @@ def generate_leaderboard_card(
 
         draw_text(
             card,
-            "No ranking data yet.",
+            _custom_text('msg.ui.leaderboard_card.generate_leaderboard_card.aadabb5be3', 'No ranking data yet.', {}),
             (85, 175),
             size=32,
         )
@@ -208,7 +209,7 @@ def generate_leaderboard_card(
 
         draw_text(
             card,
-            f"{points} PTS",
+            _custom_text('msg.ui.leaderboard_card.generate_leaderboard_card.16c39df3dc', '{points} PTS', {'points': f'{points}'}),
             (790, y + 15),
             size=25,
         )
@@ -219,7 +220,7 @@ def generate_leaderboard_card(
 
         draw_text(
             card,
-            f"W {wins}  /  G {games}",
+            _custom_text('msg.ui.leaderboard_card.generate_leaderboard_card.f38234de89', 'W {wins}  /  G {games}', {'wins': f'{wins}', 'games': f'{games}'}),
             (960, y + 17),
             size=21,
         )

@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Daily Challenge: persistent groups, random daily missions, scheduled auto-post.
 Register once immediately after TeleBot creation, before all other handlers.
 """
@@ -15,7 +16,8 @@ from ui.daily_challenge_card import card
 
 TEMP_CARD_SECONDS = 60
 
-def _delete_later(bot, chat_id, message_id, delay=TEMP_CARD_SECONDS):
+def _delete_later(bot, chat_id, message_id, delay=None):
+    if delay is None: delay = _custom_setting('cfg.features.daily_challenge.TEMP_CARD_SECONDS', TEMP_CARD_SECONDS)
     def remove():
         try: bot.delete_message(chat_id, message_id)
         except Exception as exc: print("Daily temporary cleanup:", exc)
@@ -62,7 +64,7 @@ def register_daily_challenge(bot):
                 else:
                     return True
                 # Only send a replacement if an existing message was deleted or invalid.
-            sent=bot.send_photo(chat_id,card(s),caption='🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3')
+            sent=bot.send_photo(chat_id,card(s),caption=_custom_text('msg.features.daily_challenge.publish.d2c45eae88', '🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3', {}))
             set_card_id(chat_id,sent.message_id,day)
             try:bot.pin_chat_message(chat_id,sent.message_id,disable_notification=True)
             except Exception as exc:print('Daily Challenge pin unavailable:',exc)
@@ -94,7 +96,7 @@ def register_daily_challenge(bot):
                         if day==today():publish(chat_id,force=True)
                         else:
                             replacement=bot.send_photo(chat_id,card(snapshot),
-                                caption='🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3')
+                                caption=_custom_text('msg.features.daily_challenge.ensure_main.d2c45eae88', '🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3', {}))
                             set_card_id(chat_id,replacement.message_id,day)
                             try:bot.pin_chat_message(chat_id,replacement.message_id,disable_notification=True)
                             except Exception as error:print('Daily recovery pin:',error)
@@ -140,7 +142,7 @@ def register_daily_challenge(bot):
             ensure_main(message.chat.id)
             snapshot=personal_overview(message.chat.id,message.from_user.id)
             sent=bot.send_photo(message.chat.id,card(snapshot),
-                caption='🎯 Your Daily Challenge | /dailyclaim 1, 2 or 3',
+                caption=_custom_text('msg.features.daily_challenge.daily_command.f22d1476f5', '🎯 Your Daily Challenge | /dailyclaim 1, 2 or 3', {}),
                 reply_to_message_id=message.message_id)
             _delete_later(bot,message.chat.id,sent.message_id)
         except Exception as exc:
@@ -158,9 +160,9 @@ def register_daily_challenge(bot):
                 result='Usage: /dailygroupclaim 1 (or 2 / 3)'
             else:
                 state,pts=claim(message.chat.id,message.from_user.id,idx,active_cycle(message.chat.id))
-                result={'ok':f'🎁 Group mission {idx}: +{pts} Points!',
-                    'locked':'🔒 Group objective and your contribution must be completed.',
-                    'claimed':'✅ You already claimed this group mission.',
+                result={'ok':_custom_text('msg.features.daily_challenge.group_claim_command.b81cf383b5', '🎁 Group mission {idx}: +{pts} Points!', {'idx': f'{idx}', 'pts': f'{pts}'}),
+                    'locked':_custom_text('msg.features.daily_challenge.group_claim_command.79dad83037', '🔒 Group objective and your contribution must be completed.', {}),
+                    'claimed':_custom_text('msg.features.daily_challenge.group_claim_command.0d30bb31ff', '✅ You already claimed this group mission.', {}),
                     'invalid':'Choose 1, 2 or 3.'}[state]
             sent=bot.reply_to(message,result)
             _delete_later(bot,message.chat.id,sent.message_id)
@@ -181,9 +183,9 @@ def register_daily_challenge(bot):
                     print('Daily claim error:',exc)
                     result='Database error. Try again later.'
                 else:
-                    result={'ok':f'🎁 Mission {idx}: +{pts} Points!',
-                        'locked':'🔒 Finish your personal mission first.',
-                        'claimed':'✅ You already claimed this mission today.',
+                    result={'ok':_custom_text('msg.features.daily_challenge.daily_claim_command.9e47ddb05c', '🎁 Mission {idx}: +{pts} Points!', {'idx': f'{idx}', 'pts': f'{pts}'}),
+                        'locked':_custom_text('msg.features.daily_challenge.daily_claim_command.430e8cd55a', '🔒 Finish your personal mission first.', {}),
+                        'claimed':_custom_text('msg.features.daily_challenge.daily_claim_command.edf5c63e9a', '✅ You already claimed this mission today.', {}),
                         'invalid':'Choose mission 1, 2 or 3.'}[state]
                     # Group card must not be affected by personal reward claims.
             sent=bot.reply_to(message,result)

@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Imposter Protocol: Telegram text UI + private callback alerts; Neon-backed state.
 
 One impostor, 40-second entry, fixed clue order, 60-second AFK timeout,
@@ -85,15 +86,15 @@ def _keyboard(s,page=0):
     g=s["id"]
     phase=s["phase"]
     if phase=="join":
-        k.add(types.InlineKeyboardButton("➕ ပါဝင်မယ်",callback_data=f"imp:{g}:join"))
-        k.add(types.InlineKeyboardButton("☰ Player List",callback_data=f"imp:{g}:list:0"))
+        k.add(types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.a3d0c41e21', '➕ ပါဝင်မယ်', {}),callback_data=f"imp:{g}:join"))
+        k.add(types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.fa5857fb1e', '☰ Player List', {}),callback_data=f"imp:{g}:list:0"))
     elif phase in ("clue","decision","tie","final"):
-        k.add(types.InlineKeyboardButton("🔐 SECRET ကြည့်မယ်",callback_data=f"imp:{g}:secret"))
+        k.add(types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.31df8585ce', '🔐 SECRET ကြည့်မယ်', {}),callback_data=f"imp:{g}:secret"))
         if phase=="decision":
-            k.row(types.InlineKeyboardButton("🔁 ထပ်တိုးမယ်",callback_data=f"imp:{g}:decision:more"),
-                  types.InlineKeyboardButton("🔎 ခန့်မှန်းမယ်",callback_data=f"imp:{g}:decision:guess"))
+            k.row(types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.39ac864544', '🔁 ထပ်တိုးမယ်', {}),callback_data=f"imp:{g}:decision:more"),
+                  types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.255db14e7f', '🔎 ခန့်မှန်းမယ်', {}),callback_data=f"imp:{g}:decision:guess"))
         elif phase=="tie":
-            k.add(types.InlineKeyboardButton("🎭 သရေဖြတ် ဆုံးဖြတ်မယ်",callback_data=f"imp:{g}:tiebreak"))
+            k.add(types.InlineKeyboardButton(_custom_text('msg.features.imposter._keyboard.ed85878b59', '🎭 သရေဖြတ် ဆုံးဖြတ်မယ်', {}),callback_data=f"imp:{g}:tiebreak"))
         elif phase=="final":
             people=_players(s)
             page=max(0,min(page,(len(people)-1)//8))
@@ -111,12 +112,9 @@ def _view(s):
     head="⌁ <b>IMPOSTER / CLASSIFIED</b>\n<code>━━━━━━━━━━━━━━━━━━━━</code>\n"
     if phase=="join":
         rows="\n".join(f"<code>{i+1:02d}.</code> {_name(p)}" for i,p in enumerate(names[:12]))
-        if len(names)>12:rows+=f"\n… နောက်ထပ် {len(names)-12} ယောက်"
-        return (head+"🟢 <b>RECRUITMENT OPEN</b>\n"
-                f"⏳ Join: 40 စက္ကန့်  · 👥 {len(names)} ယောက်\n\n"
-                "🔐 Secret ကို DM မလိုဘဲ Group Button ကနေ ကိုယ်တစ်ယောက်တည်း မြင်နိုင်မယ်။\n"
-                "Bot ကို Private Chat မှာ START နှိပ်စရာမလိုပါ။\n\n"
-                +(rows or "အခုထိ မပါဝင်သေးပါ။"))
+        if len(names)>12:rows+=_custom_text('msg.features.imposter._view.24358e25cf', '\n… နောက်ထပ် {len_names____12} ယောက်', {'len_names____12': f'{len(names) - 12}'})
+        return (head+_custom_text('msg.features.imposter._view.e2c330ebaf', '🟢 <b>RECRUITMENT OPEN</b>\n⏳ Join: 40 စက္ကန့်  · 👥 {len_names} ယောက်\n\n🔐 Secret ကို DM မလိုဘဲ Group Button ကနေ ကိုယ်တစ်ယောက်တည်း မြင်နိုင်မယ်။\nBot ကို Private Chat မှာ START နှိပ်စရာမလိုပါ။\n\n', {'len_names': f'{len(names)}'})
+                +(rows or _custom_text('msg.features.imposter._view.1da4144097', 'အခုထိ မပါဝင်သေးပါ။', {})))
     if phase=="clue":
         idx=s["turn"]
         p=names[idx]
@@ -125,35 +123,19 @@ def _view(s):
         remaining=max(0,min(duration,int(s.get("deadline",time.time())-time.time()+0.99)))
         filled=max(0,min(10,int(10*(duration-remaining)/duration)))
         progress="▰"*filled+"▱"*(10-filled)
-        urgency="⚠️ နောက်ဆုံး ၁၅ စက္ကန့်!" if s.get("warned") else "⏱️ Clue ပြောရန်"
-        return (f"🎭 <b>IMPOSTER · ROUND {s['round']}</b>\n"
-                "━━━━━━━━━━━━━━━━━━\n\n"
-                f"🎙️ <b>Player {idx+1} — {_name(p)}</b>\n"
-                f"{urgency}  <b>00:{remaining:02d}</b>\n"
-                f"<code>{progress}</code>\n\n"
-                "💬 ကိုယ့်အလှည့်ရောက်ရင် Group မှာ Clue တစ်ခု ရေးပါ။\n"
-                f"✅ ပြီးသွားသူ {done} / {len(names)}\n\n"
-                "🔐 ကိုယ့် Secret ကို အောက်က Button မှာ ပြန်ကြည့်နိုင်ပါတယ်။")
+        urgency=_custom_text('msg.features.imposter._view.7d06b3137e', '⚠️ နောက်ဆုံး ၁၅ စက္ကန့်!', {}) if s.get("warned") else _custom_text('msg.features.imposter._view.c02421eaf0', '⏱️ Clue ပြောရန်', {})
+        return (_custom_text('msg.features.imposter._view.3985b53eea', '🎭 <b>IMPOSTER · ROUND {s__round}</b>\n━━━━━━━━━━━━━━━━━━\n\n🎙️ <b>Player {idx___1} — {name_p}</b>\n{urgency}  <b>00:{remaining}</b>\n<code>{progress}</code>\n\n💬 ကိုယ့်အလှည့်ရောက်ရင် Group မှာ Clue တစ်ခု ရေးပါ။\n✅ ပြီးသွားသူ {done} / {len_names}\n\n🔐 ကိုယ့် Secret ကို အောက်က Button မှာ ပြန်ကြည့်နိုင်ပါတယ်။', {'s__round': f"{s['round']}", 'idx___1': f'{idx + 1}', 'name_p': f'{_name(p)}', 'urgency': f'{urgency}', 'remaining': f'{remaining:02d}', 'progress': f'{progress}', 'done': f'{done}', 'len_names': f'{len(names)}'}))
 
     if phase=="decision":
         choices=s["decisions"]
         a=sum(x=="more" for x in choices.values())
         b=sum(x=="guess" for x in choices.values())
-        return (head+f"<code>DECISION ROOM / ROUND {s['round']:02d}</code>\n\n"
-                "နောက် Round ဆက်မလား၊ Imposter ကို ခန့်မှန်းမလား?\n"
-                f"🔁 ဆက်မယ်: {a} · 🔎 ခန့်မှန်းမယ်: {b}\n"
-                f"မဲပေးပြီး: {len(choices)}/{len(_eligible(s))}")
+        return (head+_custom_text('msg.features.imposter._view.77d7ccb266', '<code>DECISION ROOM / ROUND {s__round}</code>\n\nနောက် Round ဆက်မလား၊ Imposter ကို ခန့်မှန်းမလား?\n🔁 ဆက်မယ်: {a} · 🔎 ခန့်မှန်းမယ်: {b}\nမဲပေးပြီး: {len_choices}/{len__eligible_s}', {'s__round': f"{s['round']:02d}", 'a': f'{a}', 'b': f'{b}', 'len_choices': f'{len(choices)}', 'len__eligible_s': f'{len(_eligible(s))}'}))
     if phase=="tie":
-        return (head+"⚖️ <b>VOTE သရေဖြစ်နေပါတယ်</b>\n"
-                "🎭 Imposter က သရေဖြတ်ဆုံးဖြတ်မယ်။\n"
-                "Button ကို Imposter တစ်ယောက်တည်း သုံးနိုင်ပြီး ရွေးချယ်မှုကို Private Alert နဲ့ ပြမယ်။")
+        return (head+_custom_text('msg.features.imposter._view.de0e525272', '⚖️ <b>VOTE သရေဖြစ်နေပါတယ်</b>\n🎭 Imposter က သရေဖြတ်ဆုံးဖြတ်မယ်။\nButton ကို Imposter တစ်ယောက်တည်း သုံးနိုင်ပြီး ရွေးချယ်မှုကို Private Alert နဲ့ ပြမယ်။', {}))
     if phase=="final":
-        return (head+"<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\n"
-                "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
-                f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
-                "🎧 VC မှာ တိုင်ပင်ပြီး မဲပေးပါ။\n"
-                "⏳ Voting ၁ မိနစ် · ပြည့်မှ Result ထုတ်မယ်")
-    return head+"🏁 Game ပြီးဆုံးပါပြီ။"
+        return (head+_custom_text('msg.features.imposter._view.34931087e2', '<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\nသံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n🗳️ မဲပေးပြီး: {len_s__votes}/{len__eligible_s}\n🎧 VC မှာ တိုင်ပင်ပြီး မဲပေးပါ။\n⏳ Voting ၁ မိနစ် · ပြည့်မှ Result ထုတ်မယ်', {'len_s__votes': f"{len(s['votes'])}", 'len__eligible_s': f'{len(_eligible(s))}'}))
+    return head+_custom_text('msg.features.imposter._view.c2b2ec09c4', '🏁 Game ပြီးဆုံးပါပြီ။', {})
 
 def _edit(bot,chat_id,s):
     if not s.get("message_id"):return
@@ -203,30 +185,20 @@ def _finish(bot,chat_id,s,reason="vote"):
     s["found"]=found
     _save(chat_id,s)
     _edit(bot,chat_id,s)
-    winners=", ".join(_name(p) for p in s["players"] if p["id"] in correct) or "မရှိပါ"
-    win_label="🟢 NORMAL TEAM" if found else "🔴 IMPOSTER"
-    detail=("🎯 Secret Word မှန်အောင် ခန့်မှန်းနိုင်ခဲ့ပါတယ်။\n\n"
+    winners=", ".join(_name(p) for p in s["players"] if p["id"] in correct) or _custom_text('msg.features.imposter._finish.2fcd6eae80', 'မရှိပါ', {})
+    win_label=_custom_text('msg.features.imposter._finish.161447e8f6', '🟢 NORMAL TEAM', {}) if found else _custom_text('msg.features.imposter._finish.76b8fe4b32', '🔴 IMPOSTER', {})
+    detail=(_custom_text('msg.features.imposter._finish.d52af1cf9d', '🎯 Secret Word မှန်အောင် ခန့်မှန်းနိုင်ခဲ့ပါတယ်။\n\n', {})
             if reason=="secret_right" else
-            "❌ Secret Word မှားယွင်းစွာ ခန့်မှန်းခဲ့ပါတယ်။\n\n"
+            _custom_text('msg.features.imposter._finish.a42fba742b', '❌ Secret Word မှားယွင်းစွာ ခန့်မှန်းခဲ့ပါတယ်။\n\n', {})
             if reason=="secret_wrong" else "")
     vote_report=("" if reason.startswith("secret_") else
-                 "📊 <b>VOTE INTELLIGENCE</b>\n"
-                 f"  ✅ မှန်ကန်သူ  {len(correct)} ယောက်\n"
-                 f"  🗳️ မဲပေးသူ  {len(votes)} ယောက်\n\n"
-                 "⭐ <b>TOP INVESTIGATORS</b>\n"
-                 f"  {winners}\n\n")
+                 _custom_text('msg.features.imposter._finish.fcaed88589', '📊 <b>VOTE INTELLIGENCE</b>\n  ✅ မှန်ကန်သူ  {len_correct} ယောက်\n  🗳️ မဲပေးသူ  {len_votes} ယောက်\n\n⭐ <b>TOP INVESTIGATORS</b>\n  {winners}\n\n', {'len_correct': f'{len(correct)}', 'len_votes': f'{len(votes)}', 'winners': f'{winners}'}))
     result=(
-        "╔═══ 🎭 <b>CASE FILE CLOSED</b> ═══╗\n"
-        "┃  <code>IMPOSTER • FINAL REPORT</code>\n"
-        "╚══════════════════════╝\n\n"
-        f"🏆 <b>{win_label} WINS</b>\n\n"
+        _custom_text('msg.features.imposter._finish.4e3d555682', '╔═══ 🎭 <b>CASE FILE CLOSED</b> ═══╗\n┃  <code>IMPOSTER • FINAL REPORT</code>\n╚══════════════════════╝\n\n🏆 <b>{win_label} WINS</b>\n\n', {'win_label': f'{win_label}'})
         +detail+
-        "🔎 <b>IDENTITY REVEALED</b>\n"
-        f"  🎭 {_name(s['players'][imp_idx])}\n"
-        f"  🔐 {html.escape(s['word'])}\n\n"
+        _custom_text('msg.features.imposter._finish.9e1323c547', '🔎 <b>IDENTITY REVEALED</b>\n  🎭 {name_s__players___imp_idx}\n  🔐 {html_escape_s__word}\n\n', {'name_s__players___imp_idx': f"{_name(s['players'][imp_idx])}", 'html_escape_s__word': f"{html.escape(s['word'])}"})
         +vote_report+
-        "━━━━━━━━━━━━━━━━━━\n"
-        "🎮 နောက်ပွဲစရန် /imposter"
+        _custom_text('msg.features.imposter._finish.10d6417438', '━━━━━━━━━━━━━━━━━━\n🎮 နောက်ပွဲစရန် /imposter', {})
     )
     _announce(bot,chat_id,result)
     end_session(chat_id,"imposter")
@@ -253,12 +225,12 @@ def _start_clues(s):
 def _start_final(s):
     now=time.time()
     s["phase"]="final"
-    s["deadline"]=now+FINAL_VOTE_SECONDS
-    s["vote_earliest_finish"]=now+FINAL_MIN_DISCUSSION
+    s["deadline"]=now+_custom_setting('cfg.features.imposter.FINAL_VOTE_SECONDS', FINAL_VOTE_SECONDS)
+    s["vote_earliest_finish"]=now+_custom_setting('cfg.features.imposter.FINAL_MIN_DISCUSSION', FINAL_MIN_DISCUSSION)
     s["votes"]={}
 
 def _decide(s,decision):
-    if decision=="more" and s["round"]<MAX_ROUNDS:
+    if decision=="more" and s["round"]<_custom_setting('cfg.features.imposter.MAX_ROUNDS', MAX_ROUNDS):
         _start_clues(s)
     else:_start_final(s)
 
@@ -269,7 +241,7 @@ def _next_turn(bot,chat_id,s):
     if s["turn"]>=len(s["players"]):
         s["phase"]="decision"
         s["decisions"]={}
-        s["deadline"]=time.time()+DECISION_TIME
+        s["deadline"]=time.time()+_custom_setting('cfg.features.imposter.DECISION_TIME', DECISION_TIME)
     else:s["deadline"]=time.time()+45
     _save(chat_id,s)
     _publish_turn(bot,chat_id,s)
@@ -289,19 +261,19 @@ def _tick(bot,chat_id,s):
                 _edit(bot,chat_id,s)
         return
     if s["phase"]=="join":
-        if len(s["players"])<MIN_PLAYERS:
+        if len(s["players"])<_custom_setting('cfg.features.imposter.MIN_PLAYERS', MIN_PLAYERS):
             s["phase"]="cancelled";_save(chat_id,s);end_session(chat_id,"imposter");ACTIVE_CHATS.discard(chat_id)
-            _announce(bot,chat_id,"🎭 ပါဝင်သူ 4 ယောက်မပြည့်လို့ Game ပယ်ဖျက်ပါပြီ။")
+            _announce(bot,chat_id,_custom_text('msg.features.imposter._tick.e56fe34a65', '🎭 ပါဝင်သူ 4 ယောက်မပြည့်လို့ Game ပယ်ဖျက်ပါပြီ။', {}))
             return
         s["imposter"]=random.choice(s["players"])["id"]
         s["word"]=_word(chat_id)
         s["round"]=0
         _start_clues(s)
         _save(chat_id,s)
-        _announce(bot,chat_id,"📋 <b>OPERATIVE LIST · JOIN ORDER</b>\n"+
+        _announce(bot,chat_id,_custom_text('msg.features.imposter._tick.ceecd95339', '📋 <b>OPERATIVE LIST · JOIN ORDER</b>\n', {})+
                   "\n".join(f"{i+1:02d}. {_name(p)}" for i,p in enumerate(s["players"][:100]))+
-                  ("\n… ကျန်သူတွေကို List Button နဲ့ကြည့်ပါ။" if len(s["players"])>100 else "")+
-                  "\n\n🔐 Game Message မှာ SECRET ကြည့်မယ် နှိပ်ပြီး ကိုယ့် Role ကို ကြည့်ပါ။")
+                  (_custom_text('msg.features.imposter._tick.d83d7ff242', '\n… ကျန်သူတွေကို List Button နဲ့ကြည့်ပါ။', {}) if len(s["players"])>100 else "")+
+                  _custom_text('msg.features.imposter._tick.ad3d21f99e', '\n\n🔐 Game Message မှာ SECRET ကြည့်မယ် နှိပ်ပြီး ကိုယ့် Role ကို ကြည့်ပါ။', {}))
         _publish_turn(bot,chat_id,s)
     elif s["phase"]=="clue":
         p=s["players"][s["turn"]]
@@ -309,20 +281,20 @@ def _tick(bot,chat_id,s):
             s["warned"]=True
             s["deadline"]=now+15
             _save(chat_id,s)
-            _announce(bot,chat_id,f"⏳ {_name(p)} — Clue ပေးဖို့ 15 seconds ကျန်ပါပြီ။")
+            _announce(bot,chat_id,_custom_text('msg.features.imposter._tick.7226b04997', '⏳ {name_p} — Clue ပေးဖို့ 15 seconds ကျန်ပါပြီ။', {'name_p': f'{_name(p)}'}))
             return
         s["warned"]=False
         p["afk"]=p.get("afk",0)+1
         if p["afk"]>=2:
             p["removed"]=True
-            _announce(bot,chat_id,f"💤 {_name(p)} — AFK ၂ ကြိမ်ဆက်ဖြစ်လို့ ဖယ်ရှားပါတယ်။")
+            _announce(bot,chat_id,_custom_text('msg.features.imposter._tick.c8696ac302', '💤 {name_p} — AFK ၂ ကြိမ်ဆက်ဖြစ်လို့ ဖယ်ရှားပါတယ်။', {'name_p': f'{_name(p)}'}))
             if p["id"]==s["imposter"]:
                 _finish(bot,chat_id,s,"imposter_afk");return
         _next_turn(bot,chat_id,s)
     elif s["phase"]=="decision":
         values=list(s["decisions"].values())
         more=values.count("more");guess=values.count("guess")
-        if more==guess and s["round"]<MAX_ROUNDS:
+        if more==guess and s["round"]<_custom_setting('cfg.features.imposter.MAX_ROUNDS', MAX_ROUNDS):
             s["phase"]="tie";s["deadline"]=now+40
         else:_decide(s,"more" if more>guess else "guess")
         _save(chat_id,s);_publish_turn(bot,chat_id,s)
@@ -362,13 +334,13 @@ def register(bot):
 
     @bot.message_handler(commands=["imposter"])
     def command(msg):
-        if msg.chat.type not in ("group","supergroup"):return bot.reply_to(msg,"Group ထဲမှာပဲ Imposter Game စလို့ရပါတယ်။")
+        if msg.chat.type not in ("group","supergroup"):return bot.reply_to(msg,_custom_text('msg.features.imposter.command.1b95029c2a', 'Group ထဲမှာပဲ Imposter Game စလို့ရပါတယ်။', {}))
         with LOCK:
             s=_load(msg.chat.id)
-            if _active(s):return bot.reply_to(msg,"🎭 Imposter Game ကစားနေပြီးသားပါ။")
+            if _active(s):return bot.reply_to(msg,_custom_text('msg.features.imposter.command.0798f03b28', '🎭 Imposter Game ကစားနေပြီးသားပါ။', {}))
             ok,reason=start_session(msg.chat.id,"imposter",duration=24*3600)
-            if not ok:return bot.reply_to(msg,f"🎮 {reason} Game ရှိနေပါတယ်။")
-            s={"id":uuid.uuid4().hex[:10],"phase":"join","deadline":time.time()+JOIN_TIME,
+            if not ok:return bot.reply_to(msg,_custom_text('msg.features.imposter.command.7b1e522e01', '🎮 {reason} Game ရှိနေပါတယ်။', {'reason': f'{reason}'}))
+            s={"id":uuid.uuid4().hex[:10],"phase":"join","deadline":time.time()+_custom_setting('cfg.features.imposter.JOIN_TIME', JOIN_TIME),
                "players":[],"imposter":None,"word":None,"round":0,"turn":0,
                "warned":False,"decisions":{},"votes":{},"message_id":None}
             _save(msg.chat.id,s)
@@ -392,18 +364,18 @@ def register(bot):
         with LOCK:
             state=_load(msg.chat.id)
             if not _active(state) or state["phase"]=="join":
-                bot.reply_to(msg,"🎭 Secret ဖြေဖို့ လက်ရှိ Imposter Game ရှိရပါမယ်။")
+                bot.reply_to(msg,_custom_text('msg.features.imposter.imposter_secret_guess.1fa16b5bd6', '🎭 Secret ဖြေဖို့ လက်ရှိ Imposter Game ရှိရပါမယ်။', {}))
                 return ContinueHandling()
             if state.get("imposter")!=msg.from_user.id:
-                bot.reply_to(msg,"🔒 ဒီ Command ကို Imposter ပဲ သုံးနိုင်ပါတယ်။")
+                bot.reply_to(msg,_custom_text('msg.features.imposter.imposter_secret_guess.5b8bfa925a', '🔒 ဒီ Command ကို Imposter ပဲ သုံးနိုင်ပါတယ်။', {}))
                 return ContinueHandling()
             parts=(msg.text or "").split(maxsplit=1)
             if len(parts)<2 or not parts[1].strip():
-                bot.reply_to(msg,"🎭 /secret အဖြေ လို့ တစ်ခါတည်း ဖြေပါ။ မှားရင် ချက်ချင်းရှုံးမယ်။")
+                bot.reply_to(msg,_custom_text('msg.features.imposter.imposter_secret_guess.47e780a35d', '🎭 /secret အဖြေ လို့ တစ်ခါတည်း ဖြေပါ။ မှားရင် ချက်ချင်းရှုံးမယ်။', {}))
                 return ContinueHandling()
             guess=parts[1].strip()
             if len(guess)>100:
-                bot.reply_to(msg,"အဖြေက ရှည်လွန်းပါတယ်။")
+                bot.reply_to(msg,_custom_text('msg.features.imposter.imposter_secret_guess.f7fc63e3c7', 'အဖြေက ရှည်လွန်းပါတယ်။', {}))
                 return ContinueHandling()
             correct=matches_secret(guess,state["word"])
             _finish(bot,msg.chat.id,state,"secret_right" if correct else "secret_wrong")
@@ -416,15 +388,15 @@ def register(bot):
             status=bot.get_chat_member(msg.chat.id,msg.from_user.id).status
         except Exception:return
         if status not in ("administrator","creator"):
-            return bot.reply_to(msg,"Admin ပဲ Game ရပ်နိုင်ပါတယ်။")
+            return bot.reply_to(msg,_custom_text('msg.features.imposter.stop.19a39eecad', 'Admin ပဲ Game ရပ်နိုင်ပါတယ်။', {}))
         with LOCK:
             s=_load(msg.chat.id)
-            if not _active(s):return bot.reply_to(msg,"Game မရှိပါ။")
+            if not _active(s):return bot.reply_to(msg,_custom_text('msg.features.imposter.stop.c24be6588c', 'Game မရှိပါ။', {}))
             s["phase"]="cancelled";_save(msg.chat.id,s)
             _edit(bot,msg.chat.id,s)
             end_session(msg.chat.id,"imposter")
             ACTIVE_CHATS.discard(msg.chat.id)
-            bot.send_message(msg.chat.id,"🎭 Imposter Game ကို Admin က ရပ်လိုက်ပါပြီ။")
+            bot.send_message(msg.chat.id,_custom_text('msg.features.imposter.stop.5c1425411d', '🎭 Imposter Game ကို Admin က ရပ်လိုက်ပါပြီ။', {}))
 
     @bot.callback_query_handler(func=lambda q:(q.data or "").startswith("imp:"))
     def callback(q):
@@ -435,67 +407,67 @@ def register(bot):
                 chat_id=q.message.chat.id
                 s=_load(chat_id)
                 if not _active(s) or s["id"]!=data[1]:
-                    return bot.answer_callback_query(q.id,"ဒီ Game ပြီးသွားပါပြီ။",show_alert=True)
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.b13747837a', 'ဒီ Game ပြီးသွားပါပြီ။', {}),show_alert=True)
                 action=data[2]
                 uid=q.from_user.id
                 player=next((p for p in s["players"] if p["id"]==uid),None)
                 if action=="join":
-                    if s["phase"]!="join" or time.time()>s["deadline"]:message="Join ပိတ်သွားပါပြီ။"
-                    elif player:message="ပါဝင်ပြီးသားပါ။"
+                    if s["phase"]!="join" or time.time()>s["deadline"]:message=_custom_text('msg.features.imposter.callback.f4e50f2a87', 'Join ပိတ်သွားပါပြီ။', {})
+                    elif player:message=_custom_text('msg.features.imposter.callback.be6ebce0cb', 'ပါဝင်ပြီးသားပါ။', {})
                     else:
                         s["players"].append({"id":uid,"name":q.from_user.first_name or "Player","afk":0,"removed":False})
-                        _save(chat_id,s);_edit(bot,chat_id,s);message="✅ ပါဝင်ပြီးပါပြီ!"
+                        _save(chat_id,s);_edit(bot,chat_id,s);message=_custom_text('msg.features.imposter.callback.08ead379bc', '✅ ပါဝင်ပြီးပါပြီ!', {})
                     return bot.answer_callback_query(q.id,message,show_alert=False)
                 if action=="list":
                     page=int(data[3]) if len(data)>3 else 0
                     players=s["players"];page=max(0,min(page,(len(players)-1)//15 if players else 0))
                     text="\n".join(f"{i+1:02d}. {p['name']}" for i,p in enumerate(players[page*15:page*15+15],page*15))
-                    return bot.answer_callback_query(q.id,text[:180] or "လူမရှိသေးပါ။",show_alert=True)
+                    return bot.answer_callback_query(q.id,text[:180] or _custom_text('msg.features.imposter.callback.ec451e4a25', 'လူမရှိသေးပါ။', {}),show_alert=True)
                 if not player or player.get("removed"):
-                    return bot.answer_callback_query(q.id,"ဒီ Game မှာ ပါဝင်သူမဟုတ်ပါ။",show_alert=True)
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.4444915904', 'ဒီ Game မှာ ပါဝင်သူမဟုတ်ပါ။', {}),show_alert=True)
                 if action=="secret":
                     message=(
-                        "🎭 SECRET ROLE\n\n🕵️ IMPOSTER ပါ!\n\nစကားလုံးမသိပါ။\nမဖမ်းမိအောင် Clue ပေးပါ။"
+                        _custom_text('msg.features.imposter.callback.f6b56c92d1', '🎭 SECRET ROLE\n\n🕵️ IMPOSTER ပါ!\n\nစကားလုံးမသိပါ။\nမဖမ်းမိအောင် Clue ပေးပါ။', {})
                         if uid==s["imposter"] else
-                        "🔐 SECRET WORD\n\n"+str(s["word"])+"\n\n🤫 တခြားသူတွေကို မပြောပါနဲ့။"
+                        _custom_text('msg.features.imposter.callback.af405e0ee0', '🔐 SECRET WORD\n\n', {})+str(s["word"])+_custom_text('msg.features.imposter.callback.c200cd27ec', '\n\n🤫 တခြားသူတွေကို မပြောပါနဲ့။', {})
                     )
                     return bot.answer_callback_query(q.id,message,show_alert=True)
                 if action=="decision" and s["phase"]=="decision" and len(data)>3:
-                    if str(uid) in s["decisions"]:return bot.answer_callback_query(q.id,"မဲပေးပြီးသားပါ။")
+                    if str(uid) in s["decisions"]:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.6b8d484594', 'မဲပေးပြီးသားပါ။', {}))
                     s["decisions"][str(uid)]=data[3]
                     if len(s["decisions"])>=len(_eligible(s)):s["deadline"]=0
                     _save(chat_id,s);_edit(bot,chat_id,s)
-                    return bot.answer_callback_query(q.id,"မဲပေးပြီးပါပြီ။")
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.28c1e333ce', 'မဲပေးပြီးပါပြီ။', {}))
                 if action=="tiebreak" and s["phase"]=="tie":
-                    if uid!=s["imposter"]:return bot.answer_callback_query(q.id,"ဒီဆုံးဖြတ်ချက်က Imposter အတွက်သာပါ။",show_alert=True)
+                    if uid!=s["imposter"]:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.582dfa451d', 'ဒီဆုံးဖြတ်ချက်က Imposter အတွက်သာပါ။', {}),show_alert=True)
                     # Callback popup cannot itself contain buttons; provide two new
                     # inline actions publicly, but authorize only the impostor.
                     k=types.InlineKeyboardMarkup()
-                    k.row(types.InlineKeyboardButton("🔁 ဆက်မယ်",callback_data=f"imp:{s['id']}:tie:more"),
-                          types.InlineKeyboardButton("🔎 ခန့်မှန်းမယ်",callback_data=f"imp:{s['id']}:tie:guess"))
-                    bot.send_message(chat_id,"⚖️ သရေဖြတ် ရွေးချယ်မှု (Imposter တစ်ယောက်သာ အလုပ်လုပ်မယ်)",reply_markup=k)
-                    return bot.answer_callback_query(q.id,"အောက်က ရွေးချယ်မှုတစ်ခု နှိပ်ပါ။",show_alert=True)
+                    k.row(types.InlineKeyboardButton(_custom_text('msg.features.imposter.callback.8594806c6a', '🔁 ဆက်မယ်', {}),callback_data=f"imp:{s['id']}:tie:more"),
+                          types.InlineKeyboardButton(_custom_text('msg.features.imposter.callback.255db14e7f', '🔎 ခန့်မှန်းမယ်', {}),callback_data=f"imp:{s['id']}:tie:guess"))
+                    bot.send_message(chat_id,_custom_text('msg.features.imposter.callback.de30002be3', '⚖️ သရေဖြတ် ရွေးချယ်မှု (Imposter တစ်ယောက်သာ အလုပ်လုပ်မယ်)', {}),reply_markup=k)
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.2988b01269', 'အောက်က ရွေးချယ်မှုတစ်ခု နှိပ်ပါ။', {}),show_alert=True)
                 if action=="tie" and s["phase"]=="tie" and len(data)>3:
-                    if uid!=s["imposter"]:return bot.answer_callback_query(q.id,"Imposter တစ်ယောက်သာ ဆုံးဖြတ်နိုင်ပါတယ်။",show_alert=True)
+                    if uid!=s["imposter"]:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.a1ebb232ca', 'Imposter တစ်ယောက်သာ ဆုံးဖြတ်နိုင်ပါတယ်။', {}),show_alert=True)
                     _decide(s,data[3]);_save(chat_id,s);_publish_turn(bot,chat_id,s)
-                    return bot.answer_callback_query(q.id,"ဆုံးဖြတ်ပြီးပါပြီ။")
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.c9da95d021', 'ဆုံးဖြတ်ပြီးပါပြီ။', {}))
                 if action=="page" and s["phase"]=="final":
                     page=int(data[3]);bot.edit_message_reply_markup(chat_id,s["message_id"],reply_markup=_keyboard(s,page))
                     return bot.answer_callback_query(q.id)
                 if action=="vote" and s["phase"]=="final" and len(data)>3:
-                    if str(uid) in s["votes"]:return bot.answer_callback_query(q.id,"မဲပေးပြီးသားပါ။")
+                    if str(uid) in s["votes"]:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.6b8d484594', 'မဲပေးပြီးသားပါ။', {}))
                     idx=int(data[3])
-                    if idx<0 or idx>=len(s["players"]):return bot.answer_callback_query(q.id,"ရွေးချယ်မှု မမှန်ပါ။")
-                    if s["players"][idx]["id"]==uid:return bot.answer_callback_query(q.id,"ကိုယ့်ကိုယ်ကို မဲပေးလို့မရပါ။")
-                    if s["players"][idx].get("removed"):return bot.answer_callback_query(q.id,"ဒီ Player ကို AFK ကြောင့် ဖယ်ထားပါတယ်။")
+                    if idx<0 or idx>=len(s["players"]):return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.80693ae83d', 'ရွေးချယ်မှု မမှန်ပါ။', {}))
+                    if s["players"][idx]["id"]==uid:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.9727d06d4c', 'ကိုယ့်ကိုယ်ကို မဲပေးလို့မရပါ။', {}))
+                    if s["players"][idx].get("removed"):return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.1c6388e679', 'ဒီ Player ကို AFK ကြောင့် ဖယ်ထားပါတယ်။', {}))
                     s["votes"][str(uid)]=idx
                     _save(chat_id,s)
                     _edit(bot,chat_id,s)
-                    return bot.answer_callback_query(q.id,"မဲပေးပြီးပါပြီ။")
-                return bot.answer_callback_query(q.id,"အခုအချိန်မှာ မရနိုင်ပါ။")
+                    return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.28c1e333ce', 'မဲပေးပြီးပါပြီ။', {}))
+                return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.d1fac4c532', 'အခုအချိန်မှာ မရနိုင်ပါ။', {}))
         except Exception as exc:
             print("Imposter callback:",exc)
-            try:bot.answer_callback_query(q.id,"ခေတ္တ အဆင်မပြေပါ။")
+            try:bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.10d41a0403', 'ခေတ္တ အဆင်မပြေပါ။', {}))
             except Exception:pass
 
     @bot.message_handler(func=lambda m:True,content_types=["text"])
@@ -517,7 +489,7 @@ def register(bot):
                 if len(value)<2 or len(value)>150:return ContinueHandling()
                 # The secret itself is not a clue; reject and ask for a hint.
                 if s["word"] and s["word"] in value:
-                    bot.reply_to(msg,"🔐 Secret Word ကို တိုက်ရိုက်မရေးပါနဲ့။ သဲလွန်စပဲ ရေးပေးပါ။")
+                    bot.reply_to(msg,_custom_text('msg.features.imposter.capture_clue.1bc79aa63f', '🔐 Secret Word ကို တိုက်ရိုက်မရေးပါနဲ့။ သဲလွန်စပဲ ရေးပေးပါ။', {}))
                     return ContinueHandling()
                 p["afk"]=0;s["warned"]=False
                 _next_turn(bot,msg.chat.id,s)

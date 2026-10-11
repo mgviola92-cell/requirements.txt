@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import random
 import threading
 import time
@@ -157,10 +158,10 @@ def select_mode(chat_id, game_id, user_id, mode):
             return {"status": "closed"}
         if user_id != game["owner_id"]:
             return {"status": "owner_only"}
-        if mode not in MODES:
+        if mode not in _custom_setting('cfg.games.pair_challenge.MODES', MODES):
             return {"status": "invalid"}
         game["mode"] = mode
-        game["total_rounds"] = MODES[mode]["rounds"]
+        game["total_rounds"] = _custom_setting('cfg.games.pair_challenge.MODES', MODES)[mode]["rounds"]
         game["state"] = "lobby"
         return {"status": "ok", "game": _copy(game)}
 
@@ -169,7 +170,7 @@ def join(chat_id, game_id, user_id, name):
         game = _games.get(chat_id)
         if not game or game["id"] != game_id or game["state"] != "lobby":
             return {"status": "closed"}
-        info = MODES[game["mode"]]
+        info = _custom_setting('cfg.games.pair_challenge.MODES', MODES)[game["mode"]]
         if user_id in game["players"]:
             return {"status": "already", "game": _copy(game)}
         if len(game["players"]) >= info["max"]:
@@ -192,7 +193,7 @@ def leave(chat_id, game_id, user_id):
 def can_start(game):
     if not game or game.get("state") != "lobby" or not game.get("mode"):
         return False
-    info = MODES[game["mode"]]
+    info = _custom_setting('cfg.games.pair_challenge.MODES', MODES)[game["mode"]]
     count = len(game["players"])
     return info["min"] <= count <= info["max"]
 

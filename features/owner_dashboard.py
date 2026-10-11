@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Owner-only Flask dashboard. Locked until Render env secrets are configured."""
 import os, time, secrets, threading, html, json
 from datetime import datetime, timezone
@@ -134,7 +135,7 @@ a{color:#88c5ff}nav{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:26px}
 .panel{background:#192234;border:1px solid #33415d;border-radius:16px;padding:20px;margin:14px 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .big{font-size:30px;font-weight:750}small,.muted{color:#b6c2d6}
-input,textarea{width:100%;padding:12px;background:#101a2a;color:#fff;border:1px solid #50637f;border-radius:9px;font:inherit;margin:9px 0}
+input,textarea,select{width:100%;padding:12px;background:#101a2a;color:#fff;border:1px solid #50637f;border-radius:9px;font:inherit;margin:9px 0}
 textarea{min-height:130px}button{background:#397fe8;color:white;border:0;border-radius:9px;padding:12px 18px;font-weight:700;cursor:pointer}
 table{width:100%;border-collapse:collapse}th,td{padding:11px 6px;text-align:left;border-bottom:1px solid #33415d;overflow-wrap:anywhere}
 .wrap{overflow-x:auto}.error{color:#ffadad}.ok{color:#9be4ac}
@@ -174,6 +175,7 @@ def logout():
 SHELL=CSS+"""<main><nav><strong>👑 BOT CONTROL</strong>
 <a href="{{url_for('owner_dashboard.index')}}">Dashboard</a>
 <a href="{{url_for('owner_dashboard.broadcast')}}">Broadcast</a>
+<a href="/owner/control/">⚙️ Group Control & Messages</a>
 <a href="{{url_for('owner_dashboard.edit_welcome')}}">✏️ Welcome Editor</a>
 <form action="{{url_for('owner_dashboard.logout')}}" method="post">
 <input type="hidden" name="csrf" value="{{csrf}}"><button style="padding:5px 12px">Logout</button></form>
@@ -503,15 +505,16 @@ def register_owner_dashboard(app,bot):
 
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
-        kb.add(types.InlineKeyboardButton("📢 Broadcast",callback_data="own:broadcast"),
-               types.InlineKeyboardButton("👥 Groups",callback_data="own:groups"))
-        kb.add(types.InlineKeyboardButton("📜 History",callback_data="own:history"),
-               types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+        kb.add(types.InlineKeyboardButton("⚙️ Group Control & Messages",callback_data="ctl:home:0"))
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.f12c1d4700', '📢 Broadcast', {}),callback_data="own:broadcast"),
+               types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.4957a560df', '👥 Groups', {}),callback_data="own:groups"))
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.6a9d439083', '📜 History', {}),callback_data="own:history"),
+               types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.ff1e4bbf4f', '❌ Cancel', {}),callback_data="own:cancel"))
         return kb
 
     def owner_back_button():
         kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton("⬅️ Back to Owner Panel",callback_data="own:menu"))
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_back_button.d1b4474c67', '⬅️ Back to Owner Panel', {}),callback_data="own:menu"))
         return kb
 
     def owner_home(uid,chat_id):
@@ -528,16 +531,16 @@ def register_owner_dashboard(app,bot):
     @bot.callback_query_handler(func=lambda q:bool(q.data and q.data.startswith("own:")))
     def owner_actions(q):
         if not q.from_user or str(q.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip() or not q.message or q.message.chat.type!="private":
-            bot.answer_callback_query(q.id,"Owner သာ အသုံးပြုနိုင်ပါတယ်။",show_alert=True)
+            bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.e4b7fa6b22', 'Owner သာ အသုံးပြုနိုင်ပါတယ်။', {}),show_alert=True)
             return
         try:
             _,latest_card,_=_load_panel_state(q.from_user.id)
             if not latest_card or q.message.message_id!=latest_card:
-                bot.answer_callback_query(q.id,"အရင် Menu ဟောင်းပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။",show_alert=True)
+                bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.475ad32d00', 'အရင် Menu ဟောင်းပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။', {}),show_alert=True)
                 return
         except Exception as exc:
             print("Owner callback state:",type(exc).__name__)
-            bot.answer_callback_query(q.id,"ခေတ္တ အဆင်မပြေပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။",show_alert=True)
+            bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.e9128ed1a7', 'ခေတ္တ အဆင်မပြေပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။', {}),show_alert=True)
             return
         action=q.data.split(":",1)[1]
         uid=q.from_user.id
@@ -568,19 +571,19 @@ def register_owner_dashboard(app,bot):
                 with _owner_draft_lock:
                     draft=get_owner_draft(uid)
                     if not draft or draft.get("phase")!="ready" or time.time()>draft["expires"]:
-                        bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
+                        bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.49d4a7a2dd', 'Message သက်တမ်းကုန်သွားပါပြီ။', {}),show_alert=True);return
                     draft["target"]=target
                 _save_panel_state(uid,draft=draft)
                 kb=types.InlineKeyboardMarkup()
-                kb.add(types.InlineKeyboardButton("✅ Confirm Send",callback_data="own:send"),
-                       types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+                kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_actions.a88c8d39e1', '✅ Confirm Send', {}),callback_data="own:send"),
+                       types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_actions.ff1e4bbf4f', '❌ Cancel', {}),callback_data="own:cancel"))
                 owner_replace_card(uid,q.message.chat.id,"📢 ဒီ Message ကို "+("Group အားလုံး" if target=="all" else "ရွေးထားတဲ့ Group")+" ဆီ ပို့မှာလား။",kb)
             elif action=="send":
                 global _running
                 with _owner_draft_lock:
                     draft=get_owner_draft(uid)
                     if not draft or draft.get("phase")!="ready" or "target" not in draft or time.time()>draft["expires"]:
-                        bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
+                        bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.49d4a7a2dd', 'Message သက်တမ်းကုန်သွားပါပြီ။', {}),show_alert=True);return
                     draft=_owner_drafts.pop(uid,None) or draft
                     _save_panel_state(uid,draft=None)
                 try:
@@ -596,14 +599,14 @@ def register_owner_dashboard(app,bot):
             bot.answer_callback_query(q.id)
         except Exception as exc:
             print("Owner panel action:",type(exc).__name__)
-            try:bot.answer_callback_query(q.id,"ခေတ္တ အဆင်မပြေပါ။",show_alert=True)
+            try:bot.answer_callback_query(q.id,_custom_text('msg.features.owner_dashboard.owner_actions.10d41a0403', 'ခေတ္တ အဆင်မပြေပါ။', {}),show_alert=True)
             except Exception:pass
 
     @bot.message_handler(commands=["ownercancel"])
     def owner_cancel(msg):
         if not is_owner(msg):return ContinueHandling()
         clear_owner_draft(msg.from_user.id)
-        bot.reply_to(msg,"❌ Cancelled.")
+        bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_cancel.fc24629e57', '❌ Cancelled.', {}))
         return ContinueHandling()
 
     def offer_destinations(msg,source):
@@ -611,25 +614,25 @@ def register_owner_dashboard(app,bot):
             _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.time()+600,"request_id":secrets.token_hex(20)}
         _save_panel_state(msg.from_user.id,draft=_owner_drafts[msg.from_user.id])
         kb=types.InlineKeyboardMarkup(row_width=1)
-        kb.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.offer_destinations.5bcb6302da', '📢 All Groups', {}),callback_data="own:to:all"))
         with get_db_connection() as conn,conn.cursor() as cur:
             cur.execute("SELECT chat_id,title FROM owner_groups WHERE active ORDER BY last_seen DESC LIMIT 20")
             groups=cur.fetchall()
         for gid,title in groups:
-            kb.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
-        kb.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+            kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.offer_destinations.a97a09956e', '👥 ', {})+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.offer_destinations.ff1e4bbf4f', '❌ Cancel', {}),callback_data="own:cancel"))
         owner_replace_card(msg.from_user.id,msg.chat.id,"✅ Original Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",kb)
 
     @bot.message_handler(commands=["ownersend"])
     def owner_send_reply(msg):
         if not is_owner(msg):return ContinueHandling()
         if not msg.reply_to_message:
-            bot.reply_to(msg,"Forward လုပ်ထားတဲ့စာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_send_reply.4c352c206b', 'Forward လုပ်ထားတဲ့စာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။', {}))
             return ContinueHandling()
         try:offer_destinations(msg,msg.reply_to_message)
         except Exception as exc:
             print("Owner send:",type(exc).__name__)
-            bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_send_reply.97289e75a6', '⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။', {}))
         return ContinueHandling()
 
     @bot.message_handler(commands=["testwelcome"])
@@ -639,30 +642,30 @@ def register_owner_dashboard(app,bot):
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
                 row=cur.fetchone()
-            bot.send_message(msg.chat.id,"👀 Welcome Preview:\n\n"+(row[0] if row else DEFAULT_GROUP_WELCOME),parse_mode=None)
+            bot.send_message(msg.chat.id,_custom_text('msg.features.owner_dashboard.owner_test_welcome.dc3fac89a7', '👀 Welcome Preview:\n\n', {})+(row[0] if row else DEFAULT_GROUP_WELCOME),parse_mode=None)
         except Exception as exc:
             print("Welcome preview:",type(exc).__name__)
-            bot.reply_to(msg,"⚠️ Welcome Preview မဖွင့်နိုင်သေးပါ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_test_welcome.82581a53d5', '⚠️ Welcome Preview မဖွင့်နိုင်သေးပါ။', {}))
         return ContinueHandling()
 
     @bot.message_handler(commands=["ownersave"])
     def owner_save_reply(msg):
         if msg.chat.type!="private":return ContinueHandling()
         if str(msg.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip():
-            bot.reply_to(msg,"🔒 Owner သာ သုံးနိုင်ပါတယ်။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_save_reply.cb0b638bb2', '🔒 Owner သာ သုံးနိုင်ပါတယ်။', {}))
             return ContinueHandling()
         source=msg.reply_to_message
         if source is None:
-            bot.reply_to(msg,"Forward လုပ်ထားတဲ့ Message ကို Reply ပြီး /ownersave ပို့ပါ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_save_reply.50d477d300', 'Forward လုပ်ထားတဲ့ Message ကို Reply ပြီး /ownersave ပို့ပါ။', {}))
             return ContinueHandling()
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
                     (msg.chat.id,source.message_id,(source.text or source.caption or "["+source.content_type+"]")[:180]))
-            bot.reply_to(msg,"✅ Telegram Original သိမ်းပြီးပါပြီ။ Dashboard ကနေ ရွေးပို့နိုင်ပြီ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_save_reply.5e01e949ad', '✅ Telegram Original သိမ်းပြီးပါပြီ။ Dashboard ကနေ ရွေးပို့နိုင်ပြီ။', {}))
         except Exception as exc:
             print("Owner reply save:",type(exc).__name__)
-            bot.reply_to(msg,"⚠️ Message သိမ်းမရပါ။")
+            bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.owner_save_reply.300ba1bc3f', '⚠️ Message သိမ်းမရပါ။', {}))
         return ContinueHandling()
     @bot.message_handler(commands=["broadcastcheck"])
     def broadcast_check(msg):
@@ -670,7 +673,7 @@ def register_owner_dashboard(app,bot):
         configured=os.getenv("OWNER_TELEGRAM_ID","").strip()
         matched=configured==str(msg.from_user.id)
         status="✅ Owner ID ကိုက်ညီပါတယ်။" if matched else "❌ Owner ID မကိုက်ပါ၊ သို့မဟုတ် Render မှာ မသတ်မှတ်ရသေးပါ။"
-        bot.reply_to(msg,f"🔐 Broadcast Check\n\nYour Telegram ID: <code>{msg.from_user.id}</code>\n{status}\n\nRender Environment က OWNER_TELEGRAM_ID ကို စစ်ပါ။",parse_mode="HTML")
+        bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.broadcast_check.f94974f25f', '🔐 Broadcast Check\n\nYour Telegram ID: <code>{msg_from_user_id}</code>\n{status}\n\nRender Environment က OWNER_TELEGRAM_ID ကို စစ်ပါ။', {'msg_from_user_id': f'{msg.from_user.id}', 'status': f'{status}'}),parse_mode="HTML")
         return ContinueHandling()
     @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document","audio","voice","video_note","sticker"])
     def capture_owner_message(msg):
@@ -684,5 +687,8 @@ def register_owner_dashboard(app,bot):
             try:offer_destinations(msg,msg)
             except Exception as exc:
                 print("Owner direct message:",type(exc).__name__)
-                bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။")
+                bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.capture_owner_message.5a4437a3b7', '⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။', {}))
         return ContinueHandling()
+
+    from features.owner_controls import register as register_owner_controls
+    register_owner_controls(app,bot,owner_replace_card,owner_back_button,clear_owner_draft)

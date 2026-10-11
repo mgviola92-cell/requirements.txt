@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # ⚡ SPEED TAP VISUAL CARD
 # =========================================================
@@ -35,16 +36,16 @@ def get_speed_tap_background():
     return random_asset_avoiding_recent(
         "speed_tap_background",
         SPEED_TAP_ASSET_FOLDER,
-        recent_limit=BACKGROUND_RECENT_LIMIT,
+        recent_limit=_custom_setting('cfg.ui.speed_tap_card.BACKGROUND_RECENT_LIMIT', BACKGROUND_RECENT_LIMIT),
         recursive=True,
     )
 
 
 def _create_speed_tap_base(background_path=None):
     card = create_card(
-        width=CARD_WIDTH,
-        height=CARD_HEIGHT,
-        background=BG_DARK,
+        width=_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH),
+        height=_custom_setting('cfg.ui.speed_tap_card.CARD_HEIGHT', CARD_HEIGHT),
+        background=_custom_setting('cfg.ui.speed_tap_card.BG_DARK', BG_DARK),
     )
 
     if background_path is not None:
@@ -58,7 +59,7 @@ def _create_speed_tap_base(background_path=None):
     draw_panel(
         card,
         (42, 38, 858, 522),
-        fill=PANEL_MAIN,
+        fill=_custom_setting('cfg.ui.speed_tap_card.PANEL_MAIN', PANEL_MAIN),
         radius=42,
         outline=(76, 88, 110, 255),
         outline_width=2,
@@ -70,13 +71,13 @@ def _draw_speed_lines(card, state):
     draw = ImageDraw.Draw(card)
 
     if state == "go":
-        line_fill = ACCENT_YELLOW
+        line_fill = _custom_setting('cfg.ui.speed_tap_card.ACCENT_YELLOW', ACCENT_YELLOW)
     elif state == "result":
-        line_fill = ACCENT_BLUE
+        line_fill = _custom_setting('cfg.ui.speed_tap_card.ACCENT_BLUE', ACCENT_BLUE)
     elif state == "pending":
-        line_fill = ACCENT_PURPLE
+        line_fill = _custom_setting('cfg.ui.speed_tap_card.ACCENT_PURPLE', ACCENT_PURPLE)
     elif state == "timeout":
-        line_fill = ACCENT_RED
+        line_fill = _custom_setting('cfg.ui.speed_tap_card.ACCENT_RED', ACCENT_RED)
     else:
         line_fill = (110, 122, 142, 255)
 
@@ -96,10 +97,10 @@ def generate_speed_tap_pending_card(background_path=None):
     card = _create_speed_tap_base(background_path)
     _draw_speed_lines(card, "pending")
 
-    draw_text(card, "SPEED TAP", (CARD_WIDTH // 2, 95), size=50, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "∞", (CARD_WIDTH // 2, 255), size=155, fill=ACCENT_PURPLE, anchor="mm")
-    draw_text(card, "RANDOM START", (CARD_WIDTH // 2, 365), size=35, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "ဘယ်အချိန်စမလဲ မသိရဘူး 👀", (CARD_WIDTH // 2, 420), size=28, fill=TEXT_MUTED, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_pending_card.3810f17222', 'SPEED TAP', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 95), size=50, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, "∞", (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 255), size=155, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_PURPLE', ACCENT_PURPLE), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_pending_card.6ff80ddfcf', 'RANDOM START', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 365), size=35, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_pending_card.3003ffda55', 'ဘယ်အချိန်စမလဲ မသိရဘူး 👀', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 420), size=28, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MUTED', TEXT_MUTED), anchor="mm")
     return card
 
 
@@ -110,10 +111,10 @@ def generate_speed_tap_wait_card(wait_seconds=None, background_path=None):
     card = _create_speed_tap_base(background_path)
     _draw_speed_lines(card, "wait")
 
-    draw_text(card, "SPEED TAP", (CARD_WIDTH // 2, 95), size=50, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "WAIT...", (CARD_WIDTH // 2, 245), size=88, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "GO ပေါ်လာမှ နှိပ်ပါ", (CARD_WIDTH // 2, 350), size=36, fill=ACCENT_YELLOW, anchor="mm")
-    draw_text(card, "စောနှိပ်ရင် အနိုင်မရပါ", (CARD_WIDTH // 2, 412), size=27, fill=TEXT_MUTED, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_wait_card.3810f17222', 'SPEED TAP', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 95), size=50, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, "WAIT...", (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 245), size=88, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_wait_card.7c1a52e0e5', 'GO ပေါ်လာမှ နှိပ်ပါ', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 350), size=36, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_YELLOW', ACCENT_YELLOW), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_wait_card.3d489cbaf7', 'စောနှိပ်ရင် အနိုင်မရပါ', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 412), size=27, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MUTED', TEXT_MUTED), anchor="mm")
     return card
 
 
@@ -124,9 +125,9 @@ def generate_speed_tap_go_card(background_path=None):
     card = _create_speed_tap_base(background_path)
     _draw_speed_lines(card, "go")
 
-    draw_text(card, "SPEED TAP", (CARD_WIDTH // 2, 90), size=46, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "GO!", (CARD_WIDTH // 2, 245), size=135, fill=ACCENT_GREEN, anchor="mm")
-    draw_text(card, "⚡ TAP NOW ⚡", (CARD_WIDTH // 2, 375), size=43, fill=ACCENT_YELLOW, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_go_card.3810f17222', 'SPEED TAP', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 90), size=46, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_go_card.da1a00cca3', 'GO!', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 245), size=135, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_GREEN', ACCENT_GREEN), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_go_card.ee998f0753', '⚡ TAP NOW ⚡', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 375), size=43, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_YELLOW', ACCENT_YELLOW), anchor="mm")
     return card
 
 
@@ -162,40 +163,40 @@ def generate_speed_tap_result_card(
     card = _create_speed_tap_base(background_path)
     _draw_speed_lines(card, "result")
 
-    draw_text(card, "SPEED TAP RESULT", (CARD_WIDTH // 2, 82), size=43, fill=TEXT_MAIN, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_result_card.0c78ebda7b', 'SPEED TAP RESULT', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 82), size=43, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
 
     draw_panel(
         card,
         (190, 130, 710, 252),
-        fill=PANEL_SOFT,
+        fill=_custom_setting('cfg.ui.speed_tap_card.PANEL_SOFT', PANEL_SOFT),
         radius=28,
         outline=(74, 88, 112, 255),
         outline_width=2,
     )
-    draw_text(card, "🏆 WINNER", (CARD_WIDTH // 2, 162), size=24, fill=ACCENT_YELLOW, anchor="mm")
-    draw_text(card, winner_name, (CARD_WIDTH // 2, 210), size=42, fill=TEXT_MAIN, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_result_card.f155e700b6', '🏆 WINNER', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 162), size=24, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_YELLOW', ACCENT_YELLOW), anchor="mm")
+    draw_text(card, winner_name, (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 210), size=42, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
 
     draw_panel(
         card,
         (175, 292, 430, 430),
-        fill=PANEL_SOFT,
+        fill=_custom_setting('cfg.ui.speed_tap_card.PANEL_SOFT', PANEL_SOFT),
         radius=26,
         outline=(70, 84, 108, 255),
         outline_width=2,
     )
-    draw_text(card, "REACTION", (302, 327), size=21, fill=TEXT_MUTED, anchor="mm")
-    draw_text(card, f"{reaction_ms} ms", (302, 383), size=38, fill=ACCENT_BLUE, anchor="mm")
+    draw_text(card, "REACTION", (302, 327), size=21, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MUTED', TEXT_MUTED), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_result_card.28644bf787', '{reaction_ms} ms', {'reaction_ms': f'{reaction_ms}'}), (302, 383), size=38, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_BLUE', ACCENT_BLUE), anchor="mm")
 
     draw_panel(
         card,
         (470, 292, 725, 430),
-        fill=PANEL_ACCENT,
+        fill=_custom_setting('cfg.ui.speed_tap_card.PANEL_ACCENT', PANEL_ACCENT),
         radius=26,
         outline=(96, 104, 126, 255),
         outline_width=2,
     )
-    draw_text(card, "REWARD", (597, 327), size=21, fill=TEXT_MUTED, anchor="mm")
-    draw_text(card, f"+{reward_points} Points", (597, 383), size=33, fill=ACCENT_YELLOW, anchor="mm")
+    draw_text(card, "REWARD", (597, 327), size=21, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MUTED', TEXT_MUTED), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_result_card.d84ad2b09a', '+{reward_points} Points', {'reward_points': f'{reward_points}'}), (597, 383), size=33, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_YELLOW', ACCENT_YELLOW), anchor="mm")
 
     if jackpot_bonus > 0:
         draw_panel(
@@ -203,10 +204,10 @@ def generate_speed_tap_result_card(
             (285, 458, 615, 505),
             fill=(72, 50, 96, 255),
             radius=22,
-            outline=ACCENT_PURPLE,
+            outline=_custom_setting('cfg.ui.speed_tap_card.ACCENT_PURPLE', ACCENT_PURPLE),
             outline_width=2,
         )
-        draw_text(card, f"✨ JACKPOT +{jackpot_bonus}", (CARD_WIDTH // 2, 482), size=24, fill=TEXT_MAIN, anchor="mm")
+        draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_result_card.7bdf173a87', '✨ JACKPOT +{jackpot_bonus}', {'jackpot_bonus': f'{jackpot_bonus}'}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 482), size=24, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
 
     return card
 
@@ -218,9 +219,9 @@ def generate_speed_tap_timeout_card(background_path=None):
     card = _create_speed_tap_base(background_path)
     _draw_speed_lines(card, "timeout")
 
-    draw_text(card, "SPEED TAP", (CARD_WIDTH // 2, 105), size=48, fill=TEXT_MAIN, anchor="mm")
-    draw_text(card, "TIME'S UP", (CARD_WIDTH // 2, 255), size=78, fill=ACCENT_RED, anchor="mm")
-    draw_text(card, "ဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး", (CARD_WIDTH // 2, 370), size=31, fill=TEXT_MUTED, anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_timeout_card.3810f17222', 'SPEED TAP', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 105), size=48, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MAIN', TEXT_MAIN), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_timeout_card.aee564fe1c', "TIME'S UP", {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 255), size=78, fill=_custom_setting('cfg.ui.speed_tap_card.ACCENT_RED', ACCENT_RED), anchor="mm")
+    draw_text(card, _custom_text('msg.ui.speed_tap_card.generate_speed_tap_timeout_card.3cae975e9f', 'ဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး', {}), (_custom_setting('cfg.ui.speed_tap_card.CARD_WIDTH', CARD_WIDTH) // 2, 370), size=31, fill=_custom_setting('cfg.ui.speed_tap_card.TEXT_MUTED', TEXT_MUTED), anchor="mm")
     return card
 
 

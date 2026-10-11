@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 🏆 VISUAL RANK CARD
 # =========================================================
@@ -130,7 +131,7 @@ def generate_rank_card(
 
     draw_text(
         card,
-        f"{points} POINTS",
+        _custom_text('msg.ui.rank_card.generate_rank_card.2fca910e80', '{points} POINTS', {'points': f'{points}'}),
         (440, 245),
         size=38,
     )
@@ -182,28 +183,28 @@ def generate_rank_card(
 
     draw_text(
         card,
-        f"WINS  {wins}",
+        _custom_text('msg.ui.rank_card.generate_rank_card.27b10dcd73', 'WINS  {wins}', {'wins': f'{wins}'}),
         (130, stat_y),
         size=28,
     )
 
     draw_text(
         card,
-        f"GAMES  {games}",
+        _custom_text('msg.ui.rank_card.generate_rank_card.58d9d5edd4', 'GAMES  {games}', {'games': f'{games}'}),
         (390, stat_y),
         size=28,
     )
 
     draw_text(
         card,
-        f"LOSSES  {losses}",
+        _custom_text('msg.ui.rank_card.generate_rank_card.098dfe63ae', 'LOSSES  {losses}', {'losses': f'{losses}'}),
         (680, stat_y),
         size=28,
     )
 
     draw_text(
         card,
-        f"DRAWS  {draws}",
+        _custom_text('msg.ui.rank_card.generate_rank_card.0c1e636b5f', 'DRAWS  {draws}', {'draws': f'{draws}'}),
         (950, stat_y),
         size=28,
     )

@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 🏆 EXPANDED PLAYER RANK LADDER
 # Existing low-rank thresholds are preserved; ranks continue far beyond LEGEND.
@@ -30,15 +31,15 @@ def _points(value):
 
 def get_rank_data(points):
     points = _points(points)
-    for index, rank in enumerate(RANKS):
+    for index, rank in enumerate(_custom_setting('cfg.config.ranks.RANKS', RANKS)):
         maximum = rank["max_points"]
         if maximum is None or points <= maximum:
             data = dict(rank)
-            next_rank = RANKS[index + 1] if index + 1 < len(RANKS) else None
+            next_rank = _custom_setting('cfg.config.ranks.RANKS', RANKS)[index + 1] if index + 1 < len(_custom_setting('cfg.config.ranks.RANKS', RANKS)) else None
             data["next_rank"] = next_rank["title"] if next_rank else None
             data["next_points"] = next_rank["min_points"] if next_rank else None
             return data
-    return dict(RANKS[-1])
+    return dict(_custom_setting('cfg.config.ranks.RANKS', RANKS)[-1])
 
 
 def get_rank_title(points):

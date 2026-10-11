@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 👹 BOSS RAID DYNAMIC VISUAL CARDS
 # One base artwork per boss -> many runtime cinematic variants.
@@ -21,12 +22,12 @@ def boss_element(boss_name):
 
 def _element_treatment(image,element):
     if image is None:return None
-    a=ELEMENT_ACCENTS.get(element,ELEMENT_ACCENTS["shadow"])
+    a=_custom_setting('cfg.ui.boss_raid_card.ELEMENT_ACCENTS', ELEMENT_ACCENTS).get(element,_custom_setting('cfg.ui.boss_raid_card.ELEMENT_ACCENTS', ELEMENT_ACCENTS)["shadow"])
     return Image.alpha_composite(image,Image.new("RGBA",image.size,(a[0],a[1],a[2],18)))
 
 def _element_effects(card,element,stage):
     overlay=Image.new("RGBA",card.size,(0,0,0,0));d=ImageDraw.Draw(overlay)
-    a=ELEMENT_ACCENTS.get(element,ELEMENT_ACCENTS["shadow"]);alpha=24 if stage in ("normal","damaged") else (38 if stage=="rage" else 52)
+    a=_custom_setting('cfg.ui.boss_raid_card.ELEMENT_ACCENTS', ELEMENT_ACCENTS).get(element,_custom_setting('cfg.ui.boss_raid_card.ELEMENT_ACCENTS', ELEMENT_ACCENTS)["shadow"]);alpha=24 if stage in ("normal","damaged") else (38 if stage=="rage" else 52)
     if element in ("fire","chaos"):
         for x in range(70,W,150):d.polygon([(x,H),(x+48,H),(x+22,H-105),(x-12,H-42)],fill=(a[0],a[1],a[2],alpha))
     elif element=="ice":
@@ -128,7 +129,7 @@ def _effects(card,stage,variant):
     """Lightweight procedural overlays; no extra image assets required."""
     overlay=Image.new("RGBA",card.size,(0,0,0,0))
     d=ImageDraw.Draw(overlay)
-    accent=ACCENTS.get(variant,ACCENTS["crimson"])
+    accent=_custom_setting('cfg.ui.boss_raid_card.ACCENTS', ACCENTS).get(variant,_custom_setting('cfg.ui.boss_raid_card.ACCENTS', ACCENTS)["crimson"])
     # Cinematic edge vignette.
     for i,a in ((0,105),(18,72),(36,44)):
         d.rounded_rectangle((i,i,W-i,H-i),radius=34,outline=(0,0,0,a),width=18)
@@ -151,7 +152,7 @@ def _base(art,variant,stage="normal",composition="center",element="shadow"):
         card=add_background_image(card,treated,blur=0,darken=0)
     card=_effects(card,stage,variant)
     card=_element_effects(card,element,stage)
-    accent=ELEMENT_ACCENTS.get(element,ACCENTS.get(variant,ACCENTS["crimson"]))
+    accent=_custom_setting('cfg.ui.boss_raid_card.ELEMENT_ACCENTS', ELEMENT_ACCENTS).get(element,_custom_setting('cfg.ui.boss_raid_card.ACCENTS', ACCENTS).get(variant,_custom_setting('cfg.ui.boss_raid_card.ACCENTS', ACCENTS)["crimson"]))
     frame_alpha={"normal":35,"damaged":50,"rage":72,"final":90}.get(stage,35)
     # ImageDraw writes RGBA fills directly; a transparent fill erases the artwork.
     # Draw the border only, without filling the large central image area.
@@ -165,7 +166,7 @@ def live_card(raid,art=None,variant=None,composition=None):
     b=raid["boss"];element=boss_element(b["name"])
     card,accent=_base(art,variant,stage,composition,element)
     draw_panel(card,(48,42,1052,148),fill=(7,9,14,145),radius=26,outline=accent,outline_width=2)
-    draw_text(card,"GROUP BOSS RAID",(82,78),size=24,fill=accent)
+    draw_text(card,_custom_text('msg.ui.boss_raid_card.live_card.806b396235', 'GROUP BOSS RAID', {}),(82,78),size=24,fill=accent)
     draw_text(card,b["name"].upper(),(82,128),size=48)
     draw_panel(card,(730,604,1048,672),fill=(7,9,14,150),radius=22,outline=accent,outline_width=2)
     label={"normal":"RAID LIVE","damaged":"DAMAGED","rage":"RAGE","final":"FINAL STAND"}[stage]
@@ -187,17 +188,17 @@ def result_card(raid,won,line,muted=0,protected=0,art=None,variant=None,composit
     else:
         shade=Image.new("RGBA",card.size,(35,0,45,24))
         card=Image.alpha_composite(card,shade)
-    title="RAID VICTORY" if won else "PARTY DEFEATED";icon="🏆" if won else "☠"
+    title="RAID VICTORY" if won else "PARTY DEFEATED";icon=_custom_text('msg.ui.boss_raid_card.result_card.9bc03d1b33', '🏆', {}) if won else _custom_text('msg.ui.boss_raid_card.result_card.129fac6289', '☠', {})
     draw_text(card,f"{icon} {title}",(550,105),size=58,fill=accent,anchor="mm")
     draw_text(card,b["name"].upper(),(550,175),size=42,anchor="mm")
     draw_panel(card,(90,230,1010,390),fill=(16,20,29,230),radius=28)
-    draw_text(card,"BOSS SAYS",(550,268),size=23,fill=accent,anchor="mm")
+    draw_text(card,_custom_text('msg.ui.boss_raid_card.result_card.426d902d50', 'BOSS SAYS', {}),(550,268),size=23,fill=accent,anchor="mm")
     short=str(line)
     if len(short)>65:short=short[:62]+"..."
     draw_text(card,f'“{short}”',(550,325),size=29,anchor="mm")
     draw_panel(card,(90,430,1010,615),fill=(16,20,29,225),radius=28)
-    draw_text(card,f'⚔ TOTAL DAMAGE   {raid["total_damage"]:,}',(130,478),size=29)
-    draw_text(card,f'👥 RAIDERS        {len(raid["fighters"])}',(130,528),size=29)
-    if not won:draw_text(card,f'🔒 PENALTY        {muted} muted / {protected} protected',(130,578),size=27,fill=accent)
-    else:draw_text(card,'✨ BOSS DEFEATED — RAID CLEARED',(130,578),size=27,fill=accent)
+    draw_text(card,_custom_text('msg.ui.boss_raid_card.result_card.8799612e18', '⚔ TOTAL DAMAGE   {raid__total_damage}', {'raid__total_damage': f"{raid['total_damage']:,}"}),(130,478),size=29)
+    draw_text(card,_custom_text('msg.ui.boss_raid_card.result_card.375502346c', '👥 RAIDERS        {len_raid__fighters}', {'len_raid__fighters': f"{len(raid['fighters'])}"}),(130,528),size=29)
+    if not won:draw_text(card,_custom_text('msg.ui.boss_raid_card.result_card.8c0c54db2f', '🔒 PENALTY        {muted} muted / {protected} protected', {'muted': f'{muted}', 'protected': f'{protected}'}),(130,578),size=27,fill=accent)
+    else:draw_text(card,_custom_text('msg.ui.boss_raid_card.result_card.2351188390', '✨ BOSS DEFEATED — RAID CLEARED', {}),(130,578),size=27,fill=accent)
     return card_to_bytes(card,"JPEG",93)

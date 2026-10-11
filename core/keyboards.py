@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # ⌨️ INLINE KEYBOARD HELPERS
 # =========================================================
@@ -69,10 +70,10 @@ def vote_keyboard(
     session_id
 ):
     return two_buttons(
-        f"🅰️ {option_a_text}",
+        _custom_text('msg.core.keyboards.vote_keyboard.1502f51af1', '🅰️ {option_a_text}', {'option_a_text': f'{option_a_text}'}),
         f"{vote_prefix}:{session_id}:A",
 
-        f"🅱️ {option_b_text}",
+        _custom_text('msg.core.keyboards.vote_keyboard.dc02ec4fc9', '🅱️ {option_b_text}', {'option_b_text': f'{option_b_text}'}),
         f"{vote_prefix}:{session_id}:B"
     )
 
@@ -88,10 +89,10 @@ def accept_decline_keyboard(
     session_id
 ):
     return two_buttons(
-        "✅ ACCEPT",
+        _custom_text('msg.core.keyboards.accept_decline_keyboard.a7ecf6a0fc', '✅ ACCEPT', {}),
         f"{prefix}:{session_id}:accept",
 
-        "❌ DECLINE",
+        _custom_text('msg.core.keyboards.accept_decline_keyboard.ebdb099f62', '❌ DECLINE', {}),
         f"{prefix}:{session_id}:decline"
     )
 
@@ -109,10 +110,10 @@ def boss_attack_keyboard(
     markup = InlineKeyboardMarkup()
 
     if disabled:
-        text = "🏁 RAID FINISHED"
+        text = _custom_text('msg.core.keyboards.boss_attack_keyboard.87bd70daf1', '🏁 RAID FINISHED', {})
         callback = f"boss:{raid_id}:closed"
     else:
-        text = "⚔️ ATTACK"
+        text = _custom_text('msg.core.keyboards.boss_attack_keyboard.750ba0278d', '⚔️ ATTACK', {})
         callback = f"boss:{raid_id}:attack"
 
     markup.add(
@@ -136,10 +137,10 @@ def speed_tap_keyboard(
     markup = InlineKeyboardMarkup()
 
     if active:
-        text = "⚡ TAP NOW"
+        text = _custom_text('msg.core.keyboards.speed_tap_keyboard.a4231c927e', '⚡ TAP NOW', {})
         callback = f"speedtap:{game_id}:tap"
     else:
-        text = "🏁 FINISHED"
+        text = _custom_text('msg.core.keyboards.speed_tap_keyboard.5e26cfbffb', '🏁 FINISHED', {})
         callback = f"speedtap:{game_id}:closed"
 
     markup.add(
@@ -166,13 +167,13 @@ def claim_keyboard(
     markup = InlineKeyboardMarkup()
 
     if active:
-        text = "🎁 CLAIM"
+        text = _custom_text('msg.core.keyboards.claim_keyboard.56ff3c13b9', '🎁 CLAIM', {})
         callback = (
             f"{event_type}:"
             f"{event_id}:claim"
         )
     else:
-        text = "🏁 EVENT ENDED"
+        text = _custom_text('msg.core.keyboards.claim_keyboard.a63c5ef091', '🏁 EVENT ENDED', {})
         callback = (
             f"{event_type}:"
             f"{event_id}:closed"

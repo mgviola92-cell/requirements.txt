@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Atomic Neon persistence for daily group missions and player claims."""
 from datetime import datetime, timezone, timedelta
 from database.db import get_db_connection
@@ -264,7 +265,7 @@ def personal_missions(chat_id,user_id,day=None):
                 seed=f'personal:{chat_id}:{user_id}:{day}:{tier}'.encode()
                 k=int.from_bytes(hashlib.sha256(seed).digest()[:8],'big')%len(pool)
                 kind,game,needed=pool[k]
-                lo,hi=PERSONAL_REWARDS[tier-1]
+                lo,hi=_custom_setting('cfg.database.daily_challenge.PERSONAL_REWARDS', PERSONAL_REWARDS)[tier-1]
                 cur.execute('''INSERT INTO daily_personal_missions
                     (chat_id,cycle_day,user_id,mission,kind,game,needed,lo,hi)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING''',

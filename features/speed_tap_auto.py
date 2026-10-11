@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # ⚡ SPEED TAP AUTO-SPAWN ACTIVITY ENGINE
 # =========================================================
@@ -89,7 +90,7 @@ def _cleanup_activity_locked(
 
     cutoff = (
         now
-        - ACTIVITY_WINDOW_SECONDS
+        - _custom_setting('cfg.features.speed_tap_auto.ACTIVITY_WINDOW_SECONDS', ACTIVITY_WINDOW_SECONDS)
     )
 
     items = _activity.get(
@@ -151,9 +152,9 @@ def get_speed_tap_activity(
             "users": len(users),
             "active": (
                 len(items)
-                >= MIN_ACTIVE_MESSAGES
+                >= _custom_setting('cfg.features.speed_tap_auto.MIN_ACTIVE_MESSAGES', MIN_ACTIVE_MESSAGES)
                 and len(users)
-                >= MIN_ACTIVE_USERS
+                >= _custom_setting('cfg.features.speed_tap_auto.MIN_ACTIVE_USERS', MIN_ACTIVE_USERS)
             ),
             "quiet_remaining": max(
                 0,
@@ -313,6 +314,7 @@ def _evaluate_speed_tap_auto(
     chat_id,
 ):
 
+    if not _custom_setting('cfg.speed_tap_auto.enabled',True,scope=chat_id):return False
     now = time.time()
 
     with _lock:
@@ -362,9 +364,9 @@ def _evaluate_speed_tap_auto(
 
     if (
         message_count
-        < MIN_ACTIVE_MESSAGES
+        < _custom_setting('cfg.features.speed_tap_auto.MIN_ACTIVE_MESSAGES', MIN_ACTIVE_MESSAGES)
         or user_count
-        < MIN_ACTIVE_USERS
+        < _custom_setting('cfg.features.speed_tap_auto.MIN_ACTIVE_USERS', MIN_ACTIVE_USERS)
     ):
         return False
 
@@ -389,8 +391,8 @@ def _evaluate_speed_tap_auto(
 
                 _schedule_random_check(
                     chat_id,
-                    RECHECK_DELAY_MIN,
-                    RECHECK_DELAY_MAX,
+                    _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MIN', RECHECK_DELAY_MIN),
+                    _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MAX', RECHECK_DELAY_MAX),
                 )
 
                 return False
@@ -411,13 +413,13 @@ def _evaluate_speed_tap_auto(
 
     if (
         random.random()
-        > AUTO_SPAWN_CHANCE
+        > _custom_setting('cfg.features.speed_tap_auto.AUTO_SPAWN_CHANCE', AUTO_SPAWN_CHANCE)
     ):
 
         _schedule_random_check(
             chat_id,
-            RECHECK_DELAY_MIN,
-            RECHECK_DELAY_MAX,
+            _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MIN', RECHECK_DELAY_MIN),
+            _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MAX', RECHECK_DELAY_MAX),
         )
 
         return False
@@ -447,8 +449,8 @@ def _evaluate_speed_tap_auto(
 
         _schedule_random_check(
             chat_id,
-            RECHECK_DELAY_MIN,
-            RECHECK_DELAY_MAX,
+            _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MIN', RECHECK_DELAY_MIN),
+            _custom_setting('cfg.features.speed_tap_auto.RECHECK_DELAY_MAX', RECHECK_DELAY_MAX),
         )
 
         return False
@@ -460,8 +462,8 @@ def _evaluate_speed_tap_auto(
     # -----------------------------------------
 
     quiet_seconds = random.randint(
-        AUTO_QUIET_MIN,
-        AUTO_QUIET_MAX,
+        _custom_setting('cfg.features.speed_tap_auto.AUTO_QUIET_MIN', AUTO_QUIET_MIN),
+        _custom_setting('cfg.features.speed_tap_auto.AUTO_QUIET_MAX', AUTO_QUIET_MAX),
     )
 
     with _lock:
@@ -509,7 +511,7 @@ def record_speed_tap_activity(
         # Ignore rapid messages from one person.
         if (
             now - last_time
-            < PER_USER_ACTIVITY_GAP
+            < _custom_setting('cfg.features.speed_tap_auto.PER_USER_ACTIVITY_GAP', PER_USER_ACTIVITY_GAP)
         ):
             return False
 
@@ -562,8 +564,8 @@ def record_speed_tap_activity(
 
         _schedule_random_check(
             chat_id,
-            CHECK_DELAY_MIN,
-            CHECK_DELAY_MAX,
+            _custom_setting('cfg.features.speed_tap_auto.CHECK_DELAY_MIN', CHECK_DELAY_MIN),
+            _custom_setting('cfg.features.speed_tap_auto.CHECK_DELAY_MAX', CHECK_DELAY_MAX),
         )
 
     return True

@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 🎨 DYNAMIC CARD GENERATOR
 # =========================================================
@@ -96,10 +97,12 @@ def load_font(
 # =========================================================
 
 def create_card(
-    width=DEFAULT_WIDTH,
-    height=DEFAULT_HEIGHT,
+    width=None,
+    height=None,
     background=(24, 26, 32, 255)
 ):
+    if width is None: width = _custom_setting('cfg.ui.card_generator.DEFAULT_WIDTH', DEFAULT_WIDTH)
+    if height is None: height = _custom_setting('cfg.ui.card_generator.DEFAULT_HEIGHT', DEFAULT_HEIGHT)
     width = max(1, int(width))
     height = max(1, int(height))
 
@@ -273,10 +276,11 @@ def draw_panel(
     card,
     box,
     fill=(20, 22, 28, 220),
-    radius=DEFAULT_RADIUS,
+    radius=None,
     outline=None,
     outline_width=0
 ):
+    if radius is None: radius = _custom_setting('cfg.ui.card_generator.DEFAULT_RADIUS', DEFAULT_RADIUS)
     draw = ImageDraw.Draw(
         card
     )

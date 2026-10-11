@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import random
 import secrets
 import threading
@@ -78,11 +79,12 @@ def _pick(key,pool):
     choices=[x for x in pool if x not in hist] or list(pool)
     x=secrets.choice(choices);hist.append(x);return x
 
-def start_raid(chat_id,duration=RAID_DURATION,boss=None):
+def start_raid(chat_id,duration=None,boss=None):
+    if duration is None: duration = _custom_setting('cfg.games.boss_raid.RAID_DURATION', RAID_DURATION)
     with _lock:
         cur=_raids.get(chat_id)
         if cur and not cur["finished"]:return False,_copy(cur)
-        b=dict(boss or random.choice(BOSSES));now=time.time()
+        b=dict(boss or random.choice(_custom_setting('cfg.games.boss_raid.BOSSES', BOSSES)));now=time.time()
         r={"id":uuid.uuid4().hex[:10],"chat_id":chat_id,"boss":b,"hp":b["hp"],"max_hp":b["hp"],"phase":1,"fighters":{},"total_damage":0,"started_at":now,"ends_at":now+duration,"message_id":None,"finished":False,"result":None,"thresholds_seen":set(),"ending_handled":False,"event_hits":0,"modifier":None,"modifier_hits_left":0}
         _raids[chat_id]=r;return True,_copy(r)
 
@@ -109,11 +111,11 @@ def attack(chat_id,raid_id,user_id,user_name):
             r["finished"]=True;r["result"]=r["result"] or "timeout";return {"status":"finished","raid":_copy(r)}
         old_pct=r["hp"]/r["max_hp"]*100
         roll=secrets.randbelow(100);crit=False;blocked=False
-        if roll<BLOCK_CHANCE_PERCENT:raw=0;blocked=True
-        elif roll<BLOCK_CHANCE_PERCENT+CRIT_CHANCE_PERCENT:raw=secrets.randbelow(CRIT_DAMAGE_MAX-CRIT_DAMAGE_MIN+1)+CRIT_DAMAGE_MIN;crit=True
-        else:raw=secrets.randbelow(BASE_DAMAGE_MAX-BASE_DAMAGE_MIN+1)+BASE_DAMAGE_MIN
+        if roll<_custom_setting('cfg.games.boss_raid.BLOCK_CHANCE_PERCENT', BLOCK_CHANCE_PERCENT):raw=0;blocked=True
+        elif roll<_custom_setting('cfg.games.boss_raid.BLOCK_CHANCE_PERCENT', BLOCK_CHANCE_PERCENT)+_custom_setting('cfg.games.boss_raid.CRIT_CHANCE_PERCENT', CRIT_CHANCE_PERCENT):raw=secrets.randbelow(_custom_setting('cfg.games.boss_raid.CRIT_DAMAGE_MAX', CRIT_DAMAGE_MAX)-_custom_setting('cfg.games.boss_raid.CRIT_DAMAGE_MIN', CRIT_DAMAGE_MIN)+1)+_custom_setting('cfg.games.boss_raid.CRIT_DAMAGE_MIN', CRIT_DAMAGE_MIN);crit=True
+        else:raw=secrets.randbelow(_custom_setting('cfg.games.boss_raid.BASE_DAMAGE_MAX', BASE_DAMAGE_MAX)-_custom_setting('cfg.games.boss_raid.BASE_DAMAGE_MIN', BASE_DAMAGE_MIN)+1)+_custom_setting('cfg.games.boss_raid.BASE_DAMAGE_MIN', BASE_DAMAGE_MIN)
         modifier=r.get("modifier")
-        mod_mult=MODIFIER_DAMAGE_MULTIPLIERS.get(modifier,1.0)
+        mod_mult=_custom_setting('cfg.games.boss_raid.MODIFIER_DAMAGE_MULTIPLIERS', MODIFIER_DAMAGE_MULTIPLIERS).get(modifier,1.0)
         dmg=int(round(raw*_mult(r["phase"])*mod_mult))
         if raw>0:dmg=max(1,dmg)
         if r.get("modifier_hits_left",0)>0:
@@ -128,15 +130,15 @@ def attack(chat_id,raid_id,user_id,user_name):
         reaction=None
         for t in PHASE_THRESHOLDS:
             if old_pct>t>=new_pct and t not in r["thresholds_seen"]:
-                r["thresholds_seen"].add(t);reaction={"threshold":t,"text":_pick((r["boss"]["name"],"phase"),PHASE_LINES)};break
+                r["thresholds_seen"].add(t);reaction={"threshold":t,"text":_pick((r["boss"]["name"],"phase"),_custom_bank('games.boss_raid', PHASE_LINES))};break
         event=None
-        if not r["finished"] and r["event_hits"]>=BOSS_EVENT_MIN_HITS and secrets.randbelow(100)<BOSS_EVENT_CHANCE_PERCENT:
+        if not r["finished"] and r["event_hits"]>=_custom_setting('cfg.games.boss_raid.BOSS_EVENT_MIN_HITS', BOSS_EVENT_MIN_HITS) and secrets.randbelow(100)<_custom_setting('cfg.games.boss_raid.BOSS_EVENT_CHANCE_PERCENT', BOSS_EVENT_CHANCE_PERCENT):
             r["event_hits"]=0
             if secrets.randbelow(100)<45:
-                mod=secrets.choice(MODIFIER_LINES);r["modifier"]=mod[0];r["modifier_hits_left"]=MODIFIER_DURATION_HITS
-                event={"kind":"modifier","title":mod[1],"text":mod[2],"hits":MODIFIER_DURATION_HITS}
+                mod=secrets.choice(_custom_bank('games.boss_raid', MODIFIER_LINES));r["modifier"]=mod[0];r["modifier_hits_left"]=_custom_setting('cfg.games.boss_raid.MODIFIER_DURATION_HITS', MODIFIER_DURATION_HITS)
+                event={"kind":"modifier","title":mod[1],"text":mod[2],"hits":_custom_setting('cfg.games.boss_raid.MODIFIER_DURATION_HITS', MODIFIER_DURATION_HITS)}
             else:
-                effect=secrets.choice(BOSS_ATTACK_EFFECTS)
+                effect=secrets.choice(_custom_bank('games.boss_raid', BOSS_ATTACK_EFFECTS))
                 if effect[0]=="slam":
                     heal=min(effect[3],r["max_hp"]-r["hp"]);r["hp"]+=heal
                     event={"kind":"attack","title":effect[1],"text":effect[2],"heal":heal}
@@ -151,7 +153,7 @@ def attack(chat_id,raid_id,user_id,user_name):
 
 def ending_line(raid):
     kind="win" if raid.get("result")=="victory" else "lose"
-    return _pick((raid["boss"]["name"],kind),WIN_LINES if kind=="win" else LOSE_LINES)
+    return _pick((raid["boss"]["name"],kind),_custom_bank('games.boss_raid', WIN_LINES) if kind=="win" else _custom_bank('games.boss_raid', LOSE_LINES))
 
 def claim_ending(chat_id,raid_id):
     """Exactly one callback/timer owns the final ending sequence."""

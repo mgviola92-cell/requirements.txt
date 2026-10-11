@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 😀 EMOJI GUESS GAME
 # =========================================================
@@ -226,8 +227,9 @@ def get_random_question(
 def start_emoji_game(
     chat_id,
     question,
-    duration=EMOJI_GUESS_TIME
+    duration=None
 ):
+    if duration is None: duration = _custom_setting('cfg.games.emoji_guess.EMOJI_GUESS_TIME', EMOJI_GUESS_TIME)
     if not question:
         return False, None
 

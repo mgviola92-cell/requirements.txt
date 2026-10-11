@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # ⚡ SPEED TAP GAME ENGINE
 # =========================================================
@@ -167,9 +168,10 @@ def start_speed_tap_wait(
 
 def activate_speed_tap(
     chat_id,
-    active_time=SPEED_TAP_ACTIVE_TIME,
+    active_time=None,
 ):
 
+    if active_time is None: active_time = _custom_setting('cfg.games.speed_tap.SPEED_TAP_ACTIVE_TIME', SPEED_TAP_ACTIVE_TIME)
     now = time.time()
 
     with _speed_tap_lock:

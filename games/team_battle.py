@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import random
 import threading
 import time
@@ -35,7 +36,7 @@ def start_battle(chat_id):
         if cur and not cur.get("finished"):
             return False, _copy(cur)
         now = time.time()
-        duration = random.randint(MIN_DURATION, MAX_DURATION)
+        duration = random.randint(_custom_setting('cfg.games.team_battle.MIN_DURATION', MIN_DURATION), _custom_setting('cfg.games.team_battle.MAX_DURATION', MAX_DURATION))
         half_ratio = random.uniform(0.42, 0.58)
         battle = {
             "id": uuid.uuid4().hex[:10],
@@ -126,4 +127,4 @@ def finish_battle(chat_id, battle_id):
         return _copy(b)
 
 def hype_line():
-    return random.choice(HYPE_LINES)
+    return random.choice(_custom_bank('games.team_battle', HYPE_LINES))

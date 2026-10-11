@@ -1,3 +1,4 @@
+from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 # =========================================================
 # 🎁 REWARD / POINT SYSTEM
 # =========================================================
@@ -71,7 +72,7 @@ GAME_REWARDS = {
 
 
 def get_reward(game_key, result):
-    game = GAME_REWARDS.get(game_key)
+    game = _custom_setting('cfg.core.rewards.GAME_REWARDS', GAME_REWARDS).get(game_key)
 
     if game is None:
         return 0
