@@ -6,11 +6,14 @@ from flask import Blueprint, request, session, redirect, url_for, render_templat
 from werkzeug.security import check_password_hash
 from database.db import get_db_connection
 from telebot.handler_backends import ContinueHandling
+from telebot import types
 
 dashboard = Blueprint("owner_dashboard", __name__, url_prefix="/owner")
 BOT = None
 _job_lock = threading.Lock()
 _running = False
+_owner_drafts = {}
+_owner_draft_lock = threading.RLock()
 
 def _ready():
     return bool(os.getenv("OWNER_PASSWORD_HASH") and os.getenv("DASHBOARD_SECRET_KEY"))
@@ -269,6 +272,101 @@ def register_owner_dashboard(app,bot):
     def owner_membership(m):
         new=getattr(m.new_chat_member,"status","")
         record_group(m.chat,active=new not in ("left","kicked"))
+    def is_owner(msg):
+        return (msg.chat.type=="private" and msg.from_user is not None and
+                os.getenv("OWNER_TELEGRAM_ID","").strip()==str(msg.from_user.id))
+
+    def owner_buttons():
+        kb=types.InlineKeyboardMarkup(row_width=2)
+        kb.add(types.InlineKeyboardButton("📢 Broadcast",callback_data="own:broadcast"),
+               types.InlineKeyboardButton("👥 Groups",callback_data="own:groups"))
+        kb.add(types.InlineKeyboardButton("📜 History",callback_data="own:history"),
+               types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+        return kb
+
+    @bot.message_handler(commands=["owner"])
+    def telegram_owner_panel(msg):
+        if not is_owner(msg):return ContinueHandling()
+        with get_db_connection() as conn,conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*),COUNT(*) FILTER(WHERE active),COUNT(*) FILTER(WHERE active AND NOT broadcast_opt_out) FROM owner_groups")
+            total,active,enabled=cur.fetchone()
+        bot.send_message(msg.chat.id,f"👑 OWNER PANEL\n\n👥 Groups: {total}\n🟢 Active: {active}\n📢 Broadcast enabled: {enabled}\n\nအောက်က Menu ကို ရွေးပါ။",reply_markup=owner_buttons())
+        return ContinueHandling()
+
+    @bot.callback_query_handler(func=lambda q:bool(q.data and q.data.startswith("own:")))
+    def owner_actions(q):
+        if not q.from_user or str(q.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip() or q.message.chat.type!="private":
+            bot.answer_callback_query(q.id,"Owner သာ အသုံးပြုနိုင်ပါတယ်။",show_alert=True)
+            return
+        action=q.data.split(":",1)[1]
+        uid=q.from_user.id
+        try:
+            if action=="broadcast":
+                with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.monotonic()+600}
+                bot.send_message(q.message.chat.id,"📢 ပို့ချင်တဲ့ Message ကို ဒီ Chat ထဲ ပို့ပါ (သို့) Forward လုပ်ပါ။\n\nPremium Emoji နဲ့ Formatting ကို Copy လုပ်ပေးမယ်။ /ownercancel နဲ့ ရပ်နိုင်ပါတယ်။")
+            elif action=="groups":
+                with get_db_connection() as conn,conn.cursor() as cur:
+                    cur.execute("SELECT title,active,broadcast_opt_out FROM owner_groups ORDER BY last_seen DESC LIMIT 30")
+                    groups=cur.fetchall()
+                lines=[f"{i}. {title or 'Unnamed'} — {'🟢' if active else '⚪'}{' 🔕' if muted else ''}" for i,(title,active,muted) in enumerate(groups,1)]
+                bot.send_message(q.message.chat.id,"👥 Group List\n\n"+("\n".join(lines) if lines else "Group မရှိသေးပါ။"))
+            elif action=="history":
+                with get_db_connection() as conn,conn.cursor() as cur:
+                    cur.execute("SELECT id,total,sent,failed,status FROM owner_broadcasts ORDER BY id DESC LIMIT 8")
+                    jobs=cur.fetchall()
+                lines=[f"#{i} · {sent}/{total} sent · {failed} failed · {status}" for i,total,sent,failed,status in jobs]
+                bot.send_message(q.message.chat.id,"📜 Broadcast History\n\n"+("\n".join(lines) if lines else "မရှိသေးပါ။"))
+            elif action=="cancel":
+                with _owner_draft_lock:_owner_drafts.pop(uid,None)
+                bot.send_message(q.message.chat.id,"❌ Cancelled. /owner နဲ့ ပြန်ဖွင့်နိုင်ပါတယ်။")
+            elif action.startswith("to:"):
+                target=action[3:]
+                with _owner_draft_lock:
+                    draft=_owner_drafts.get(uid)
+                    if not draft or draft.get("phase")!="ready" or time.monotonic()>draft["expires"]:
+                        bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
+                    draft["target"]=target
+                kb=types.InlineKeyboardMarkup()
+                kb.add(types.InlineKeyboardButton("✅ Confirm Send",callback_data="own:send"),
+                       types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+                bot.send_message(q.message.chat.id,"📢 ဒီ Message ကို "+("Group အားလုံး" if target=="all" else "ရွေးထားတဲ့ Group")+" ဆီ ပို့မှာလား။",reply_markup=kb)
+            elif action=="send":
+                global _running
+                with _owner_draft_lock:
+                    draft=_owner_drafts.get(uid)
+                    if not draft or draft.get("phase")!="ready" or "target" not in draft or time.monotonic()>draft["expires"]:
+                        bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
+                    with _job_lock:
+                        if _running:
+                            bot.answer_callback_query(q.id,"Broadcast တစ်ခု ပို့နေပါတယ်။",show_alert=True);return
+                        _running=True
+                    draft=_owner_drafts.pop(uid)
+                try:
+                    with get_db_connection() as conn,conn.cursor() as cur:
+                        cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
+                        ids=[r[0] for r in cur.fetchall()]
+                        if draft["target"]!="all":ids=[i for i in ids if str(i)==draft["target"]]
+                        if not ids:raise ValueError("No eligible groups")
+                        cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",("[Telegram original]",len(ids)))
+                        jobid=cur.fetchone()[0]
+                    threading.Thread(target=_send_broadcast,args=(jobid,"",ids,draft["chat_id"],draft["message_id"]),daemon=True).start()
+                    bot.send_message(q.message.chat.id,f"✅ Broadcast #{jobid} စတင်ပို့နေပြီ။ Group {len(ids)} ခု။")
+                except Exception as exc:
+                    with _job_lock:_running=False
+                    bot.send_message(q.message.chat.id,"⚠️ Broadcast စတင်မရပါ။ Eligible Group ရှိ/မရှိ စစ်ပါ။")
+            bot.answer_callback_query(q.id)
+        except Exception as exc:
+            print("Owner panel action:",type(exc).__name__)
+            try:bot.answer_callback_query(q.id,"ခေတ္တ အဆင်မပြေပါ။",show_alert=True)
+            except Exception:pass
+
+    @bot.message_handler(commands=["ownercancel"])
+    def owner_cancel(msg):
+        if not is_owner(msg):return ContinueHandling()
+        with _owner_draft_lock:_owner_drafts.pop(msg.from_user.id,None)
+        bot.reply_to(msg,"❌ Cancelled.")
+        return ContinueHandling()
+
     @bot.message_handler(commands=["broadcastsave"])
     def broadcast_save_reply(msg):
         if msg.chat.type!="private":return ContinueHandling()
@@ -303,6 +401,20 @@ def register_owner_dashboard(app,bot):
             bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
             return ContinueHandling()
         if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
+        with _owner_draft_lock:
+            draft=_owner_drafts.get(msg.from_user.id)
+            if draft and draft.get("phase")=="waiting" and time.monotonic()<draft["expires"]:
+                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.monotonic()+600}
+                choices=types.InlineKeyboardMarkup(row_width=1)
+                choices.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
+                with get_db_connection() as conn,conn.cursor() as cur:
+                    cur.execute("SELECT chat_id,title FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY last_seen DESC LIMIT 20")
+                    groups=cur.fetchall()
+                for gid,title in groups:
+                    choices.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
+                choices.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
+                bot.reply_to(msg,"✅ Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=choices)
+                return ContinueHandling()
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
