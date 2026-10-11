@@ -64,7 +64,7 @@ def openalex_question():
     key=os.getenv("OPENALEX_API_KEY")
     params={"filter":"from_publication_date:2015-01-01,cited_by_count:>200",
             "per-page":50,"page":random.randint(1,25),
-            "select":"title,publication_year,cited_by_count,authorships,primary_location"}
+            "select":"title,publication_year,cited_by_count,authorships,primary_location,language,type,open_access,primary_topic"}
     if key:params["api_key"]=key
     data=_read("https://api.openalex.org/works?"+urllib.parse.urlencode(params))
     rows=[r for r in data.get("results",[]) if isinstance(r.get("title"),str)
@@ -77,6 +77,12 @@ def openalex_question():
         author_names=[a for a in author_names if a]
         journal=((row.get("primary_location") or {}).get("source") or {}).get("display_name")
         kinds=["year"]
+        if row.get("language") in ("en","es","fr","de","zh","ja","pt","ru","ar","it"):
+            kinds.append("language")
+        if row.get("type"):
+            kinds.append("type")
+        if (row.get("primary_topic") or {}).get("field",{}).get("display_name"):
+            kinds.append("field")
         if author_names:kinds.append("author")
         if journal:kinds.append("journal")
         random.shuffle(kinds)
@@ -88,9 +94,32 @@ def openalex_question():
                 others=[a.get("author",{}).get("display_name") for r in rows for a in r.get("authorships",[])]
                 item=_quiz("Who is an author of this research: "+title+"?",author_names[0],
                            [x for x in others if x and x not in author_names],"openalex:author")
-            else:
+            elif kind=="journal":
                 others=[((r.get("primary_location") or {}).get("source") or {}).get("display_name") for r in rows]
                 item=_quiz("Which journal or source published: "+title+"?",journal,
                            [x for x in others if x],"openalex:journal")
+            elif kind=="language":
+                names={"en":"English","es":"Spanish","fr":"French","de":"German",
+                       "zh":"Chinese","ja":"Japanese","pt":"Portuguese",
+                       "ru":"Russian","ar":"Arabic","it":"Italian"}
+                item=_quiz("What language is recorded for this research: "+title+"?",
+                           names[row["language"]],list(names.values()),"openalex:language")
+            elif kind=="type":
+                choices=["article","book","book-chapter","dissertation","dataset",
+                         "preprint","review","report","editorial","letter",
+                         "proceedings-article","reference-entry"]
+                if row["type"] not in choices:
+                    continue
+                item=_quiz("Which publication type is recorded for: "+title+"?",
+                           row["type"],choices,"openalex:type")
+            elif kind=="field":
+                field=row["primary_topic"]["field"]["display_name"]
+                others=[((r.get("primary_topic") or {}).get("field") or {}).get("display_name") for r in rows]
+                item=_quiz("Which research field is assigned to: "+title+"?",
+                           field,[x for x in others if x and x!=field],"openalex:field")
+            else:
+                item=None
+                # Boolean open-access metadata needs an unambiguous 4-way answer,
+                # so do not turn it into a misleading multiple-choice question.
             if item:return item
     return None
