@@ -254,7 +254,7 @@ def register_owner_dashboard(app,bot):
         configured=os.getenv("OWNER_TELEGRAM_ID","").strip()
         matched=configured==str(msg.from_user.id)
         status="✅ Owner ID ကိုက်ညီပါတယ်။" if matched else "❌ Owner ID မကိုက်ပါ၊ သို့မဟုတ် Render မှာ မသတ်မှတ်ရသေးပါ။"
-        bot.reply_to(msg,f"🔐 Broadcast Check\\n\\nYour Telegram ID: <code>{msg.from_user.id}</code>\\n{status}\\n\\nRender Environment က OWNER_TELEGRAM_ID ကို စစ်ပါ။",parse_mode="HTML")
+        bot.reply_to(msg,f"🔐 Broadcast Check\n\nYour Telegram ID: <code>{msg.from_user.id}</code>\n{status}\n\nRender Environment က OWNER_TELEGRAM_ID ကို စစ်ပါ။",parse_mode="HTML")
         return ContinueHandling()
     @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document","audio","voice","video_note","sticker"])
     def capture_owner_message(msg):
