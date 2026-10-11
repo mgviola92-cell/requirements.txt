@@ -64,12 +64,17 @@ def openalex_question():
     key=os.getenv("OPENALEX_API_KEY")
     params={"filter":"from_publication_date:2015-01-01,cited_by_count:>200",
             "per-page":50,"page":random.randint(1,25),
-            "select":"title,publication_year,cited_by_count,authorships,primary_location,language,type,open_access,primary_topic"}
+            "select":"title,publication_year,publication_date,cited_by_count,authorships,primary_location,language,type,open_access,primary_topic,biblio,doi"}
     if key:params["api_key"]=key
     data=_read("https://api.openalex.org/works?"+urllib.parse.urlencode(params))
     rows=[r for r in data.get("results",[]) if isinstance(r.get("title"),str)
           and 15<=len(r["title"])<=100 and isinstance(r.get("publication_year"),int)]
     random.shuffle(rows)
+    from core.metadata_quiz import field_quiz, OPENALEX_FIELDS
+    if random.random()<0.65:
+        item=field_quiz(rows,OPENALEX_FIELDS,"title","openalex")
+        if item:
+            return item
     for row in rows:
         title=row["title"]
         year=row["publication_year"]
