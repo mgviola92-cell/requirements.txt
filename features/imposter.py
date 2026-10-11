@@ -22,6 +22,8 @@ LOCK = threading.RLock()
 JOIN_TIME = 40
 TURN_TIME = 60
 DECISION_TIME = 60
+FINAL_VOTE_SECONDS = 240
+FINAL_MIN_DISCUSSION = 120
 MAX_ROUNDS = 5
 MIN_PLAYERS = 4
 _schedulers_started = False
@@ -118,11 +120,14 @@ def _view(s):
         idx=s["turn"]
         p=names[idx]
         done=sum(1 for i in range(idx) if not names[i].get("removed"))
-        return (head+f"<code>TRANSMISSION  {s['round']:02d} / {idx+1:02d}</code>\n\n"
-                f"🎙️ <b>NOW SPEAKING</b>\n👉 <b>{_name(p)}</b>\n\n"
-                "💬 Group Chat မှာ သဲလွန်စတစ်ခု ရေးပါ။\n"
-                "⏳ 45s + 15s Warning · အလှည့်မကျော်ရ\n"
-                f"\n<code>● {done} DONE   /   {len(names)} AGENTS</code>")
+        return (f"🎭 <b>IMPOSTER · ROUND {s['round']}</b>\n"
+                "━━━━━━━━━━━━━━━━━━\n\n"
+                f"🎙️ <b>Player {idx+1} — {_name(p)}</b>\n"
+                "⏱️ <b>00:45</b> + 15s သတိပေးချိန်\n"
+                "▰▰▰▰▰▰▰▰▱▱\n\n"
+                "💬 ကိုယ့်အလှည့်ရောက်ရင် Group မှာ Clue တစ်ခု ရေးပါ။\n"
+                f"✅ ပြီးသွားသူ {done} / {len(names)}\n\n"
+                "🔐 ကိုယ့် Secret ကို အောက်က Button မှာ ပြန်ကြည့်နိုင်ပါတယ်။")
     if phase=="decision":
         choices=s["decisions"]
         a=sum(x=="more" for x in choices.values())
@@ -139,7 +144,8 @@ def _view(s):
         return (head+"<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\n"
                 "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
                 f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
-                "⏳ 60 seconds · မပေးသူ Abstain")
+                "🎧 VC မှာ တိုင်ပင်ဖို့ ၂ မိနစ် အနည်းဆုံးပေးမယ်။\\n"
+                "⏳ Vote စုစုပေါင်း ၄ မိနစ် · မပေးသူ Abstain")
     return head+"🏁 Game ပြီးဆုံးပါပြီ။"
 
 def _edit(bot,chat_id,s):
@@ -248,7 +254,7 @@ def _next_turn(bot,chat_id,s):
 
 def _tick(bot,chat_id,s):
     now=time.time()
-    if now<s.get("deadline",now+1):return
+    if (s["phase"]=="final" and len(s.get("votes",{}))>=len(_eligible(s))\n        and now>=s.get("vote_earliest_finish",s.get("deadline",now+1))):\n        _finish(bot,chat_id,s);return\n    if now<s.get("deadline",now+1):return
     if s["phase"]=="join":
         if len(s["players"])<MIN_PLAYERS:
             s["phase"]="cancelled";_save(chat_id,s);end_session(chat_id,"imposter");ACTIVE_CHATS.discard(chat_id)
