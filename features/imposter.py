@@ -144,7 +144,7 @@ def _view(s):
         return (head+"<code>FINAL INTERROGATION</code>\n\n🔎 <b>WHO IS THE IMPOSTER?</b>\n"
                 "သံသယအရှိဆုံး Player ကို ရွေးပါ။ ကိုယ့်ကိုယ်ကို မဲမပေးရ။\n"
                 f"🗳️ မဲပေးပြီး: {len(s['votes'])}/{len(_eligible(s))}\n"
-                "🎧 VC မှာ တိုင်ပင်ဖို့ ၂ မိနစ် အနည်းဆုံးပေးမယ်။\\n"
+                "🎧 VC မှာ တိုင်ပင်ဖို့ ၂ မိနစ် အနည်းဆုံးပေးမယ်။\n"
                 "⏳ Vote စုစုပေါင်း ၄ မိနစ် · မပေးသူ Abstain")
     return head+"🏁 Game ပြီးဆုံးပါပြီ။"
 
@@ -254,7 +254,12 @@ def _next_turn(bot,chat_id,s):
 
 def _tick(bot,chat_id,s):
     now=time.time()
-    if (s["phase"]=="final" and len(s.get("votes",{}))>=len(_eligible(s))\n        and now>=s.get("vote_earliest_finish",s.get("deadline",now+1))):\n        _finish(bot,chat_id,s);return\n    if now<s.get("deadline",now+1):return
+    if (s["phase"]=="final" and len(s.get("votes",{}))>=len(_eligible(s))
+        and now>=s.get("vote_earliest_finish",s.get("deadline",now+1))):
+        _finish(bot,chat_id,s)
+        return
+    if now<s.get("deadline",now+1):
+        return
     if s["phase"]=="join":
         if len(s["players"])<MIN_PLAYERS:
             s["phase"]="cancelled";_save(chat_id,s);end_session(chat_id,"imposter");ACTIVE_CHATS.discard(chat_id)
@@ -393,8 +398,11 @@ def register(bot):
                 if not player or player.get("removed"):
                     return bot.answer_callback_query(q.id,"ဒီ Game မှာ ပါဝင်သူမဟုတ်ပါ။",show_alert=True)
                 if action=="secret":
-                    message=("🎭 သင်က IMPOSTER ဖြစ်ပါတယ်။\nSecret Word မသိပါ။ တခြားသူတွေနဲ့ မကွာအောင် Clue ပေးပါ။"
-                             if uid==s["imposter"] else "🔐 သင့် SECRET WORD:\n"+str(s["word"])+"\n\nGroup ထဲမှာ Word ကို တိုက်ရိုက်မပြောပါနဲ့။")
+                    message=(
+                        "🎭 SECRET ROLE\n\n🕵️ IMPOSTER ပါ!\n\nစကားလုံးမသိပါ။\nမဖမ်းမိအောင် Clue ပေးပါ။"
+                        if uid==s["imposter"] else
+                        "🔐 SECRET WORD\n\n"+str(s["word"])+"\n\n🤫 တခြားသူတွေကို မပြောပါနဲ့။"
+                    )
                     return bot.answer_callback_query(q.id,message,show_alert=True)
                 if action=="decision" and s["phase"]=="decision" and len(data)>3:
                     if str(uid) in s["decisions"]:return bot.answer_callback_query(q.id,"မဲပေးပြီးသားပါ။")
@@ -425,9 +433,8 @@ def register(bot):
                     if s["players"][idx]["id"]==uid:return bot.answer_callback_query(q.id,"ကိုယ့်ကိုယ်ကို မဲပေးလို့မရပါ။")
                     if s["players"][idx].get("removed"):return bot.answer_callback_query(q.id,"ဒီ Player ကို AFK ကြောင့် ဖယ်ထားပါတယ်။")
                     s["votes"][str(uid)]=idx
-                    if len(s["votes"])>=len(_eligible(s)):
-                        _finish(bot,chat_id,s)
-                    else:_save(chat_id,s);_edit(bot,chat_id,s)
+                    _save(chat_id,s)
+                    _edit(bot,chat_id,s)
                     return bot.answer_callback_query(q.id,"မဲပေးပြီးပါပြီ။")
                 return bot.answer_callback_query(q.id,"အခုအချိန်မှာ မရနိုင်ပါ။")
         except Exception as exc:
