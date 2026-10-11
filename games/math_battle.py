@@ -5,6 +5,7 @@ import time
 import uuid
 import json
 from pathlib import Path
+from core.math_battle_procedural import generate as generate_advanced
 from core.sessions import start_session, end_session
 from database.used_questions import get_used_question_ids, get_recent_question_ids, mark_question_used, reset_used_questions
 
@@ -87,9 +88,36 @@ def _next_question(chat_id, level):
         recent=set(get_recent_question_ids(chat_id,kind,limit=150))
         reset_used_questions(chat_id,kind)
         available=[q for q in pool if q['id'] not in recent] or pool
-    q=random.choice(available).copy()
+    # Advanced procedural questions supplement, never replace, the fixed 15k.
+    # Check the per-group persistent recent IDs to avoid immediate repetition.
+    if random.random() < 0.55:
+        recent = set(get_recent_question_ids(chat_id, kind, limit=150))
+        for _ in range(12):
+            try:
+                if level <= 1 and random.random() < 0.30:
+                    from core.procedural_questions import generate as generate_classic
+                    item = generate_classic(level=level+1, mode="versus")
+                    # Classic engine has two numeric choices and a correct letter.
+                    answer = int(item["options"][0 if item["answer"] == "a" else 1])
+                    import hashlib
+                    question = item["question"]
+                    item = {"id": "CLASSIC-" + hashlib.sha256(question.encode()).hexdigest()[:24],
+                            "question": question, "answer": answer, "source": item["source"]}
+                else:
+                    item = generate_advanced(level+1)
+                if item["id"] not in recent and item["id"] not in used:
+                    q = item.copy()
+                    mark_question_used(chat_id, kind, q["id"])
+                    break
+            except (ValueError, KeyError, TypeError, OverflowError) as exc:
+                print("Math procedural fallback:", exc)
+        else:
+            q = random.choice(available).copy()
+            mark_question_used(chat_id, kind, q["id"])
+    else:
+        q = random.choice(available).copy()
+        mark_question_used(chat_id, kind, q["id"])
     # A new match uses one ID only once, even when database unavailable.
-    mark_question_used(chat_id,kind,q['id'])
     ans=q['answer']
     wrong=set()
     while len(wrong)<3:
