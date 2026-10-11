@@ -3326,11 +3326,11 @@ def get_trivia_question(chat_id=None):
     from core.question_sources import fetch_question
     from database.question_history import seen
     candidates = []
-    for _ in range(5):
+    for _ in range(2):
         item = fetch_question()
         if item:
             candidates.append(item)
-    for _ in range(6):
+    for _ in range(2):
         item = get_online_trivia_question()
         if item:
             candidates.append(item)
