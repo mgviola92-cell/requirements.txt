@@ -153,7 +153,9 @@ def _base(art,variant,stage="normal",composition="center",element="shadow"):
     card=_element_effects(card,element,stage)
     accent=ELEMENT_ACCENTS.get(element,ACCENTS.get(variant,ACCENTS["crimson"]))
     frame_alpha={"normal":35,"damaged":50,"rage":72,"final":90}.get(stage,35)
-    draw_panel(card,(24,22,1076,698),fill=(7,9,14,0),radius=32,outline=accent,outline_width=3)
+    # ImageDraw writes RGBA fills directly; a transparent fill erases the artwork.
+    # Draw the border only, without filling the large central image area.
+    ImageDraw.Draw(card).rounded_rectangle((24,22,1076,698),radius=32,outline=accent,width=3)
     return card,accent
 
 def live_card(raid,art=None,variant=None,composition=None):
