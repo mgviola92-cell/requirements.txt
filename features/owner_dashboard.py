@@ -161,7 +161,7 @@ def login():
         error="Username or password incorrect."
     return render_template_string(CSS+"""<main style="max-width:450px"><div class="panel">
     <h1>🔐 Owner Login</h1><p class="error">{{error}}</p>
-    <form method="post"><input type="hidden" name="request_id" value="{secrets.token_hex(20)}"><input type="hidden" name="csrf" value="{{csrf}}">
+    <form method="post"><input type="hidden" name="csrf" value="{{csrf}}">
     <label>Username</label><input name="username" required autocomplete="username">
     <label>Password</label><input name="password" type="password" required autocomplete="current-password">
     <button>Sign in</button></form></div></main>""",csrf=_csrf(),error=error)
@@ -309,17 +309,40 @@ def broadcast():
     return _shell(body)
 
 def _send_broadcast(jobid):
+    """One PostgreSQL session owns delivery and recovery across all processes."""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT pg_try_advisory_xact_lock(759012346)")
+                if not cur.fetchone()[0]:return
+            # The outer transaction owns the lock (compatible with Neon pooling).
+            with get_db_connection() as recovery_conn, recovery_conn.cursor() as cur:
+                cur.execute("SELECT status FROM owner_broadcasts WHERE id=%s",(jobid,))
+                row=cur.fetchone()
+                if not row or row[0]!="running":return
+                cur.execute("SELECT 1 FROM owner_broadcast_targets WHERE job_id=%s LIMIT 1",(jobid,))
+                if not cur.fetchone():
+                    cur.execute("UPDATE owner_broadcasts SET status='needs_review' WHERE id=%s",(jobid,))
+                    return
+                cur.execute("""UPDATE owner_broadcast_targets SET status='uncertain',
+                    last_error='Interrupted while sending (delivery unknown)'
+                    WHERE job_id=%s AND status='sending'""",(jobid,))
+            _process_broadcast(jobid,conn)
+    except Exception as exc:
+        print("Broadcast recovery:",type(exc).__name__)
+
+def _process_broadcast(jobid, conn):
     """Durable per-group outbox. Interrupted in-flight sends are flagged uncertain,
     not blindly replayed; this avoids duplicate announcements after restarts."""
     global _running
     try:
-        with get_db_connection() as conn,conn.cursor() as cur:
+        with get_db_connection() as delivery_conn, delivery_conn.cursor() as cur:
             cur.execute("SELECT message,source_chat,source_msg FROM owner_broadcasts WHERE id=%s",(jobid,))
             job=cur.fetchone()
         if not job:return
         message,source_chat,source_msg=job
         while True:
-            with get_db_connection() as conn,conn.cursor() as cur:
+            with get_db_connection() as delivery_conn, delivery_conn.cursor() as cur:
                 cur.execute("""SELECT t.chat_id FROM owner_broadcast_targets t
                     JOIN owner_groups g ON g.chat_id=t.chat_id
                     WHERE t.job_id=%s AND t.status='pending'
@@ -333,12 +356,20 @@ def _send_broadcast(jobid):
                 else:gid=None
             if gid is None:break
             error=None
+            skipped=False
             for attempt in range(3):
                 try:
+                    # Abort delivery if the lock-owning connection has been lost.
+                    with conn.cursor() as lock_cur:lock_cur.execute("SELECT 1")
+                    with get_db_connection() as consent_conn, consent_conn.cursor() as consent_cur:
+                        consent_cur.execute("SELECT 1 FROM owner_groups WHERE chat_id=%s AND active AND NOT broadcast_opt_out",(gid,))
+                        if not consent_cur.fetchone():
+                            skipped=True
+                            break
                     if source_chat is not None:
                         BOT.copy_message(gid,source_chat,source_msg)
                     else:
-                        BOT.send_message(gid,message)
+                        BOT.send_message(gid,message,parse_mode=None)
                     error=None
                     break
                 except Exception as exc:
@@ -347,15 +378,17 @@ def _send_broadcast(jobid):
                     if "retry after" in desc or "too many requests" in desc:
                         import re
                         m=re.search(r"retry after (\d+)",desc)
-                        time.sleep(min(int(m.group(1)) if m else 5,60))
+                        parameters=getattr(exc,"result_json",{}).get("parameters",{})
+                        delay=parameters.get("retry_after",int(m.group(1)) if m else 5)
+                        if attempt<2:time.sleep(max(1,float(delay)))
                     elif "timed out" in desc or "timeout" in desc:
                         # Delivery is ambiguous: retry could create duplicate.
                         break
                     else:
                         break
             desc=str(error or "")[:250]
-            state="sent" if error is None else ("uncertain" if "timed out" in desc.lower() or "timeout" in desc.lower() else "failed")
-            with get_db_connection() as conn,conn.cursor() as cur:
+            state="skipped" if skipped else "sent" if error is None else ("uncertain" if "timed out" in desc.lower() or "timeout" in desc.lower() or not getattr(error,"error_code",None) or getattr(error,"error_code",0)>=500 else "failed")
+            with get_db_connection() as delivery_conn, delivery_conn.cursor() as cur:
                 cur.execute("""UPDATE owner_broadcast_targets
                     SET status=%s,last_error=%s WHERE job_id=%s AND chat_id=%s""",
                     (state,desc,jobid,gid))
@@ -370,35 +403,29 @@ def _send_broadcast(jobid):
         print("Broadcast worker:",type(exc).__name__,str(exc)[:200])
     finally:
         try:
-            with get_db_connection() as conn,conn.cursor() as cur:
+            with get_db_connection() as delivery_conn, delivery_conn.cursor() as cur:
                 cur.execute("""UPDATE owner_broadcast_targets t SET status='skipped'
                     FROM owner_groups g WHERE t.job_id=%s AND t.chat_id=g.chat_id
                     AND t.status='pending' AND (NOT g.active OR g.broadcast_opt_out)""",(jobid,))
                 cur.execute("""UPDATE owner_broadcasts SET
                     sent=(SELECT COUNT(*) FROM owner_broadcast_targets WHERE job_id=%s AND status='sent'),
                     failed=(SELECT COUNT(*) FROM owner_broadcast_targets WHERE job_id=%s AND status IN ('failed','uncertain')),
-                    status=CASE WHEN EXISTS(SELECT 1 FROM owner_broadcast_targets WHERE job_id=%s AND status IN ('pending','sending')) THEN 'running' ELSE 'completed' END
-                    WHERE id=%s""",(jobid,jobid,jobid,jobid))
+                    status=CASE WHEN EXISTS(SELECT 1 FROM owner_broadcast_targets WHERE job_id=%s AND status IN ('pending','sending')) THEN 'running' WHEN EXISTS(SELECT 1 FROM owner_broadcast_targets WHERE job_id=%s AND status='uncertain') THEN 'needs_review' ELSE 'completed' END
+                    WHERE id=%s""",(jobid,jobid,jobid,jobid,jobid))
         except Exception as exc:print("Broadcast finalize:",type(exc).__name__)
         with _job_lock:_running=False
 
 def _resume_broadcasts():
-    global _running
-    with get_db_connection() as conn,conn.cursor() as cur:
-        cur.execute("""UPDATE owner_broadcast_targets SET status='uncertain',
-            last_error='Interrupted while sending (delivery unknown)'
-            WHERE status='sending'""")
-        # Pre-outbox legacy running jobs have no target snapshot: never mark them completed as if sent.
-        cur.execute("""UPDATE owner_broadcasts b SET status='needs_review'
-            WHERE b.status='running' AND NOT EXISTS
-              (SELECT 1 FROM owner_broadcast_targets t WHERE t.job_id=b.id)""")
-        cur.execute("SELECT id FROM owner_broadcasts WHERE status='running' ORDER BY id")
-        jobs=[r[0] for r in cur.fetchall()]
-    if jobs:
-        # Only one active job is allowed. Resume outstanding targets.
-        with _job_lock:_running=True
-        for jid in jobs:
-            _send_broadcast(jid)
+    """Retry pending work after transient DB failures without waiting for restart."""
+    while True:
+        try:
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("SELECT id FROM owner_broadcasts WHERE status='running' ORDER BY id")
+                jobs=[r[0] for r in cur.fetchall()]
+            for jid in jobs:_send_broadcast(jid)
+        except Exception as exc:
+            print("Broadcast supervisor:",type(exc).__name__)
+        time.sleep(15)
 
 def register_owner_dashboard(app,bot):
     global BOT
@@ -434,7 +461,7 @@ def register_owner_dashboard(app,bot):
                 with get_db_connection() as conn,conn.cursor() as cur:
                     cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
                     row=cur.fetchone()
-                bot.send_message(m.chat.id,row[0] if row else DEFAULT_GROUP_WELCOME)
+                bot.send_message(m.chat.id,row[0] if row else DEFAULT_GROUP_WELCOME,parse_mode=None)
             except Exception as exc:
                 print("Bot group welcome failed:",type(exc).__name__)
     def is_owner(msg):
@@ -443,8 +470,8 @@ def register_owner_dashboard(app,bot):
 
     def owner_replace_card(uid,chat_id,text,keyboard=None):
         """Persist latest card ID so old cards are cleaned after Render restarts."""
-        new_card=bot.send_message(chat_id,text,reply_markup=keyboard)
         with _owner_draft_lock:
+            new_card=bot.send_message(chat_id,text,reply_markup=keyboard)
             old_id=_owner_card_ids.get(uid)
             if not old_id:
                 try:_,old_id,_=_load_panel_state(uid)
@@ -500,15 +527,18 @@ def register_owner_dashboard(app,bot):
 
     @bot.callback_query_handler(func=lambda q:bool(q.data and q.data.startswith("own:")))
     def owner_actions(q):
-        if not q.from_user or str(q.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip() or q.message.chat.type!="private":
+        if not q.from_user or str(q.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip() or not q.message or q.message.chat.type!="private":
             bot.answer_callback_query(q.id,"Owner သာ အသုံးပြုနိုင်ပါတယ်။",show_alert=True)
             return
         try:
             _,latest_card,_=_load_panel_state(q.from_user.id)
-            if latest_card and q.message.message_id!=latest_card:
+            if not latest_card or q.message.message_id!=latest_card:
                 bot.answer_callback_query(q.id,"အရင် Menu ဟောင်းပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။",show_alert=True)
                 return
-        except Exception as exc:print("Owner callback state:",type(exc).__name__)
+        except Exception as exc:
+            print("Owner callback state:",type(exc).__name__)
+            bot.answer_callback_query(q.id,"ခေတ္တ အဆင်မပြေပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။",show_alert=True)
+            return
         action=q.data.split(":",1)[1]
         uid=q.from_user.id
         try:
@@ -609,7 +639,7 @@ def register_owner_dashboard(app,bot):
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
                 row=cur.fetchone()
-            bot.send_message(msg.chat.id,"👀 Welcome Preview:\n\n"+(row[0] if row else DEFAULT_GROUP_WELCOME))
+            bot.send_message(msg.chat.id,"👀 Welcome Preview:\n\n"+(row[0] if row else DEFAULT_GROUP_WELCOME),parse_mode=None)
         except Exception as exc:
             print("Welcome preview:",type(exc).__name__)
             bot.reply_to(msg,"⚠️ Welcome Preview မဖွင့်နိုင်သေးပါ။")
@@ -644,26 +674,8 @@ def register_owner_dashboard(app,bot):
         return ContinueHandling()
     @bot.message_handler(func=lambda m:m.chat.type=="private",content_types=["text","photo","video","animation","document","audio","voice","video_note","sticker"])
     def capture_owner_message(msg):
-        owner_id=os.getenv("OWNER_TELEGRAM_ID","").strip()
-        if not owner_id or str(msg.from_user.id)!=owner_id:
-            bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
-            return ContinueHandling()
-        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
-        with _owner_draft_lock:
-            draft=get_owner_draft(msg.from_user.id)
-            if draft and draft.get("phase")=="waiting" and time.time()<draft["expires"]:
-                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.time()+600,"request_id":secrets.token_hex(20)}
-                choices=types.InlineKeyboardMarkup(row_width=1)
-                choices.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
-                with get_db_connection() as conn,conn.cursor() as cur:
-                    cur.execute("SELECT chat_id,title FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY last_seen DESC LIMIT 20")
-                    groups=cur.fetchall()
-                for gid,title in groups:
-                    choices.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
-                choices.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
-                owner_replace_card(msg.from_user.id,msg.chat.id,"✅ Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",choices)
-                return ContinueHandling()
-        # Only /ownersave stores originals. Ordinary private messages are not saved.
+        # Forwarding alone neither saves a source nor advances the draft.
+        # /ownersend and /ownersave are the explicit, separate entry points.
         return ContinueHandling()
     @bot.message_handler(commands=["broadcastoff","broadcaston"])
     def toggle_broadcast(msg):
