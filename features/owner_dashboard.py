@@ -43,6 +43,7 @@ def _init_db():
         )""")
         cur.execute("ALTER TABLE owner_broadcasts ADD COLUMN IF NOT EXISTS source_chat BIGINT")
         cur.execute("ALTER TABLE owner_broadcasts ADD COLUMN IF NOT EXISTS source_msg BIGINT")
+        cur.execute("ALTER TABLE owner_broadcasts ADD COLUMN IF NOT EXISTS request_id TEXT UNIQUE")
         cur.execute("""CREATE TABLE IF NOT EXISTS owner_broadcast_targets (
             job_id BIGINT NOT NULL REFERENCES owner_broadcasts(id),
             chat_id BIGINT NOT NULL,
@@ -56,16 +57,19 @@ def _init_db():
             draft TEXT, updated_at TIMESTAMPTZ DEFAULT NOW()
         )""")
 
-def _queue_broadcast(message, ids, source_chat=None, source_msg=None):
+def _queue_broadcast(message, ids, source_chat=None, source_msg=None, request_id=None):
     """Serialize jobs using a PostgreSQL transaction lock, not process-local RAM."""
     if not ids: raise ValueError("No eligible groups")
     with get_db_connection() as conn,conn.cursor() as cur:
         cur.execute("SELECT pg_advisory_xact_lock(759012345)")
+        if request_id:
+            cur.execute("SELECT id FROM owner_broadcasts WHERE request_id=%s",(request_id,))
+            if cur.fetchone(): raise ValueError("This request has already been submitted")
         cur.execute("SELECT 1 FROM owner_broadcasts WHERE status='running' LIMIT 1")
         if cur.fetchone(): raise ValueError("Another broadcast is already running")
-        cur.execute("""INSERT INTO owner_broadcasts(message,total,status,source_chat,source_msg)
-                    VALUES(%s,%s,'running',%s,%s) RETURNING id""",
-                    (message,len(ids),source_chat,source_msg))
+        cur.execute("""INSERT INTO owner_broadcasts(message,total,status,source_chat,source_msg,request_id)
+                    VALUES(%s,%s,'running',%s,%s,%s) RETURNING id""",
+                    (message,len(ids),source_chat,source_msg,request_id))
         jobid=cur.fetchone()[0]
         cur.executemany("""INSERT INTO owner_broadcast_targets(job_id,chat_id)
                         VALUES(%s,%s) ON CONFLICT DO NOTHING""",
@@ -156,7 +160,7 @@ def login():
         error="Username or password incorrect."
     return render_template_string(CSS+"""<main style="max-width:450px"><div class="panel">
     <h1>🔐 Owner Login</h1><p class="error">{{error}}</p>
-    <form method="post"><input type="hidden" name="csrf" value="{{csrf}}">
+    <form method="post"><input type="hidden" name="request_id" value="{secrets.token_hex(20)}"><input type="hidden" name="csrf" value="{{csrf}}">
     <label>Username</label><input name="username" required autocomplete="username">
     <label>Password</label><input name="password" type="password" required autocomplete="current-password">
     <button>Sign in</button></form></div></main>""",csrf=_csrf(),error=error)
@@ -279,7 +283,7 @@ def broadcast():
             ids=[x[0] for x in cur.fetchall()]
         if target!="all":ids=[i for i in ids if i==target]
         if not ids:return ("No eligible groups",400)
-        try:jobid=_queue_broadcast(message,ids,source_chat,source_msg)
+        try:jobid=_queue_broadcast(message,ids,source_chat,source_msg,request.form.get("request_id"))
         except ValueError as exc:return (str(exc),409)
         threading.Thread(target=_send_broadcast,args=(jobid,),daemon=True).start()
         return redirect(url_for("owner_dashboard.index"))
