@@ -248,6 +248,25 @@ def register_owner_dashboard(app,bot):
     def owner_membership(m):
         new=getattr(m.new_chat_member,"status","")
         record_group(m.chat,active=new not in ("left","kicked"))
+    @bot.message_handler(commands=["broadcastsave"])
+    def broadcast_save_reply(msg):
+        if msg.chat.type!="private":return ContinueHandling()
+        if str(msg.from_user.id)!=os.getenv("OWNER_TELEGRAM_ID","").strip():
+            bot.reply_to(msg,"🔒 Owner သာ သုံးနိုင်ပါတယ်။")
+            return ContinueHandling()
+        source=msg.reply_to_message
+        if source is None:
+            bot.reply_to(msg,"Forward လုပ်ထားတဲ့ Message ကို Reply ပြီး /broadcastsave ပို့ပါ။")
+            return ContinueHandling()
+        try:
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
+                    (msg.chat.id,source.message_id,(source.text or source.caption or "["+source.content_type+"]")[:180]))
+            bot.reply_to(msg,"✅ Telegram Original သိမ်းပြီးပါပြီ။ Dashboard ကနေ ရွေးပို့နိုင်ပြီ။")
+        except Exception as exc:
+            print("Owner reply save:",type(exc).__name__)
+            bot.reply_to(msg,"⚠️ Message သိမ်းမရပါ။")
+        return ContinueHandling()
     @bot.message_handler(commands=["broadcastcheck"])
     def broadcast_check(msg):
         if msg.chat.type!="private":return ContinueHandling()
@@ -262,7 +281,7 @@ def register_owner_dashboard(app,bot):
         if not owner_id or str(msg.from_user.id)!=owner_id:
             bot.reply_to(msg,"🔒 ဒီ Message ကို Broadcast အတွက် သိမ်းခွင့်မရှိပါ။ /broadcastcheck နဲ့ Owner ID ကို စစ်ပါ။")
             return ContinueHandling()
-        if msg.content_type=="text" and (msg.text or "").startswith("/"):return ContinueHandling()
+        if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("INSERT INTO owner_source_messages(chat_id,message_id,preview) VALUES(%s,%s,%s)",
