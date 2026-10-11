@@ -592,6 +592,11 @@ def _pair_next_round(chat_id, game_id):
     game = start_pair_round(chat_id, game_id, duration=PAIR_ROUND_SECONDS)
     if game:
         _pair_show_round(game)
+    else:
+        try:
+            bot.send_message(chat_id, "⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ခဏရပ်ထားပါတယ်။ ခဏနေ ပြန်ကြိုးစားနိုင်ပါတယ်။")
+        except Exception as exc:
+            print("Pair question unavailable:", exc)
 
 def _pair_finish_match(chat_id, game_id):
     game = finish_pair_match(chat_id, game_id)
