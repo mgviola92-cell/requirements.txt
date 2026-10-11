@@ -149,12 +149,15 @@ def register(bot):
     def stop(chat_id, gid, *, force=False):
         with _lock:
             g=_rounds.get(chat_id)
-            if not g or g["id"]!=gid:return False
-            if not force and time.time()<g["ends"]:return False
+            if not g or g["id"]!=gid:
+                return False
+            if not force and time.time()<g["ends"]:
+                return False
             try:
-                bot.stop_poll(chat_id,g["message_id"])
+                result=bot.stop_poll(chat_id,g["message_id"])
             except Exception as exc:
                 print("WYR stop_poll:",exc)
+                return False  # do not announce success if Telegram did not close poll
             try:
                 with get_db_connection() as conn:
                     with conn.cursor() as cur:
@@ -165,7 +168,19 @@ def register(bot):
             _poll_rounds.pop(g["poll_id"],None)
             _rounds.pop(chat_id,None)
             end_session(chat_id,"would_you_rather")
-            return True
+
+        # Native Telegram polls do not support a custom lock badge.
+        # Reply to the poll so the closure is unmistakable in a busy group.
+        try:
+            counts=[opt.voter_count for opt in result.options]
+            total=sum(counts)
+            summary=(f"🔒 WYR Vote ပိတ်ပြီးပါပြီ!\n"
+                     f"{'🛑 စတင်သူက ရပ်လိုက်ပါတယ်။' if force else '⏰ အချိန်ပြည့်သွားပါပြီ။'}\n"
+                     f"🗳 စုစုပေါင်း Vote: {total}")
+            bot.send_message(chat_id,summary,reply_to_message_id=g["message_id"])
+        except Exception as exc:
+            print("WYR closure notice:",exc)
+        return True
 
     def wait_finish(chat_id,gid):
         while True:
@@ -271,8 +286,9 @@ def register(bot):
             elif g["owner_id"]!=message.from_user.id:
                 response="🔒 ဒီ Poll ကို /wyr နဲ့ စခဲ့တဲ့သူပဲ ရပ်လို့ရတယ်။"
             else:
-                response="✅ Poll ကို ရပ်လိုက်ပြီ။" if stop(message.chat.id,g["id"],force=True) else "❌ ရပ်လို့မရသေးပါ။"
-        bot.reply_to(message,response)
+                response=None if stop(message.chat.id,g["id"],force=True) else "❌ Poll ပိတ်မရသေးပါ။ ထပ်စမ်းပါ။"
+        if response:
+            bot.reply_to(message,response)
 
     @bot.poll_answer_handler(func=lambda ans:True)
     def wyr_poll_answer(ans):
