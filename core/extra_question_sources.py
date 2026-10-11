@@ -77,7 +77,7 @@ def world_bank_question():
     countries=_get("https://api.worldbank.org/v2/country?format=json&per_page=400")
     valid=set()
     if isinstance(countries,list) and len(countries)>1 and isinstance(countries[1],list):
-        valid={r.get("id") for r in countries[1] if r.get("region",{}).get("id")!="NA"}
+        valid={r.get("iso2Code") for r in countries[1] if (r.get("region") or {}).get("id")!="NA" and r.get("iso2Code")}
     rows=[r for r in data[1] if isinstance(r.get("value"),(int,float))
           and r.get("country",{}).get("id") in valid
           and r.get("country",{}).get("value")]
