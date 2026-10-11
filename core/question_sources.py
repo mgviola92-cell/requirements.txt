@@ -51,8 +51,30 @@ def wikidata_capital():
     return {"question": f"What is the capital of {country}?", "answers": answers,
             "correct_index": answers.index(capital), "source": "wikidata"}
 
+def openalex_research():
+    """Research publication-year quiz using OpenAlex metadata."""
+    url = "https://api.openalex.org/works?" + urllib.parse.urlencode({
+        "filter": "from_publication_date:2015-01-01,cited_by_count:>500",
+        "per-page": 40, "select": "title,publication_year",
+        "page": random.randint(1, 8)})
+    data = _json(url, timeout=5)
+    rows = [r for r in data.get("results", [])
+            if isinstance(r.get("title"), str) and 20 <= len(r["title"]) <= 90
+            and isinstance(r.get("publication_year"), int)
+            and 2015 <= r["publication_year"] <= 2026]
+    if not rows:
+        return None
+    row = random.choice(rows)
+    year = row["publication_year"]
+    wrong = [y for y in range(2015, 2027) if y != year]
+    answers = [str(year)] + [str(y) for y in random.sample(wrong, 3)]
+    random.shuffle(answers)
+    return {"question": "In which year was this research published: " + row["title"] + "?",
+            "answers": answers, "correct_index": answers.index(str(year)),
+            "source": "openalex"}
+
 def fetch_question():
-    sources = [trivia_api, wikidata_capital]
+    sources = [trivia_api, wikidata_capital, openalex_research]
     random.shuffle(sources)
     for source in sources:
         try:
