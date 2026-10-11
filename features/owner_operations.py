@@ -16,16 +16,34 @@ from database.db import get_db_connection
 MMT=ZoneInfo('Asia/Yangon')
 PERMISSIONS={'edit','announce','stats'}
 COMMAND_GAMES={'boss':'boss_raid','bossraid':'boss_raid','raid':'boss_raid','teambattle':'team_battle','pair':'pair_challenge','mathbattle':'math_battle','math':'math_battle','wordchain':'word_chain','wc':'word_chain','emoji':'emoji_guess','emojiguess':'emoji_guess','speedtap':'speed_tap','wyr':'would_you_rather','wouldyourather':'would_you_rather','imposter':'imposter'}
+# Append newly implemented games here; the private menu reverses this creation order.
 GAME_LABELS={
-    'boss_raid':'👹 Boss Raid','team_battle':'⚔️ Team Battle','math_battle':'🧮 Math Battle',
-    'pair_challenge':'👥 Pair Challenge','imposter':'🎭 Imposter','word_chain':'🔗 Word Chain',
-    'emoji_guess':'😀 Emoji Guess','speed_tap':'⚡ Speed Tap','would_you_rather':'🤔 Would You Rather'}
-GAME_COMMANDS={'boss_raid':'/boss','team_battle':'/teambattle','math_battle':'/mathbattle','pair_challenge':'/pair','imposter':'/imposter','word_chain':'/wordchain','emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr'}
+    'coin':'🪙 Coin Flip','trivia':'🧠 Trivia','guess':'🎯 Number Guess',
+    'dice':'🎲 Dice','slot':'🎰 Slot','eight_ball':'🎱 Magic 8 Ball',
+    'love':'❤️ Love Calculator','random':'🎲 Random Number',
+    'emoji_guess':'😀 Emoji Guess','speed_tap':'⚡ Speed Tap','word_chain':'🔗 Word Chain',
+    'math_battle':'🧮 Math Battle','daily_challenge':'📅 Daily Challenge','boss_raid':'👹 Boss Raid',
+    'team_battle':'⚔️ Team Battle','pair_challenge':'👥 Pair Challenge',
+    'would_you_rather':'🤔 Would You Rather','imposter':'🎭 Imposter'}
+GAME_COMMANDS={'coin':'/coin','trivia':'/trivia','guess':'/guess','dice':'/dice','slot':'/slot',
+    'eight_ball':'/8ball','love':'/love','random':'/random','daily_challenge':'/daily',
+    'boss_raid':'/boss','team_battle':'/teambattle','math_battle':'/mathbattle',
+    'pair_challenge':'/pair','imposter':'/imposter','word_chain':'/wordchain',
+    'emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr'}
 GAME_HANDLERS={k:'enabled.bot.'+fn for k,fn in {
+    'coin':'coin_command','trivia':'trivia_command','guess':'guess_command','dice':'roll_dice',
+    'slot':'roll_slot','eight_ball':'eight_ball_command','love':'love_calculator','random':'random_command',
     'boss_raid':'boss_raid_command','team_battle':'team_battle_command','math_battle':'math_battle_command',
     'pair_challenge':'pair_challenge_command','word_chain':'word_chain_command',
     'emoji_guess':'emoji_guess_command','speed_tap':'speed_tap_command'}.items()}
-GAME_HANDLERS.update(imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command')
+GAME_HANDLERS.update(imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command',daily_challenge='enabled.features.daily_challenge.daily_command')
+COMMAND_GAMES.update({command.lstrip('/'):kind for kind,command in GAME_COMMANDS.items()})
+
+
+def ordered_games():
+    return list(reversed(list(GAME_LABELS.items())))
+
+
 _ready=False
 _lock=threading.RLock()
 _cache={'groups':set(),'releases':{}}
@@ -96,9 +114,8 @@ def feature_allowed(feature,chat_id):
 
 def release_features():
     from core.customization import CATALOG
-    from core.sessions import SESSION_PRIORITIES
     return {**{k:e['label'] for k,e in CATALOG.items() if k.startswith('enabled.')},
-            **{'game:'+k:k.replace('_',' ').title() for k in SESSION_PRIORITIES if k in {'boss_raid','team_battle','math_battle','pair_challenge','imposter','word_chain','emoji_guess','speed_tap','would_you_rather'}}}
+            **{'game:'+k:label for k,label in ordered_games()}}
 
 
 def change_release(actor,feature,rollout):
@@ -378,11 +395,16 @@ def register(app,bot,replace_card,clear_broadcast):
         text='🧪 ဘယ် Group မှာ Game စမ်းချင်လဲ?\n\nအောက်က Group ကို နှိပ်ရွေးပါ။' if action=='tests' else '🚪 ထွက်ခိုင်းချင်တဲ့ Group ရွေးပါ။'
         if notice:text=notice+'\n\n'+text
         card(uid,text,rows)
-    def game_list(uid):
-        rows=[(label,f'ops:game:{kind}') for kind,label in GAME_LABELS.items()]
+    def game_list(uid,page=0):
+        entries=ordered_games();page=max(0,min(page,(len(entries)-1)//8))
+        rows=[(label,f'ops:game:{kind}') for kind,label in entries[page*8:(page+1)*8]]
+        if page:rows.append(('← ရှေ့ဂိမ်းများ',f'ops:features:{page-1}'))
+        if (page+1)*8<len(entries):rows.append(('နောက်ဂိမ်းများ →',f'ops:features:{page+1}'))
         rows += [('👥 စမ်းမယ့် Group ရွေးမယ်','ops:tests:0'),('⬅️ နောက်သို့','ops:home')]
         names=', '.join(title[:45] for _,title in selected_groups())
-        card(uid,'🎮 ဘယ် Game ကို စမ်းချင်လဲ?'+('\n\nစမ်းမယ့် Group: '+names[:500] if names else '\n\nစမ်းမယ့် Group ကို အရင်ရွေးပါ။'),rows)
+        text=f'🎮 ဘယ် Game ကို စမ်းချင်လဲ? ({page+1}/{(len(entries)+7)//8})'
+        text+='\n\nစမ်းမယ့် Group: '+names[:500] if names else '\n\nစမ်းမယ့် Group ကို အရင်ရွေးပါ။'
+        card(uid,text,rows)
     def game_card(uid,kind,notice=''):
         if kind not in GAME_LABELS:raise ValueError('Game မရှိပါ။')
         refresh()
@@ -428,7 +450,8 @@ def register(app,bot,replace_card,clear_broadcast):
                 test_group(uid,cid,enabled)
                 if enabled:selected_card(uid,cid,page)
                 else:group_list(uid,'tests',page,'✅ Group ကို စမ်းသပ်စာရင်းမှ ဖယ်ပြီးပါပြီ။')
-            elif action in ('features','feature'):game_list(uid)
+            elif action=='features':game_list(uid,int(parts[2]) if len(parts)>2 else 0)
+            elif action=='feature':game_list(uid)
             elif action=='game':game_card(uid,parts[2])
             elif action=='mode':
                 kind=parts[2];rollout=parts[3]

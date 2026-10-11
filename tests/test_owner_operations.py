@@ -165,7 +165,9 @@ class OwnerOperationsTests(unittest.TestCase):
         with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'):
             handlers['owner_tools_action'](q)
         buttons=[b for row in replace.call_args.args[3].keyboard for b in row]
-        self.assertEqual(len([b for b in buttons if b.callback_data.startswith('ops:game:')]),9)
+        self.assertEqual(len([b for b in buttons if b.callback_data.startswith('ops:game:')]),8)
+        self.assertEqual(buttons[0].callback_data,'ops:game:imposter')
+        self.assertTrue(any(b.callback_data=='ops:features:1' for b in buttons))
         self.assertTrue(any(b.text=='👹 Boss Raid' and b.callback_data=='ops:game:boss_raid' for b in buttons))
         self.assertFalse(any('enabled.' in b.text or 'Command' in b.text for b in buttons))
 
@@ -177,3 +179,43 @@ class OwnerOperationsTests(unittest.TestCase):
         self.assertIn(('game:boss_raid','all'),inserts)
         self.assertIn((ops.GAME_HANDLERS['boss_raid'],'all'),inserts)
         self.assertEqual(ops._cache['releases'][ops.GAME_HANDLERS['boss_raid']],'all')
+
+    def test_game_menu_has_all_existing_games_newest_first(self):
+        kinds=[kind for kind,_ in ops.ordered_games()]
+        self.assertEqual(kinds[:3],['imposter','would_you_rather','pair_challenge'])
+        self.assertEqual(len(kinds),18)
+        self.assertTrue({'coin','trivia','guess','dice','slot','eight_ball','love','random','daily_challenge'}<=set(kinds))
+        self.assertEqual(set(ops.GAME_HANDLERS),set(kinds))
+        self.assertEqual(set(ops.GAME_COMMANDS),set(kinds))
+        from core.customization import CATALOG
+        self.assertTrue(all(handler in CATALOG for handler in ops.GAME_HANDLERS.values()))
+        self.assertTrue(all('game:'+kind in ops.release_features() for kind in kinds))
+
+    def test_game_menu_pagination_reaches_all_games_without_dates_or_new_marks(self):
+        _,bot,handlers,replace=self.handlers();conn,cur=self.connection();cur.fetchall.return_value=[(-100,'Test Group')]
+        q=NS(id='q',data='ops:features:0',from_user=NS(id=42),message=NS(message_id=7,chat=NS(id=42,type='private')))
+        seen=[]
+        with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'):
+            for page in range(3):
+                q.data=f'ops:features:{page}';handlers['owner_tools_action'](q)
+                for row in replace.call_args.args[3].keyboard:
+                    for b in row:
+                        if b.callback_data.startswith('ops:game:'):
+                            seen.append(b.callback_data.split(':')[2]);self.assertNotIn('🆕',b.text)
+        self.assertEqual(seen,[kind for kind,_ in ops.ordered_games()])
+
+    def test_daily_auto_respects_test_scope_and_keeps_existing_card_updates(self):
+        import ast
+        import threading
+        from pathlib import Path
+        source=ast.parse(Path('features/daily_challenge.py').read_text())
+        function=next(n for n in ast.walk(source) if isinstance(n,ast.FunctionDef) and n.name=='publish')
+        bot=MagicMock();overview=Mock(return_value={})
+        env={'_ready':True,'today':lambda:'today','time':time,'_lock':threading.RLock(),
+             '_last_refresh':{},'get_card_id':Mock(return_value=None),'overview':overview,
+             'card':lambda snapshot:'photo','bot':bot}
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[function],type_ignores=[])),'daily-publish','exec'),env)
+        with patch.object(ops,'feature_allowed',return_value=False):
+            self.assertFalse(env['publish'](-101,force=True));overview.assert_not_called();bot.send_photo.assert_not_called()
+            env['get_card_id'].return_value=123
+            self.assertTrue(env['publish'](-101,force=True));bot.edit_message_media.assert_called_once()

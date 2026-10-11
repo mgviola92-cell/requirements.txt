@@ -43,6 +43,7 @@ def register_daily_challenge(bot):
 
     def publish(chat_id, force=False):
         if not _ready: return False
+        from features.owner_operations import feature_allowed
         day=today()
         now=time.monotonic()
         with _lock:
@@ -51,6 +52,7 @@ def register_daily_challenge(bot):
             _last_refresh[key]=now
         try:
             existing=get_card_id(chat_id,day)
+            if not existing and not feature_allowed('game:daily_challenge',chat_id):return False
             s=overview(chat_id,day=day)
             s['chat_id']=chat_id
             if existing:
