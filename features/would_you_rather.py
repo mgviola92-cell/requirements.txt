@@ -79,7 +79,7 @@ def generate_by_index(ix):
     if not 0 <= ix < CAPACITY:
         raise ValueError("invalid scenario index")
     a, b = MYANMAR_PAIRS[ix]
-    question = f"ဘယ်ဟာကို ပိုကြိုက်လဲ?\n{a} လား၊ {b} လား?"
+    question = "🎲 Would You Rather?\n\nမင်းသာ တစ်ခုတည်း ရွေးခွင့်ရမယ်ဆို ဘယ်ဟာကို ရွေးမလဲ?"
     if len(question) > 300 or len(a) > 100 or len(b) > 100:
         raise ValueError("Telegram Poll text too long")
     return {"id": "WYR-MM-"+str(ix), "question": question,
