@@ -2,10 +2,15 @@ import random
 import threading
 import time
 import uuid
+import html
+import urllib.request
+import urllib.parse
 
 _lock = threading.RLock()
 _games = {}
 _recent = {}
+_online_cache = []
+_online_last_fetch = 0
 
 MODES = {
     "duo": {"title": "CO-OP DUO", "min": 2, "max": 2, "rounds": 5},
@@ -81,14 +86,55 @@ def _generated_challenge(game):
     return {"id": uuid.uuid4().hex[:12], "kind": kind, "question": question,
             "options": options, "answer": answer, "difficulty": level}
 
+def _online_quiz(game):
+    """Fetch two-option trivia; fallback to local/generated challenges on errors."""
+    global _online_last_fetch
+    now = time.time()
+    with _lock:
+        if not _online_cache and now - _online_last_fetch >= 8:
+            _online_last_fetch = now
+            difficulty = "easy" if len(game["players"]) <= 2 else (
+                "medium" if len(game["players"]) == 3 else "hard"
+            )
+            url = "https://opentdb.com/api.php?" + urllib.parse.urlencode({
+                "amount": 20, "type": "multiple", "difficulty": difficulty
+            })
+            try:
+                request = urllib.request.Request(url, headers={"User-Agent": "PairChallengeBot/1.0"})
+                with urllib.request.urlopen(request, timeout=3) as response:
+                    payload = __import__("json").load(response)
+                if payload.get("response_code") == 0:
+                    _online_cache.extend(payload.get("results", []))
+            except Exception as exc:
+                print("Pair online question fallback:", exc)
+        if not _online_cache:
+            return None
+        row = _online_cache.pop(random.randrange(len(_online_cache)))
+    question = html.unescape(row.get("question", ""))
+    correct = html.unescape(row.get("correct_answer", ""))
+    incorrect = [html.unescape(x) for x in row.get("incorrect_answers", [])]
+    if not question or not correct or not incorrect:
+        return None
+    wrong = random.choice(incorrect)
+    if wrong == correct:
+        return None
+    answer = random.choice(("a", "b"))
+    options = [correct, wrong] if answer == "a" else [wrong, correct]
+    return {"id": "online:" + uuid.uuid4().hex[:12], "kind": "quiz",
+            "question": question[:180], "options": [x[:90] for x in options],
+            "answer": answer, "source": "OpenTDB"}
+
 def _pick_challenge(game):
     used = set(game.get("used_challenges", []))
     pool = [q for q in CHALLENGES if q["kind"] in _allowed_kinds(game) and q["id"] not in used]
     # Generated questions expand variety; for Squad, scale difficulty by player count.
-    if game["mode"] == "squad" or random.random() < 0.65 or not pool:
-        challenge = _generated_challenge(game)
-    else:
+    roll = random.random()
+    if roll < 0.30 and pool:
         challenge = dict(random.choice(pool))
+    elif roll < 0.65:
+        challenge = _online_quiz(game) or _generated_challenge(game)
+    else:
+        challenge = _generated_challenge(game)
     game["used_challenges"].append(challenge["id"])
     return challenge
 
