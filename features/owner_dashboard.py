@@ -143,6 +143,10 @@ def broadcast():
         message=(request.form.get("message") or "").strip()
         if not message or len(message)>1500: return ("Message must be 1–1500 characters",400)
         if request.form.get("confirm")!="yes":return ("Confirmation required",400)
+        target=request.form.get("target","all")
+        if target!="all":
+            try:target=int(target)
+            except ValueError:return ("Invalid target",400)
         with _job_lock:
             if _running:return ("A broadcast is already in progress",409)
             _running=True
@@ -150,6 +154,9 @@ def broadcast():
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("SELECT chat_id FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY chat_id")
                 ids=[x[0] for x in cur.fetchall()]
+                if target!="all":
+                    if target not in ids:return ("Destination not available",400)
+                    ids=[target]
                 cur.execute("INSERT INTO owner_broadcasts(message,total,status) VALUES(%s,%s,'running') RETURNING id",
                             (message,len(ids)))
                 jobid=cur.fetchone()[0]
@@ -159,13 +166,17 @@ def broadcast():
             raise
         return redirect(url_for("owner_dashboard.index"))
     with get_db_connection() as conn,conn.cursor() as cur:
-        cur.execute("SELECT COUNT(*) FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE")
-        count=cur.fetchone()[0]
+        cur.execute("SELECT chat_id,title FROM owner_groups WHERE active=TRUE AND broadcast_opt_out=FALSE ORDER BY title")
+        groups=cur.fetchall()
+        count=len(groups)
+    choices="<option value='all'>All groups</option>"
+    for gid,title in groups:
+        choices+=f"<option value='{gid}'>{html.escape(title or str(gid))}</option>"
     body=f"""<h1>📢 Broadcast Center</h1><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
 <p class='muted'>Group admins can opt out using /broadcastoff in their group. Broadcasts are plain text and rate limited.</p>
 <form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}">
-<textarea name="message" maxlength="1500" required placeholder="Write the announcement..."></textarea>
-<label><input style="width:auto" type="checkbox" name="confirm" value="yes" required> I confirm sending this to {count} groups.</label>
+<label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" required placeholder="Write the announcement..."></textarea>
+<label><input style="width:auto" type="checkbox" name="confirm" value="yes" required> I confirm sending to selected destination.</label>
 <p><button>Send to groups</button></p></form></div>"""
     return _shell(body)
 
@@ -198,6 +209,17 @@ def register_owner_dashboard(app,bot):
                       PERMANENT_SESSION_LIFETIME=3600)
     app.register_blueprint(dashboard)
     _init_db()
+    observed={}
+    observed_lock=threading.Lock()
+    @bot.message_handler(func=lambda m:m.chat.type in ("group","supergroup"),content_types=["text"])
+    def observe_group(msg):
+        now=time.monotonic()
+        with observed_lock:
+            if now-observed.get(msg.chat.id,-1000000)<21600:
+                return ContinueHandling()
+            observed[msg.chat.id]=now
+        record_group(msg.chat)
+        return ContinueHandling()
     @bot.my_chat_member_handler(func=lambda m:True)
     def owner_membership(m):
         new=getattr(m.new_chat_member,"status","")
