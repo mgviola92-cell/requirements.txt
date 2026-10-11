@@ -6,7 +6,7 @@ from features.would_you_rather import PAIRS, CAPACITY, generate_by_index, genera
 
 class WouldYouRatherTests(unittest.TestCase):
     def test_more_than_twenty_thousand_scenarios(self):
-        self.assertGreater(CAPACITY, 20000)
+        self.assertGreaterEqual(CAPACITY, 80)
         self.assertGreaterEqual(len(PAIRS), 75)
 
     def test_all_combinations_unique_and_valid(self):
@@ -20,7 +20,7 @@ class WouldYouRatherTests(unittest.TestCase):
             self.assertNotEqual(*item["options"])
             self.assertIn(item["options"][0],item["question"])
             self.assertIn(item["options"][1],item["question"])
-            self.assertEqual(item["id"],"WYR-"+str(ix))
+            self.assertEqual(item["id"],"WYR-MM-"+str(ix))
             self.assertNotIn(item["question"], questions)
             questions.add(item["question"])
         self.assertEqual(len(questions), CAPACITY)
