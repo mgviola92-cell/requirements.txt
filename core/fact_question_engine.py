@@ -55,7 +55,8 @@ def wikidata_question():
     pairs=list(dict.fromkeys(pairs))
     random.shuffle(pairs)
     for a,b in pairs[:20]:
-        item=_quiz(template.format(a),b,[v for _,v in pairs if v!=b],"wikidata:"+title)
+        valid_for_subject={value for subject,value in pairs if subject==a}
+        item=_quiz(template.format(a),b,[v for _,v in pairs if v not in valid_for_subject],"wikidata:"+title)
         if item:return item
     return None
 
