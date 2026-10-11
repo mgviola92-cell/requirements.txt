@@ -6666,7 +6666,7 @@ threading.Thread(
 # /cmds = NEVER AUTO DELETE
 # =========================================================
 
-@bot.message_handler(commands=["cmds"])
+@bot.message_handler(commands=["cmd", "cmds"])
 def commands_list(message):
 
     bot.send_message(
@@ -6674,6 +6674,11 @@ def commands_list(message):
         "🤖 BOT COMMANDS\n\n"
 
         "🎮 GAME COMMANDS\n"
+        "🎭 /imposter — Imposter Game\n"
+        "🧠 /trivia — Trivia\n"
+        "👤 /profile — Player Profile\n"
+        "🏆 /rank ၊ /top — Leaderboard\n"
+        "📅 /daily — Daily Challenges\n"
         "🎲 /dice — Dice လှိမ့်ရန်\n"
         "🎰 /slot — Slot animation\n"
         "❤️ /love — Love calculator\n"
@@ -6703,7 +6708,7 @@ def commands_list(message):
         "🆔 /id — User / Chat ID\n"
         "🏓 /ping — Bot Ping\n"
         "⏱️ /uptime — Bot Uptime\n"
-        "📋 /cmds — Command List"
+        "📋 /cmd ၊ /cmds — Command List"
     )
 
 
