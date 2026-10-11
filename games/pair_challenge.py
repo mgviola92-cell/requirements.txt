@@ -62,33 +62,9 @@ def _allowed_kinds(game):
     return {"quiz", "puzzle", "sync"}
 
 def _generated_challenge(game):
-    """Validated arithmetic, number series and logic puzzles."""
-    level = min(5, max(1, len(game["players"]) - 1) + game["round_no"] // 2)
-    a = random.randint(5 * level, 15 * level)
-    b = random.randint(2 * level, 9 * level)
-    kind = random.choice(("add", "subtract", "multiply", "series", "square", "logic"))
-    if kind == "add":
-        correct, question = a + b, f"{a} + {b} = ?"
-    elif kind == "subtract":
-        correct, question = a, f"{a+b} - {b} = ?"
-    elif kind == "multiply":
-        correct, question = a * b, f"{a} x {b} = ?"
-    elif kind == "square":
-        correct, question = a * a, f"{a} squared = ?"
-    elif kind == "series":
-        step = random.randint(2, 4 + level * 3)
-        correct, question = a + 3 * step, f"Next: {a}, {a+step}, {a+2*step}, ?"
-    else:
-        correct, question = a + b, f"Two numbers total {a+b}. One is {a}. Other = ?"
-        correct = b
-    offset = random.choice((-1, 1)) * random.randint(1, max(3, level * 4))
-    wrong = correct + offset
-    if wrong < 0:
-        wrong = correct + abs(offset)
-    answer = random.choice(("a", "b"))
-    options = [str(correct), str(wrong)] if answer == "a" else [str(wrong), str(correct)]
-    return {"id": uuid.uuid4().hex[:12], "kind": "math" if game["mode"] == "versus" else "puzzle",
-            "question": question, "options": options, "answer": answer, "difficulty": level}
+    from core.procedural_questions import generate
+    level = min(6, max(1, len(game["players"]) - 1) + game["round_no"] // 2)
+    return generate(level, game["mode"])
 
 def _online_quiz(game):
     from core.question_sources import fetch_question
