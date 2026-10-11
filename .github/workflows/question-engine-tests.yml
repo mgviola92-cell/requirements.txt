@@ -26,6 +26,8 @@ jobs:
           python-version: '3.11'
       - name: Compile bot and question source modules
         run: python -m compileall -q bot.py core tests
+      - name: Install test database driver
+        run: python -m pip install 'psycopg[binary]'
       - name: Run offline unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Audit all 50 procedural templates
