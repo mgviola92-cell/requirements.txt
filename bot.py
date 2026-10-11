@@ -3322,88 +3322,22 @@ def get_local_trivia_question():
 
 
 def get_trivia_question():
-
-    # 50% Online / 50% Local
-    source = random.choice([
-        "online",
-        "local"
-    ])
-
-    # =====================================
-    # ONLINE ကို random ရွေးမိရင်
-    # =====================================
-
-    if source == "online":
-
-        question = (
-            get_online_trivia_question()
-        )
-
-        if question:
-
-            print(
-                "🌐 Trivia Source: ONLINE"
-            )
-
-            return question
-
-        # Online မရရင် Local fallback
-        print(
-            "⚠️ Online Trivia unavailable. "
-            "Using Local Trivia."
-        )
-
-        question = (
-            get_local_trivia_question()
-        )
-
-        if question:
-
-            print(
-                "📁 Trivia Source: LOCAL"
-            )
-
-            return question
-
-        return None
-
-    # =====================================
-    # LOCAL ကို random ရွေးမိရင်
-    # =====================================
-
-    else:
-
-        question = (
-            get_local_trivia_question()
-        )
-
-        if question:
-
-            print(
-                "📁 Trivia Source: LOCAL"
-            )
-
-            return question
-
-        # Local file မရရင် Online fallback
-        print(
-            "⚠️ Local Trivia unavailable. "
-            "Using Online Trivia."
-        )
-
-        question = (
-            get_online_trivia_question()
-        )
-
-        if question:
-
-            print(
-                "🌐 Trivia Source: ONLINE"
-            )
-
-            return question
-
-        return None
+    """Try diverse sources, reject previously seen questions, then local fallback."""
+    from core.question_sources import fetch_question
+    for _ in range(5):
+        item = fetch_question()
+        if not item:
+            break
+        correct = item["answers"][item["correct_index"]]
+        key = make_trivia_question_key("shared", item["question"], correct)
+        if key not in trivia_used_questions:
+            item["question_key"] = key
+            return item
+    for _ in range(3):
+        item = get_online_trivia_question()
+        if item:
+            return item
+    return get_local_trivia_question()
 
 
 # ---------------------------------------------------------
