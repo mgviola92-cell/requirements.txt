@@ -6,13 +6,13 @@ to a third-party API. Only high-confidence patterns are auto-corrected.
 import re
 
 RULES = (
- ("DID_QUESTION",re.compile(r"\\bdid\\s+(I|you|he|she|it|we|they)\\s+(went|ate|saw|came|made|took|wrote|bought|played|liked|visited|studied|watched|worked|called)\\b",re.I),
+ ("DID_QUESTION",re.compile(r"\bdid\s+(I|you|he|she|it|we|they)\s+(went|ate|saw|came|made|took|wrote|bought|played|liked|visited|studied|watched|worked|called)\b",re.I),
   {"went":"go","ate":"eat","saw":"see","came":"come","made":"make","took":"take","wrote":"write","bought":"buy","played":"play","liked":"like","visited":"visit","studied":"study","watched":"watch","worked":"work","called":"call"},
   "Did နဲ့မေးခွန်းဖွဲ့ပြီးရင် Verb ကို Past Form မဟုတ်ဘဲ Base Form (V1) သုံးရပါတယ်။","Did + Subject + V1 + ... ?"),
- ("MODAL_BASE",re.compile(r"\\b(can|can't|cannot|could|couldn't|will|won't|would|wouldn't|should|shouldn't|must|might|may)\\s+(went|ate|saw|came|made|took|wrote|bought|played|liked|visited|studied|watched|worked|called)\\b",re.I),
+ ("MODAL_BASE",re.compile(r"\b(can|can't|cannot|could|couldn't|will|won't|would|wouldn't|should|shouldn't|must|might|may)\s+(went|ate|saw|came|made|took|wrote|bought|played|liked|visited|studied|watched|worked|called)\b",re.I),
   {"went":"go","ate":"eat","saw":"see","came":"come","made":"make","took":"take","wrote":"write","bought":"buy","played":"play","liked":"like","visited":"visit","studied":"study","watched":"watch","worked":"work","called":"call"},
   "Modal Verb (can/will/should စသည်) နောက်မှာ Base Form (V1) သုံးပါတယ်။","Subject + Modal + V1"),
- ("DOES_QUESTION",re.compile(r"\\bdoes\\s+(he|she|it)\\s+(likes|plays|wants|goes|eats|works|studies|watches|knows|has)\\b",re.I),
+ ("DOES_QUESTION",re.compile(r"\bdoes\s+(he|she|it)\s+(likes|plays|wants|goes|eats|works|studies|watches|knows|has)\b",re.I),
   {"likes":"like","plays":"play","wants":"want","goes":"go","eats":"eat","works":"work","studies":"study","watches":"watch","knows":"know","has":"have"},
   "Does နဲ့မေးခွန်းဖွဲ့ရင် Main Verb မှာ s/es မထည့်ရပါဘူး။","Does + He/She/It + V1 + ... ?"),
  ("DID_BASE",re.compile(r"\b(didn't|did not)\s+(went|ate|saw|came|made|took|wrote|bought|played|liked|visited|studied|watched|worked|called)\b",re.I),
