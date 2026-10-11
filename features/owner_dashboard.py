@@ -220,7 +220,9 @@ def edit_welcome():
           "<div class='panel'><form method='post'>"
           f"<input type='hidden' name='csrf' value='{html.escape(_csrf())}'>"
           f"<textarea name='welcome' maxlength='3500' required style='min-height:300px'>{html.escape(value)}</textarea>"
-          "<button>Save Welcome</button></form></div>")
+          "<button>Save Welcome</button></form></div>"
+          f"<div class='panel'><h2>👀 Saved Welcome Preview</h2><pre style='white-space:pre-wrap;overflow-wrap:anywhere;font:inherit'>{html.escape(value)}</pre></div>"
+          "<p class='muted'>Telegram private chat မှာ /testwelcome နဲ့လည်း Preview စမ်းနိုင်ပါတယ်။</p>")
     return _shell(body)
 
 @dashboard.route("/saved",methods=["GET"])
@@ -447,6 +449,22 @@ def register_owner_dashboard(app,bot):
                 try:bot.edit_message_reply_markup(chat_id,old_id,reply_markup=None)
                 except Exception:pass
         return new_card
+    def get_owner_draft(uid):
+        with _owner_draft_lock:
+            draft=get_owner_draft(uid)
+            if draft and time.time()<draft.get("expires",0):return draft
+        try:
+            _,_,draft=_load_panel_state(uid)
+            if draft and time.time()<draft.get("expires",0):
+                with _owner_draft_lock:_owner_drafts[uid]=draft
+                return draft
+        except Exception as exc:print("Restore owner draft:",type(exc).__name__)
+        return None
+
+    def clear_owner_draft(uid):
+        clear_owner_draft(uid)
+        _save_panel_state(uid)
+
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
         kb.add(types.InlineKeyboardButton("📢 Broadcast",callback_data="own:broadcast"),
@@ -489,7 +507,7 @@ def register_owner_dashboard(app,bot):
                 with _owner_draft_lock:_owner_drafts.pop(uid,None)
                 owner_home(uid,q.message.chat.id)
             elif action=="broadcast":
-                with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.monotonic()+600}
+                with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.time()+600}
                 owner_replace_card(uid,q.message.chat.id,"📢 ပို့ချင်တဲ့စာကို Forward လုပ်ပါ။\n\nပြီးရင် အဲဒီစာကို Reply နှိပ်ပြီး /ownersend ပို့ပါ။\n/ownercancel နဲ့ ရပ်နိုင်ပါတယ်။",owner_back_button())
             elif action=="groups":
                 with get_db_connection() as conn,conn.cursor() as cur:
@@ -510,9 +528,10 @@ def register_owner_dashboard(app,bot):
                 target=action[3:]
                 with _owner_draft_lock:
                     draft=_owner_drafts.get(uid)
-                    if not draft or draft.get("phase")!="ready" or time.monotonic()>draft["expires"]:
+                    if not draft or draft.get("phase")!="ready" or time.time()>draft["expires"]:
                         bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
                     draft["target"]=target
+                _save_panel_state(uid,draft=draft)
                 kb=types.InlineKeyboardMarkup()
                 kb.add(types.InlineKeyboardButton("✅ Confirm Send",callback_data="own:send"),
                        types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
@@ -521,7 +540,7 @@ def register_owner_dashboard(app,bot):
                 global _running
                 with _owner_draft_lock:
                     draft=_owner_drafts.get(uid)
-                    if not draft or draft.get("phase")!="ready" or "target" not in draft or time.monotonic()>draft["expires"]:
+                    if not draft or draft.get("phase")!="ready" or "target" not in draft or time.time()>draft["expires"]:
                         bot.answer_callback_query(q.id,"Message သက်တမ်းကုန်သွားပါပြီ။",show_alert=True);return
                     draft=_owner_drafts.pop(uid)
                     _save_panel_state(uid,draft=None)
@@ -544,13 +563,14 @@ def register_owner_dashboard(app,bot):
     @bot.message_handler(commands=["ownercancel"])
     def owner_cancel(msg):
         if not is_owner(msg):return ContinueHandling()
-        with _owner_draft_lock:_owner_drafts.pop(msg.from_user.id,None)
+        clear_owner_draft(msg.from_user.id)
         bot.reply_to(msg,"❌ Cancelled.")
         return ContinueHandling()
 
     def offer_destinations(msg,source):
         with _owner_draft_lock:
-            _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.monotonic()+600}
+            _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.time()+600}
+        _save_panel_state(msg.from_user.id,draft=_owner_drafts[msg.from_user.id])
         kb=types.InlineKeyboardMarkup(row_width=1)
         kb.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
         with get_db_connection() as conn,conn.cursor() as cur:
@@ -571,6 +591,19 @@ def register_owner_dashboard(app,bot):
         except Exception as exc:
             print("Owner send:",type(exc).__name__)
             bot.reply_to(msg,"⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။")
+        return ContinueHandling()
+
+    @bot.message_handler(commands=["testwelcome"])
+    def owner_test_welcome(msg):
+        if not is_owner(msg):return ContinueHandling()
+        try:
+            with get_db_connection() as conn,conn.cursor() as cur:
+                cur.execute("SELECT value FROM owner_settings WHERE key='group_welcome'")
+                row=cur.fetchone()
+            bot.send_message(msg.chat.id,"👀 Welcome Preview:\n\n"+(row[0] if row else DEFAULT_GROUP_WELCOME))
+        except Exception as exc:
+            print("Welcome preview:",type(exc).__name__)
+            bot.reply_to(msg,"⚠️ Welcome Preview မဖွင့်နိုင်သေးပါ။")
         return ContinueHandling()
 
     @bot.message_handler(commands=["ownersave"])
@@ -608,9 +641,9 @@ def register_owner_dashboard(app,bot):
             return ContinueHandling()
         if msg.content_type=="text" and (msg.text or "").startswith("/") and not getattr(msg,"forward_origin",None) and not getattr(msg,"forward_date",None):return ContinueHandling()
         with _owner_draft_lock:
-            draft=_owner_drafts.get(msg.from_user.id)
-            if draft and draft.get("phase")=="waiting" and time.monotonic()<draft["expires"]:
-                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.monotonic()+600}
+            draft=get_owner_draft(msg.from_user.id)
+            if draft and draft.get("phase")=="waiting" and time.time()<draft["expires"]:
+                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.time()+600}
                 choices=types.InlineKeyboardMarkup(row_width=1)
                 choices.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
                 with get_db_connection() as conn,conn.cursor() as cur:
@@ -619,7 +652,7 @@ def register_owner_dashboard(app,bot):
                 for gid,title in groups:
                     choices.add(types.InlineKeyboardButton("👥 "+(title or str(gid))[:30],callback_data="own:to:"+str(gid)))
                 choices.add(types.InlineKeyboardButton("❌ Cancel",callback_data="own:cancel"))
-                bot.reply_to(msg,"✅ Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",reply_markup=choices)
+                owner_replace_card(msg.from_user.id,msg.chat.id,"✅ Message ရပြီ။ ပို့မယ့် Group ကို ရွေးပါ။",choices)
                 return ContinueHandling()
         # Only /ownersave stores originals. Ordinary private messages are not saved.
         return ContinueHandling()
