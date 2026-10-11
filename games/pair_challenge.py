@@ -248,7 +248,7 @@ def match_complete(game):
 def finish_match(chat_id, game_id):
     with _lock:
         game = _games.get(chat_id)
-        if not game or game["id"] != game_id:
+        if not game or game["id"] != game_id or game.get("state") != "between" or game.get("round_no", 0) < game.get("total_rounds", 5):
             return None
         if game["mode"] == "versus":
             red = game["match_scores"]["red"]
