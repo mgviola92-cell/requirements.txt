@@ -62,6 +62,7 @@ def _queue_broadcast(message, ids, source_chat=None, source_msg=None, request_id
     if not ids: raise ValueError("No eligible groups")
     with get_db_connection() as conn,conn.cursor() as cur:
         cur.execute("SELECT pg_advisory_xact_lock(759012345)")
+        if not request_id: raise ValueError("Missing broadcast request ID; refresh form")
         if request_id:
             cur.execute("SELECT id FROM owner_broadcasts WHERE request_id=%s",(request_id,))
             if cur.fetchone(): raise ValueError("This request has already been submitted")
@@ -301,7 +302,7 @@ def broadcast():
         choices+=f"<option value='{gid}'>{html.escape(title or str(gid))}</option>"
     body=f"""<h1>📢 Broadcast Center</h1><p><a href="/owner/saved">Manage saved messages</a></p><div class='panel'><h2>Send announcement to {count} opted-in groups</h2>
 <p class='muted'>Group admins can opt out using /broadcastoff in their group. Broadcasts are plain text and rate limited.</p>
-<form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}">
+<form method="post"><input type="hidden" name="csrf" value="{html.escape(_csrf())}"><input type="hidden" name="request_id" value="{secrets.token_hex(20)}">
 <label>Message Source</label><select name="source" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{source_options}</select><p class="muted">For original formatting and Premium emoji, send the message to the bot in Telegram private chat first. Configure OWNER_TELEGRAM_ID on Render.</p><label>Destination</label><select name="target" style="width:100%;padding:12px;background:#101a2a;color:white;border:1px solid #50637f;border-radius:9px">{choices}</select><textarea name="message" maxlength="1500" placeholder="Write the announcement..."></textarea>
 <label><input style="width:auto" type="checkbox" name="confirm" value="yes" required> I confirm sending to selected destination.</label>
 <p><button>Send to groups</button></p></form></div>"""
@@ -387,6 +388,10 @@ def _resume_broadcasts():
         cur.execute("""UPDATE owner_broadcast_targets SET status='uncertain',
             last_error='Interrupted while sending (delivery unknown)'
             WHERE status='sending'""")
+        # Pre-outbox legacy running jobs have no target snapshot: never mark them completed as if sent.
+        cur.execute("""UPDATE owner_broadcasts b SET status='needs_review'
+            WHERE b.status='running' AND NOT EXISTS
+              (SELECT 1 FROM owner_broadcast_targets t WHERE t.job_id=b.id)""")
         cur.execute("SELECT id FROM owner_broadcasts WHERE status='running' ORDER BY id")
         jobs=[r[0] for r in cur.fetchall()]
     if jobs:
@@ -445,7 +450,7 @@ def register_owner_dashboard(app,bot):
                 try:_,old_id,_=_load_panel_state(uid)
                 except Exception as exc:print("Load owner card:",type(exc).__name__)
             _owner_card_ids[uid]=new_card.message_id
-            try:_save_panel_state(uid,chat_id,new_card.message_id,_owner_drafts.get(uid))
+            try:_save_panel_state(uid,chat_id,new_card.message_id,get_owner_draft(uid))
             except Exception as exc:print("Save owner card:",type(exc).__name__)
         if old_id and old_id!=new_card.message_id:
             try:bot.delete_message(chat_id,old_id)
@@ -508,7 +513,7 @@ def register_owner_dashboard(app,bot):
         uid=q.from_user.id
         try:
             if action=="menu":
-                with _owner_draft_lock:_owner_drafts.pop(uid,None)
+                clear_owner_draft(uid)
                 owner_home(uid,q.message.chat.id)
             elif action=="broadcast":
                 with _owner_draft_lock:_owner_drafts[uid]={"phase":"waiting","expires":time.time()+600}
@@ -526,7 +531,7 @@ def register_owner_dashboard(app,bot):
                 lines=[f"#{i} · {sent}/{total} sent · {failed} failed · {status}" for i,total,sent,failed,status in jobs]
                 owner_replace_card(uid,q.message.chat.id,"📜 Broadcast History\n\n"+("\n".join(lines) if lines else "မရှိသေးပါ။"),owner_back_button())
             elif action=="cancel":
-                with _owner_draft_lock:_owner_drafts.pop(uid,None)
+                clear_owner_draft(uid)
                 owner_home(uid,q.message.chat.id)
             elif action.startswith("to:"):
                 target=action[3:]
@@ -553,7 +558,7 @@ def register_owner_dashboard(app,bot):
                         cur.execute("SELECT chat_id FROM owner_groups WHERE active AND NOT broadcast_opt_out ORDER BY chat_id")
                         ids=[r[0] for r in cur.fetchall()]
                     if draft["target"]!="all":ids=[i for i in ids if str(i)==draft["target"]]
-                    jobid=_queue_broadcast("[Telegram original]",ids,draft["chat_id"],draft["message_id"])
+                    jobid=_queue_broadcast("[Telegram original]",ids,draft["chat_id"],draft["message_id"],draft.get("request_id"))
                     threading.Thread(target=_send_broadcast,args=(jobid,),daemon=True).start()
                     owner_replace_card(uid,q.message.chat.id,f"✅ Broadcast #{jobid} စတင်ပို့နေပြီ။ Group {len(ids)} ခု။",owner_back_button())
                 except Exception as exc:
@@ -573,7 +578,7 @@ def register_owner_dashboard(app,bot):
 
     def offer_destinations(msg,source):
         with _owner_draft_lock:
-            _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.time()+600}
+            _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":source.chat.id,"message_id":source.message_id,"expires":time.time()+600,"request_id":secrets.token_hex(20)}
         _save_panel_state(msg.from_user.id,draft=_owner_drafts[msg.from_user.id])
         kb=types.InlineKeyboardMarkup(row_width=1)
         kb.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
@@ -647,7 +652,7 @@ def register_owner_dashboard(app,bot):
         with _owner_draft_lock:
             draft=get_owner_draft(msg.from_user.id)
             if draft and draft.get("phase")=="waiting" and time.time()<draft["expires"]:
-                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.time()+600}
+                _owner_drafts[msg.from_user.id]={"phase":"ready","chat_id":msg.chat.id,"message_id":msg.message_id,"expires":time.time()+600,"request_id":secrets.token_hex(20)}
                 choices=types.InlineKeyboardMarkup(row_width=1)
                 choices.add(types.InlineKeyboardButton("📢 All Groups",callback_data="own:to:all"))
                 with get_db_connection() as conn,conn.cursor() as cur:
