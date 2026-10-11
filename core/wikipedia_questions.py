@@ -39,16 +39,20 @@ def _members(category):
             and 3<=len(p["title"])<=80 and not p["title"].startswith("List of ")]
 
 def wikipedia_question():
+    # Compare two independently fetched category pools, not arbitrary article names.
+    # Every wrong option must be absent from the correct category pool.
     for _ in range(2):
-        chosen=random.sample(CATEGORIES,4)
-        pools=[_members(category) for category in chosen]
-        if any(not pool for pool in pools):
+        category,other=random.sample(CATEGORIES,2)
+        members=_members(category)
+        outsiders=_members(other)
+        if not members or not outsiders:
             continue
-        correct=random.choice(pools[0])
-        wrong=[random.choice(pool) for pool in pools[1:]]
-        if len(set([correct]+wrong))!=4:
+        correct=random.choice(members)
+        members_normalized={name.casefold() for name in members}
+        wrong=[name for name in outsiders if name.casefold() not in members_normalized]
+        if len(set(wrong))<3:
             continue
         return make_mcq(
-            "Which Wikipedia article is listed directly under Category:"+chosen[0]+"?",
+            "Which Wikipedia article is listed directly under Category:"+category+"?",
             correct,wrong,"wikipedia:category_membership")
     return None
