@@ -3322,22 +3322,46 @@ def get_local_trivia_question():
 
 
 def get_trivia_question(chat_id=None):
-    """Try diverse sources, reject previously seen questions, then local fallback."""
+    """Find an unseen question across sources; never deliberately recycle."""
     from core.question_sources import fetch_question
+    from database.question_history import seen
+    candidates = []
     for _ in range(5):
         item = fetch_question()
-        if not item:
-            break
-        correct = item["answers"][item["correct_index"]]
-        key = make_trivia_question_key("shared", item["question"], correct)
-        if key not in trivia_used_questions and (chat_id is None or not __import__("database.question_history", fromlist=["seen"]).seen(chat_id, item["question"])):
-            item["question_key"] = key
-            return item
-    for _ in range(3):
+        if item:
+            candidates.append(item)
+    for _ in range(6):
         item = get_online_trivia_question()
         if item:
-            return item
-    return get_local_trivia_question()
+            candidates.append(item)
+    candidates.extend(load_local_trivia_questions_normalized())
+    random.shuffle(candidates)
+    for item in candidates:
+        correct = item["answers"][item["correct_index"]]
+        key = make_trivia_question_key("shared", item["question"], correct)
+        if key in trivia_used_questions:
+            continue
+        if chat_id is not None and seen(chat_id, item["question"]):
+            continue
+        item["question_key"] = key
+        return item
+    return None
+
+
+def load_local_trivia_questions_normalized():
+    """Normalize local questions without resetting history when exhausted."""
+    result = []
+    for row in load_local_trivia_questions():
+        try:
+            answers = [str(x) for x in row["answers"]]
+            index = int(row["correct_index"])
+            question = str(row["question"]).strip()
+            if question and len(answers) == 4 and index in range(4) and len(set(answers)) == 4:
+                result.append({"question": question, "answers": answers,
+                               "correct_index": index, "source": "local"})
+        except (KeyError, ValueError, TypeError):
+            continue
+    return result
 
 
 # ---------------------------------------------------------
