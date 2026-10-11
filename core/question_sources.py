@@ -4,11 +4,10 @@ import json
 import random
 import urllib.parse
 import urllib.request
+from core.question_quality import cached_json, validate_question
 
 def _json(url, timeout=5):
-    req = urllib.request.Request(url, headers={"User-Agent": "MyanmarGroupGamesBot/1.0 (educational trivia)", "Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return json.load(response)
+    return cached_json(url,timeout=timeout)
 
 def trivia_api():
     """The Trivia API v2, four options."""
@@ -108,6 +107,7 @@ def fetch_question():
     for source in sources:
         try:
             item = source()
+            item = validate_question(item)
             if item:
                 return item
         except Exception as exc:
