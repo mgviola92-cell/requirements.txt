@@ -35,10 +35,13 @@ class SourceCatalogueTests(unittest.TestCase):
 
     def test_world_bank_question_from_mocked_api(self):
         rows=[
-            {"country":{"value":"Country "+str(i)},"countryiso3code":"AAA",
+            {"country":{"id":"C"+str(i),"value":"Country "+str(i)},"countryiso3code":"AAA",
              "value":1000000+i*100000}
             for i in range(8)]
-        with patch("core.extra_question_sources._get",return_value=[{},rows]):
+        countries=[{"id":"C"+str(i),"region":{"id":"EAS"}} for i in range(8)]
+        def response(url):
+            return [{},countries] if "/v2/country?" in url else [{},rows]
+        with patch("core.extra_question_sources._get",side_effect=response):
             result=world_bank_question()
         self.assertIsNotNone(result)
         self.assertEqual(len(set(result["answers"])),4)
