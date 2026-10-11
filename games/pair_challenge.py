@@ -104,16 +104,29 @@ def _online_quiz(game):
 
 
 def _pick_challenge(game):
+    from database.question_history import seen, mark
     used = set(game.get("used_challenges", []))
     pool = [q for q in CHALLENGES if q["kind"] in _allowed_kinds(game) and q["id"] not in used]
-    # Generated questions expand variety; for Squad, scale difficulty by player count.
-    roll = random.random()
-    if roll < 0.30 and pool:
-        challenge = dict(random.choice(pool))
-    elif roll < 0.65:
-        challenge = _online_quiz(game) or _generated_challenge(game)
-    else:
-        challenge = _generated_challenge(game)
+    chat_id = game["chat_id"]
+    for _ in range(12):
+        roll = random.random()
+        if roll < 0.25 and pool:
+            challenge = dict(random.choice(pool))
+        elif roll < 0.60:
+            challenge = _online_quiz(game) or _generated_challenge(game)
+        else:
+            challenge = _generated_challenge(game)
+        if challenge["kind"] == "math" and game["mode"] != "versus":
+            challenge["kind"] = "puzzle"
+        if challenge["id"] in used or seen(chat_id, challenge["question"]):
+            continue
+        mark(chat_id, challenge["question"])
+        game["used_challenges"].append(challenge["id"])
+        return challenge
+    challenge = _generated_challenge(game)
+    if game["mode"] != "versus" and challenge["kind"] == "math":
+        challenge["kind"] = "puzzle"
+    mark(chat_id, challenge["question"])
     game["used_challenges"].append(challenge["id"])
     return challenge
 
