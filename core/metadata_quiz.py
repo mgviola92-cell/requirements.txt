@@ -58,7 +58,6 @@ OPENALEX_FIELDS=(
  ("biblio.issue","In which issue is '{title}' listed?"),
  ("biblio.first_page","On what first page does '{title}' begin?"),
  ("biblio.last_page","On what last page does '{title}' end?"),
- ("doi","What DOI is recorded for '{title}'?"),
 )
 OPENLIBRARY_FIELDS=(
  ("first_publish_year","What was the first publication year of '{title}'?"),
@@ -69,13 +68,10 @@ OPENLIBRARY_FIELDS=(
  ("currently_reading_count","How many users marked '{title}' currently-reading?"),
  ("already_read_count","How many users marked '{title}' already-read?"),
  ("number_of_pages_median","What median page count is listed for '{title}'?"),
- ("cover_i","What cover image identifier is listed for '{title}'?"),
 )
 NASA_FIELDS=(
  ("date_created","What catalog date is recorded for the NASA item '{title}'?"),
  ("center","Which NASA center is credited for '{title}'?"),
- ("nasa_id","What NASA catalog identifier belongs to '{title}'?"),
- ("media_type","What media type is listed for '{title}'?"),
  ("location","Which location is listed for the NASA item '{title}'?"),
  ("photographer","Who is credited as photographer of '{title}'?"),
  ("secondary_creator","Who is listed as secondary creator of '{title}'?"),
