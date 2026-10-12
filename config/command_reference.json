@@ -11,6 +11,72 @@
   },
   "entries": [
     {
+      "id": "tot",
+      "aliases": [
+        "tot",
+        "thisorthat"
+      ],
+      "title": "This or That",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/tot",
+      "steps": [
+        "/tot သို့မဟုတ် /thisorthat ပို့ပါ။",
+        "A/B option ပုံကတ်ထဲက ပိုကြိုက်တာကိုရွေးပါ။ တစ်ယောက်တစ် round တစ်မဲ။",
+        "၅ round၊ တစ် round ၃၀ စက္ကန့် default။ မဲအရေအတွက်နှင့် ရာခိုင်နှုန်းကို card တွင်ပြသည်။",
+        "ပွဲဆုံးလျှင် ပါဝင်သူကို +3 points default တစ်ကြိမ်ပေးသည်။",
+        "ပုံပို့မရလျှင် စာနှင့်ခလုတ်ဖြင့်ဆက်ဆော့သည်။"
+      ],
+      "notes": "Option ၈၀ ခုမှ မတူသော A/B အတွဲ ၃,၁၆၀။ ပုံ asset ၂၄ subject နှင့် abstract typography ပါသည်။ Restart ပြီးပြန်ဆက်နိုင်သည်။"
+    },
+    {
+      "id": "totrules",
+      "aliases": [
+        "totrules"
+      ],
+      "title": "This or That စည်းမျဉ်း",
+      "category": "game_control",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/totrules",
+      "steps": [
+        "This or That စည်းမျဉ်းနှင့် ဆုကိုဖတ်ပါ။"
+      ],
+      "notes": "ပုံပို့မရလျှင် စာဖြင့်ဆက်ကစားနိုင်သည်။"
+    },
+    {
+      "id": "totstop",
+      "aliases": [
+        "totstop"
+      ],
+      "title": "This or That ပွဲရပ်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/totstop",
+      "steps": [
+        "Admin က /totstop ပို့ပါ။",
+        "ဖျက်သိမ်းမယ်ကိုနှိပ်ပြီးအတည်ပြုပါ။ ပွဲရပ်၍ သက်ဆိုင်ရာ card ဖျက်သည်။"
+      ],
+      "notes": "ဖျက်သိမ်းသောပွဲအတွက် reward မရပါ။"
+    },
+    {
+      "id": "auto_tot",
+      "aliases": [],
+      "title": "This or That Auto Spawn",
+      "category": "auto",
+      "where": "Group",
+      "who": "Automatic / Owner settings",
+      "usage": "Group activity အလိုက် random spawn",
+      "steps": [
+        "အနည်းဆုံးလူ ၂ ယောက်၏ valid activity လိုသည်။",
+        "၅၅–၉၀ message threshold နှင့် chance ၃၅% default။",
+        "ပွဲစပြီးနောက် ၁၅–၃၀ မိနစ် random quiet default။ အခြားဂိမ်းရှိလျှင်မစပါ။"
+      ],
+      "notes": "Owner editor တွင် auto enabled / threshold / chance / quiet ပြင်နိုင်သည်။"
+    },
+    {
       "id": "draw",
       "aliases": [
         "draw",

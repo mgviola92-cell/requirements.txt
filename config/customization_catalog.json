@@ -11493,5 +11493,984 @@
     "fields": [],
     "html": false,
     "max_length": 200
+  },
+  "msg.features.this_or_that.round": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · round",
+    "default": "🖼️ This or That — {round}/{rounds}\nဒီနှစ်ခုထဲက ပိုကြိုက်တာကို ရွေးပါ။\n\nA · {a}\n{av} မဲ · {ap}%\nB · {b}\n{bv} မဲ · {bp}%\n\nမဲတစ်ယောက်တစ်ကြိမ်။ {seconds} စက္ကန့်။",
+    "fields": [
+      "round",
+      "rounds",
+      "a",
+      "av",
+      "ap",
+      "b",
+      "bv",
+      "bp",
+      "seconds"
+    ],
+    "html": false,
+    "max_length": 900
+  },
+  "msg.features.this_or_that.results": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · results",
+    "default": "🏁 This or That ပြီးပြီ\n\n{results}\n\nပါဝင်သူ {count} ယောက်။ ပါဝင်ဆု +{reward} points။",
+    "fields": [
+      "results",
+      "count",
+      "reward"
+    ],
+    "html": false,
+    "max_length": 3900
+  },
+  "msg.features.this_or_that.a": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · a",
+    "default": "🅰️ A ရွေးမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.b": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · b",
+    "default": "🅱️ B ရွေးမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.stop": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · stop",
+    "default": "🛑 ရပ်မယ် (Admin)",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.confirm": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · confirm",
+    "default": "ပွဲကိုဖျက်သိမ်းမလား? ဆုမပေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.yes": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · yes",
+    "default": "ဖျက်သိမ်းမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.no": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · no",
+    "default": "ဆက်ဆော့မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.cancelled": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · cancelled",
+    "default": "This or That ပွဲကို ဖျက်သိမ်းလိုက်ပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.expired": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · expired",
+    "default": "ဒီ round ပြီးသွားပြီ။ လက်ရှိခလုတ်ကိုသုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.voted": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · voted",
+    "default": "ဒီ round မှာ မဲပေးပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.accepted": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · accepted",
+    "default": "မဲလက်ခံပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.admin": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · admin",
+    "default": "Group Admin သာ ရပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.group": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · group",
+    "default": "Group ထဲမှာ /tot ပို့ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.busy": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · busy",
+    "default": "အခြားပွဲရှိနေသည်။ ပြီးမှ ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.error": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · error",
+    "default": "ခေတ္တမစနိုင်သေးပါ။ ခဏနေရင် ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.missing": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · missing",
+    "default": "ရပ်ရန်ပွဲမရှိပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.member": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · member",
+    "default": "Group အဖွဲ့ဝင်သာ မဲပေးနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.this_or_that.rules": {
+    "kind": "message",
+    "category": "This or That",
+    "label": "This or That · rules",
+    "default": "🖼️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nပုံပို့မရလျှင် စာနှင့်ခလုတ်ဖြင့်ဆက်ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "cfg.features.this_or_that.rounds": {
+    "kind": "setting",
+    "category": "This or That",
+    "label": "This or That · rounds",
+    "default": 5,
+    "minimum": 1,
+    "maximum": 5
+  },
+  "cfg.features.this_or_that.round_seconds": {
+    "kind": "setting",
+    "category": "This or That",
+    "label": "This or That · round_seconds",
+    "default": 30,
+    "minimum": 15,
+    "maximum": 120
+  },
+  "cfg.features.this_or_that.participation_reward": {
+    "kind": "setting",
+    "category": "This or That",
+    "label": "This or That · participation_reward",
+    "default": 3,
+    "minimum": 0,
+    "maximum": 20
+  },
+  "cfg.tot_auto.enabled": {
+    "kind": "setting",
+    "category": "This or That Auto",
+    "label": "This or That Auto · enabled",
+    "default": true
+  },
+  "cfg.tot_auto.threshold": {
+    "kind": "setting",
+    "category": "This or That Auto",
+    "label": "This or That Auto · threshold",
+    "default": [
+      55,
+      90
+    ],
+    "minimum": 3,
+    "maximum": 300,
+    "ordered": true
+  },
+  "cfg.tot_auto.chance": {
+    "kind": "setting",
+    "category": "This or That Auto",
+    "label": "This or That Auto · chance",
+    "default": 0.35,
+    "minimum": 0,
+    "maximum": 1
+  },
+  "cfg.tot_auto.quiet": {
+    "kind": "setting",
+    "category": "This or That Auto",
+    "label": "This or That Auto · quiet",
+    "default": [
+      900,
+      1800
+    ],
+    "minimum": 60,
+    "maximum": 14400,
+    "ordered": true
+  },
+  "enabled.features.this_or_that.command": {
+    "kind": "setting",
+    "category": "This or That",
+    "label": "This or That · command",
+    "default": true
+  },
+  "enabled.features.this_or_that.activity": {
+    "kind": "setting",
+    "category": "This or That",
+    "label": "This or That · activity",
+    "default": true
+  },
+  "msg.data.this_or_that.option.0": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကော်ဖီ",
+    "default": "ကော်ဖီ",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.1": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ရေနွေးကြမ်း",
+    "default": "ရေနွေးကြမ်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.2": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပီဇာ",
+    "default": "ပီဇာ",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.3": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဘာဂါ",
+    "default": "ဘာဂါ",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.4": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မုန့်ဟင်းခါး",
+    "default": "မုန့်ဟင်းခါး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.5": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ရှမ်းခေါက်ဆွဲ",
+    "default": "ရှမ်းခေါက်ဆွဲ",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.6": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ချောကလက်ရေခဲမုန့်",
+    "default": "ချောကလက်ရေခဲမုန့်",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.7": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဗနီလာရေခဲမုန့်",
+    "default": "ဗနီလာရေခဲမုန့်",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.8": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · သရက်သီး",
+    "default": "သရက်သီး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.9": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပန်းသီး",
+    "default": "ပန်းသီး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.10": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဖရဲသီး",
+    "default": "ဖရဲသီး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.11": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ငှက်ပျောသီး",
+    "default": "ငှက်ပျောသီး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.12": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကြောင်",
+    "default": "ကြောင်",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.13": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ခွေး",
+    "default": "ခွေး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.14": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ယုန်",
+    "default": "ယုန်",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.15": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကြက်တူရွေး",
+    "default": "ကြက်တူရွေး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.16": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပင်လယ်ကမ်းခြေ",
+    "default": "ပင်လယ်ကမ်းခြေ",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.17": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · တောင်တန်း",
+    "default": "တောင်တန်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.18": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စာဖတ်ခြင်း",
+    "default": "စာဖတ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.19": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဂိမ်းဆော့ခြင်း",
+    "default": "ဂိမ်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.20": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ရုပ်ရှင်ကြည့်ခြင်း",
+    "default": "ရုပ်ရှင်ကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.21": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စခန်းချခြင်း",
+    "default": "စခန်းချခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.22": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စက်ဘီးစီးခြင်း",
+    "default": "စက်ဘီးစီးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.23": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဂစ်တာတီးခြင်း",
+    "default": "ဂစ်တာတီးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.24": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မနက်ခင်းအေးအေး",
+    "default": "မနက်ခင်းအေးအေး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.25": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ညနေခင်းအေးအေး",
+    "default": "ညနေခင်းအေးအေး",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.26": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မိုးရွာသံနားထောင်ခြင်း",
+    "default": "မိုးရွာသံနားထောင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.27": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကြယ်တွေကြည့်ခြင်း",
+    "default": "ကြယ်တွေကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.28": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · နေထွက်ချိန်ကြည့်ခြင်း",
+    "default": "နေထွက်ချိန်ကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.29": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · နေဝင်ချိန်ကြည့်ခြင်း",
+    "default": "နေဝင်ချိန်ကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.30": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အိမ်မှာအနားယူခြင်း",
+    "default": "အိမ်မှာအနားယူခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.31": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · သူငယ်ချင်းတွေနဲ့အပြင်ထွက်ခြင်း",
+    "default": "သူငယ်ချင်းတွေနဲ့အပြင်ထွက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.32": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · တစ်ယောက်တည်းခရီးသွားခြင်း",
+    "default": "တစ်ယောက်တည်းခရီးသွားခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.33": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အဖွဲ့လိုက်ခရီးသွားခြင်း",
+    "default": "အဖွဲ့လိုက်ခရီးသွားခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.34": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ခရီးတိုမကြာခဏသွားခြင်း",
+    "default": "ခရီးတိုမကြာခဏသွားခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.35": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ခရီးရှည်တစ်ခါသွားခြင်း",
+    "default": "ခရီးရှည်တစ်ခါသွားခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.36": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မြို့ကြီးမှာနေခြင်း",
+    "default": "မြို့ကြီးမှာနေခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.37": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ရွာအေးအေးမှာနေခြင်း",
+    "default": "ရွာအေးအေးမှာနေခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.38": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပုံဆွဲခြင်း",
+    "default": "ပုံဆွဲခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.39": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဓာတ်ပုံရိုက်ခြင်း",
+    "default": "ဓာတ်ပုံရိုက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.40": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · သီချင်းဆိုခြင်း",
+    "default": "သီချင်းဆိုခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.41": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကခုန်ခြင်း",
+    "default": "ကခုန်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.42": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပီယာနိုတီးခြင်း",
+    "default": "ပီယာနိုတီးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.43": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဒရမ်တီးခြင်း",
+    "default": "ဒရမ်တီးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.44": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဟင်းချက်ခြင်း",
+    "default": "ဟင်းချက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.45": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မုန့်ဖုတ်ခြင်း",
+    "default": "မုန့်ဖုတ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.46": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပန်းစိုက်ခြင်း",
+    "default": "ပန်းစိုက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.47": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အိမ်မွေးတိရစ္ဆာန်စောင့်ရှောက်ခြင်း",
+    "default": "အိမ်မွေးတိရစ္ဆာန်စောင့်ရှောက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.48": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အဖွဲ့လိုက်ဂိမ်းဆော့ခြင်း",
+    "default": "အဖွဲ့လိုက်ဂိမ်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.49": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · တစ်ယောက်တည်းဂိမ်းဆော့ခြင်း",
+    "default": "တစ်ယောက်တည်းဂိမ်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.50": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပဟေဠိဖြေခြင်း",
+    "default": "ပဟေဠိဖြေခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.51": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဗဟုသုတပြိုင်ပွဲဆော့ခြင်း",
+    "default": "ဗဟုသုတပြိုင်ပွဲဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.52": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စွန့်စားခန်းဂိမ်းဆော့ခြင်း",
+    "default": "စွန့်စားခန်းဂိမ်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.53": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဗျူဟာဂိမ်းဆော့ခြင်း",
+    "default": "ဗျူဟာဂိမ်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.54": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကစားသမားနဲ့ပြိုင်ခြင်း",
+    "default": "ကစားသမားနဲ့ပြိုင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.55": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အတူပူးပေါင်းဆော့ခြင်း",
+    "default": "အတူပူးပေါင်းဆော့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.56": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဟာသကားကြည့်ခြင်း",
+    "default": "ဟာသကားကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.57": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စွန့်စားခန်းကားကြည့်ခြင်း",
+    "default": "စွန့်စားခန်းကားကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.58": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကာတွန်းကြည့်ခြင်း",
+    "default": "ကာတွန်းကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.59": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · မှတ်တမ်းရုပ်ရှင်ကြည့်ခြင်း",
+    "default": "မှတ်တမ်းရုပ်ရှင်ကြည့်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.60": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဝတ္ထုဖတ်ခြင်း",
+    "default": "ဝတ္ထုဖတ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.61": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကာတွန်းစာအုပ်ဖတ်ခြင်း",
+    "default": "ကာတွန်းစာအုပ်ဖတ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.62": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စက္ကူစာအုပ်ဖတ်ခြင်း",
+    "default": "စက္ကူစာအုပ်ဖတ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.63": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အသံစာအုပ်နားထောင်ခြင်း",
+    "default": "အသံစာအုပ်နားထောင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.64": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဘာသာစကားအသစ်သင်ခြင်း",
+    "default": "ဘာသာစကားအသစ်သင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.65": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · တူရိယာအသစ်သင်ခြင်း",
+    "default": "တူရိယာအသစ်သင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.66": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ပရိုဂရမ်ရေးသင်ခြင်း",
+    "default": "ပရိုဂရမ်ရေးသင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.67": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဒီဇိုင်းသင်ခြင်း",
+    "default": "ဒီဇိုင်းသင်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.68": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကြိုတင်အစီအစဉ်ဆွဲခြင်း",
+    "default": "ကြိုတင်အစီအစဉ်ဆွဲခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.69": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · စိတ်ကူးပေါက်ရာလုပ်ခြင်း",
+    "default": "စိတ်ကူးပေါက်ရာလုပ်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.70": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ငွေစုခြင်း",
+    "default": "ငွေစုခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.71": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ခရီးအတွက်ငွေသုံးခြင်း",
+    "default": "ခရီးအတွက်ငွေသုံးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.72": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · လက်ရေးစာပို့ခြင်း",
+    "default": "လက်ရေးစာပို့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.73": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · အသံမက်ဆေ့ချ်ပို့ခြင်း",
+    "default": "အသံမက်ဆေ့ချ်ပို့ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.74": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · လက်ဆောင်လုပ်ပေးခြင်း",
+    "default": "လက်ဆောင်လုပ်ပေးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.75": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · လက်ဆောင်ဝယ်ပေးခြင်း",
+    "default": "လက်ဆောင်ဝယ်ပေးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.76": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ဘောလုံးကစားခြင်း",
+    "default": "ဘောလုံးကစားခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.77": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ကြက်တောင်ရိုက်ခြင်း",
+    "default": "ကြက်တောင်ရိုက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.78": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · ရေကူးခြင်း",
+    "default": "ရေကူးခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
+  },
+  "msg.data.this_or_that.option.79": {
+    "kind": "message",
+    "category": "This or That Options",
+    "label": "This or That · တောင်တက်ခြင်း",
+    "default": "တောင်တက်ခြင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 80
   }
 }

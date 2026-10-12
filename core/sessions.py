@@ -45,6 +45,7 @@ SESSION_PRIORITIES = {
     "imposter": 78,
     "nan_yate": 85,
     "draw_guess": 77,
+    "this_or_that": 65,
     "roast_battle": 75,
     "word_chain": 70,
 
@@ -93,6 +94,7 @@ EXCLUSIVE_SESSIONS = {
     "imposter",
     "nan_yate",
     "draw_guess",
+    "this_or_that",
     "roast_battle",
     "word_chain",
     "emoji_guess",
