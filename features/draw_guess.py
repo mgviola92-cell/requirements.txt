@@ -98,6 +98,8 @@ def tx(cid=None,gid=None):
 def persist(cur,s,now):
     s['updated']=now
     for e in s['events']:
+        if e['kind']=='cancelled':
+            e['chat_id']=s['chat_id'];e['messages']=cleanup_targets(s)
         e['epoch']=s['epoch'];e['round']=s['round']
         cur.execute('INSERT INTO draw_guess_outbox(game_id,event) VALUES(%s,%s::jsonb)',(s['id'],json.dumps(e,ensure_ascii=False)))
     s['events']=[]
@@ -128,16 +130,42 @@ def panel(bot,s):
     else:body=text('round',round=s['round'],rounds=s['rules']['rounds'],name=g.player(s,s['drawer'])['name'])
     return body,k
 
+def remember(s,cid,message):
+    mid=getattr(message,'message_id',None)
+    if type(mid) is not int:return
+    item={'chat':int(cid),'message':mid}
+    records=s.setdefault('messages',[])
+    if item not in records:records.append(item)
+
+
+def cleanup_targets(s):
+    result=list(s.get('messages',[]))
+    for key in ('lobby_card','card'):
+        if type(s.get(key)) is int:
+            item={'chat':s['chat_id'],'message':s[key]}
+            if item not in result:result.append(item)
+    return result
+
+
+def delete_messages(bot,records):
+    for item in records:
+        try:bot.delete_message(item['chat'],item['message'])
+        except Exception as exc:
+            description=str(exc).lower()
+            if 'message to delete not found' in description or 'message_id_invalid' in description:continue
+            raise
+
+
 def private(bot,cur,s,uid):
     k=types.InlineKeyboardMarkup()
     if s['phase']=='lobby':
-        k.add(types.InlineKeyboardButton(text('join'),callback_data=callback(s,'join')));bot.send_message(uid,text('lobby',count=len(s['players']),maximum=s['rules']['max_players'],minimum=s['rules']['min_players']),reply_markup=k);return
+        k.add(types.InlineKeyboardButton(text('join'),callback_data=callback(s,'join')));m=bot.send_message(uid,text('lobby',count=len(s['players']),maximum=s['rules']['max_players'],minimum=s['rules']['min_players']),reply_markup=k);remember(s,uid,m);return
     if s['phase'] in ('finished','cancelled'):raise ValueError('closed')
-    if str(uid)!=s['drawer']:bot.send_message(uid,text('waiting'));return
+    if str(uid)!=s['drawer']:m=bot.send_message(uid,text('waiting'));remember(s,uid,m);return
     if not s['ticket']:s['ticket']=secrets.token_urlsafe(32)
     url=base_url()+f"/draw/play?game={s['id']}&ticket={s['ticket']}"
     k.add(types.InlineKeyboardButton(text('canvas'),web_app=types.WebAppInfo(url)))
-    bot.send_message(uid,text('drawing'),reply_markup=k)
+    m=bot.send_message(uid,text('drawing'),reply_markup=k);remember(s,uid,m)
 
 
 def drain(bot):
@@ -146,14 +174,35 @@ def drain(bot):
             cur.execute('SELECT id,game_id,event,attempts FROM draw_guess_outbox WHERE NOT done AND next_try<=NOW() ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED');row=cur.fetchone()
             if not row:return
             oid,gid,e,attempts=row
+            if e['kind']=='cancelled' and 'messages' in e:
+                try:
+                    delete_messages(bot,e['messages'])
+                    with group_scope(e['chat_id']):m=bot.send_message(e['chat_id'],text('cancelled'))
+                    job={'kind':'delete','messages':[{'chat':e['chat_id'],'message':m.message_id}]}
+                    cur.execute("INSERT INTO draw_guess_outbox(game_id,event,next_try) VALUES(%s,%s::jsonb,NOW()+INTERVAL '10 seconds')",(gid,json.dumps(job)))
+                    cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,))
+                except Exception as exc:
+                    cur.execute("UPDATE draw_guess_outbox SET attempts=attempts+1,done=%s,next_try=NOW()+INTERVAL '10 seconds' WHERE id=%s",(attempts>=8,oid))
+                    LOG.warning('Draw cancellation cleanup: %s',type(exc).__name__)
+                continue
+            if e['kind']=='delete':
+                try:
+                    delete_messages(bot,e['messages'])
+                    cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,))
+                except Exception as exc:
+                    cur.execute("UPDATE draw_guess_outbox SET attempts=attempts+1,done=%s,next_try=NOW()+INTERVAL '10 seconds' WHERE id=%s",(attempts>=8,oid))
+                    LOG.warning('Draw cleanup: %s',type(exc).__name__)
+                continue
             cur.execute('SELECT MAX(id) FROM draw_guess_outbox WHERE game_id=%s',(gid,));watermark=cur.fetchone()[0]
             # State row lock keeps drawer-ticket creation consistent with callbacks.
             cur.execute('SELECT state FROM draw_guess_games WHERE game_id=%s FOR UPDATE',(gid,));row=cur.fetchone()
             if not row:cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,));continue
             s=row[0];cid=s['chat_id'];kind=e['kind']
+            if kind in ('round','drawer','image','correct','timeout') and s['phase']=='cancelled':
+                cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,));continue
             if kind in ('round','drawer','image') and (e['epoch']!=s['epoch'] or e['round']!=s['round']):
                 cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,));continue
-            if kind!='drawer' and time.time()<s.get('last_send',0)+3.2:
+            if kind not in ('drawer','cancelled') and time.time()<s.get('last_send',0)+3.2:
                 cur.execute("UPDATE draw_guess_outbox SET next_try=NOW()+INTERVAL '4 seconds' WHERE id=%s",(oid,));continue
             try:
                 with group_scope(cid):
@@ -162,17 +211,23 @@ def drain(bot):
                         body,k=panel(bot,s)
                         if s.get('lobby_card') and s['phase']=='lobby':bot.edit_message_text(body,cid,s['lobby_card'],reply_markup=k)
                         else:
-                            m=bot.send_message(cid,body,reply_markup=k)
+                            m=bot.send_message(cid,body,reply_markup=k);remember(s,cid,m)
                             if s['phase']=='lobby':s['lobby_card']=m.message_id
                     elif kind=='image':
                         data=io.BytesIO(base64.b64decode(s['image']));data.name='drawing.png';body=text('round',round=s['round'],rounds=s['rules']['rounds'],name=g.player(s,s['drawer'])['name'])
                         if s.get('card'):bot.edit_message_media(types.InputMediaPhoto(data,caption=body),cid,s['card'])
-                        else:s['card']=bot.send_photo(cid,data,caption=body).message_id
+                        else:
+                            m=bot.send_photo(cid,data,caption=body);s['card']=m.message_id;remember(s,cid,m)
                         cur.execute("UPDATE draw_guess_outbox SET done=TRUE WHERE game_id=%s AND event->>'kind'='image' AND id<=%s",(gid,watermark))
-                    elif kind=='correct':bot.send_message(cid,text('correct',name=g.player(s,e['uid'])['name'],word=e['word']))
-                    elif kind=='timeout':bot.send_message(cid,text('timeout',word=e['word']))
+                    elif kind=='correct':m=bot.send_message(cid,text('correct',name=g.player(s,e['uid'])['name'],word=e['word']));remember(s,cid,m)
+                    elif kind=='timeout':m=bot.send_message(cid,text('timeout',word=e['word']));remember(s,cid,m)
                     elif kind=='result':bot.send_message(cid,text('result',scores='\n'.join(p['name']+' — '+str(p['score']) for p in sorted(s['players'],key=lambda p:-p['score']))))
-                    else:bot.send_message(cid,text('cancelled'))
+                    else:
+                        delete_messages(bot,cleanup_targets(s))
+                        m=bot.send_message(cid,text('cancelled'))
+                        job={'kind':'delete','messages':[{'chat':cid,'message':m.message_id}]}
+                        cur.execute("INSERT INTO draw_guess_outbox(game_id,event,next_try) VALUES(%s,%s::jsonb,NOW()+INTERVAL '10 seconds')",(gid,json.dumps(job)))
+                        s['messages']=[];s['lobby_card']=None;s['card']=None
                 if kind!='drawer':s['last_send']=time.time()
                 cur.execute('UPDATE draw_guess_games SET state=%s::jsonb WHERE game_id=%s',(json.dumps(s,ensure_ascii=False),gid))
                 cur.execute('UPDATE draw_guess_outbox SET done=TRUE WHERE id=%s',(oid,))
@@ -238,7 +293,7 @@ def register(app,bot):
                 if cmd=='drawstop':
                     if not s or s['phase'] in ('finished','cancelled'):raise ValueError('closed')
                     if not is_admin(bot,cid,m.from_user.id):raise ValueError('admin')
-                    k=types.InlineKeyboardMarkup();k.add(types.InlineKeyboardButton(text('yes_stop'),callback_data=callback(s,'confirmedstop')));bot.reply_to(m,text('confirm_stop'),reply_markup=k);return
+                    k=types.InlineKeyboardMarkup();k.add(types.InlineKeyboardButton(text('yes_stop'),callback_data=callback(s,'confirmedstop')));msg=bot.reply_to(m,text('confirm_stop'),reply_markup=k);remember(s,cid,msg);persist(cur,s,time.time());return
                 if s and s['phase'] not in ('finished','cancelled'):g.event(s,'round')
                 else:
                     if not start_session(cid,'draw_guess')[0]:raise ValueError('busy')
@@ -279,8 +334,9 @@ def register(app,bot):
                     if kind=='begin':g.begin(s,time.time(),random.SystemRandom(),bank(s))
                     elif kind in ('stop','confirmedstop'):
                         if kind=='stop':
-                            k=types.InlineKeyboardMarkup();k.add(types.InlineKeyboardButton(text('yes_stop'),callback_data=callback(s,'confirmedstop')));bot.send_message(cid,text('confirm_stop'),reply_markup=k)
-                        else:g.cancel(s)
+                            k=types.InlineKeyboardMarkup();k.add(types.InlineKeyboardButton(text('yes_stop'),callback_data=callback(s,'confirmedstop')));msg=bot.send_message(cid,text('confirm_stop'),reply_markup=k);remember(s,cid,msg)
+                        else:
+                            remember(s,cid,q.message);g.cancel(s)
                     else:raise ValueError('closed')
                 persist(cur,s,time.time())
             if s['phase'] in ('finished','cancelled'):end_session(cid,'draw_guess');ACTIVE.discard(cid)

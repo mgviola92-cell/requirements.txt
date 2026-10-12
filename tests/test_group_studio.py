@@ -228,3 +228,55 @@ class StudioJobTests(unittest.TestCase):
         with patch.object(studio,'get_db_connection',return_value=con):studio.run_jobs(bot)
         calls=[c for c in cur.execute.call_args_list if 'attempts=attempts+1' in c.args[0]]
         self.assertEqual(calls[0].args[1][0],'pending')
+
+
+class DrawCancellationTests(unittest.TestCase):
+    def connection(self,rows):
+        con=MagicMock();con.__enter__.return_value=con
+        cur=con.cursor.return_value.__enter__.return_value;cur.fetchone.side_effect=rows
+        return con,cur
+    def test_cleanup_contains_only_recorded_bot_cards_and_legacy_lobby(self):
+        s=ready();s['lobby_card']=10;s['card']=20
+        draw.remember(s,-100,NS(message_id=30));draw.remember(s,1,NS(message_id=40));draw.remember(s,-100,NS(message_id=30))
+        self.assertEqual({(v['chat'],v['message']) for v in draw.cleanup_targets(s)},{(-100,10),(-100,20),(-100,30),(1,40)})
+    def test_confirmation_cancel_removes_cards_and_schedules_short_notice_cleanup(self):
+        s=ready();s['phase']='cancelled';s['lobby_card']=10;s['card']=20
+        draw.remember(s,-100,NS(message_id=30))
+        e={'kind':'cancelled'};con,cur=self.connection([(1,s['id'],e,0),(1,),(s,),None])
+        bot=MagicMock();bot.send_message.return_value=NS(message_id=50)
+        with patch.object(draw,'get_db_connection',return_value=con):draw.drain(bot)
+        self.assertEqual({tuple(c.args) for c in bot.delete_message.call_args_list},{(-100,10),(-100,20),(-100,30)})
+        jobs=[c for c in cur.execute.call_args_list if 'INSERT INTO draw_guess_outbox' in c.args[0]]
+        self.assertEqual(len(jobs),1);payload=json.loads(jobs[0].args[1][1])
+        self.assertEqual(payload,{'kind':'delete','messages':[{'chat':-100,'message':50}]})
+        self.assertIn("INTERVAL '10 seconds'",jobs[0].args[0]);self.assertIsNone(s['lobby_card'])
+    def test_delayed_cleanup_survives_new_game_replacing_old_state(self):
+        e={'kind':'delete','messages':[{'chat':-100,'message':50}]}
+        con,cur=self.connection([(1,'old-game',e,0),None]);bot=MagicMock()
+        with patch.object(draw,'get_db_connection',return_value=con):draw.drain(bot)
+        bot.delete_message.assert_called_once_with(-100,50)
+        self.assertFalse(any('SELECT state' in c.args[0] for c in cur.execute.call_args_list))
+    def test_cancelled_game_does_not_deliver_queued_round_cards(self):
+        s=ready();s['phase']='cancelled';e={'kind':'round','epoch':s['epoch'],'round':s['round']}
+        con,cur=self.connection([(1,s['id'],e,0),(1,),(s,),None]);bot=MagicMock()
+        with patch.object(draw,'get_db_connection',return_value=con):draw.drain(bot)
+        bot.send_message.assert_not_called()
+    def test_already_deleted_cards_are_idempotent(self):
+        bot=MagicMock();bot.delete_message.side_effect=RuntimeError('Bad Request: message to delete not found')
+        draw.delete_messages(bot,[{'chat':-100,'message':10}])
+    def test_transient_delete_failure_is_not_silently_accepted(self):
+        bot=MagicMock();bot.delete_message.side_effect=RuntimeError('offline')
+        with self.assertRaises(RuntimeError):draw.delete_messages(bot,[{'chat':-100,'message':10}])
+
+    def test_cancel_payload_is_independent_of_game_state_replacement(self):
+        e={'kind':'cancelled','chat_id':-100,'messages':[{'chat':-100,'message':10},{'chat':-100,'message':30}]}
+        con,cur=self.connection([(1,'old-game',e,0),None]);bot=MagicMock();bot.send_message.return_value=NS(message_id=50)
+        with patch.object(draw,'get_db_connection',return_value=con):draw.drain(bot)
+        self.assertEqual(bot.delete_message.call_count,2)
+        self.assertFalse(any('SELECT state' in c.args[0] for c in cur.execute.call_args_list))
+    def test_cancel_persistence_snapshots_owned_messages_for_durable_cleanup(self):
+        s=ready();s['lobby_card']=10;draw.remember(s,-100,NS(message_id=30));game.cancel(s)
+        cur=MagicMock();cur.fetchone.return_value=None;draw.persist(cur,s,400)
+        jobs=[c for c in cur.execute.call_args_list if 'INSERT INTO draw_guess_outbox' in c.args[0]]
+        payload=json.loads(jobs[0].args[1][1]);self.assertEqual(payload['chat_id'],-100)
+        self.assertEqual({x['message'] for x in payload['messages']},{10,30})
