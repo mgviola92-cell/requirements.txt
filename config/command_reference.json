@@ -1,0 +1,1481 @@
+{
+  "version": "2026-10-12",
+  "categories": {
+    "games": "🎮 ဂိမ်းများ",
+    "game_control": "🛑 ဂိမ်းအကူနှင့် ရပ်ရန်",
+    "studio": "🗂️ Capsule / အသံ / အမှတ်တရ / Commands",
+    "info": "🏆 Profile / အချက်အလက် / အကူအညီ",
+    "group": "👥 လူခေါ် / သီချင်း / စီမံခန့်ခွဲမှု",
+    "owner": "👑 Owner / Staff / Editor",
+    "auto": "⚙️ အလိုအလျောက်စနစ်များ"
+  },
+  "entries": [
+    {
+      "id": "draw",
+      "aliases": [
+        "draw",
+        "drawguess"
+      ],
+      "title": "Draw & Guess",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/draw",
+      "steps": [
+        "Group မှ /draw ပို့ပါ။",
+        "ဂိမ်းခန်းခလုတ်ကနေ bot Private ကိုဖွင့်၊ Join အတည်ပြုပါ။",
+        "၂–၁၂ ယောက် ပါနိုင်သည်။ လူပြည့်မှ Admin စနိုင်သည်၊ lobby default ၁၂၀ စက္ကန့်ပြည့်လျှင်လည်းစသည်။",
+        "ပုံဆွဲသူတစ်ယောက်သာ Canvas ခလုတ်ရမည်။ ခဲတံအရောင်/အရွယ်၊ ခဲဖျက်၊ Undo၊ Clear ရွေးနိုင်သည်။",
+        "ပုံကိုပို့ပြီးနောက် ကျန်ကစားသူများ Group ထဲတွင် အဖြေစာရိုက်ပါ။ ဆက်ဆွဲထားသည့်ပုံကို ၁၀ စက္ကန့်တိုင်း ပို့နိုင်သည်။ ပုံတစ်ပုံတည်းကိုပြင်သုံးသည်။",
+        "ပထမအဖြေမှန်သူ +10၊ ပုံဆွဲသူ +5 points default ရသည်။ အလှည့်ကျပြောင်းပြီး စုစုပေါင်း score ပြသည်။"
+      ],
+      "notes": "default ပုံဆွဲချိန် ၉၀ စက္ကန့်၊ ပုံရောက်ပြီး ခန့်မှန်းချိန် ၉၀ စက္ကန့်။ rounds default ၅ ဖြစ်သော်လည်း လူတိုင်းအလှည့်ရအောင် ကစားသူဦးရေထက် မနည်းစေပါ။"
+    },
+    {
+      "id": "nanyate",
+      "aliases": [
+        "nanyate",
+        "နန်းရိပ်"
+      ],
+      "title": "နန်းရိပ်",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/nanyate [anonymous] [advanced]",
+      "steps": [
+        "/nanyate ပို့၊ Private ဂိမ်းခန်းခလုတ်ဖွင့်ပြီး Join အတည်ပြုပါ။",
+        "၈–၄၀ ယောက် ဆော့နိုင်သည်။ lobby default ၁၈၀ စက္ကန့်၊ Admin ကစောစောစနိုင်သည်။",
+        "Role ကို Private မှာပဲကြည့်ပါ။ ညတွင် နေရာရွေး သို့မဟုတ် Role အစွမ်း/ပစ်မှတ်ရွေးပါ။ နောက်ဆုံးရွေးချယ်မှုကိုယူသည်။",
+        "လုပ်ကြံဘက်က အဖွဲ့တိုက်ခိုက်မဲကို ထပ်ပေးနိုင်သည်။ တစ်ညအဖွဲ့တိုက်ခိုက်မှု တစ်ကြိမ်သာ။",
+        "နေ့တွင် Group မှဆွေးနွေး၊ သက်သေဖော်၊ ပစ္စည်းဝယ်နိုင်သည်။ မဲချိန်မှ မဲပေးပါ။ ကိုယ့်ကိုယ်ကိုမဲမပေးနိုင်။",
+        "လုပ်ကြံသူမရှိတော့လျှင် နန်းတော်နိုင်၊ လုပ်ကြံသူအရေအတွက်က ကျန်သူအားလုံးနှင့်တူ/ပိုလျှင် လုပ်ကြံဘက်နိုင်။"
+      ],
+      "notes": "Role catalog ၃၂ မျိုးမှ balance အလိုက်ရွေးသည်။ Anonymous mode မှာ /nychat သုံး။ Advanced mode မှာ ဒုတိယည မှူးမတ်တစ်ယောက်ကို ဘက်ပြောင်းကမ်းလှမ်းနိုင်သည်။ default အများဆုံးရက် ၈၊ win reward 15၊ ပါဝင် reward 3။ ၅ ယောက်နှင့်စရန်မရ။"
+    },
+    {
+      "id": "imposter",
+      "aliases": [
+        "imposter"
+      ],
+      "title": "Imposter Protocol",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/imposter",
+      "steps": [
+        "Group မှ /imposter ပို့၊ Join ခလုတ်နှိပ်ပါ။ အနည်းဆုံး ၄ ယောက်။",
+        "Secret ကြည့်ခလုတ်က private alert ပေါ်သည်။ Imposter တစ်ယောက်က စကားလုံးကိုမသိပါ။",
+        "ကိုယ့်အလှည့်ရောက်လျှင် စကားလုံးကိုတိုက်ရိုက်မပြောဘဲ clue စာတိုတစ်ခု Group ထဲပို့ပါ။",
+        "Round ပြီးလျှင် ဆက်မလား/ဖော်ထုတ်မလား ခလုတ်နှိပ်ဆုံးဖြတ်ပါ။ မဲတူလျှင် Imposter ကဆုံးဖြတ်သည်။",
+        "Final vote မှာ သံသယရှိသူကိုရွေးပါ။ Result မှ Imposter နှင့်စကားလုံးပေါ်မည်။"
+      ],
+      "notes": "Join default ၄၀ စက္ကန့်။ Clue အချိန်ပြည့်မဖြေသူကို AFK စည်းမျဉ်းအတိုင်းဖယ်နိုင်သည်။ Imposter သည် /secret နှင့်တစ်ကြိမ်ဖြေနိုင်သည်။"
+    },
+    {
+      "id": "wyr",
+      "aliases": [
+        "wyr",
+        "wouldyourather"
+      ],
+      "title": "Would You Rather",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/wyr",
+      "steps": [
+        "/wyr ပို့ပါ။",
+        "A/B ရွေးချယ်စရာပါသော Telegram poll တွင် မဲပေးပါ။",
+        "သတ်မှတ်အချိန်ပြည့်မှ poll ပိတ်ပြီး ရလဒ်ပြမည်။"
+      ],
+      "notes": "တစ်ယောက်တစ်မဲ၊ native Telegram poll ဖြစ်သည်။ Activity-driven auto spawn လည်းပါသည်။ Manual poll ကိုစသူသာ /wyrstop ရပ်နိုင်၊ auto poll သည်အချိန်ပြည့်မှပိတ်သည်။"
+    },
+    {
+      "id": "boss",
+      "aliases": [
+        "boss",
+        "bossraid",
+        "raid"
+      ],
+      "title": "Group Boss Raid",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/boss",
+      "steps": [
+        "/boss ပို့၊ Boss card မှ ATTACK ခလုတ်ကိုနှိပ်ပါ။",
+        "ကိုယ့် cooldown ပြည့်မှ ထပ်တိုက်နိုင်သည်။ Crit၊ block၊ boss reaction နှင့် phase ပြောင်းမှုများပါသည်။",
+        "Card တွင် HP၊ အချိန်၊ damage၊ ပါဝင်သူနှင့် ထိပ်ဆုံးကစားသူများကိုကြည့်ပါ။",
+        "အချိန်မကုန်မီ HP ကိုသုညဖြစ်အောင် အတူတိုက်ကြပါ။"
+      ],
+      "notes": "Auto spawn ပါသည်။ Reward နှင့် damage စည်းမျဉ်းများ Owner setting အလိုက်ကွာနိုင်သည်။ /stop သည် Raid ရပ်ခလုတ်မဟုတ်။"
+    },
+    {
+      "id": "teambattle",
+      "aliases": [
+        "teambattle"
+      ],
+      "title": "Red / Blue Team Battle",
+      "category": "games",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/teambattle",
+      "steps": [
+        "Admin က /teambattle ပို့ပါ။",
+        "Battle card မှ RED/BLUE team ထဲ Join ပါ။",
+        "သက်ဆိုင်ရာဂိမ်းများက positive points ရလျှင် မိမိ team battle score ထဲပါဝင်မည်။",
+        "Half Time နှင့် Final မှ card ပြောင်းပြီး အသင်းရလဒ်/MVP ပြမည်။"
+      ],
+      "notes": "default duration ၆–၁၀ မိနစ်။ ယာယီ battle score နှင့် ရေရှည် rank points ခွဲထားသည်။ Card pin ရန် bot permission လိုသည်။ သီးသန့် /endteam command မရှိ။"
+    },
+    {
+      "id": "pair",
+      "aliases": [
+        "pair"
+      ],
+      "title": "Pair Challenge",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/pair",
+      "steps": [
+        "/pair ပို့ပြီး စသူက mode ရွေးပါ။",
+        "Co-op Duo = ၂ ယောက်၊ Co-op Squad = ၂–၄ ယောက်၊ Team Versus = ၄ ယောက် (2v2)။",
+        "Join ခလုတ်နှိပ်၊ လူပြည့်လျှင် စသူက START နှိပ်ပါ။",
+        "Round တစ်ခုစီမှာ A/B answer ခလုတ်တစ်ကြိမ်ရွေးပါ။ Quiz/Puzzle/Sync သို့မဟုတ် Versus challenges ပါသည်။",
+        "၅ rounds ပြီးမှ result/reward ပြမည်။"
+      ],
+      "notes": "Lobby မှ Leave ခလုတ်နှင့်ထွက်နိုင်သော်လည်း စသူသည် leave မရ။"
+    },
+    {
+      "id": "math",
+      "aliases": [
+        "mathbattle",
+        "math"
+      ],
+      "title": "Math Battle",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/mathbattle",
+      "steps": [
+        "/mathbattle ပို့ပါ။",
+        "အဖြေကို card ခလုတ်များမှရွေးပါ။ လူတစ်ယောက် round တစ်ခုတွင်တစ်ကြိမ်သာဖြေနိုင်သည်။",
+        "၅ rounds တွင် အခက်အခဲတိုးသည်။ ပထမသုံးဦးမှန်သူများ match score ရသည်။",
+        "ပထမမှန်သူရလျှင် နောက်သူများအတွက်ကျန်ချိန်ကိုတိုပေးနိုင်သည်။",
+        "Battle ပြီးမှ final leaderboard/reward ပြသည်။"
+      ],
+      "notes": "Default round limits 45/60/75/90/105 စက္ကန့်။ Match score ranges 1st 10–18၊ 2nd 5–9၊ 3rd 1–4 ဖြစ်သည်။ ရေရှည် reward နှင့် match score ကိုမရောပါနှင့်။"
+    },
+    {
+      "id": "wordchain",
+      "aliases": [
+        "wordchain",
+        "wc"
+      ],
+      "title": "English / မြန်မာ Word Chain",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/wordchain en သို့မဟုတ် /wordchain mm",
+      "steps": [
+        "Mode နှင့် command ပို့ပါ။",
+        "EN မှာ ယခင်စကားလုံး၏ နောက်ဆုံးအက္ခရာဖြင့်စသော dictionary word ပို့ပါ။",
+        "MY မှာ bot card ပေါ်က လိုအပ်သောဗျည်းကိုလိုက်ပါ။ စာလုံးပေါင်းအဆုံး Unicode character တစ်လုံးအတိုင်းမတွက်ပါ။",
+        "အဖြေကို Group ထဲ တိုက်ရိုက်ရေးနိုင်သည်။ တစ်ယောက်တည်း ဆက်တိုက် valid answer ပေးမရ။",
+        "မှန်သည့်အဖြေတိုင်း status card အသစ်ကိုအောက်သို့ပို့၊ ဟောင်းကိုဖျက်သည်။"
+      ],
+      "notes": "Valid answer မရှိ ၆၀ စက္ကန့်ဖြစ်လျှင် စောစောပြီးနိုင်သည်။ Game အဖြေစာများကိုသာအချိန်ကြာမှဖျက်၊ ပုံမှန် group chat မဖျက်။"
+    },
+    {
+      "id": "emoji",
+      "aliases": [
+        "emoji",
+        "emojiguess"
+      ],
+      "title": "Emoji Guess",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/emoji",
+      "steps": [
+        "/emoji ပို့ပါ။",
+        "Emoji clue နှင့် category ကိုကြည့်ပြီး Group ထဲတွင် အဖြေစာရိုက်ပါ။",
+        "Hint ပေါ်လျှင်သုံး၊ အချိန်မကုန်မီ မှန်အောင်ခန့်မှန်းပါ။"
+      ],
+      "notes": "မှန်သူ reward သည် setting အလိုက်။ Bot ကမေးခွန်းရွေး/သုံးပြီးသား ID ကိုစီမံသည်။"
+    },
+    {
+      "id": "speedtap",
+      "aliases": [
+        "speedtap"
+      ],
+      "title": "Speed Tap",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/speedtap",
+      "steps": [
+        "/speedtap ပို့၊ အစတွင်စောင့်ပါ။",
+        "WAIT အချိန်မှာ မနှိပ်ပါနှင့်။",
+        "GO ပေါ်လာမှ TAP ကိုအမြန်နှိပ်ပါ။",
+        "ပထမအချိန်မီနှိပ်သူကို reward/result ပြမည်။"
+      ],
+      "notes": "Hidden start delay default ၁၀–၁၈၀ စက္ကန့်၊ WAIT ၃–၈ စက္ကန့်၊ active ၁၀ စက္ကန့်။ Auto spawn လည်းပါသည်။"
+    },
+    {
+      "id": "trivia",
+      "aliases": [
+        "trivia"
+      ],
+      "title": "Trivia",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/trivia",
+      "steps": [
+        "Group မှ /trivia ပို့ပါ။",
+        "မေးခွန်းနှင့် A/B/C/D ရွေးချယ်စရာကိုဖတ်ပါ။",
+        "Group ထဲ A၊ B၊ C သို့မဟုတ် D တစ်လုံးရေးပို့ပါ။",
+        "တစ်ယောက်တစ်ကြိမ်သာဖြေနိုင်သည်။ ပထမမှန်သူနိုင်သည်။"
+      ],
+      "notes": "Default ၁၈၀ စက္ကန့်။ Win +10 default၊ wrong answer ကို loss မတွက်။ Online sources မရလျှင် fallback အမျိုးမျိုးရှိသော်လည်း မေးခွန်းမရနိုင်သည့်အချိန်လည်းရှိသည်။"
+    },
+    {
+      "id": "guess",
+      "aliases": [
+        "guess",
+        "ခန့်မှန်း"
+      ],
+      "title": "Number Guess",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/guess",
+      "steps": [
+        "Group မှ /guess ပို့ပါ။",
+        "1–100 အတွင်း number တစ်ခုစီရိုက်ပြီး ခန့်မှန်းပါ။",
+        "Bot က အကြီး/အသေး clue ပေးသည်။",
+        "ပထမမှန်သူနိုင်ပြီး +10 default points ရသည်။"
+      ],
+      "notes": "မှားခန့်မှန်းမှုကို loss မတွက်။"
+    },
+    {
+      "id": "coin",
+      "aliases": [
+        "coin"
+      ],
+      "title": "Coin Flip / PvP",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/coin ခေါင်း · /coin အမြီး · /coin @username",
+      "steps": [
+        "Bot နှင့်ဆို /coin ခေါင်း သို့မဟုတ် /coin အမြီး ပို့ပါ။",
+        "PvP ဆို Group မှ သူ့ message ကို reply ပြီး /coin ပို့၊ သို့မဟုတ် /coin @username သုံးပါ။",
+        "Challenge ပြီးလျှင် နှစ်ယောက်လုံး ခေါင်း/အမြီးကို game ကညွှန်သည့်ပုံစံရွေးပါ။"
+      ],
+      "notes": "Default win +5၊ loss -1၊ draw 0။ Points သုညအောက်မကျ။ တစ်ယောက်မှာ active Coin game ထပ်မဖွင့်နိုင်။"
+    },
+    {
+      "id": "dice",
+      "aliases": [
+        "dice",
+        "အန်စာတုံး"
+      ],
+      "title": "Dice",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/dice",
+      "steps": [
+        "Command ပို့ပါ။",
+        "Telegram အန်စာတုံးနှင့် random ရလဒ်ပြမည်။"
+      ],
+      "notes": "ဒီ handler တွင် Rank reward မချိတ်ထားပါ။"
+    },
+    {
+      "id": "slot",
+      "aliases": [
+        "slot",
+        "စလော့"
+      ],
+      "title": "Slot",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/slot",
+      "steps": [
+        "Command ပို့ပြီး slot animation/rလဒ်ကြည့်ပါ။",
+        "ပုံတူကျလျှင် Jackpot စာပြမည်။"
+      ],
+      "notes": "အပျော်ရလဒ်သာ၊ ဒီ handler တွင် Rank reward မပေး။"
+    },
+    {
+      "id": "eightball",
+      "aliases": [
+        "8ball",
+        "ဗေဒင်"
+      ],
+      "title": "Magic 8 Ball",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/8ball ဒီနေ့ကံကောင်းမလား?",
+      "steps": [
+        "Command နောက်မေးခွန်းထည့်ပို့ပါ။",
+        "Bot က random အပျော်အဖြေပြန်ပေးမည်။"
+      ],
+      "notes": "အမှန်တကယ်ခန့်မှန်းချက်မဟုတ်။"
+    },
+    {
+      "id": "love",
+      "aliases": [
+        "love",
+        "တွဲပေး"
+      ],
+      "title": "Love Calculator",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/love မောင်လှ မေ",
+      "steps": [
+        "Command နောက်နာမည်နှစ်ခု သို့မဟုတ် @username နှစ်ခုထည့်ပါ။",
+        "Random percentage အပျော်ရလဒ်ပြမည်။"
+      ],
+      "notes": "အချစ်အခြေအနေကိုအမှန်တကယ်တိုင်းတာခြင်းမဟုတ်။"
+    },
+    {
+      "id": "random",
+      "aliases": [
+        "random",
+        "ကျပမ်း"
+      ],
+      "title": "Random Number",
+      "category": "games",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/random",
+      "steps": [
+        "Command ပို့ပါ။",
+        "1–100 random number နှင့် reaction ပြမည်။"
+      ],
+      "notes": "ဤ handler တွင် custom min/max argument မဖတ်ပါ။"
+    },
+    {
+      "id": "daily",
+      "aliases": [
+        "daily",
+        "dailychallenge"
+      ],
+      "title": "Daily Challenge ကြည့်ရန်",
+      "category": "games",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/daily",
+      "steps": [
+        "/daily ပို့၊ ကိုယ့် personal mission card ကိုကြည့်ပါ။",
+        "Main pinned group card တွင် group objectives ကိုကြည့်ပါ။",
+        "မိမိ mission ပြည့်လျှင် /dailyclaim 1–3၊ group mission/contribution ပြည့်လျှင် /dailygroupclaim 1–3 သုံးပါ။"
+      ],
+      "notes": "Main card နှင့် personal temporary card မတူ။ /daily သည် main card ကိုအစားမထိုး၊ temporary card ကိုအချိန်ကြာမှဖျက်သည်။"
+    },
+    {
+      "id": "drawrules",
+      "aliases": [
+        "drawrules"
+      ],
+      "title": "Draw စည်းမျဉ်း",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/drawrules",
+      "steps": [
+        "Group မှ command ပို့ပြီး စည်းမျဉ်းကိုဖတ်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "drawstop",
+      "aliases": [
+        "drawstop"
+      ],
+      "title": "Draw ပွဲဖျက်သိမ်း",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/drawstop",
+      "steps": [
+        "Command သို့မဟုတ် ရပ်မယ်ခလုတ်နှိပ်ပါ။",
+        "ဖျက်သိမ်းမယ်ကိုအတည်ပြုပါ။",
+        "ဒီပွဲနှင့်ဆိုင်သော bot Join/ပုံ/ဂိမ်း/အတည်ပြုစာများကိုဖျက်ပေးသည်။"
+      ],
+      "notes": "ဖျက်သိမ်းပြီးကြောင်းစာကို ၁၀ စက္ကန့်အကြာဖျက်သည်။ ပုံမှန် group စာမဖျက်။"
+    },
+    {
+      "id": "nanyaterules",
+      "aliases": [
+        "nanyaterules",
+        "နန်းရိပ်စည်းမျဉ်း"
+      ],
+      "title": "နန်းရိပ်စည်းမျဉ်း",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/nanyaterules",
+      "steps": [
+        "Group မှ command ပို့ပြီး စည်းမျဉ်းဖတ်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "nanyatestop",
+      "aliases": [
+        "nanyatestop"
+      ],
+      "title": "နန်းရိပ်ရပ်ရန်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin / Owner",
+      "usage": "/nanyatestop",
+      "steps": [
+        "Group မှ command ပို့ပါ။",
+        "အတည်ပြုခလုတ်နှိပ်ပြီးပွဲဖျက်သိမ်းပါ။"
+      ],
+      "notes": "ဖျက်သိမ်းသည့်ပွဲအတွက် reward မပေး။ Draw cleanup behavior ကို နန်းရိပ်နှင့်တူသည်ဟုမယူဆပါနှင့်။"
+    },
+    {
+      "id": "imposterstop",
+      "aliases": [
+        "imposterstop"
+      ],
+      "title": "Imposter ရပ်ရန်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/imposterstop",
+      "steps": [
+        "Group Admin က command ပို့ပြီး လက်ရှိပွဲရပ်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "secret",
+      "aliases": [
+        "secret",
+        "ဖြေမယ်"
+      ],
+      "title": "Imposter လျှို့ဝှက်စကားလုံးခန့်မှန်း",
+      "category": "game_control",
+      "where": "Group",
+      "who": "လက်ရှိ Imposter သာ",
+      "usage": "/secret အဖြေ",
+      "steps": [
+        "Group ထဲ command နှင့်အဖြေကို တစ်ခါတည်းပို့ပါ။",
+        "Secret မှန်လျှင် Imposter နိုင်၊ မှားလျှင်ရှုံးပြီးပွဲဆုံးသည်။"
+      ],
+      "notes": "Join phase တွင်မရ။ Private DM command မဟုတ်၊ တစ်ကြိမ်သာဖြေပါ။"
+    },
+    {
+      "id": "wyrstop",
+      "aliases": [
+        "wyrstop"
+      ],
+      "title": "Manual WYR ရပ်ရန်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Poll ကိုစသူသာ",
+      "usage": "/wyrstop",
+      "steps": [
+        "မိမိ /wyr နှင့်စခဲ့သော poll ကို Group မှ command နှင့်ရပ်ပါ။"
+      ],
+      "notes": "Auto poll ကိုဒီ command ဖြင့် မရပ်နိုင်။"
+    },
+    {
+      "id": "endmath",
+      "aliases": [
+        "endmath",
+        "stopmath"
+      ],
+      "title": "Math Battle ရပ်ရန်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/endmath",
+      "steps": [
+        "Group Admin က command ပို့ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "endwordchain",
+      "aliases": [
+        "endwordchain",
+        "stopwc"
+      ],
+      "title": "Word Chain ရပ်ရန်",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "/endwordchain",
+      "steps": [
+        "Group Admin က command ပို့ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "nychat",
+      "aliases": [
+        "nychat"
+      ],
+      "title": "နန်းရိပ် လျှို့ဝှက်/Anonymous စကားပြော",
+      "category": "game_control",
+      "where": "Private",
+      "who": "အသက်ရှင်သော ကစားသူ",
+      "usage": "/nychat <ပွဲ ID> <စာသား>",
+      "steps": [
+        "Private role card မှ ပွဲ ID ကိုကြည့်ပါ။",
+        "ညတွင် လုပ်ကြံဘက်အဖွဲ့ဝင်များက အဖွဲ့ chat သုံးနိုင်သည်။",
+        "နေ့တွင် Anonymous mode ဖြစ်မှ Group ထံနာမည်ဝှက်စာပို့နိုင်သည်။"
+      ],
+      "notes": "စာ ၃၅၀ လုံးအထိ။ Anonymous စာတစ်ဦးတစ်နေ့ ၂ စောင်။ သေသူက role သတင်းပို့မရ။"
+    },
+    {
+      "id": "nywhisper",
+      "aliases": [
+        "nywhisper"
+      ],
+      "title": "နန်းရိပ် သံတမန်ဆက်သွယ်မှု",
+      "category": "game_control",
+      "where": "Private",
+      "who": "လျှို့ဝှက်ဆက်သွယ်ခွင့်ရသူ",
+      "usage": "/nywhisper <ပွဲ ID> <မျက်နှာဖုံးနံပါတ်> <စာသား>",
+      "steps": [
+        "မိမိနှင့်ပစ်မှတ်အကြား သံတမန်ခွင့်ရထားမှ command သုံးပါ။",
+        "ပစ်မှတ်၏မျက်နှာဖုံးနံပါတ်ကို သုံး၊ Telegram user ID မသုံးပါ။"
+      ],
+      "notes": "ခွင့်သည် နောက်ညအစတွင်ကုန်သည်။"
+    },
+    {
+      "id": "dailyclaim",
+      "aliases": [
+        "dailyclaim"
+      ],
+      "title": "Personal Daily reward",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/dailyclaim 1",
+      "steps": [
+        "/daily ဖြင့်မိမိ mission ကြည့်ပါ။",
+        "Mission ပြည့်ပြီးလျှင် 1၊ 2 သို့မဟုတ် 3 နှင့် claim လုပ်ပါ။"
+      ],
+      "notes": "Group objective claim နှင့်မတူ။ တစ်မစ်ရှင်တစ်ကြိမ်၊ မပြည့်သေးလျှင် locked ဖြစ်မည်။"
+    },
+    {
+      "id": "dailygroupclaim",
+      "aliases": [
+        "dailygroupclaim"
+      ],
+      "title": "Group Daily reward",
+      "category": "game_control",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/dailygroupclaim 1",
+      "steps": [
+        "Main group card မှ group mission ကိုကြည့်ပါ။",
+        "Group target နှင့် မိမိ contribution နှစ်ခုလုံးပြည့်မှ 1–3 နှင့် claim လုပ်ပါ။"
+      ],
+      "notes": "တစ်မစ်ရှင်တစ်ကြိမ်။ တချို့နေ့တွင် double reward ဖြစ်နိုင်သည်။"
+    },
+    {
+      "id": "studio",
+      "aliases": [
+        "studio"
+      ],
+      "title": "Group Studio အကူအညီ",
+      "category": "studio",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/studio",
+      "steps": [
+        "Command ပို့ပြီး Capsule / အသံ / အမှတ်တရ / Custom Commands အသုံးပြုနည်းဖတ်ပါ။"
+      ],
+      "notes": "Group data ကို Group မှ စီမံပါ။ Owner private မှ အသံ/command ဖန်တီးလျှင် global default ဖြစ်သည်။"
+    },
+    {
+      "id": "capsule",
+      "aliases": [
+        "capsule"
+      ],
+      "title": "အချိန် Capsule သိမ်းရန်",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "Reply → /capsule 2026-10-13 20:00",
+      "steps": [
+        "သိမ်းချင်သော message ကို reply လုပ်ပါ။",
+        "Command နောက် YYYY-MM-DD HH:MM ကိုထည့်ပါ။ မြန်မာအချိန်ဖြစ်သည်။",
+        "Bot ပေးသော capsule ID နှင့်ဖွင့်မည့်အချိန်ကိုမှတ်ထားပါ။",
+        "အချိန်ရောက်မှ ဒီ Group ထဲမူရင်းစာ/မီဒီယာကိုပြန်ပို့မည်။"
+      ],
+      "notes": "အနာဂတ် ၃၀ စက္ကန့်ထက်ပို၊ ၃၆၆ ရက်ထက်နည်းသောအချိန်။ မူရင်းကိုဖျက်ထားလည်း stored text/file ID သုံးသည်။ မူရင်း Group စာကိုဖုံးပေးသည့်လုပ်ဆောင်ချက်မဟုတ်။ default pending တစ်ဦး ၁၀ ခု။"
+    },
+    {
+      "id": "capsules",
+      "aliases": [
+        "capsules"
+      ],
+      "title": "ကိုယ့် Capsule စာရင်း",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/capsules",
+      "steps": [
+        "Group မှ command ပို့ပြီး ID၊ မြန်မာအချိန်နှင့် status ကြည့်ပါ။"
+      ],
+      "notes": "မိမိဖန်တီးထားသည့် နောက်ဆုံး ၃၀ ခုအထိပြသည်။"
+    },
+    {
+      "id": "capsulecancel",
+      "aliases": [
+        "capsulecancel"
+      ],
+      "title": "Capsule ပယ်ဖျက်",
+      "category": "studio",
+      "where": "Group",
+      "who": "ဖန်တီးသူ / Group Admin",
+      "usage": "/capsulecancel <ID>",
+      "steps": [
+        "/capsules မှ ID ယူပါ။",
+        "မဖွင့်ရသေးသော capsule ကိုပယ်ဖျက်ပါ။"
+      ],
+      "notes": "ဒီ Group ပိုင် capsule ကိုသာ ပယ်ဖျက်နိုင်။"
+    },
+    {
+      "id": "soundadd",
+      "aliases": [
+        "soundadd"
+      ],
+      "title": "အသံသိမ်းရန်",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Group Admin / Owner",
+      "usage": "Reply voice → /soundadd hello",
+      "steps": [
+        "Voice သို့မဟုတ် audio ကို reply လုပ်ပါ။",
+        "အင်္ဂလိပ်နာမည် ၂–၃၂ လုံးနှင့်သိမ်းပါ။",
+        "အမည်တူထပ်သိမ်းလျှင် အသံကိုအစားထိုးသည်။"
+      ],
+      "notes": "photo/document ကိုအသံအဖြစ်မသိမ်းနိုင်။ Owner private မှသိမ်းလျှင် group အားလုံးအတွက် default။"
+    },
+    {
+      "id": "sound",
+      "aliases": [
+        "sound"
+      ],
+      "title": "အသံပြန်ဖွင့်",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/sound hello",
+      "steps": [
+        "အသံနာမည်ကိုထည့်ပြီး command ပို့ပါ။"
+      ],
+      "notes": "default cooldown ၅ စက္ကန့်။ Group အသံအမည်တူရှိလျှင် global default ထက်ဦးစားပေးသည်။"
+    },
+    {
+      "id": "sounds",
+      "aliases": [
+        "sounds"
+      ],
+      "title": "အသံစာရင်း",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Member",
+      "usage": "/sounds",
+      "steps": [
+        "Group မှ အသံနာမည်စာရင်းကြည့်ပါ။",
+        "Owner က private မှ global အသံစာရင်းကြည့်နိုင်သည်။"
+      ],
+      "notes": "စာရင်း default ၁၀၀ အထိ။"
+    },
+    {
+      "id": "sounddel",
+      "aliases": [
+        "sounddel"
+      ],
+      "title": "အသံဖျက်",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Group Admin / Owner",
+      "usage": "/sounddel hello",
+      "steps": [
+        "မိမိစီမံသော scope မှ အသံကိုဖျက်ပါ။"
+      ],
+      "notes": "Group override ဖျက်ပြီး အမည်တူ global အသံရှိလျှင် default ပြန်သက်ရောက်သည်။"
+    },
+    {
+      "id": "memorysave",
+      "aliases": [
+        "memorysave"
+      ],
+      "title": "အမှတ်တရသိမ်း",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "Reply → /memorysave ပျော်ခဲ့တဲ့နေ့",
+      "steps": [
+        "သိမ်းချင်သော message/photo/media ကို reply လုပ်ပါ။",
+        "ခေါင်းစဉ်နှင့် command ပို့ပါ။",
+        "Bot ပေးသော memory ID ဖြင့်ပြန်ကြည့်နိုင်သည်။"
+      ],
+      "notes": "စကားဝိုင်းအားလုံးကို အလိုအလျောက်မသိမ်း၊ ကိုယ်ရွေးသိမ်းသောစာများသာပါသည်။ default Group တစ်ခု ၅၀၀ ခု။"
+    },
+    {
+      "id": "memories",
+      "aliases": [
+        "memories"
+      ],
+      "title": "အမှတ်တရစာရင်း",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/memories",
+      "steps": [
+        "Group ၏နောက်ဆုံးအမှတ်တရ ၄၀ ခုအထိ ID/ခေါင်းစဉ်နှင့်ကြည့်ပါ။"
+      ],
+      "notes": "ပိုဟောင်းသောစာများကို လအလိုက် /memorybook နှင့်ကြည့်၊ သိပြီးသား ID ဖြင့် /memory ပြန်ခေါ်နိုင်သည်။"
+    },
+    {
+      "id": "memory",
+      "aliases": [
+        "memory"
+      ],
+      "title": "အမှတ်တရပြန်ကြည့်",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/memory <ID>",
+      "steps": [
+        "ဒီ Group ၏ memory ID ကိုထည့်ပါ။",
+        "မူရင်းအမျိုးအစားအတိုင်းစာ/မီဒီယာပြန်ပို့မည်။"
+      ],
+      "notes": "အခြား Group ၏ ID ဖြင့် ဒီမှာဖတ်မရ။"
+    },
+    {
+      "id": "memorybook",
+      "aliases": [
+        "memorybook"
+      ],
+      "title": "Download အမှတ်တရစာအုပ်",
+      "category": "studio",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/memorybook [YYYY-MM]",
+      "steps": [
+        "/memorybook သို့မဟုတ် /memorybook 2026-10 ပို့ပါ။",
+        "HTML စာအုပ်ဖိုင်ရလာလျှင် download လုပ်ပြီး browser ဖြင့်ဖွင့်ဖတ်ပါ။",
+        "နောက်ဆုံးအမှတ်တရ ၁၀၀ ခု default၊ အဲဒီထဲ နောက်ဆုံးဓာတ်ပုံ ၂၀ အထိ thumbnail ထည့်သည်။"
+      ],
+      "notes": "Other media ကို /memory ID နှင့်ပြန်ဖွင့်။ file size/Telegram download မရသောပုံကို thumbnail မထည့်နိုင်သော်လည်း မှတ်တမ်းကိုထားသည်။"
+    },
+    {
+      "id": "memorydel",
+      "aliases": [
+        "memorydel"
+      ],
+      "title": "အမှတ်တရဖျက်",
+      "category": "studio",
+      "where": "Group",
+      "who": "သိမ်းသူ / Group Admin",
+      "usage": "/memorydel <ID>",
+      "steps": [
+        "မိမိသိမ်းထားသော memory ကိုဖျက်ပါ။ Admin ကဒီ Group ၏ memory ကိုဖျက်နိုင်သည်။"
+      ],
+      "notes": "မူရင်း chat message ကိုဖျက်ခြင်းမဟုတ်။"
+    },
+    {
+      "id": "commandadd",
+      "aliases": [
+        "commandadd"
+      ],
+      "title": "ကိုယ်ပိုင် Command ဖန်တီး",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Group Admin / Owner",
+      "usage": "Reply → /commandadd hello",
+      "steps": [
+        "Bot ပို့စေချင်သည့်စာ/မီဒီယာကို reply လုပ်ပါ။",
+        "Command နာမည်သည် English စာလုံးဖြင့်စ၊ ၂–၃၂ လုံးအတွင်း letters/numbers/underscore သုံးပါ။",
+        "မိမိ Group တွင် /hello ဖြင့်သုံးနိုင်မည်။"
+      ],
+      "notes": "ရှိပြီးသား bot command အစားထိုးမရ။ အမည်တူ command ရှိပြီးသားကို append သို့မဟုတ် Web မှပြင်ပါ။ Code/shell မစေခိုင်းနိုင်။"
+    },
+    {
+      "id": "commandappend",
+      "aliases": [
+        "commandappend"
+      ],
+      "title": "Command နောက်အဆင့်ထည့်",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Group Admin / Owner",
+      "usage": "Reply → /commandappend hello",
+      "steps": [
+        "ရှိပြီးသား command နာမည်ကိုသုံးပြီး နောက်ပို့စေချင်သည့် message ကို reply လုပ်ပါ။",
+        "နောက်အဆင့်ကိုအဆုံးတွင်ထည့်မည်။"
+      ],
+      "notes": "default အများဆုံး ၅ ဆင့်။ အဆင့်တစ်ခုရှုံးနိမ့်လျှင် နောက်အဆင့်များကိုမပို့တော့။"
+    },
+    {
+      "id": "commanddel",
+      "aliases": [
+        "commanddel"
+      ],
+      "title": "ကိုယ်ပိုင် Command ဖျက်",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Group Admin / Owner",
+      "usage": "/commanddel hello",
+      "steps": [
+        "မိမိစီမံသည့် scope မှ command ကိုဖျက်ပါ။"
+      ],
+      "notes": "Group override ဖျက်ပြီး global အမည်တူရှိလျှင် default ပြန်သုံးနိုင်သည်။"
+    },
+    {
+      "id": "commands",
+      "aliases": [
+        "commands"
+      ],
+      "title": "Custom Commands စာရင်း",
+      "category": "studio",
+      "where": "Group / Owner Private",
+      "who": "Member",
+      "usage": "/commands",
+      "steps": [
+        "Group နှင့် global default custom command နာမည်များကိုကြည့်ပါ။",
+        "နာမည်အတိုင်း /hello args ပို့သုံးပါ။"
+      ],
+      "notes": "{name}, {user}, {group}, {args} placeholder သုံးနိုင်သည်။ default cooldown ၁၅ စက္ကန့်။ Owner သည် private မှ global စာရင်းကြည့်နိုင်သည်။"
+    },
+    {
+      "id": "custom",
+      "aliases": [],
+      "title": "ဖန်တီးထားသော /name command များ",
+      "category": "studio",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/<name> [args]",
+      "steps": [
+        "/commands မှ အမှန်ရှိသော command နာမည်ကိုရွေးပါ။",
+        "ဥပမာ /hello မောင်လှ ပို့လျှင် {args} သည် မောင်လှ ဖြစ်မည်။",
+        "သိမ်းထားသော စာ/မီဒီယာအဆင့်များ အစဉ်လိုက်ပို့မည်။"
+      ],
+      "notes": "/name သည်နမူနာသာ။ Group override က global ထက်ဦးစားပေးသည်။ Private မှ global commands ကိုသုံးနိုင်သည်။"
+    },
+    {
+      "id": "profile",
+      "aliases": [
+        "profile"
+      ],
+      "title": "ကိုယ့် Profile / Rank Card",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/profile",
+      "steps": [
+        "ကိုယ့်လက်ရှိ chat အတွက် points၊ rank၊ wins၊ games နှင့် progress card ကိုကြည့်ပါ။"
+      ],
+      "notes": "Group အလိုက် stats သီးခြားဖြစ်သည်။ Private chat မှ Group ရွေးပြီး stats ကြည့်သည့် argument မရှိ။"
+    },
+    {
+      "id": "rank",
+      "aliases": [
+        "rank",
+        "top"
+      ],
+      "title": "Leaderboard",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/rank",
+      "steps": [
+        "လက်ရှိ chat ၏ top players card ကြည့်ပါ။"
+      ],
+      "notes": "Points → wins → games အစဉ်ဖြင့် tie ဖြတ်သည်။ Activity မရှိသူများကိုမပြ။"
+    },
+    {
+      "id": "rules",
+      "aliases": [
+        "rules",
+        "စည်းကမ်း"
+      ],
+      "title": "Group စည်းမျဉ်း",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/rules",
+      "steps": [
+        "Bot မှပြသသော Group rules ကိုဖတ်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "admins",
+      "aliases": [
+        "admins",
+        "အက်မင်"
+      ],
+      "title": "Admin စာရင်း",
+      "category": "info",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/admins",
+      "steps": [
+        "Group Admin စာရင်းကိုခေါ်ကြည့်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "id",
+      "aliases": [
+        "id",
+        "အိုင်ဒီ"
+      ],
+      "title": "User / Chat ID",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/id",
+      "steps": [
+        "ကိုယ့် user ID နှင့် chat ID ကိုကြည့်ပါ။",
+        "တစ်ယောက်၏ message ကို reply ပြီးသုံးလျှင် ပစ်မှတ် user ID ကိုပြသည်။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "ping",
+      "aliases": [
+        "ping"
+      ],
+      "title": "တုံ့ပြန်ချိန်",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/ping",
+      "steps": [
+        "Bot တုံ့ပြန်ချိန်ကိုစစ်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "uptime",
+      "aliases": [
+        "uptime"
+      ],
+      "title": "Bot run ချိန်",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/uptime",
+      "steps": [
+        "လက်ရှိ process စပြီး ဘယ်လောက်ကြာပြီလဲကြည့်ပါ။ Restart ဖြစ်လျှင်ပြန်စသည်။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "cmd",
+      "aliases": [
+        "cmd"
+      ],
+      "title": "Function / Command စာရင်း",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/cmd",
+      "steps": [
+        "အပိုင်းရွေးခလုတ်နှင့် လုပ်ဆောင်ချက်အားလုံးကြည့်ပါ။",
+        "Next/Previous ဖြင့် alias၊ အသုံးပြုပုံနှင့်ခွင့်ပြုချက်ကိုကြည့်ပါ။",
+        "Guide download ခလုတ်မှ ဖိုင်ယူနိုင်သည်။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "guide",
+      "aliases": [
+        "guide",
+        "helpguide"
+      ],
+      "title": "Download အသေးစိတ် Guide",
+      "category": "info",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/guide",
+      "steps": [
+        "လက်ရှိ command/function အသုံးပြုနည်းအားလုံးပါသော HTML guide ဖိုင်ကို download လုပ်ပါ။",
+        "ဖိုင်ကို browser ဖြင့်ဖွင့်ဖတ်နိုင်သည်။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "start",
+      "aliases": [
+        "start"
+      ],
+      "title": "Private ဂိမ်းခန်း ဝင်ပေါက်",
+      "category": "info",
+      "where": "Private",
+      "who": "Member",
+      "usage": "/start <bot ထုတ်ပေးသော parameter>",
+      "steps": [
+        "Draw/နန်းရိပ် Group card မှ Private ခလုတ်နှိပ်လျှင် /start parameter ကိုအလိုအလျောက်ပို့သည်။",
+        "Bot ထုတ်ပေးသော link ကိုသုံးပါ။ Game ID ကိုကိုယ်တိုင်မှန်းရိုက်စရာမလို။"
+      ],
+      "notes": "/start သီးသန့်ပို့ရုံဖြင့် အထွေထွေ home menu မဖွင့်ပါ။ /cmd သုံးပါ။"
+    },
+    {
+      "id": "all",
+      "aliases": [
+        "all",
+        "everyone",
+        "လာကြစမ်း"
+      ],
+      "title": "သိထားသော Members ခေါ်ရန်",
+      "category": "group",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/all [ခေါ်ချင်သည့်စာ]",
+      "steps": [
+        "Command နောက် optional ခေါ်စာထည့်ပါ။",
+        "Bot မှသိထားသော members နှင့် admins ကို mention ပေးသည်။",
+        "ရပ်လိုလျှင် /stop သုံးပါ။"
+      ],
+      "notes": "Online member စာရင်းမဟုတ်၊ Telegram က member အားလုံးကိုမပေးသဖြင့် bot မြင်ဖူးသူ registry ကိုသုံးသည်။ default shared cooldown ၁၄၀ စက္ကန့်၊ ၃၀ rounds ပြန်ခေါ်နိုင်သည်။"
+    },
+    {
+      "id": "admincall",
+      "aliases": [
+        "admincall",
+        "အက်မင်ခေါ်"
+      ],
+      "title": "Admins ကိုခေါ်ရန်",
+      "category": "group",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/admincall [စာ]",
+      "steps": [
+        "Group Admin များကို mention ခေါ်ပါ။"
+      ],
+      "notes": "Caller ကိုAdmin ဖြစ်ရမည်ဟု ဒီ handler မစစ်ထား။ /all နှင့် cooldown/stop state တူသည်။"
+    },
+    {
+      "id": "stop",
+      "aliases": [
+        "stop",
+        "နား"
+      ],
+      "title": "လူခေါ်စနစ် ရပ်ရန်",
+      "category": "group",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/stop",
+      "steps": [
+        "လက်ရှိ Group ၏ mention rounds ကိုရပ်ပါ။"
+      ],
+      "notes": "ဒီ command သည် ဂိမ်းအားလုံးရပ်ရန်မဟုတ်။ ဂိမ်းအလိုက် stop command ကိုသုံးပါ။"
+    },
+    {
+      "id": "ban",
+      "aliases": [
+        "ဘမ်း"
+      ],
+      "title": "Ban",
+      "category": "group",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "Reply → /ဘမ်း",
+      "steps": [
+        "ပစ်မှတ် user ၏ message ကို reply လုပ်ပြီး command ပို့ပါ။"
+      ],
+      "notes": "Bot အတွက် restrict/ban permission လိုသည်။ အင်္ဂလိပ် /ban ကို registered alias အဖြစ်မရှိ။"
+    },
+    {
+      "id": "unban",
+      "aliases": [
+        "မဘမ်း"
+      ],
+      "title": "Unban",
+      "category": "group",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "Reply → /မဘမ်း",
+      "steps": [
+        "ပစ်မှတ်၏ message ကို reply ပြီး ban ဖြုတ်ပါ။"
+      ],
+      "notes": "အင်္ဂလိပ် /unban ကို registered alias အဖြစ်မရှိ။"
+    },
+    {
+      "id": "mute",
+      "aliases": [
+        "တိတ်စမ်း",
+        "မြု"
+      ],
+      "title": "Mute",
+      "category": "group",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "Reply → /တိတ်စမ်း",
+      "steps": [
+        "ပစ်မှတ်စာကို reply ပြီး စာပို့ခွင့်ပိတ်ပါ။"
+      ],
+      "notes": "Manual mute တွင် duration argument မဖတ်။ /ဖွင့်လိုက် ဖြင့်ပြန်ဖွင့်ပါ။"
+    },
+    {
+      "id": "unmute",
+      "aliases": [
+        "ဖွင့်လိုက်",
+        "မမြု"
+      ],
+      "title": "Unmute",
+      "category": "group",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "Reply → /ဖွင့်လိုက်",
+      "steps": [
+        "ပစ်မှတ်စာကို reply ပြီး စာပို့ခွင့်ပြန်ဖွင့်ပါ။"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "warn",
+      "aliases": [
+        "warn"
+      ],
+      "title": "Warn / 3 ကြိမ်ပြည့် Ban",
+      "category": "group",
+      "where": "Group",
+      "who": "Group Admin",
+      "usage": "Reply → /warn",
+      "steps": [
+        "ပစ်မှတ်စာကို reply ပြီး warn ပေးပါ။",
+        "၃ ကြိမ်ပြည့်လျှင် ban လုပ်သည်။"
+      ],
+      "notes": "Bot နှင့် ကိုယ့်ကိုယ်ကို warn မပေးနိုင်။ Warn counter သည် process memory ဖြစ်၍ restart အပြီး reset ဖြစ်နိုင်သည်။"
+    },
+    {
+      "id": "play",
+      "aliases": [
+        "play",
+        "ဖွင့်"
+      ],
+      "title": "သီချင်းရှာ၍ audio ပို့",
+      "category": "group",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/play Alan Walker Faded",
+      "steps": [
+        "Command နောက် သီချင်းနာမည်ထည့်ပါ။",
+        "Bot က audio ရှာ/download လုပ်ပြီး Telegram audio အဖြစ်ပို့မည်။"
+      ],
+      "notes": "Group voice chat ထဲ live playback မဟုတ်။ External provider/download ပေါ်မူတည်၍ မရနိုင်သည့်အချိန်ရှိသည်။"
+    },
+    {
+      "id": "owner",
+      "aliases": [
+        "owner"
+      ],
+      "title": "Owner Panel",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "/owner",
+      "steps": [
+        "Bot Private မှ /owner ပို့ပါ။",
+        "Group Control & Messages၊ Owner Tools၊ Group Studio Web၊ Broadcast၊ Groups၊ history၊ saved messages menu ကိုရွေးပါ။"
+      ],
+      "notes": "Telegram owner ID ကိုက်ညီသူသာ။ Group Admin ဖြစ်ရုံဖြင့် Owner Panel မရ။"
+    },
+    {
+      "id": "control",
+      "aliases": [
+        "control",
+        "groupcontrol"
+      ],
+      "title": "Settings / Bot စာသား Editor",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner / edit ခွင့်ရ Staff",
+      "usage": "/control",
+      "steps": [
+        "Global Defaults သို့မဟုတ် Group ကိုရွေးပါ။",
+        "Bot Messages သို့မဟုတ် Settings & Functions ကိုရွေးပါ။",
+        "Category နှင့် item ရွေး၊ Preview → Edit → စာ/တန်ဖိုးပို့ပါ။",
+        "Reset ဖြင့် override ကိုဖျက်နိုင်သည်။"
+      ],
+      "notes": "Web တွင် search ရှိသည်။ Private editor သည် category/page အလိုက်ရွေးသည်။ {placeholder} အမည်မပြောင်း။ JSON settings မှ keys/type/range ကိုလိုက်နာပါ။"
+    },
+    {
+      "id": "ownertools",
+      "aliases": [
+        "ownertools"
+      ],
+      "title": "Owner Tools",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner / ခွင့်ရ Staff",
+      "usage": "/ownertools",
+      "steps": [
+        "Test Group/ဂိမ်း scope၊ schedule၊ leave group၊ assistants၊ usage၊ settings menu မှရွေးပါ။"
+      ],
+      "notes": "မိမိခွင့်ပြုချက်နှင့်ကိုက်သော menu သာအသုံးပြုနိုင်သည်။ အသေးစိတ် owner workflow အခန်းကိုဖတ်ပါ။"
+    },
+    {
+      "id": "staff",
+      "aliases": [
+        "staff"
+      ],
+      "title": "Assistant Panel",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner ကခန့်ထားသော Staff",
+      "usage": "/staff",
+      "steps": [
+        "Bot Private မှ /staff ပို့ပါ။",
+        "edit / announce / stats ခွင့်အလိုက် menu သုံးပါ။"
+      ],
+      "notes": "Staff သည် role ခန့်ခြင်း၊ bot leave၊ game publish/test scope ပြောင်းခြင်း မရ။ Web owner login ကိုStaff ခွင့်နှင့်မချိတ်ထား။"
+    },
+    {
+      "id": "ownersend",
+      "aliases": [
+        "ownersend"
+      ],
+      "title": "Reply message ကို Owner Send",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "Reply → /ownersend",
+      "steps": [
+        "Bot Private ထဲက ပို့ချင်သော message ကို reply ပြီး command ပို့ပါ။",
+        "ပို့မည့် group/all groups ရွေးပြီးအတည်ပြုပါ။"
+      ],
+      "notes": "မိမိတိုက်ရိုက်ရေးထားသောစာ၊ forward မီဒီယာ နှစ်မျိုးလုံးသုံးနိုင်သည်။"
+    },
+    {
+      "id": "ownersave",
+      "aliases": [
+        "ownersave"
+      ],
+      "title": "မူရင်း message သိမ်းရန်",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "Reply → /ownersave",
+      "steps": [
+        "Private တွင် source message ကို reply ပြီးသိမ်းပါ။",
+        "Dashboard Saved Messages မှပြန်ရွေးပို့နိုင်သည်။"
+      ],
+      "notes": "Group Studio memories နှင့်မတူ။ ဤဟာ source chat/message reference ကိုသိမ်းသဖြင့် မူရင်းကိုဖျက်သွားလျှင် ပြန်ပို့မရနိုင်။"
+    },
+    {
+      "id": "ownercancel",
+      "aliases": [
+        "ownercancel"
+      ],
+      "title": "Owner draft ပယ်ဖျက်",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "/ownercancel",
+      "steps": [
+        "လက်ရှိ owner broadcast/source ရွေးထားသော draft ကိုပယ်ဖျက်ပါ။"
+      ],
+      "notes": "ပို့ပြီးသား broadcast ကိုနောက်ကြောင်းပြန်ဖျက်ခြင်းမဟုတ်။"
+    },
+    {
+      "id": "testwelcome",
+      "aliases": [
+        "testwelcome"
+      ],
+      "title": "Bot group welcome Preview",
+      "category": "owner",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "/testwelcome",
+      "steps": [
+        "Bot group ထဲဝင်ချိန်သုံးမည့် welcome ကို Preview ကြည့်ပါ။"
+      ],
+      "notes": "Members welcome နှင့် bot group welcome settings မတူနိုင်သည်။"
+    },
+    {
+      "id": "broadcastcheck",
+      "aliases": [
+        "broadcastcheck"
+      ],
+      "title": "Owner ID စစ်ရန်",
+      "category": "owner",
+      "where": "Private",
+      "who": "Private မှမည်သူမဆို",
+      "usage": "/broadcastcheck",
+      "steps": [
+        "ကိုယ့် Telegram ID နှင့် configured owner ID ကိုက်မကိုက် စစ်ပါ။"
+      ],
+      "notes": "Owner permission ကိုပေးခြင်းမဟုတ်။"
+    },
+    {
+      "id": "auto_boss",
+      "aliases": [],
+      "title": "Activity-driven Boss Raid",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Group စကားပြော activity အလိုက် random အခွင့်အရေးဖြင့် Boss ပေါ်နိုင်သည်။",
+        "Owner editor ၏ Raid Auto Spawn မှ enabled/threshold/chance/quiet ပြင်နိုင်သည်။"
+      ],
+      "notes": "default လက်ခံ activity 60–125 message၊ chance 70%၊ raid ပြီးနောက် quiet 50–125 မိနစ်။ တစ်ယောက် spam ပို့ရုံနှင့်မပေါ်။"
+    },
+    {
+      "id": "auto_speed",
+      "aliases": [],
+      "title": "Activity-driven Speed Tap",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Group အတွင်းလူအများစကားပြော activity မှ GO game ပေါ်နိုင်သည်။",
+        "Owner editor မှ speed tap auto settings ပြင်နိုင်သည်။"
+      ],
+      "notes": "default ၅ မိနစ် window၊ အနည်းဆုံး message ၄ ခု/လူ ၂ ယောက်၊ chance70%၊ quiet10–25 မိနစ်။ နာရီတိုင်းအတိအကျမပေါ်။"
+    },
+    {
+      "id": "auto_wyr",
+      "aliases": [],
+      "title": "Activity-driven WYR",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Activity အလိုက် A/B poll ပေါ်နိုင်သည်။",
+        "Poll အချိန်ပြည့်မှ result ပြမည်။"
+      ],
+      "notes": "default threshold18–40၊ chance70%၊ quiet6–12 မိနစ်။ Auto poll ကို /wyrstop မရပ်နိုင်။"
+    },
+    {
+      "id": "auto_daily",
+      "aliases": [],
+      "title": "Daily main card / mission refresh",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "မြန်မာနေ့၏မနက်ပိုင်း random minute တွင် main group card တင်ရန်စီစဉ်သည်။",
+        "Group activity/mission events မှ progress ကို update လုပ်သည်။",
+        "Main pinned card နှင့် /daily personal temporary card ကိုခွဲသုံးသည်။"
+      ],
+      "notes": "Scheduled minute သည် group/day အလိုက်တည်ငြိမ်သည်။ Bot offline ဖြစ်လျှင်နောက်မှတင်နိုင်။ လက်ရှိ pin သည် silent ဖြစ်သည်၊ notification အမြဲထွက်မည်ဟုမယူဆပါနှင့်။"
+    },
+    {
+      "id": "auto_members",
+      "aliases": [],
+      "title": "Member registry / welcome",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Bot မြင်ဖူးသော Group member အချက်အလက်ကို mention အတွက်သိမ်းသည်။",
+        "Members ဝင်လာလျှင် welcome စာနှင့် mention ပြ၊ သတ်မှတ်အချိန်နောက်ဖျက်နိုင်သည်။"
+      ],
+      "notes": "Online presence tracking မဟုတ်။ Bot ကို group ထဲဝင်သည့် welcome သီးခြားရှိသည်။"
+    },
+    {
+      "id": "auto_spam",
+      "aliases": [],
+      "title": "Text / Sticker anti-spam",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Non-admin က စာ/Sticker ဆက်တိုက်ပို့လျှင် trigger အရစာဖျက်/mute လုပ်နိုင်သည်။",
+        "Owner က Group Control မှ enabled/limits/window/mute duration ပြင်နိုင်သည်။"
+      ],
+      "notes": "Text default ၁၀ စက္ကန့်အတွင်းစာ၅စောင်၊ mute၄၅စက္ကန့်။ Admin များကိုလွတ်ပေးထားသည်။ Bot permission လိုသည်။"
+    },
+    {
+      "id": "auto_words",
+      "aliases": [],
+      "title": "မသင့်တော်သော စကားလုံး filter",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "သတ်မှတ်ထားသော banned words ပါလျှင် message ဖျက်ပြီး warn တိုးနိုင်သည်။",
+        "၃ ကြိမ်ပြည့်လျှင် ban လုပ်နိုင်သည်။"
+      ],
+      "notes": "List ကို Owner editor မှပြင်နိုင်သည်။ Warn counter သည် memory ဖြစ်သည်။ Context-aware Auto Fun plan နှင့်မတူ။"
+    },
+    {
+      "id": "auto_rewards",
+      "aliases": [],
+      "title": "Points / Rank / Leaderboard",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Reward ပါသောဂိမ်းများမှ points သိမ်း၊ /profile နှင့် /rank မှပြသည်။",
+        "Group တစ်ခုချင်း stats သီးခြားဖြစ်သည်။"
+      ],
+      "notes": "Rank default ၁၄ ဆင့်။ ဂိမ်းတိုင်း points ပေးသည်မဟုတ်။"
+    },
+    {
+      "id": "auto_capsules",
+      "aliases": [],
+      "title": "Capsule / Custom command durable delivery",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Capsule အချိန်ရောက်လျှင်စောင့်နေသောအလုပ်ပြန်ပို့သည်။",
+        "Custom command အဆင့်များကိုအစဉ်လိုက်စီပို့၊ မအောင်မြင်သည့်ပို့မှုကို retry စီမံသည်။"
+      ],
+      "notes": "Telegram API နှင့် bot group message permission ပေါ်မူတည်သည်။"
+    },
+    {
+      "id": "auto_scope",
+      "aliases": [],
+      "title": "Game scope / active sessions",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Owner test-only scope ကိုရွေးထားလျှင် ပွဲအသစ်စမှုကိုရွေးထားသော group များတွင်သာခွင့်ပြုသည်။",
+        "အချို့ဂိမ်းများကို session manager ကတစ်ပြိုင်နက်မစစေပါ။"
+      ],
+      "notes": "Group တိုင်းဂိမ်းအားလုံးအချိန်တိုင်းတစ်ပြိုင်နက်ဆော့နိုင်မည်ဟုမယူဆပါနှင့်။ ရှိပြီးသားပွဲတွင် ခလုတ်ဟောင်းမနှိပ်ဘဲနောက်ဆုံး card သုံးပါ။"
+    },
+    {
+      "id": "auto_schedules",
+      "aliases": [],
+      "title": "Owner Announcement schedule / recovery",
+      "category": "auto",
+      "where": "Group",
+      "who": "အလိုအလျောက် / Owner settings",
+      "usage": "/cmd auto",
+      "steps": [
+        "Owner Tools မှ scheduled announcement ကို မြန်မာအချိန်နှင့်သတ်မှတ်ထားပါ။",
+        "Due time မှသက်ဆိုင်ရာ group များသို့ပို့၊ job status နှင့် retry ကိုစီမံသည်။"
+      ],
+      "notes": "တကယ်ပို့နိုင်မှုက bot membership/permissions ပေါ်မူတည်သည်။"
+    }
+  ]
+}

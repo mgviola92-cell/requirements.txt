@@ -387,6 +387,8 @@ def register(app,bot):
 
 
 def register_custom_handler(bot):
+    # Imposter secret guesses are registered through a predicate rather than commands.
+    BUILTINS.update({"secret", "ဖြေမယ်"})
     for h in bot.message_handlers:
         BUILTINS.update(h.get('filters',{}).get('commands',[]))
     bot.message_handler(func=lambda m:bool(m.text and m.text.startswith('/')),content_types=['text'])(bot._studio_custom_handler)

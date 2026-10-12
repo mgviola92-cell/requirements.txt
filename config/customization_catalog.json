@@ -10860,5 +10860,50 @@
     "fields": [],
     "html": false,
     "max_length": 2000
+  },
+  "msg.features.command_help.home": {
+    "kind": "message",
+    "category": "Command Help",
+    "label": "Command Help · home",
+    "default": "📋 Bot အသုံးပြုနည်း\nအောက်က အပိုင်းကိုရွေးပါ။ Command၊ alias၊ အသုံးပြုနိုင်သည့်နေရာနှင့် permission အားလုံး ပါဝင်သည်။\nအသေးစိတ်ဖိုင်: /guide\nကိုယ်ပိုင် command စာရင်း: /commands",
+    "fields": [],
+    "html": false,
+    "max_length": 600
+  },
+  "msg.features.command_help.download": {
+    "kind": "message",
+    "category": "Command Help",
+    "label": "Command Help · download",
+    "default": "📥 အသုံးပြုနည်းဖိုင်",
+    "fields": [],
+    "html": false,
+    "max_length": 200
+  },
+  "msg.features.command_help.back": {
+    "kind": "message",
+    "category": "Command Help",
+    "label": "Command Help · back",
+    "default": "↩️ အဓိကစာရင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 200
+  },
+  "msg.features.command_help.all": {
+    "kind": "message",
+    "category": "Command Help",
+    "label": "Command Help · all",
+    "default": "📋 Command အားလုံး",
+    "fields": [],
+    "html": false,
+    "max_length": 200
+  },
+  "msg.features.command_help.error": {
+    "kind": "message",
+    "category": "Command Help",
+    "label": "Command Help · error",
+    "default": "ဖိုင်ပို့မရသေးပါ။ ခဏနေရင် /guide ပြန်သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 200
   }
 }
