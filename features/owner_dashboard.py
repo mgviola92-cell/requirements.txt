@@ -179,6 +179,7 @@ SHELL=CSS+"""<main><nav><strong>👑 BOT CONTROL</strong>
 <a href="{{url_for('owner_dashboard.broadcast')}}">Broadcast</a>
 <a href="/owner/control/">⚙️ Group Control & Messages</a>
 <a href="/owner/tools/">🛠️ Owner Tools</a>
+<a href="/owner/studio/">🗂️ Group Studio</a>
 <a href="{{url_for('owner_dashboard.edit_welcome')}}">✏️ Welcome Editor</a>
 <form action="{{url_for('owner_dashboard.logout')}}" method="post">
 <input type="hidden" name="csrf" value="{{csrf}}"><button style="padding:5px 12px">Logout</button></form>
@@ -515,6 +516,8 @@ def register_owner_dashboard(app,bot):
         kb=types.InlineKeyboardMarkup(row_width=2)
         kb.add(types.InlineKeyboardButton("⚙️ Group Control & Messages",callback_data="ctl:home:0"))
         kb.add(types.InlineKeyboardButton("🛠️ Owner Tools",callback_data="ops:home"))
+        from features.draw_guess import base_url
+        kb.add(types.InlineKeyboardButton(_custom_text('msg.features.group_studio.owner_link','🗂️ Group Studio Web',{}),url=base_url()+"/owner/studio/"))
         kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.f12c1d4700', '📢 Broadcast', {}),callback_data="own:broadcast"),
                types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.4957a560df', '👥 Groups', {}),callback_data="own:groups"))
         kb.add(types.InlineKeyboardButton(_custom_text('msg.features.owner_dashboard.owner_buttons.6a9d439083', '📜 History', {}),callback_data="own:history"),

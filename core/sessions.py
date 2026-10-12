@@ -44,6 +44,7 @@ SESSION_PRIORITIES = {
     "pair_challenge": 80,
     "imposter": 78,
     "nan_yate": 85,
+    "draw_guess": 77,
     "roast_battle": 75,
     "word_chain": 70,
 
@@ -91,6 +92,7 @@ EXCLUSIVE_SESSIONS = {
     "pair_challenge",
     "imposter",
     "nan_yate",
+    "draw_guess",
     "roast_battle",
     "word_chain",
     "emoji_guess",

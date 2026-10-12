@@ -163,6 +163,12 @@ def validate(key,value):
             if v is not None:raise ValueError('Keep null for unbounded values')
         else:raise ValueError('Unsupported setting')
     check(value,default)
+    if key=='cfg.features.draw_guess.words':
+        from games.draw_guess import normalize
+        if any(not isinstance(w,str) or not 1<=len(w.strip())<=40 or not normalize(w) for w in value):
+            raise ValueError('Drawing words must contain 1 to 40 characters')
+        if len({normalize(w) for w in value})!=len(value):
+            raise ValueError('Drawing words must be unique')
     if key=='cfg.features.nan_yate.role_enabled':
         if not all(value[r] for r in ('noble','seer','doctor','detective','leader','blade')):
             raise ValueError('Nan Yate requires noble, seer, doctor, detective, leader and blade roles')

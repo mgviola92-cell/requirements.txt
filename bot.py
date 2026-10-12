@@ -320,6 +320,10 @@ register_owner_dashboard(app, bot)
 
 from features.nan_yate import register as register_nan_yate
 register_nan_yate(bot)
+from features.group_studio import register as register_group_studio, register_custom_handler
+register_group_studio(app,bot)
+from features.draw_guess import register as register_draw_guess
+register_draw_guess(app,bot)
 
 register_daily_challenge(bot)
 from features.would_you_rather import register as register_would_you_rather
@@ -6526,7 +6530,7 @@ threading.Thread(
 def commands_list(message):
     bot.send_message(
         message.chat.id,
-        _custom_text('msg.bot.commands_list.ae6c96f389', '🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။', {})
+        _custom_text('msg.bot.commands_list.ae6c96f389', '🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။', {})
     )
 
 
@@ -7218,6 +7222,8 @@ def run_bot():
             print(f"⚠️ Connection Error: {e}")
             print("🔄 Telegram ကို ပြန်ချိတ်နေပါတယ်...")
             time.sleep(10)
+
+register_custom_handler(bot)
 
 threading.Thread(target=run_bot, daemon=True).start()
 

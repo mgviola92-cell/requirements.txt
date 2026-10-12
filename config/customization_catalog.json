@@ -5295,7 +5295,7 @@
     "kind": "message",
     "category": "bot",
     "label": "commands_list · 🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Num",
-    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
+    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
     "fields": [],
     "max_length": 4000,
     "html": false
@@ -9982,5 +9982,883 @@
     "fields": [],
     "html": false,
     "max_length": 2500
+  },
+  "msg.features.group_studio.help": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · help",
+    "default": "🗂️ Group Studio\n\n⏳ /capsule YYYY-MM-DD HH:MM — စာ/ပုံ/အသံကို reply ပြီး အနာဂတ်တွင်ဖွင့်ရန် (မြန်မာအချိန်)\n/capsules — ကိုယ့် capsule စာရင်း\n/capsulecancel ID — မဖွင့်ရသေးတာပယ်ဖျက်\n\n🎙️ /soundadd name — voice/audio ကို reply ပြီးသိမ်း (Admin)\n/sound name — ပြန်ဖွင့်\n/sounds — အသံစာရင်း\n/sounddel name — ဖျက် (Admin)\n\n📖 /memorysave ခေါင်းစဉ် — message ကို reply ပြီး အမှတ်တရသိမ်း\n/memories — စာရင်း\n/memory ID — ပြန်ကြည့်\n/memorybook [YYYY-MM] — အမှတ်တရစာအုပ် HTML ဖိုင်\n/memorydel ID — ကိုယ့်အမှတ်တရဖျက်\n\n🪄 /commandadd name — စာ/မီဒီယာကို reply ပြီး command ဖန်တီး (Admin)\n/commandappend name — နောက်တစ်ဆင့်ထည့်\n/commanddel name — ဖျက်\n/commands — စာရင်း\n/name args — ကိုယ်ပိုင် command သုံး\nစာတွင် {name}, {user}, {group}, {args} သုံးနိုင်သည်။\n\nOwner private chat မှ အသံ/command သိမ်းလျှင် Group အားလုံးအတွက် default ဖြစ်သည်။",
+    "fields": [
+      "name",
+      "user",
+      "group",
+      "args"
+    ],
+    "html": false,
+    "max_length": 3500
+  },
+  "msg.features.group_studio.saved": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · saved",
+    "default": "✅ သိမ်းပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.deleted": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · deleted",
+    "default": "✅ ဖျက်ပြီးပြီ။ ",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.capsule_saved": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · capsule_saved",
+    "default": "⏳ Capsule #{id} သိမ်းပြီးပြီ။ {date} (မြန်မာအချိန်) တွင် ဖွင့်မယ်။",
+    "fields": [
+      "id",
+      "date"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.capsule_open": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · capsule_open",
+    "default": "🕰️ အချိန် Capsule #{id} ကို ဖွင့်လိုက်ပြီ။",
+    "fields": [
+      "id"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.memory_saved": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · memory_saved",
+    "default": "📖 အမှတ်တရ #{id} သိမ်းပြီးပြီ။ /memory {id} ဖြင့် ပြန်ကြည့်နိုင်သည်။",
+    "fields": [
+      "id",
+      "id"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.empty": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · empty",
+    "default": "မရှိသေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.admin": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · admin",
+    "default": "ဒီလုပ်ဆောင်ချက်ကို Group Admin သို့မဟုတ် Owner သာလုပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.group": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · group",
+    "default": "ဒီ command ကို Group ထဲတွင် သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.reply": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · reply",
+    "default": "သိမ်းချင်သော စာ/ပုံ/မီဒီယာကို reply ပြီး command ပို့ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.unsupported": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · unsupported",
+    "default": "ဒီမီဒီယာအမျိုးအစားကို မသိမ်းနိုင်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.sound_only": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · sound_only",
+    "default": "Voice သို့မဟုတ် Audio ကို reply လုပ်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.not_found": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · not_found",
+    "default": "မတွေ့ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.date": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · date",
+    "default": "ရက်စွဲကို YYYY-MM-DD HH:MM ပုံစံနဲ့ရေးပါ။ မြန်မာအချိန်ဖြစ်သည်။ အနာဂတ်ရက်ဖြစ်ရမည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.name": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · name",
+    "default": "နာမည်ကို အင်္ဂလိပ်စာလုံးဖြင့်စပြီး စာလုံး/နံပါတ်/underscore ၂–၃၂ လုံးသုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.reserved": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · reserved",
+    "default": "ရှိပြီးသား bot command နာမည်ကို အစားထိုးမရပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.exists": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · exists",
+    "default": "ရှိပြီးသားပါ။ နောက်အဆင့်ထည့်ရန် /commandappend သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.limit": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · limit",
+    "default": "သတ်မှတ်ထားသော အရေအတွက်ပြည့်သွားပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.cooldown": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · cooldown",
+    "default": "ခဏစောင့်ပြီးမှ ထပ်သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.too_long": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · too_long",
+    "default": "စာ သို့မဟုတ် caption အရမ်းရှည်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.empty_payload": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · empty_payload",
+    "default": "စာမပါပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.error": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · error",
+    "default": "⚠️ မသိမ်းနိုင်သေးပါ။ ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.book": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · book",
+    "default": "Group အမှတ်တရစာအုပ်",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.group_studio.owner_link": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · owner_link",
+    "default": "🗂️ Group Studio Web",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.group_studio.disabled": {
+    "kind": "message",
+    "category": "Group Studio",
+    "label": "Group Studio · disabled",
+    "default": "Owner က ဒီ function ကို ပိတ်ထားသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "cfg.features.group_studio.capsules_enabled": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · capsules_enabled",
+    "default": true
+  },
+  "cfg.features.group_studio.sounds_enabled": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · sounds_enabled",
+    "default": true
+  },
+  "cfg.features.group_studio.memories_enabled": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · memories_enabled",
+    "default": true
+  },
+  "cfg.features.group_studio.commands_enabled": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · commands_enabled",
+    "default": true
+  },
+  "cfg.features.group_studio.capsule_limit": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · capsule_limit",
+    "default": 10,
+    "minimum": 1,
+    "maximum": 50
+  },
+  "cfg.features.group_studio.command_steps": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · command_steps",
+    "default": 5,
+    "minimum": 1,
+    "maximum": 5
+  },
+  "cfg.features.group_studio.command_cooldown": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · command_cooldown",
+    "default": 15,
+    "minimum": 5,
+    "maximum": 300
+  },
+  "cfg.features.group_studio.sound_cooldown": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · sound_cooldown",
+    "default": 5,
+    "minimum": 3,
+    "maximum": 300
+  },
+  "cfg.features.group_studio.memory_limit": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · memory_limit",
+    "default": 500,
+    "minimum": 10,
+    "maximum": 2000
+  },
+  "cfg.features.group_studio.book_limit": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · book_limit",
+    "default": 100,
+    "minimum": 10,
+    "maximum": 500
+  },
+  "msg.features.draw_guess.title": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · title",
+    "default": "🎨 Draw & Guess",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.lobby": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · lobby",
+    "default": "🎨 Draw & Guess\nလူစုနေသည် — {count}/{maximum}\nPrivate ခလုတ်ဖွင့်ပြီး ပါဝင်မှုအတည်ပြုပါ။ အနည်းဆုံး {minimum} ယောက်။",
+    "fields": [
+      "count",
+      "maximum",
+      "minimum"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.open": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · open",
+    "default": "🎨 ဂိမ်းခန်းဖွင့်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.join": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · join",
+    "default": "➕ Join အတည်ပြုမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.begin": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · begin",
+    "default": "▶️ စမယ် (Admin)",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.stop": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · stop",
+    "default": "🛑 ရပ်မယ် (Admin)",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.round": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · round",
+    "default": "🎨 Round {round}/{rounds}\nပုံဆွဲသူ — {name}\nပုံရောက်လာလျှင် ဒီ Group ထဲတွင် အဖြေကိုရေးပါ။",
+    "fields": [
+      "round",
+      "rounds",
+      "name"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.drawing": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · drawing",
+    "default": "သင်ပုံဆွဲရမည့်အလှည့်ဖြစ်သည်။ Canvas ခလုတ်ကိုဖွင့်ပါ။ အဖြေကို Group ထဲ မရေးပါနှင့်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.canvas": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · canvas",
+    "default": "🖌️ Canvas ဖွင့်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.waiting": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · waiting",
+    "default": "Group ထဲမှာ ပုံကြည့်ပြီး ခန့်မှန်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.hint": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · hint",
+    "default": "စကားလုံးကိုစာနဲ့မရေးဘဲ ပုံနဲ့ပဲရှင်းပြပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.correct": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · correct",
+    "default": "✅ {name} မှန်ပြီ! အဖြေ — {word}",
+    "fields": [
+      "name",
+      "word"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.timeout": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · timeout",
+    "default": "⏱️ အချိန်ကုန်ပြီ။ အဖြေ — {word}",
+    "fields": [
+      "word"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.result": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · result",
+    "default": "🏁 Draw & Guess ပွဲပြီးပြီ\n{scores}",
+    "fields": [
+      "scores"
+    ],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.cancelled": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · cancelled",
+    "default": "Draw & Guess ကို ဖျက်သိမ်းလိုက်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.saved": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · saved",
+    "default": "✅ ပုံကို Group ဆီပို့ရန် သိမ်းပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.joined": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · joined",
+    "default": "✅ ပါဝင်ပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.closed": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · closed",
+    "default": "ဒီအလှည့်ပိတ်သွားပြီ။ Group မှ ဂိမ်းခန်းကိုပြန်ဖွင့်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.minimum": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · minimum",
+    "default": "လူအနည်းဆုံး မပြည့်သေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.full": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · full",
+    "default": "လူပြည့်သွားပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.admin": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · admin",
+    "default": "Group Admin သို့မဟုတ် Owner သာစ/ရပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.group": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · group",
+    "default": "/draw ကို Group ထဲတွင်သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.busy": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · busy",
+    "default": "တခြားဂိမ်းရှိနေသည်။ ပြီးမှစပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.auth": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · auth",
+    "default": "Telegram private chat မှ Canvas ကိုဖွင့်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.image": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · image",
+    "default": "ပုံအရွယ်အစား သို့မဟုတ် format မမှန်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.rate": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · rate",
+    "default": "ခဏစောင့်ပြီး ထပ်ပို့ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.error": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · error",
+    "default": "ခေတ္တ မသိမ်းနိုင်သေးပါ။ ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.confirm_stop": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · confirm_stop",
+    "default": "ပွဲကိုဖျက်သိမ်းရန် အတည်ပြုမလား?",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.yes_stop": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · yes_stop",
+    "default": "ဖျက်သိမ်းမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.rules": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · rules",
+    "default": "🎨 Draw & Guess\nGroup တွင် /draw ပို့ → Private ဂိမ်းခန်းဖွင့် → Join အတည်ပြုပါ။ အနည်းဆုံး ၂ ယောက်။ ပုံဆွဲသူ အလှည့်ကျပြောင်းသည်။\nပုံဆွဲသူသာ Canvas တွင် အဖြေမြင်ရသည်။ ပုံပို့ပြီးနောက် ကျန်သူတွေက Group ထဲအဖြေရေးပါ။ ပထမမှန်သူနှင့် ပုံဆွဲသူ reward ရသည်။\nဆက်ဆွဲထားသည့်ပုံကို ၁၀ စက္ကန့်တိုင်း ပြန်ပို့နိုင်သည်။ ပုံတစ်ခုတည်းကိုပြင်သုံးသည်။ စကားလုံးကိုစာနဲ့မရေးရ။ /drawstop ဖြင့် Admin ရပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 3500
+  },
+  "cfg.features.draw_guess.lobby_seconds": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · lobby_seconds",
+    "default": 120,
+    "minimum": 30,
+    "maximum": 600
+  },
+  "cfg.features.draw_guess.draw_seconds": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · draw_seconds",
+    "default": 90,
+    "minimum": 30,
+    "maximum": 180
+  },
+  "cfg.features.draw_guess.guess_seconds": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · guess_seconds",
+    "default": 90,
+    "minimum": 30,
+    "maximum": 180
+  },
+  "cfg.features.draw_guess.min_players": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · min_players",
+    "default": 2,
+    "minimum": 2,
+    "maximum": 12,
+    "pair_max": "cfg.features.draw_guess.max_players"
+  },
+  "cfg.features.draw_guess.max_players": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · max_players",
+    "default": 12,
+    "minimum": 2,
+    "maximum": 12,
+    "pair_min": "cfg.features.draw_guess.min_players"
+  },
+  "cfg.features.draw_guess.rounds": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · rounds",
+    "default": 5,
+    "minimum": 1,
+    "maximum": 12
+  },
+  "cfg.features.draw_guess.winner_reward": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · winner_reward",
+    "default": 10,
+    "minimum": 0,
+    "maximum": 50
+  },
+  "cfg.features.draw_guess.drawer_reward": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · drawer_reward",
+    "default": 5,
+    "minimum": 0,
+    "maximum": 30
+  },
+  "cfg.features.draw_guess.words": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · words",
+    "default": [
+      "ကြောင်",
+      "ခွေး",
+      "ငါး",
+      "ဆင်",
+      "ယုန်",
+      "လိပ်",
+      "ကြက်",
+      "ငှက်",
+      "မြွေ",
+      "လိပ်ပြာ",
+      "နေ",
+      "လ",
+      "ကြယ်",
+      "အိမ်",
+      "သစ်ပင်",
+      "ပန်း",
+      "တောင်",
+      "မြစ်",
+      "ပင်လယ်",
+      "ကား",
+      "စက်ဘီး",
+      "လေယာဉ်",
+      "လှေ",
+      "ရထား",
+      "ထီး",
+      "ဖုန်း",
+      "ကွန်ပျူတာ",
+      "စာအုပ်",
+      "ခဲတံ",
+      "နာရီ",
+      "မျက်မှန်",
+      "ဖိနပ်",
+      "ဦးထုပ်",
+      "အိတ်",
+      "ကုလားထိုင်",
+      "စားပွဲ",
+      "သော့",
+      "မီးအိမ်",
+      "တံခါး",
+      "ဘောလုံး",
+      "စွန်",
+      "ဂစ်တာ",
+      "ဒရမ်",
+      "ကိတ်မုန့်",
+      "ရေခဲမုန့်",
+      "ငှက်ပျောသီး",
+      "ဖရဲသီး",
+      "ပန်းသီး",
+      "နာနတ်သီး",
+      "ကြက်ဥ",
+      "မုန့်ဟင်းခါး",
+      "ခေါက်ဆွဲ",
+      "လက်ဖက်ရည်",
+      "ကော်ဖီ",
+      "ပီဇာ",
+      "ဟမ်ဘာဂါ",
+      "စတော်ဘယ်ရီ",
+      "ချယ်ရီ",
+      "နှင်းလူ",
+      "သက်တံ",
+      "မီးတောင်",
+      "ရဲတိုက်",
+      "ရေတံခွန်",
+      "တံတား",
+      "မီးရထားဘူတာ",
+      "မီးသတ်ကား",
+      "အာကာသယာဉ်",
+      "ပင့်ကူ",
+      "ပျား",
+      "မိကျောင်း",
+      "ဝက်",
+      "ကျား",
+      "ခြင်္သေ့",
+      "သစ်ကုလားအုတ်",
+      "ပန်ဒါ",
+      "ပင်ဂွင်း",
+      "ဖား",
+      "ရေခွက်",
+      "ဇွန်း",
+      "ခက်ရင်း",
+      "ပန်းကန်",
+      "ဒယ်အိုး",
+      "သွားတိုက်တံ",
+      "ဆပ်ပြာ",
+      "ဖြီး",
+      "မိုက်ခရိုဖုန်း",
+      "ကင်မရာ",
+      "လက်စွပ်",
+      "လည်ဆွဲ",
+      "ပူဖောင်း",
+      "လက်ဆောင်",
+      "ရတနာသေတ္တာ",
+      "အလံ",
+      "မီးပွိုင့်",
+      "လှေကား",
+      "ရေတွင်း",
+      "ပန်ကာ",
+      "တီဗီ",
+      "ရေခဲသေတ္တာ",
+      "မီးဖို",
+      "ကတ်ကြေး",
+      "စက္ကူလှေ",
+      "စက္ကူလေယာဉ်",
+      "နတ်သမီး",
+      "နဂါး",
+      "ဒိုင်နိုဆော",
+      "ရုပ်တု",
+      "မျက်နှာဖုံး",
+      "ကြက်တူရွေး",
+      "ဝေလငါး",
+      "ငါးမန်း",
+      "ပင်လယ်ကြယ်",
+      "ကဏန်း",
+      "ခရု",
+      "ပုရွက်ဆိတ်",
+      "သိုး",
+      "ဆိတ်",
+      "နွား",
+      "မြင်း",
+      "နေကြာပန်း",
+      "နှင်းဆီပန်း",
+      "အုန်းပင်",
+      "မှို",
+      "သရက်သီး",
+      "လိမ္မော်သီး",
+      "သံပုရာသီး",
+      "ငရုတ်သီး",
+      "မုန်လာဥနီ",
+      "အာလူး"
+    ]
+  },
+  "enabled.features.draw_guess.command": {
+    "kind": "setting",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · command",
+    "default": true
+  },
+  "enabled.features.group_studio.studio_command": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · studio_command",
+    "default": true
+  },
+  "enabled.features.group_studio.custom_command": {
+    "kind": "setting",
+    "category": "Group Studio",
+    "label": "Group Studio · custom_command",
+    "default": true
+  },
+  "msg.features.draw_guess.brush_eraser": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_eraser",
+    "default": "ခဲဖျက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.brush_undo": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_undo",
+    "default": "နောက်ပြန်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.brush_clear": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_clear",
+    "default": "ရှင်းမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.brush_send": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_send",
+    "default": "Group ဆီပို့မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.draw_guess.brush_loading": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_loading",
+    "default": "ပို့နေသည်…",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.brush_clear_confirm": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_clear_confirm",
+    "default": "ပုံကိုရှင်းမလား?",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
+  },
+  "msg.features.draw_guess.brush_expired": {
+    "kind": "message",
+    "category": "Draw & Guess",
+    "label": "Draw & Guess · brush_expired",
+    "default": "အချိန်ကုန်ပြီ။ Group ထဲပြန်သွားပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2000
   }
 }
