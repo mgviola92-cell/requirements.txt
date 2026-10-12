@@ -163,6 +163,12 @@ def validate(key,value):
             if v is not None:raise ValueError('Keep null for unbounded values')
         else:raise ValueError('Unsupported setting')
     check(value,default)
+    if key=='cfg.features.nan_yate.role_enabled':
+        if not all(value[r] for r in ('noble','seer','doctor','detective','leader','blade')):
+            raise ValueError('Nan Yate requires noble, seer, doctor, detective, leader and blade roles')
+    if key=='cfg.features.nan_yate.role_uses':
+        if any(type(v) is not int or not 1<=v<=3 for v in value.values()):
+            raise ValueError('Role uses must be integers from 1 to 3')
     # Known structural invariants are checked before data reaches gameplay.
     if entry.get('ordered') and any(a>b for a,b in zip(value,value[1:])):raise ValueError('Values must be in ascending order')
     if isinstance(value,dict) and 'min' in value and 'max' in value and value['min']>value['max']:raise ValueError('Minimum exceeds maximum')

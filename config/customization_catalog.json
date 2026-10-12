@@ -5295,7 +5295,7 @@
     "kind": "message",
     "category": "bot",
     "label": "commands_list · 🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Num",
-    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
+    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
     "fields": [],
     "max_length": 4000,
     "html": false
@@ -7965,5 +7965,2022 @@
     "fields": [],
     "html": false,
     "max_length": 4000
+  },
+  "msg.features.nan_yate.title": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · title",
+    "default": "🏯 နန်းရိပ် — လုပ်ကြံမှုနှင့် သက်သေ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.lobby": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · lobby",
+    "default": "လူစုနေပြီ။ ပါဝင်ရန် Private Chat ကိုဖွင့်ပြီး အတည်ပြုပါ။\nလူဦးရေ {count}/{maximum} · အနည်းဆုံး {minimum}\nအချိန်ကျန် {seconds} စက္ကန့်",
+    "fields": [
+      "count",
+      "maximum",
+      "minimum",
+      "seconds"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.phase": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · phase",
+    "default": "ရက် {day} · {phase}\nအသက်ရှင် {count} ယောက် · အချိန်ကျန် {seconds} စက္ကန့်\nဒီညဖြစ်ရပ် — {event}",
+    "fields": [
+      "day",
+      "phase",
+      "count",
+      "seconds",
+      "event"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.night": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · night",
+    "default": "🌙 ညဉ့်နက်ပြီ။ နန်းတံခါးများ ပိတ်လိုက်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.day": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · day",
+    "default": "☀️ မနက်လင်းပြီ။ သက်သေများဖော်၍ ဆွေးနွေးကြပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.vote": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · vote",
+    "default": "⚖️ ထုတ်ပယ်မဲပေးချိန်။ မဲအရေအတွက်ကို ပြီးမှပြမည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.runoff": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · runoff",
+    "default": "⚖️ မဲတူနေသည်။ သတ်မှတ်ထားသူများကို ထပ်မဲပေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.open": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · open",
+    "default": "🔐 ကိုယ့်ဂိမ်းခန်းဖွင့်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.confirm_join": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · confirm_join",
+    "default": "➕ ပါဝင်မှုအတည်ပြုမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.start": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · start",
+    "default": "▶️ လူပြည့်လျှင် စမယ် (Admin)",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.stop": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · stop",
+    "default": "🛑 ရပ်မယ် (Admin)",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.confirm_stop": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · confirm_stop",
+    "default": "⚠️ ပွဲဖျက်သိမ်းမယ်။ Reward မရပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.yes_stop": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · yes_stop",
+    "default": "ပွဲဖျက်သိမ်းရန် အတည်ပြု",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.back": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · back",
+    "default": "← ပြန်သွားမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.next": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · next",
+    "default": "နောက် →",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.previous": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · previous",
+    "default": "← ရှေ့",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.select_location": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · select_location",
+    "default": "🗺️ သက်သေရှာမယ့်နေရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.ability": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · ability",
+    "default": "✨ Role အစွမ်းသုံးမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.skip_action": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · skip_action",
+    "default": "⏭️ ညလုပ်ဆောင်ချက် Skip",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.attack": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · attack",
+    "default": "🗡️ အဖွဲ့တိုက်ခိုက်ပစ်မှတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.skip_vote": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · skip_vote",
+    "default": "⏭️ မထုတ်ပယ်ဘူး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.vote_button": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · vote_button",
+    "default": "⚖️ မဲပေးမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.publish": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · publish",
+    "default": "📜 သက်သေဖော်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.quest": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · quest",
+    "default": "🧩 လျှို့ဝှက်မစ်ရှင်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.shop": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · shop",
+    "default": "🛍️ ပစ္စည်းဝယ်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.seal": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · seal",
+    "default": "တံဆိပ်စစ်စာ · {cost} coin",
+    "fields": [
+      "cost"
+    ],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.armor": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · armor",
+    "default": "ချပ်ဝတ် · {cost} coin (တစ်ပွဲတစ်ကြိမ်)",
+    "fields": [
+      "cost"
+    ],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.ghost": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · ghost",
+    "default": "👻 ဝိညာဉ်သက်သေရှာမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.escape": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · escape",
+    "default": "💎 ရတနာနဲ့ထွက်ခွာမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.traitor": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · traitor",
+    "default": "🔀 လျှို့ဝှက်ဘက်ပြောင်းကမ်းလှမ်းချက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.accept": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · accept",
+    "default": "လက်ခံမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.decline": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · decline",
+    "default": "ငြင်းမယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.panel": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · panel",
+    "default": "မျက်နှာဖုံး {number} · {role}\nဘက် — {side}\n{description}\nအစွမ်းအသုံးကျန် — {uses}\nပွဲအတွင်း coin — {coins}\n{selection}",
+    "fields": [
+      "number",
+      "role",
+      "side",
+      "description",
+      "uses",
+      "coins",
+      "selection"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.objective": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · objective",
+    "default": "လျှို့ဝှက်ပစ်မှတ် — မျက်နှာဖုံး {number}",
+    "fields": [
+      "number"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.selection": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · selection",
+    "default": "လက်ရှိရွေးထားမှု — {selection}",
+    "fields": [
+      "selection"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.allies": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · allies",
+    "default": "လုပ်ကြံအဖွဲ့ — {names}\n/nychat စာသား ဖြင့် အဖွဲ့ထံပြောနိုင်သည်။",
+    "fields": [
+      "names"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.quest_question": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · quest_question",
+    "default": "မစ်ရှင် — {a} + {b} = ?\nမှန်လျှင် ပွဲအတွင်း coin {coins}။ တစ်ညတစ်ကြိမ်။",
+    "fields": [
+      "a",
+      "b",
+      "coins"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.shop_help": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · shop_help",
+    "default": "ပွဲအတွင်း coin သာသုံးသည်။ တစ်နေ့ပစ္စည်းတစ်ခုသာဝယ်နိုင်သည်။\nတံဆိပ်စစ်စာသည် နောက်ဆုံးရသက်သေ အတု/အစစ်ကိုပြသည်။\nချပ်ဝတ်သည် ညတိုက်ခိုက်မှုတစ်ကြိမ်ကာသည်၊ အဆိပ်မကာပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.traitor_help": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · traitor_help",
+    "default": "ဒုတိယညသာ။ လက်ခံလျှင် လုပ်ကြံဘက်သို့ အပြီးပြောင်းမည်။\nအဖွဲ့ဝင်စာရင်းကို ညကုန်မှရမည်။ Coin လောင်းကြေးမရှိပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.death": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · death",
+    "default": "🕯️ မျက်နှာဖုံး {number} — {name} သည် {cause} ကြောင့် ပွဲမှထွက်ခဲ့သည်။ ဘက် — {side}",
+    "fields": [
+      "number",
+      "name",
+      "cause",
+      "side"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.evidence": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · evidence",
+    "default": "📜 သက်သေ #{eid} · ရက် {day}\n{location} တွင် မျက်နှာဖုံး {number} သွားလာခဲ့သည့် ခြေရာရှိသည်။\nဒါသည် Role အတည်ပြုချက်မဟုတ်ပါ။ အတုလည်းဖြစ်နိုင်သည်။",
+    "fields": [
+      "eid",
+      "day",
+      "location",
+      "number"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.result": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · result",
+    "default": "🏁 နန်းရိပ်ပွဲပြီးပြီ။\nပင်မရလဒ် — {winner}\nတစ်ဦးချင်းအနိုင် — {individual}\nRole စာရင်းကို အောက်တွင်ပြထားသည်။",
+    "fields": [
+      "winner",
+      "individual"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.cancelled": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · cancelled",
+    "default": "🏯 နန်းရိပ်ပွဲကို ဖျက်သိမ်းလိုက်သည်။ လူမပြည့်ခြင်း သို့မဟုတ် Admin ရပ်ခြင်းဖြစ်သည်။ Reward မပေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.no_execution": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · no_execution",
+    "default": "⚖️ ဒီနေ့ ဘယ်သူမှ မထုတ်ပယ်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.votes": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · votes",
+    "default": "မဲရလဒ်\n{votes}",
+    "fields": [
+      "votes"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.escaped": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · escaped",
+    "default": "💎 မျက်နှာဖုံး {number} သည် ရတနာမစ်ရှင်အောင်မြင်ပြီး ထွက်ခွာသွားသည်။",
+    "fields": [
+      "number"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.pardon": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · pardon",
+    "default": "📯 မျက်နှာဖုံး {number} သည် အမိန့်ပြန်အမတ်ဖြစ်သည်။ မျက်နှာဖုံး {target} ၏ ထုတ်ပယ်မှုကို တားလိုက်သည်။",
+    "fields": [
+      "number",
+      "target"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.judge": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · judge",
+    "default": "⚖️ မျက်နှာဖုံး {number} သည် တော်ဝင်တရားသူကြီး၏ ဆုံးဖြတ်ခွင့်ကို သုံးလိုက်သည်။",
+    "fields": [
+      "number"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.blocked": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · blocked",
+    "default": "🚪 ဒီည Role အစွမ်း ပိတ်ခံရသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.poisoned": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · poisoned",
+    "default": "☠️ အဆိပ်မိနေသည်။ နောက်ညကုန်မတိုင်မီ ဆေးမြစ်ဆရာက ကုမှလွတ်မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.protected": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · protected",
+    "default": "🛡️ တိုက်ခိုက်မှုမှ လွတ်မြောက်ခဲ့သည်။ ကာကွယ်သူကို မဖော်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.verified": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · verified",
+    "default": "သက်သေ #{eid} — {verdict}",
+    "fields": [
+      "eid",
+      "verdict"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.side": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · side",
+    "default": "မျက်နှာဖုံး {number} ၏ စစ်တွေ့ဘက် — {side}။ မျက်နှာဖုံးအစွမ်းက လှည့်စားနိုင်သည်။",
+    "fields": [
+      "number",
+      "side"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.location": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location",
+    "default": "မျက်နှာဖုံး {number} ၏ ခြေရာ — {location}",
+    "fields": [
+      "number",
+      "location"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.visitors": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · visitors",
+    "default": "{location} သို့ လာခဲ့သူ — {names}။ အများဆုံးသုံးဦးသာပြသည်။",
+    "fields": [
+      "location",
+      "names"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.used": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · used",
+    "default": "မျက်နှာဖုံး {number} ၏ အစွမ်းသုံးခြင်း — {verdict}",
+    "fields": [
+      "number",
+      "verdict"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role_group": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_group",
+    "default": "မျက်နှာဖုံး {number} ၏ အစွမ်းအုပ်စု — {action}",
+    "fields": [
+      "number",
+      "action"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.found": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · found",
+    "default": "📜 သက်သေ #{eid} ရခဲ့သည်။ ကိုယ့်ဂိမ်းခန်းတွင် ကြည့်နိုင်သည်။",
+    "fields": [
+      "eid"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.empty": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · empty",
+    "default": "ဒီနေရာမှ သက်သေအသစ် မရခဲ့ပါ။ ဒါက တခြားသူအပြစ်ကင်းကြောင်း မဆိုလိုပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.gift": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · gift",
+    "default": "🎁 ပစ္စည်းစစ်ဖို့ coin ၂ ရခဲ့သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.copied": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · copied",
+    "default": "အစွမ်းကူးရပြီ — {action}။ နောက်ညတစ်ကြိမ်သုံးနိုင်သည်။",
+    "fields": [
+      "action"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.turned": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · turned",
+    "default": "လုပ်ကြံဘက်သို့ ပြောင်းပြီးပြီ။ မိမိအနိုင်ရည်မှန်းချက်လည်း ပြောင်းသွားပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.afk": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · afk",
+    "default": "⚠️ တစ်ရက်စက်ဝန်းတွင် မပါဝင်ခဲ့ပါ။ နောက်တစ်ရက်လည်း မပါဝင်လျှင် ပွဲမှဖယ်မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.dead_panel": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · dead_panel",
+    "default": "👻 သင်သေဆုံးပြီးဖြစ်သည်။ Role သတင်းကို Group တွင် မဖော်ပါနှင့်။ ညဘက်ဝိညာဉ်မဲပေးနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.inactive_panel": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · inactive_panel",
+    "default": "ဒီပွဲတွင် သင်မပါဝင်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.saved": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · saved",
+    "default": "✅ ရွေးထားမှုကို သိမ်းပြီးပြီ။ အချိန်မကုန်မီ ပြောင်းနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.closed": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · closed",
+    "default": "အဲ့ဒီရွေးချယ်မှုက ပိတ်သွားပြီ။ နောက်ဆုံးဂိမ်းခန်းကို ပြန်ဖွင့်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.full": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · full",
+    "default": "လူပြည့်သွားပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.not_enough": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · not_enough",
+    "default": "အနည်းဆုံးလူဦးရေ မပြည့်သေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.not_player": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · not_player",
+    "default": "ဒီပွဲမှာ သင်မပါဝင်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.unavailable": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · unavailable",
+    "default": "အခုအချိန်မှာ ဒီလုပ်ဆောင်ချက် မရပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.dead": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · dead",
+    "default": "အသက်ရှင်သူသာ လုပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.target": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · target",
+    "default": "ဒီပစ်မှတ်ကို ရွေးမရပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.publish_limit": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · publish_limit",
+    "default": "ဒီနေ့သက်သေဖော်ပြခွင့် ပြည့်သွားပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.wrong": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · wrong",
+    "default": "အဖြေမမှန်သေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.coins": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · coins",
+    "default": "ပွဲအတွင်း coin မလုံလောက်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.admin": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · admin",
+    "default": "Group Admin သို့မဟုတ် Owner သာ လုပ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.busy": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · busy",
+    "default": "တခြားဂိမ်းတစ်ပွဲ ရှိနေသည်။ ပြီးမှစပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.private_required": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · private_required",
+    "default": "ဒီ command ကို Group ထဲမှာ သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.error": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · error",
+    "default": "ခေတ္တ မသိမ်းနိုင်ပါ။ ရွေးထားမှုကို အတည်မပြုရသေးပါ။ ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.chat_help": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · chat_help",
+    "default": "/nychat <ပွဲ ID> <စာသား> — လုပ်ကြံအဖွဲ့/Anonymous ဆွေးနွေးရန်\n/nywhisper <ပွဲ ID> <မျက်နှာဖုံးနံပါတ်> <စာသား> — သံတမန်ခွင့်ရသူနှင့်ပြောရန်",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.chat_sent": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · chat_sent",
+    "default": "✅ စာပို့ရန် သိမ်းပြီးပြီ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.chat_relay": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · chat_relay",
+    "default": "မျက်နှာဖုံး {number} — {text}",
+    "fields": [
+      "number",
+      "text"
+    ],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.rules": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · rules",
+    "default": "🏯 နန်းရိပ် စည်းမျဉ်း\n\nလူ ၈–၄၀။ Private chat မှ Join အတည်ပြုရသည်။\nညတွင် သက်သေရှာမည့်နေရာ သို့မဟုတ် Role အစွမ်းရွေးပါ။ Role အစွမ်းက သွားရမည့်နေရာကို သတ်မှတ်ပေးသည်။ လုပ်ကြံဘက်က အဖွဲ့တိုက်ခိုက်မဲ ထပ်ပေးနိုင်သည်။\nနေ့တွင် ဆွေးနွေး၊ သက်သေဖော်၊ ပစ္စည်းဝယ်နိုင်သည်။ မဲချိန်တွင် တစ်ဦးတစ်မဲ၊ ကိုယ့်ကိုမဲပေးမရ။ မဲပြောင်းနိုင်သည်။\nSkip နှင့် မဲတူလျှင် မထုတ်ပယ်။ လူချင်းမဲတူလျှင် တစ်ကြိမ်ထပ်မဲပေးသည်။\nသေသူ၏ဘက်သာ ချက်ချင်းပေါ်၊ Role အပြည့်အစုံကို ပွဲဆုံးမှပြသည်။ သေသူက Role သတင်းမဖော်ရ။\nလုပ်ကြံသူမရှိတော့လျှင် နန်းတော်နိုင်။ လုပ်ကြံသူက ကျန်သူအားလုံးနှင့်အရေအတွက်တူ/ပိုလျှင် လုပ်ကြံဘက်နိုင်။ အများဆုံးရက်ပြည့်လျှင် Draw။\nတစ်ရက်စက်ဝန်း နှစ်ခါဆက်မပါဝင်လျှင် ပွဲမှဖယ်သည်။ Rank Points ဖြင့်ပစ္စည်းမဝယ်ရ။\nRole screenshot မဖော်ရ။ Private game ခလုတ်များသာ အစွမ်းအတည်ယူသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.mode_help": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · mode_help",
+    "default": "Mode ကို lobby မဖွင့်မီ command တွင်ရွေးပါ။\n/nanyate — ပုံမှန်\n/nanyate anonymous — နာမည်ဝှက်ဆွေးနွေး\n/nanyate advanced — သစ္စာဖောက်ခွင့်ပါ\n/nanyate anonymous advanced — နှစ်မျိုးလုံး\n/nanyaterules — စည်းမျဉ်း\n/nanyatestop — Admin ရပ်ရန်",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.rain": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · rain",
+    "default": "🌧️ မိုးသည်းည — နေရာသက်သေရနိုင်ခြေ လျော့သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.festival": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · festival",
+    "default": "🏮 နန်းတွင်းပွဲတော် — မနက်တွင် ပါဝင်သူတိုင်း coin ၁ ရသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.lantern": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · lantern",
+    "default": "🪔 မီးအိမ်ထွန်းည — နေရာတွင်သက်သေရှိလျှင် ရမည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.normal": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · normal",
+    "default": "🌙 သာမန်ည — အထူးစည်းမျဉ်းမရှိ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.noble": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.noble",
+    "default": "မှူးမတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.noble": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.noble",
+    "default": "သက်သေရှာရာတွင် အခွင့်အရေးပိုကောင်းသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.seer": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.seer",
+    "default": "နက္ခတ်ဆရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.seer": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.seer",
+    "default": "ပစ်မှတ်၏ဘက်ကိုစစ်သည်။ မျက်နှာဖုံးအစွမ်းက လှည့်စားနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.detective": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.detective",
+    "default": "နန်းတွင်းစုံထောက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.detective": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.detective",
+    "default": "မိမိပိုင်သက်သေ အတု/အစစ် စစ်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.tracker": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.tracker",
+    "default": "ခြေရာခံမုဆိုး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.tracker": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.tracker",
+    "default": "ပစ်မှတ်သွားခဲ့သော နေရာကိုကြည့်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.watcher": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.watcher",
+    "default": "ကင်းထောက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.watcher": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.watcher",
+    "default": "နေရာတစ်ခုသို့လာသူ အများဆုံးသုံးဦးကိုကြည့်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.listener": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.listener",
+    "default": "နားစွင့်သူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.listener": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.listener",
+    "default": "ပစ်မှတ် အစွမ်းသုံးခဲ့လား စစ်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.doctor": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.doctor",
+    "default": "သမားတော်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.doctor": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.doctor",
+    "default": "တိုက်ခိုက်မှုတစ်ကြိမ်ကိုကာသည်။ တူညီသူကိုဆက်တိုက်မကာနိုင်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.guard": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.guard",
+    "default": "အမတ်စောင့်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.guard": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.guard",
+    "default": "ပစ်မှတ်အစား တိုက်ခိုက်မှုတစ်ကြိမ်ခံသည်။ ကိုယ်ကိုကာမရ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.healer": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.healer",
+    "default": "ဆေးမြစ်ဆရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.healer": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.healer",
+    "default": "အဆိပ်ကိုကုသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.cleanser": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.cleanser",
+    "default": "ကျိန်စာဖြေဆရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.cleanser": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.cleanser",
+    "default": "သက်သေဖော်ပြခွင့်ကျိန်စာကိုဖြေသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.blocker": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.blocker",
+    "default": "တံခါးမှူး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.blocker": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.blocker",
+    "default": "ပစ်မှတ်၏ ညအစွမ်းကိုပိတ်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.smith": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.smith",
+    "default": "ပန်းပဲဆရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.smith": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.smith",
+    "default": "တိုက်ခိုက်မှုတစ်ကြိမ်ခံနိုင်သည့်ချပ်ဝတ်ပေးသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.scribe": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.scribe",
+    "default": "နန်းစာရေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.scribe": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.scribe",
+    "default": "သေသူပိုင်သက်သေတစ်ခုကိုရယူသည်။ Role မရ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.diplomat": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.diplomat",
+    "default": "တော်ဝင်သံတမန်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.diplomat": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.diplomat",
+    "default": "ကိုယ်နှင့်ပစ်မှတ်ကို နောက်ညအထိ လျှို့ဝှက်ဆွေးနွေးခွင့်ပေးသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.minister": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.minister",
+    "default": "အမိန့်ပြန်အမတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.minister": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.minister",
+    "default": "နေ့ဆွေးနွေးချိန် ရွေးသူ၏ထုတ်ပယ်မှုကို တစ်ကြိမ်တားသည်။ မိမိ Role ပေါ်မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.lamp": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.lamp",
+    "default": "မီးအိမ်စောင့်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.lamp": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.lamp",
+    "default": "နေရာတစ်ခုမှ အစစ်သက်သေကို လူတိုင်းထံဖော်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.judge": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.judge",
+    "default": "တော်ဝင်တရားသူကြီး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.judge": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.judge",
+    "default": "နေ့ဆွေးနွေးချိန်ရွေးသူကို ထပ်မဲတူလျှင် ဆုံးဖြတ်ပေးသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.soldier": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.soldier",
+    "default": "သံချပ်ဝတ်စစ်သည်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.soldier": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.soldier",
+    "default": "ပထမတိုက်ခိုက်မှုတစ်ကြိမ်ခံနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.leader": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.leader",
+    "default": "လုပ်ကြံခေါင်းဆောင်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.leader": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.leader",
+    "default": "အဖွဲ့တိုက်ခိုက်မဲတူလျှင် မိမိရွေးသူကိုဦးစားပေးသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.blade": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.blade",
+    "default": "ဓားဝှက်သမား",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.blade": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.blade",
+    "default": "အဖွဲ့၏တိုက်ခိုက်မှုဆောင်ရွက်သူအဖြစ်ဦးစားပေးခံရသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.poisoner": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.poisoner",
+    "default": "အဆိပ်ခတ်သူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.poisoner": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.poisoner",
+    "default": "တစ်ကြိမ်အဆိပ်ခတ်သည်။ ပစ်မှတ်သည်နောက်ညကုန်မှသေမည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.hider": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.hider",
+    "default": "ခြေရာဖျောက်သူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.hider": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.hider",
+    "default": "လုပ်ကြံအဖွဲ့ဝင်တစ်ဦး၏ခြေရာကိုဖျောက်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.forger": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.forger",
+    "default": "စာတုရေးသူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.forger": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.forger",
+    "default": "ပစ်မှတ်သွားခဲ့သကဲ့သို့ သက်သေအတုတစ်ခုဖန်တီးသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.mask": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.mask",
+    "default": "မျက်နှာဖုံးသူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.mask": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.mask",
+    "default": "ကိုယ့်ဘက်ကို တစ်ညတာနန်းတော်ဟုစစ်တွေ့စေသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.spy": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.spy",
+    "default": "အတွင်းသတင်းပေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.spy": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.spy",
+    "default": "ပစ်မှတ်၏အစွမ်းအုပ်စုကိုစစ်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.curser": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.curser",
+    "default": "ကျိန်စာတိုက်သူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.curser": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.curser",
+    "default": "ပစ်မှတ်သည် နောက်နေ့သက်သေတစ်ခုသာဖော်နိုင်မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.jester": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.jester",
+    "default": "ပွဲလှန့်သူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.jester": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.jester",
+    "default": "မဲဖြင့်ထုတ်ပယ်ခံရလျှင် တစ်ဦးချင်းနိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.hunter": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.hunter",
+    "default": "ပစ်မှတ်မုဆိုး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.hunter": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.hunter",
+    "default": "မိမိပစ်မှတ် မဲဖြင့်ထုတ်ပယ်ခံရလျှင်နိုင်သည်။ ညသေပါကအသက်ရှင်ရန်ပြောင်းသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.treasure": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.treasure",
+    "default": "ရတနာရှာသူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.treasure": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.treasure",
+    "default": "နေရာမတူသုံးခုမှ ရတနာစု၍ ဆန္ဒအလျောက်ထွက်ခွာလျှင်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.keeper": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.keeper",
+    "default": "အစောင့်အရှောက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.keeper": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.keeper",
+    "default": "မိမိပစ်မှတ် ပွဲဆုံးချိန်အသက်ရှင်လျှင်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.mimic": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.mimic",
+    "default": "အစွမ်းကူးဆရာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.mimic": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.mimic",
+    "default": "သေသူ၏ခွင့်ပြုအစွမ်းကိုတစ်ကြိမ်ကူးယူပြီး နောက်ညသုံးနိုင်သည်။ အသက်ရှင်လျှင်နိုင်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.role.merchant": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role.merchant",
+    "default": "နန်းတွင်းကုန်သည်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.role_description.merchant": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_description.merchant",
+    "default": "လူမတူသုံးဦးကိုသက်သေစစ်ပစ္စည်းပေးပြီး ပွဲဆုံးချိန်အသက်ရှင်လျှင်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
+  },
+  "msg.features.nan_yate.location.0": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.0",
+    "default": "နန်းဆောင်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.location.1": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.1",
+    "default": "ဆေးတိုက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.location.2": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.2",
+    "default": "လက်နက်တိုက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.location.3": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.3",
+    "default": "ရတနာတိုက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.location.4": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.4",
+    "default": "နတ်ကွန်း",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.location.5": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · location.5",
+    "default": "တံခါးမကြီး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.search": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.search",
+    "default": "သက်သေရှာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.seer": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.seer",
+    "default": "ဘက်စစ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.verify": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.verify",
+    "default": "သက်သေစစ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.track": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.track",
+    "default": "ခြေရာခံ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.watch": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.watch",
+    "default": "နေရာစောင့်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.listen": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.listen",
+    "default": "အစွမ်းသုံးမှုစစ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.protect": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.protect",
+    "default": "ကာကွယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.guard": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.guard",
+    "default": "ကိုယ်စားခံ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.heal": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.heal",
+    "default": "အဆိပ်ကု",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.cleanse": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.cleanse",
+    "default": "ကျိန်စာဖြေ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.block": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.block",
+    "default": "အစွမ်းပိတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.armor": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.armor",
+    "default": "ချပ်ဝတ်ပေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.recover": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.recover",
+    "default": "သေသူသက်သေရယူ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.link": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.link",
+    "default": "လျှို့ဝှက်ဆွေးနွေးခွင့်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.pardon": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.pardon",
+    "default": "ထုတ်ပယ်မှုတား",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.illuminate": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.illuminate",
+    "default": "သက်သေဖော်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.judge": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.judge",
+    "default": "မဲတူဆုံးဖြတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.poison": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.poison",
+    "default": "အဆိပ်ခတ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.hide": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.hide",
+    "default": "ခြေရာဖျောက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.forge": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.forge",
+    "default": "သက်သေအတု",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.mask": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.mask",
+    "default": "ဘက်ဖုံး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.spy": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.spy",
+    "default": "အစွမ်းအုပ်စုစစ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.curse": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.curse",
+    "default": "ကျိန်စာ",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.copy": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.copy",
+    "default": "အစွမ်းကူး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.action.gift": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · action.gift",
+    "default": "ပစ္စည်းစစ် coin ပေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.phase.night": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · phase.night",
+    "default": "ညလုပ်ဆောင်ချက်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.phase.day": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · phase.day",
+    "default": "နေ့ဆွေးနွေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.phase.vote": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · phase.vote",
+    "default": "မဲပေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.phase.runoff": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · phase.runoff",
+    "default": "ထပ်မဲပေး",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "cfg.features.nan_yate.lobby_seconds": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · lobby_seconds",
+    "default": 180,
+    "minimum": 60,
+    "maximum": 600
+  },
+  "cfg.features.nan_yate.night_seconds": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · night_seconds",
+    "default": 90,
+    "minimum": 45,
+    "maximum": 180
+  },
+  "cfg.features.nan_yate.day_seconds": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · day_seconds",
+    "default": 150,
+    "minimum": 60,
+    "maximum": 300
+  },
+  "cfg.features.nan_yate.vote_seconds": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · vote_seconds",
+    "default": 45,
+    "minimum": 30,
+    "maximum": 90
+  },
+  "cfg.features.nan_yate.runoff_seconds": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · runoff_seconds",
+    "default": 30,
+    "minimum": 20,
+    "maximum": 60
+  },
+  "cfg.features.nan_yate.max_days": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · max_days",
+    "default": 8,
+    "minimum": 4,
+    "maximum": 12
+  },
+  "cfg.features.nan_yate.min_players": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · min_players",
+    "default": 8,
+    "minimum": 8,
+    "maximum": 40,
+    "pair_max": "cfg.features.nan_yate.max_players"
+  },
+  "cfg.features.nan_yate.max_players": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · max_players",
+    "default": 40,
+    "minimum": 8,
+    "maximum": 40,
+    "pair_min": "cfg.features.nan_yate.min_players"
+  },
+  "cfg.features.nan_yate.win_reward": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · win_reward",
+    "default": 15,
+    "minimum": 0,
+    "maximum": 100
+  },
+  "cfg.features.nan_yate.participation_reward": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · participation_reward",
+    "default": 3,
+    "minimum": 0,
+    "maximum": 30
+  },
+  "cfg.features.nan_yate.anonymous": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · anonymous",
+    "default": false
+  },
+  "cfg.features.nan_yate.traitor": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · traitor",
+    "default": false
+  },
+  "cfg.features.nan_yate.quests": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · quests",
+    "default": true
+  },
+  "cfg.features.nan_yate.shop": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · shop",
+    "default": true
+  },
+  "cfg.features.nan_yate.ghosts": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · ghosts",
+    "default": true
+  },
+  "cfg.features.nan_yate.events": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · events",
+    "default": true
+  },
+  "cfg.features.nan_yate.curse": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · curse",
+    "default": true
+  },
+  "cfg.features.nan_yate.seal_cost": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · seal_cost",
+    "default": 2,
+    "minimum": 2,
+    "maximum": 8
+  },
+  "cfg.features.nan_yate.armor_cost": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · armor_cost",
+    "default": 4,
+    "minimum": 4,
+    "maximum": 8
+  },
+  "cfg.features.nan_yate.quest_coins": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · quest_coins",
+    "default": 1,
+    "minimum": 1,
+    "maximum": 2
+  },
+  "cfg.features.nan_yate.role_enabled": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_enabled",
+    "default": {
+      "noble": true,
+      "seer": true,
+      "detective": true,
+      "tracker": true,
+      "watcher": true,
+      "listener": true,
+      "doctor": true,
+      "guard": true,
+      "healer": true,
+      "cleanser": true,
+      "blocker": true,
+      "smith": true,
+      "scribe": true,
+      "diplomat": true,
+      "minister": true,
+      "lamp": true,
+      "judge": true,
+      "soldier": true,
+      "leader": true,
+      "blade": true,
+      "poisoner": true,
+      "hider": true,
+      "forger": true,
+      "mask": true,
+      "spy": true,
+      "curser": true,
+      "jester": true,
+      "hunter": true,
+      "treasure": true,
+      "keeper": true,
+      "mimic": true,
+      "merchant": true
+    }
+  },
+  "cfg.features.nan_yate.role_uses": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · role_uses",
+    "default": {
+      "guard": 2,
+      "blocker": 2,
+      "smith": 2,
+      "scribe": 2,
+      "diplomat": 2,
+      "minister": 1,
+      "lamp": 1,
+      "judge": 1,
+      "poisoner": 1,
+      "hider": 2,
+      "forger": 2,
+      "mask": 1,
+      "curser": 2,
+      "keeper": 2,
+      "mimic": 1,
+      "merchant": 3
+    },
+    "minimum": 1,
+    "maximum": 3
+  },
+  "enabled.features.nan_yate.command": {
+    "kind": "setting",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · ဂိမ်းဖွင့်ပိတ်",
+    "default": true
+  },
+  "msg.features.nan_yate.withdraw": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · withdraw",
+    "default": "လူစုစာရင်းမှ ထွက်မယ်",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.public": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · public",
+    "default": "📜 အများသိသက်သေစာရင်း",
+    "fields": [],
+    "html": false,
+    "max_length": 100
+  },
+  "msg.features.nan_yate.anonymous_limit": {
+    "kind": "message",
+    "category": "နန်းရိပ်",
+    "label": "နန်းရိပ် · anonymous_limit",
+    "default": "ဒီနေ့နာမည်ဝှက်စာ ၂ စောင် ပြည့်သွားပြီ။ တစ်စောင်ကို စာတိုအများကြီးအစား စုရေးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 2500
   }
 }

@@ -43,6 +43,7 @@ SESSION_PRIORITIES = {
 
     "pair_challenge": 80,
     "imposter": 78,
+    "nan_yate": 85,
     "roast_battle": 75,
     "word_chain": 70,
 
@@ -89,6 +90,7 @@ EXCLUSIVE_SESSIONS = {
     "math_battle",
     "pair_challenge",
     "imposter",
+    "nan_yate",
     "roast_battle",
     "word_chain",
     "emoji_guess",
@@ -260,35 +262,35 @@ def start_session(
     if not recover and not feature_allowed('game:'+session_type,chat_id):
         return False, 'test_group_only'
 
-    allowed, blocker = can_start_session(
-        chat_id,
-        session_type,
-        allow_with=allow_with,
-        recover=recover
-    )
-
-    if not allowed:
-        return False, blocker
-
-    now = time.time()
-
-    session = {
-        "chat_id": chat_id,
-        "type": session_type,
-        "started_at": now,
-        "expires_at": (
-            now + duration
-            if duration is not None
-            else None
-        ),
-        "data": dict(data or {})
-    }
-
-    key = (chat_id, session_type)
-
+    # Check and reserve atomically: concurrent launches cannot both pass.
     with _sessions_lock:
-        _active_sessions[key] = session
+        allowed, blocker = can_start_session(
+            chat_id,
+            session_type,
+            allow_with=allow_with,
+            recover=recover
+        )
 
+        if not allowed:
+            return False, blocker
+
+        now = time.time()
+
+        session = {
+            "chat_id": chat_id,
+            "type": session_type,
+            "started_at": now,
+            "expires_at": (
+                now + duration
+                if duration is not None
+                else None
+            ),
+            "data": dict(data or {})
+        }
+
+        key = (chat_id, session_type)
+
+        _active_sessions[key] = session
     if not recover:usage(chat_id,'game',session_type)
     return True, session
 
