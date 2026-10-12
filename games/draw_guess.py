@@ -31,6 +31,23 @@ WORDS=[
  ('လိမ္မော်သီး',[]),('သံပုရာသီး',[]),('ငရုတ်သီး',[]),('မုန်လာဥနီ',[]),('အာလူး',[])]
 
 
+from data.draw_words import EXTRA, LEVELS
+_original={w for w,_ in WORDS}
+WORDS += [(w,a) for w,a in EXTRA if w not in _original]
+
+def word_level(word):
+    # Existing owner-created words stay playable without mandatory metadata.
+    return LEVELS.get(word,1)
+
+def choose_word(choices,players,rng):
+    weights=(90,10,0) if players<=4 else (45,45,10) if players<=7 else (20,45,35)
+    tiers={level:[item for item in choices if word_level(item[0])==level] for level in (1,2,3)}
+    available=[level for level in tiers if tiers[level] and weights[level-1]]
+    if not available:return rng.choice(choices)
+    level=rng.choices(available,weights=[weights[level-1] for level in available],k=1)[0]
+    return rng.choice(tiers[level])
+
+
 def normalize(value):return re.sub(r'[\s\u200b\u200c\u200d]+','',unicodedata.normalize('NFC',value).casefold().strip())
 def player(s,uid):return next((p for p in s['players'] if p['id']==str(uid)),None)
 def event(s,kind,**data):s['events'].append(dict(kind=kind,**data))
@@ -56,7 +73,7 @@ def next_round(s,now,rng,words=WORDS):
     s['drawer']=live[(s['round']-1)%len(live)]['id'];s['image']=None;s['ticket']=None;s['card']=None
     choices=[(w,a) for w,a in words if w not in s['used']]
     if not choices:s['used']=[];choices=list(words)
-    s['word'],s['aliases']=rng.choice(choices);s['used'].append(s['word'])
+    s['word'],s['aliases']=choose_word(choices,len(live),rng);s['used'].append(s['word'])
     event(s,'round');event(s,'drawer',uid=s['drawer'])
 def submit(s,uid,now):
     if str(uid)!=s['drawer'] or s['phase'] not in ('draw','guess') or now>s['deadline']:raise ValueError('closed')

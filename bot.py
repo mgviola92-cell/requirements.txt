@@ -3338,11 +3338,15 @@ def get_trivia_question(chat_id=None):
 def load_local_trivia_questions_normalized():
     """Normalize local questions without resetting history when exhausted."""
     result = []
+    from core.trivia_myanmar import clean
+    seen=set()
     for row in load_local_trivia_questions():
         try:
             answers = [str(x) for x in row["answers"]]
             index = int(row["correct_index"])
-            question = str(row["question"]).strip()
+            question = clean(row["question"])
+            if question.casefold() in seen:continue
+            seen.add(question.casefold())
             if question and len(answers) == 4 and index in range(4) and len(set(answers)) == 4:
                 result.append({"question": question, "answers": answers,
                                "correct_index": index, "source": "local"})
@@ -3356,112 +3360,13 @@ def load_local_trivia_questions_normalized():
 # ---------------------------------------------------------
 
 def translate_to_myanmar(text):
-
-    if not text:
-        return text
-
-    text = str(
-        text
-    )
-
-    # မြန်မာစာ ဖြစ်ပြီးသားဆို
-    # ထပ်ဘာသာမပြန်
-    if any(
-        "\u1000"
-        <= char
-        <= "\u109F"
-
-        for char
-        in text
-    ):
-        return text
-
-    try:
-
-        encoded_text = (
-            urllib.parse.quote(
-                text
-            )
-        )
-
-        url = (
-            "https://api.mymemory.translated.net/"
-            "get"
-            f"?q={encoded_text}"
-            "&langpair=en|my"
-        )
-
-        with urllib.request.urlopen(
-            url,
-            timeout=8
-        ) as response:
-
-            data = json.loads(
-                response.read().decode(
-                    "utf-8"
-                )
-            )
-
-        translated = (
-
-            data.get(
-                "responseData",
-                {}
-            )
-
-            .get(
-                "translatedText"
-            )
-        )
-
-        if translated:
-
-            return (
-                html.unescape(
-                    translated
-                )
-            )
-
-    except Exception as e:
-
-        print(
-            f"Trivia Translation Error: {e}"
-        )
-
-    return text
+    from core.trivia_myanmar import translate
+    return translate(text)
 
 
-def translate_trivia_question(
-    question
-):
-
-    result = dict(
-        question
-    )
-
-    result[
-        "question"
-    ] = translate_to_myanmar(
-        question[
-            "question"
-        ]
-    )
-
-    result[
-        "answers"
-    ] = [
-
-        translate_to_myanmar(
-            answer
-        )
-
-        for answer
-        in question[
-            "answers"
-        ]
-    ]
-
-    return result
+def translate_trivia_question(question):
+    from core.trivia_myanmar import translate_question
+    return translate_question(question)
 
 
 # ---------------------------------------------------------

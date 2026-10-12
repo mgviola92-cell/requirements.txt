@@ -152,7 +152,7 @@ def validate(key,value):
         elif isinstance(d,str):
             if not isinstance(v,str) or len(v)>3500:raise ValueError('Invalid text value')
         elif isinstance(d,list):
-            if not isinstance(v,list) or not v or len(v)>500:raise ValueError('Use a nonempty JSON list')
+            if not isinstance(v,list) or not v or len(v)>entry.get("max_items",500):raise ValueError('Use a nonempty JSON list')
             if entry.get('fixed_length') and len(v)!=len(d):raise ValueError('Keep the same number of entries')
             for i,item in enumerate(v):check(item,d[min(i,len(d)-1)])
         elif isinstance(d,dict):
