@@ -1,8 +1,4 @@
 pyTelegramBotAPI
-py-tgcalls
-Pyrogram
-tgcrypto
-yt-dlp
 flask
 psycopg[binary]
 Pillow

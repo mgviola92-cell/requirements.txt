@@ -3517,53 +3517,6 @@
     "max_length": 4000,
     "html": false
   },
-  "msg.bot.play_music.ca6f4d8e17": {
-    "kind": "message",
-    "category": "bot",
-    "label": "play_music · ❌ သီချင်းနာမည်ထည့်ပေးပါ။\nဥပမာ - /play Alan Walker Faded",
-    "default": "❌ သီချင်းနာမည်ထည့်ပေးပါ။\nဥပမာ - /play Alan Walker Faded",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.play_music.45b8d5f61d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "play_music · 🎵 '' ပို့ပေးမယ်။ ခဏစောင့်ပါ...",
-    "default": "🎵 '{song_name}' ပို့ပေးမယ်။ ခဏစောင့်ပါ...",
-    "fields": [
-      "song_name"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.play_music.5c85ac8fd2": {
-    "kind": "message",
-    "category": "bot",
-    "label": "play_music · ❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error ကိုကြည့်ပါ။",
-    "default": "❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error ကိုကြည့်ပါ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.play_music.4083ffa049": {
-    "kind": "message",
-    "category": "bot",
-    "label": "play_music · 🎧 သီချင်းရပြီ။ နားထောင်တော့",
-    "default": "🎧 သီချင်းရပြီ။ နားထောင်တော့",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.play_music.d20fba766b": {
-    "kind": "message",
-    "category": "bot",
-    "label": "play_music · ❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error အစစ်ကိုကြည့်ပါ။",
-    "default": "❌ သီချင်း download မအောင်မြင်ဘူး။\nConsole မှာ Error အစစ်ကိုကြည့်ပါ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
   "msg.bot.roll_dice.1950b4e582": {
     "kind": "message",
     "category": "bot",
@@ -5295,7 +5248,7 @@
     "kind": "message",
     "category": "bot",
     "label": "commands_list · 🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Num",
-    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n🎵 /play — Search Music\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
+    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
     "fields": [],
     "max_length": 4000,
     "html": false
@@ -5561,12 +5514,6 @@
     "kind": "setting",
     "category": "bot",
     "label": "Enable mention admins only",
-    "default": true
-  },
-  "enabled.bot.play_music": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Enable play music",
     "default": true
   },
   "enabled.bot.roll_dice": {

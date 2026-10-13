@@ -5,7 +5,7 @@
     "game_control": "🛑 ဂိမ်းအကူနှင့် ရပ်ရန်",
     "studio": "🗂️ Capsule / အသံ / အမှတ်တရ / Commands",
     "info": "🏆 Profile / အချက်အလက် / အကူအညီ",
-    "group": "👥 လူခေါ် / သီချင်း / စီမံခန့်ခွဲမှု",
+    "group": "👥 လူခေါ် / စီမံခန့်ခွဲမှု",
     "owner": "👑 Owner / Staff / Editor",
     "auto": "⚙️ အလိုအလျောက်စနစ်များ"
   },
@@ -1227,23 +1227,6 @@
         "၃ ကြိမ်ပြည့်လျှင် ban လုပ်သည်။"
       ],
       "notes": "Bot နှင့် ကိုယ့်ကိုယ်ကို warn မပေးနိုင်။ Warn counter သည် process memory ဖြစ်၍ restart အပြီး reset ဖြစ်နိုင်သည်။"
-    },
-    {
-      "id": "play",
-      "aliases": [
-        "play",
-        "ဖွင့်"
-      ],
-      "title": "သီချင်းရှာ၍ audio ပို့",
-      "category": "group",
-      "where": "Group / Private",
-      "who": "Member",
-      "usage": "/play Alan Walker Faded",
-      "steps": [
-        "Command နောက် သီချင်းနာမည်ထည့်ပါ။",
-        "Bot က audio ရှာ/download လုပ်ပြီး Telegram audio အဖြစ်ပို့မည်။"
-      ],
-      "notes": "Group voice chat ထဲ live playback မဟုတ်။ External provider/download ပေါ်မူတည်၍ မရနိုင်သည့်အချိန်ရှိသည်။"
     },
     {
       "id": "owner",
