@@ -165,6 +165,10 @@ def validate(key,value):
     check(value,default)
     if key in ('cfg.tot_auto.threshold','cfg.tot_auto.quiet') and len(value)!=2:
         raise ValueError('Use exactly two values: minimum and maximum')
+    if key=='cfg.features.news.source_ids':
+        from data.news_sources import CATALOG as news_sources
+        if len(value)!=len(set(value)) or any(s not in news_sources for s in value):
+            raise ValueError('Choose unique known news source IDs')
     if key=='cfg.features.draw_guess.words':
         from games.draw_guess import normalize
         if any(not isinstance(w,str) or not 1<=len(w.strip())<=40 or not normalize(w) for w in value):

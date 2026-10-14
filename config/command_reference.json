@@ -7,7 +7,8 @@
     "info": "🏆 Profile / အချက်အလက် / အကူအညီ",
     "group": "👥 လူခေါ် / စီမံခန့်ခွဲမှု",
     "owner": "👑 Owner / Staff / Editor",
-    "auto": "⚙️ အလိုအလျောက်စနစ်များ"
+    "auto": "⚙️ အလိုအလျောက်စနစ်များ",
+    "news": "📰 မြန်မာသတင်းများ"
   },
   "entries": [
     {
@@ -1525,6 +1526,101 @@
         "Due time မှသက်ဆိုင်ရာ group များသို့ပို့၊ job status နှင့် retry ကိုစီမံသည်။"
       ],
       "notes": "တကယ်ပို့နိုင်မှုက bot membership/permissions ပေါ်မူတည်သည်။"
+    },
+    {
+      "id": "news",
+      "aliases": [
+        "news",
+        "သတင်း"
+      ],
+      "title": "မြန်မာသတင်းစု",
+      "category": "news",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/news",
+      "steps": [
+        "လက်ရှိ cache မှ သတင်းစုကိုဖတ်ပါ။ Source link၊ Myanmar ရက်စွဲနှင့် article ID ပါသည်။",
+        "နောက်သတင်းများခလုတ်ဖြင့် ဆက်ဖတ်နိုင်သည်။",
+        "တစ်ဌာနဖော်ပြချက်နှင့် မီဒီယာအုပ်စုများတွင် ဆင်တူဖော်ပြချက်ကိုခွဲပြသည်။"
+      ],
+      "notes": "Default ၇၂ နာရီအတွင်းသတင်း။ မူရင်းခေါင်းစဉ်အခြေပြု digest ဖြစ်ပြီး full article မကူးပါ။ fact-check အတည်ပြုချက်ဟုမဆိုပါ။"
+    },
+    {
+      "id": "newssources",
+      "aliases": [
+        "newssources"
+      ],
+      "title": "သတင်း source status",
+      "category": "news",
+      "where": "Group / Private",
+      "who": "Member",
+      "usage": "/newssources",
+      "steps": [
+        "Feed တစ်ခုချင်း၏ status၊ လက်ခံနိုင်သော item အရေအတွက်နှင့် နောက်ဆုံးစစ်ချိန်ကိုကြည့်ပါ။"
+      ],
+      "notes": "RSS ၂၅ adapters / မီဒီယာအုပ်စု ၂၂။ Error source ကို working ဟုမတွက်ပါ။ Reuters/AP သည် indexed RSS adapter ဖြစ်ပြီး direct licensed API မဟုတ်ပါ။"
+    },
+    {
+      "id": "newson",
+      "aliases": [
+        "newson"
+      ],
+      "title": "Auto news ဖွင့်",
+      "category": "news",
+      "where": "Group",
+      "who": "Group Admin / Owner",
+      "usage": "/newson",
+      "steps": [
+        "ဒီ Group အတွက် auto digest ဖွင့်ပါ။ သတင်းအသစ်နှင့် အနည်းဆုံး source သတ်မှတ်ချက်ပြည့်မှပို့သည်။"
+      ],
+      "notes": "Default ၃ နာရီတစ်ခါ၊ media group အနည်းဆုံး ၂ ခု။ Auto မဖွင့်ထားလည်း /news ဖတ်နိုင်သည်။"
+    },
+    {
+      "id": "newsoff",
+      "aliases": [
+        "newsoff"
+      ],
+      "title": "Auto news ပိတ်",
+      "category": "news",
+      "where": "Group",
+      "who": "Group Admin / Owner",
+      "usage": "/newsoff",
+      "steps": [
+        "ဒီ Group အတွက် auto digest ပိတ်ပါ။"
+      ],
+      "notes": "Manual /news ဆက်သုံးနိုင်သည်။"
+    },
+    {
+      "id": "newsstatus",
+      "aliases": [
+        "newsstatus"
+      ],
+      "title": "Group news settings",
+      "category": "news",
+      "where": "Group",
+      "who": "Member",
+      "usage": "/newsstatus",
+      "steps": [
+        "လက်ရှိ auto status၊ ပို့နှုန်း၊ သတင်းအသက်နှင့် source threshold ကိုကြည့်ပါ။"
+      ],
+      "notes": "Owner editor Global/Group settings နှင့် Group explicit on/off သီးခြားရှိသည်။"
+    },
+    {
+      "id": "newsbrief",
+      "aliases": [
+        "newsbrief"
+      ],
+      "title": "ကိုယ်ပိုင်သတင်းအကျဉ်းချုပ် / ပြင်ဆင်ချက်",
+      "category": "news",
+      "where": "Private",
+      "who": "Owner",
+      "usage": "/newsbrief ID စာသား",
+      "steps": [
+        "မူရင်း source ကိုအရင်ဖတ်စစ်ပါ။ /news မှ article ID ကိုယူပါ။",
+        "Owner private chat တွင် ID နှင့် အကျဉ်းချုပ် ၅၀၀ စာလုံးအထိရေးပါ။",
+        "Source link နှင့် published date ကိုထိန်းထားပြီး brief အသစ်ကိုသုံးမည်။"
+      ],
+      "notes": "ယခင် auto ပို့ပြီးသောသတင်းကိုပြင်လျှင် eligible subscribed groups မှနောက်ပို့ချိန်တွင် update ရနိုင်သည်။ အကြောင်းအရာမှန်ကန်မှုကို Owner စစ်ရမည်။"
     }
   ]
 }

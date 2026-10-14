@@ -12419,5 +12419,322 @@
     "fields": [],
     "html": false,
     "max_length": 80
+  },
+  "msg.features.news.heading": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · heading",
+    "default": "📰 မြန်မာသတင်းစု\n{date}\n",
+    "fields": [
+      "date"
+    ],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.single": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · single",
+    "default": "သတင်းဌာနတစ်ခု၏ ဖော်ပြချက်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.multiple": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · multiple",
+    "default": "မီဒီယာအုပ်စု {count} ခုတွင် ဆင်တူဖော်ပြချက်ရှိသည်",
+    "fields": [
+      "count"
+    ],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.disclaimer": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · disclaimer",
+    "default": "ရင်းမြစ်ဖော်ပြချက်များကို စုထားခြင်းဖြစ်ပြီး သီးခြား fact-check အတည်ပြုချက်မဟုတ်ပါ။ မူရင်း link ကိုပါဖတ်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.empty": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · empty",
+    "default": "လက်ရှိရွေးထားသည့် source များတွင် သတ်မှတ်ချိန်အတွင်း သတင်းအသစ်မတွေ့ပါ။ /newssources ဖြင့် status ကြည့်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.unavailable": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · unavailable",
+    "default": "Source များကို ယာယီမရသေးပါ။ နောက်ဆုံး cache ရှိသလောက်သာဖတ်နိုင်သည်။ /newssources ဖြင့်စစ်ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.warming": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · warming",
+    "default": "သတင်း cache ကို ပြင်ဆင်နေပါသည်။ ခဏနေရင် /news ပြန်သုံးပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.group": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · group",
+    "default": "Auto news ကို Group ထဲတွင် /newson သို့မဟုတ် /newsoff ဖြင့်ထိန်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.admin": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · admin",
+    "default": "Group Admin သို့မဟုတ် Bot Owner သာ ပြင်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.on": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · on",
+    "default": "✅ ဒီ Group အတွက် auto news ဖွင့်ပြီးပြီ။ Source များတွင်သတင်းအသစ်ရှိပြီး သတ်မှတ်ချက်ပြည့်မှ ပို့မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.off": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · off",
+    "default": "⏸ ဒီ Group အတွက် auto news ပိတ်ပြီးပြီ။ /news နဲ့ ဆက်ဖတ်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.status": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · status",
+    "default": "📰 News status\nAuto: {enabled}\nပို့နှုန်း: {minutes} မိနစ်\nသတင်းအသက်: {hours} နာရီအတွင်း\nAuto အနည်းဆုံး media group: {minimum}\nSource ရွေးထားမှု: {sources}",
+    "fields": [
+      "enabled",
+      "minutes",
+      "hours",
+      "minimum",
+      "sources"
+    ],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.error": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · error",
+    "default": "သတင်းစနစ်ကို ခေတ္တမသုံးနိုင်သေးပါ။ ပြန်စမ်းပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.sources": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · sources",
+    "default": "🗞️ News sources\n{sources}\n\n✅ = feed ဖတ်ရ၊ ⏳ = မစစ်ရသေး၊ ⚠️ = error / timestamp မရှိ။ Feed ဖတ်ရခြင်းနှင့် သတင်းအသစ်ရှိခြင်းမတူပါ။",
+    "fields": [
+      "sources"
+    ],
+    "html": false,
+    "max_length": 3500
+  },
+  "msg.features.news.owner": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · owner",
+    "default": "Bot Owner private chat တွင်သာ ပြင်နိုင်သည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.brief_usage": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · brief_usage",
+    "default": "/newsbrief ID ကိုယ်ပိုင်အကျဉ်းချုပ်\nမူရင်းကိုစစ်ပြီးမှ ပြင်ပါ။ Source link နှင့်ရက်စွဲကိုထိန်းထားသည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.brief_saved": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · brief_saved",
+    "default": "✅ ကိုယ်ပိုင်အကျဉ်းချုပ် သိမ်းပြီးပြီ။ ယခင်ပို့ထားသောသတင်းဖြစ်လျှင် auto ဖွင့်ထားသော Group များသို့ update အဖြစ်နောက်ပို့ချိန်တွင်ရောက်မည်။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.update": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · update",
+    "default": "🔄 ပြင်ဆင်/ဖြည့်စွက်ထားသော ဖော်ပြချက်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.brief_note": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · brief_note",
+    "default": "အကျဉ်းချုပ်မရှိသေးသောသတင်းကို မူရင်းခေါင်းစဉ်အညွှန်းဖြင့်ဖော်ပြသည်။ အပြည့်အစုံကို ကူးမပို့ပါ။",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.checked": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · checked",
+    "default": "Feed နောက်ဆုံးစစ်ချိန်: {date}",
+    "fields": [
+      "date"
+    ],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.next": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · next",
+    "default": "နောက်သတင်းများ",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "msg.features.news.previous": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · previous",
+    "default": "ယခင်သတင်းများ",
+    "fields": [],
+    "html": false,
+    "max_length": 700
+  },
+  "cfg.features.news.source_ids": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · source_ids",
+    "default": [
+      "myanmar_now",
+      "irrawaddy",
+      "dvb",
+      "mizzima",
+      "bbc_burmese",
+      "rfa",
+      "voa",
+      "frontier",
+      "frontier_mm",
+      "kachin",
+      "kic",
+      "karen",
+      "shan",
+      "mon",
+      "thanlwin",
+      "dawei",
+      "khitthit",
+      "bbc_asia",
+      "guardian",
+      "aljazeera",
+      "france24",
+      "cna",
+      "dw",
+      "reuters",
+      "ap"
+    ]
+  },
+  "cfg.features.news.refresh_minutes": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · refresh_minutes",
+    "default": 30,
+    "minimum": 10,
+    "maximum": 180
+  },
+  "cfg.features.news.max_age_hours": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · max_age_hours",
+    "default": 72,
+    "minimum": 12,
+    "maximum": 168
+  },
+  "cfg.features.news.items": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · items",
+    "default": 5,
+    "minimum": 1,
+    "maximum": 8
+  },
+  "cfg.features.news.auto_enabled": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · auto_enabled",
+    "default": false
+  },
+  "cfg.features.news.interval_minutes": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · interval_minutes",
+    "default": 180,
+    "minimum": 30,
+    "maximum": 1440
+  },
+  "cfg.features.news.auto_min_sources": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · auto_min_sources",
+    "default": 2,
+    "minimum": 1,
+    "maximum": 5
+  },
+  "enabled.features.news.news_command": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · news_command",
+    "default": true
+  },
+  "enabled.features.news.news_control": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · news_control",
+    "default": true
+  },
+  "enabled.features.news.news_sources": {
+    "kind": "setting",
+    "category": "Myanmar News",
+    "label": "Myanmar News · news_sources",
+    "default": true
+  },
+  "msg.features.news.brief_label": {
+    "kind": "message",
+    "category": "Myanmar News",
+    "label": "Myanmar News · brief_label",
+    "default": "✍️ Owner ရေးသားထားသော အကျဉ်းချုပ်",
+    "fields": [],
+    "html": false,
+    "max_length": 700
   }
 }

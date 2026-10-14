@@ -323,6 +323,8 @@ from features.group_studio import register as register_group_studio, register_cu
 register_group_studio(app,bot)
 from features.command_help import register as register_command_help
 register_command_help(app,bot)
+from features.news import register as register_news
+register_news(bot)
 from features.draw_guess import register as register_draw_guess
 register_draw_guess(app,bot)
 from features.this_or_that import register as register_this_or_that
