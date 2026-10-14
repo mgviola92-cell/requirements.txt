@@ -12435,7 +12435,7 @@
     "kind": "message",
     "category": "Myanmar News",
     "label": "Myanmar News · single",
-    "default": "သတင်းဌာနတစ်ခု၏ ဖော်ပြချက်",
+    "default": "ရင်းမြစ် ၁ ခု၏ ဖော်ပြချက်",
     "fields": [],
     "html": false,
     "max_length": 700
@@ -12455,7 +12455,7 @@
     "kind": "message",
     "category": "Myanmar News",
     "label": "Myanmar News · disclaimer",
-    "default": "ရင်းမြစ်ဖော်ပြချက်များကို စုထားခြင်းဖြစ်ပြီး သီးခြား fact-check အတည်ပြုချက်မဟုတ်ပါ။ မူရင်း link ကိုပါဖတ်ပါ။",
+    "default": "ရင်းမြစ်အညွှန်းဖြစ်ပြီး fact-check အတည်ပြုချက်မဟုတ်ပါ။\n⏳ ခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကိုဖျက်မည်။",
     "fields": [],
     "html": false,
     "max_length": 700
@@ -12527,7 +12527,7 @@
     "kind": "message",
     "category": "Myanmar News",
     "label": "Myanmar News · status",
-    "default": "📰 News status\nAuto: {enabled}\nပို့နှုန်း: {minutes} မိနစ်\nသတင်းအသက်: {hours} နာရီအတွင်း\nAuto အနည်းဆုံး media group: {minimum}\nSource ရွေးထားမှု: {sources}",
+    "default": "📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nAuto ပို့ရန် သတင်းတစ်ပုဒ်ကို မတူသော သတင်းဌာနအုပ်စု အနည်းဆုံး {minimum} ခုက ဆင်တူဖော်ပြထားရမည်။ Telegram Group အရေအတွက်ကို ဆိုလိုခြင်းမဟုတ်ပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။",
     "fields": [
       "enabled",
       "minutes",
@@ -12598,7 +12598,7 @@
     "kind": "message",
     "category": "Myanmar News",
     "label": "Myanmar News · brief_note",
-    "default": "အကျဉ်းချုပ်မရှိသေးသောသတင်းကို မူရင်းခေါင်းစဉ်အညွှန်းဖြင့်ဖော်ပြသည်။ အပြည့်အစုံကို ကူးမပို့ပါ။",
+    "default": "ခေါင်းစဉ်ကိုဖတ်ပြီး သတင်းဌာနအမည်ကိုနှိပ်၍ အပြည့်အစုံဖတ်နိုင်သည်။",
     "fields": [],
     "html": false,
     "max_length": 700

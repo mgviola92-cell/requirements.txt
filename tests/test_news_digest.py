@@ -86,7 +86,40 @@ class DigestTests(unittest.TestCase):
         control=next(fn for kw,fn in handlers if 'newson' in kw.get('commands',[]))
         m=MagicMock();m.chat.type='supergroup';m.chat.id=-1;m.text='/newson';m.from_user.id=42
         bot.get_chat_member.return_value.status='member'
-        with patch('features.owner_operations.is_owner',return_value=False),patch.object(news,'get_db_connection') as db:control(m)
+        with patch('features.owner_operations.is_owner',return_value=False),patch.object(news,'get_db_connection') as db,patch.object(news,'track',side_effect=lambda m:m):control(m)
         db.assert_not_called();self.assertIn(news.text('admin'),bot.reply_to.call_args.args)
+
+class CleanupTests(unittest.TestCase):
+    def database(self):
+        con=MagicMock();con.__enter__.return_value=con
+        return con,con.cursor.return_value.__enter__.return_value
+
+    def test_send_tracks_five_minute_deadline(self):
+        con,cur=self.database();bot=MagicMock()
+        bot.send_message.return_value.chat.id=-42;bot.send_message.return_value.message_id=9
+        with patch.object(news,'get_db_connection',return_value=con):news.send(bot,-42,'news')
+        sql,args=cur.execute.call_args.args
+        self.assertIn("INTERVAL '5 minutes'",sql);self.assertEqual(args,(-42,9))
+
+    def test_tap_resets_only_existing_card(self):
+        con,cur=self.database();cur.fetchone.return_value=(9,)
+        with patch.object(news,'get_db_connection',return_value=con):self.assertTrue(news.touch(-42,9))
+        self.assertIn("SET expires_at=NOW()+INTERVAL '5 minutes'",cur.execute.call_args.args[0])
+        cur.fetchone.return_value=None
+        with patch.object(news,'get_db_connection',return_value=con):self.assertFalse(news.touch(-42,9))
+
+    def test_expired_cleanup_and_retry(self):
+        con,cur=self.database();cur.fetchall.return_value=[(-42,9),(-42,10)];bot=MagicMock()
+        bot.delete_message.side_effect=[None,RuntimeError('temporary network error')]
+        with patch.object(news,'get_db_connection',return_value=con):news.cleanup(bot)
+        calls=cur.execute.call_args_list
+        self.assertIn('expires_at<=NOW()',calls[0].args[0]);self.assertIn('FOR UPDATE SKIP LOCKED',calls[0].args[0])
+        self.assertIn('DELETE FROM news_messages',calls[1].args[0]);self.assertEqual(calls[1].args[1],(-42,9))
+        self.assertIn("INTERVAL '1 minute'",calls[2].args[0]);self.assertEqual(calls[2].args[1],(-42,10))
+
+    def test_groups_hide_owner_ids(self):
+        body,_,_=news.render(-42,[[item(key='secret-editor-id')]],[])
+        self.assertNotIn('<code>secret-editor-id</code>',body)
+        self.assertIn('🕒',body)
 
 if __name__=='__main__':unittest.main()

@@ -13,9 +13,9 @@ LOG=logging.getLogger(__name__);READY=False;MMT=ZoneInfo('Asia/Yangon')
 DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':False,'interval_minutes':180,'auto_min_sources':2}
 MESSAGES={
  'heading':'📰 မြန်မာသတင်းစု\n{date}\n',
- 'single':'သတင်းဌာနတစ်ခု၏ ဖော်ပြချက်',
+ 'single':'ရင်းမြစ် ၁ ခု၏ ဖော်ပြချက်',
  'multiple':'မီဒီယာအုပ်စု {count} ခုတွင် ဆင်တူဖော်ပြချက်ရှိသည်',
- 'disclaimer':'ရင်းမြစ်ဖော်ပြချက်များကို စုထားခြင်းဖြစ်ပြီး သီးခြား fact-check အတည်ပြုချက်မဟုတ်ပါ။ မူရင်း link ကိုပါဖတ်ပါ။',
+ 'disclaimer':'ရင်းမြစ်အညွှန်းဖြစ်ပြီး fact-check အတည်ပြုချက်မဟုတ်ပါ။\n⏳ ခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကိုဖျက်မည်။',
  'empty':'လက်ရှိရွေးထားသည့် source များတွင် သတ်မှတ်ချိန်အတွင်း သတင်းအသစ်မတွေ့ပါ။ /newssources ဖြင့် status ကြည့်နိုင်သည်။',
  'unavailable':'Source များကို ယာယီမရသေးပါ။ နောက်ဆုံး cache ရှိသလောက်သာဖတ်နိုင်သည်။ /newssources ဖြင့်စစ်ပါ။',
  'warming':'သတင်း cache ကို ပြင်ဆင်နေပါသည်။ ခဏနေရင် /news ပြန်သုံးပါ။',
@@ -23,7 +23,7 @@ MESSAGES={
  'admin':'Group Admin သို့မဟုတ် Bot Owner သာ ပြင်နိုင်သည်။',
  'on':'✅ ဒီ Group အတွက် auto news ဖွင့်ပြီးပြီ။ Source များတွင်သတင်းအသစ်ရှိပြီး သတ်မှတ်ချက်ပြည့်မှ ပို့မည်။',
  'off':'⏸ ဒီ Group အတွက် auto news ပိတ်ပြီးပြီ။ /news နဲ့ ဆက်ဖတ်နိုင်သည်။',
- 'status':'📰 News status\nAuto: {enabled}\nပို့နှုန်း: {minutes} မိနစ်\nသတင်းအသက်: {hours} နာရီအတွင်း\nAuto အနည်းဆုံး media group: {minimum}\nSource ရွေးထားမှု: {sources}',
+ 'status':'📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nAuto ပို့ရန် သတင်းတစ်ပုဒ်ကို မတူသော သတင်းဌာနအုပ်စု အနည်းဆုံး {minimum} ခုက ဆင်တူဖော်ပြထားရမည်။ Telegram Group အရေအတွက်ကို ဆိုလိုခြင်းမဟုတ်ပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။',
  'error':'သတင်းစနစ်ကို ခေတ္တမသုံးနိုင်သေးပါ။ ပြန်စမ်းပါ။',
  'sources':'🗞️ News sources\n{sources}\n\n✅ = feed ဖတ်ရ၊ ⏳ = မစစ်ရသေး၊ ⚠️ = error / timestamp မရှိ။ Feed ဖတ်ရခြင်းနှင့် သတင်းအသစ်ရှိခြင်းမတူပါ။',
  'owner':'Bot Owner private chat တွင်သာ ပြင်နိုင်သည်။',
@@ -31,7 +31,7 @@ MESSAGES={
  'brief_saved':'✅ ကိုယ်ပိုင်အကျဉ်းချုပ် သိမ်းပြီးပြီ။ ယခင်ပို့ထားသောသတင်းဖြစ်လျှင် auto ဖွင့်ထားသော Group များသို့ update အဖြစ်နောက်ပို့ချိန်တွင်ရောက်မည်။',
  'update':'🔄 ပြင်ဆင်/ဖြည့်စွက်ထားသော ဖော်ပြချက်',
  'brief_label':'✍️ Owner ရေးသားထားသော အကျဉ်းချုပ်',
- 'brief_note':'အကျဉ်းချုပ်မရှိသေးသောသတင်းကို မူရင်းခေါင်းစဉ်အညွှန်းဖြင့်ဖော်ပြသည်။ အပြည့်အစုံကို ကူးမပို့ပါ။',
+ 'brief_note':'ခေါင်းစဉ်ကိုဖတ်ပြီး သတင်းဌာနအမည်ကိုနှိပ်၍ အပြည့်အစုံဖတ်နိုင်သည်။',
  'checked':'Feed နောက်ဆုံးစစ်ချိန်: {date}',
  'next':'နောက်သတင်းများ','previous':'ယခင်သတင်းများ'}
 
@@ -43,11 +43,41 @@ def stamp(value):return datetime.fromtimestamp(value,MMT).strftime('%d/%m/%Y %H:
 def initialize():
     with get_db_connection() as con,con.cursor() as cur:
         cur.execute('CREATE TABLE IF NOT EXISTS news_items(id TEXT PRIMARY KEY,data JSONB NOT NULL,published TIMESTAMPTZ NOT NULL)')
+        cur.execute('CREATE TABLE IF NOT EXISTS news_messages(chat_id BIGINT NOT NULL,message_id BIGINT NOT NULL,expires_at TIMESTAMPTZ NOT NULL,PRIMARY KEY(chat_id,message_id))')
         cur.execute('CREATE INDEX IF NOT EXISTS news_publish_date ON news_items(published DESC)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_health(source_id TEXT PRIMARY KEY,checked TIMESTAMPTZ,last_ok TIMESTAMPTZ,status TEXT NOT NULL,items INTEGER NOT NULL DEFAULT 0)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_groups(chat_id BIGINT PRIMARY KEY,enabled BOOLEAN, next_due TIMESTAMPTZ, retry_after TIMESTAMPTZ)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_jobs(key TEXT PRIMARY KEY,next_run TIMESTAMPTZ NOT NULL)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_sent(chat_id BIGINT NOT NULL,item_id TEXT NOT NULL,revision TEXT NOT NULL, sent_at TIMESTAMPTZ DEFAULT NOW(),PRIMARY KEY(chat_id,item_id))')
+
+def track(message):
+    """Persist inactivity deadlines so restart does not leave news cards behind."""
+    try:
+        with get_db_connection() as con,con.cursor() as cur:
+            cur.execute("INSERT INTO news_messages VALUES(%s,%s,NOW()+INTERVAL '5 minutes') ON CONFLICT(chat_id,message_id) DO UPDATE SET expires_at=EXCLUDED.expires_at",(message.chat.id,message.message_id))
+    except Exception:LOG.exception('News cleanup tracking failed')
+    return message
+
+def send(bot,*args,**kwargs):return track(bot.send_message(*args,**kwargs))
+def reply(bot,*args,**kwargs):return track(bot.reply_to(*args,**kwargs))
+
+def touch(cid,mid):
+    with get_db_connection() as con,con.cursor() as cur:
+        cur.execute("UPDATE news_messages SET expires_at=NOW()+INTERVAL '5 minutes' WHERE chat_id=%s AND message_id=%s RETURNING message_id",(cid,mid))
+        return bool(cur.fetchone())
+
+def cleanup(bot):
+    # A row lock serializes expiry and button taps, including across deploys.
+    with get_db_connection() as con,con.cursor() as cur:
+        cur.execute('SELECT chat_id,message_id FROM news_messages WHERE expires_at<=NOW() ORDER BY expires_at LIMIT 100 FOR UPDATE SKIP LOCKED')
+        for cid,mid in cur.fetchall():
+            try:bot.delete_message(cid,mid)
+            except Exception as exc:
+                reason=str(exc).lower()
+                if 'message to delete not found' not in reason:
+                    cur.execute("UPDATE news_messages SET expires_at=NOW()+INTERVAL '1 minute' WHERE chat_id=%s AND message_id=%s",(cid,mid))
+                    LOG.warning('News cleanup retry: %s',type(exc).__name__);continue
+            cur.execute('DELETE FROM news_messages WHERE chat_id=%s AND message_id=%s',(cid,mid))
 
 def ingest(source,now):
     sid=source['id']
@@ -107,7 +137,9 @@ def render(cid,groups,health,offset=0):
             if item['family'] in seen:continue
             seen.add(item['family'])
             links.append('<a href="'+html.escape(item['url'],quote=True)+'">'+html.escape(item['name'])+'</a>')
-        block=f'<b>{n}. {html.escape(title)}</b>\n{html.escape(label)}\n'+(' · '.join(links[:4]))+'\n'+html.escape(stamp(lead['published']))+' · <code>'+lead['key']+'</code>\n'
+        block=f'<b>{n}. {html.escape(title)}</b>\n{html.escape(label)}\n'+(' · '.join(links[:4]))+'\n'+'🕒 '+html.escape(stamp(lead['published']))+'\n'
+        from features.owner_operations import is_owner
+        if cid>0 and is_owner(cid):block+='ID: <code>'+lead['key']+'</code>\n'
         if lead.get('brief'):block+=html.escape(text('brief_label'))+'\n'
         elif lead.get('correction'):block+=html.escape(text('update'))+'\n'
         if len('\n'.join(parts+[block]+footer))>3900:break
@@ -147,7 +179,7 @@ def auto(bot):
                     eligible.append(group)
                 body,items,_=render(cid,eligible,health)
                 if items:
-                    bot.send_message(cid,body,parse_mode='HTML',disable_web_page_preview=True)
+                    send(bot,cid,body,parse_mode='HTML',disable_web_page_preview=True)
                     with get_db_connection() as con,con.cursor() as cur:
                         for item in items:cur.execute('INSERT INTO news_sent(chat_id,item_id,revision) VALUES(%s,%s,%s) ON CONFLICT(chat_id,item_id) DO UPDATE SET revision=EXCLUDED.revision,sent_at=NOW()',(cid,item['key'],item['revision']))
                 with get_db_connection() as con,con.cursor() as cur:
@@ -168,8 +200,8 @@ def register(bot):
     def news_command(m):
         try:
             groups,health=load(m.chat.id);body,items,count=render(m.chat.id,groups,health)
-            bot.send_message(m.chat.id,body,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(0,len(groups),count))
-        except Exception:bot.reply_to(m,text('error'))
+            send(bot,m.chat.id,body,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(0,len(groups),count))
+        except Exception:reply(bot,m,text('error'))
     @bot.message_handler(commands=['newssources'])
     def news_sources(m):
         try:
@@ -180,36 +212,36 @@ def register(bot):
                 rows.append(f'{symbol} {CATALOG[sid]["name"]} [{sid}]\n{status} · {count} news · '+(stamp(checked.timestamp()) if checked else '—'))
             value=text('sources',sources='\n'.join(rows))
             # Split only at source boundaries, keeping each Telegram message bounded.
-            if len(value)<3900:bot.send_message(m.chat.id,value,parse_mode=None)
+            if len(value)<3900:send(bot,m.chat.id,value,parse_mode=None)
             else:
-                for i in range(0,len(rows),12):bot.send_message(m.chat.id,text('sources',sources='\n'.join(rows[i:i+12]))[:3900],parse_mode=None)
-        except Exception:bot.reply_to(m,text('error'))
+                for i in range(0,len(rows),12):send(bot,m.chat.id,text('sources',sources='\n'.join(rows[i:i+12]))[:3900],parse_mode=None)
+        except Exception:reply(bot,m,text('error'))
     @bot.message_handler(commands=['newson','newsoff','newsstatus'])
     def news_control(m):
-        if m.chat.type not in ('group','supergroup'):bot.reply_to(m,text('group'));return
+        if m.chat.type not in ('group','supergroup'):reply(bot,m,text('group'));return
         try:
             command=m.text.split()[0].split('@')[0].lstrip('/')
             if command=='newsstatus':
                 with get_db_connection() as con,con.cursor() as cur:cur.execute('SELECT enabled FROM news_groups WHERE chat_id=%s',(m.chat.id,));row=cur.fetchone()
-                bot.reply_to(m,text('status',enabled=enabled(m.chat.id,row[0] if row else None),minutes=cfg('interval_minutes',m.chat.id),hours=cfg('max_age_hours',m.chat.id),minimum=cfg('auto_min_sources',m.chat.id),sources=len(sources_for(m.chat.id))));return
-            if not manage(m):bot.reply_to(m,text('admin'));return
+                reply(bot,m,text('status',enabled='ဖွင့်ထားသည် ✅' if enabled(m.chat.id,row[0] if row else None) else 'ပိတ်ထားသည် ⏸',minutes=cfg('interval_minutes',m.chat.id),hours=cfg('max_age_hours',m.chat.id),minimum=cfg('auto_min_sources',m.chat.id),sources=len(sources_for(m.chat.id))));return
+            if not manage(m):reply(bot,m,text('admin'));return
             with get_db_connection() as con,con.cursor() as cur:cur.execute('INSERT INTO news_groups(chat_id,enabled,next_due,retry_after) VALUES(%s,%s,NOW(),NULL) ON CONFLICT(chat_id) DO UPDATE SET enabled=EXCLUDED.enabled,next_due=NOW(),retry_after=NULL',(m.chat.id,command=='newson'))
-            bot.reply_to(m,text('on' if command=='newson' else 'off'))
-        except Exception:bot.reply_to(m,text('error'))
+            reply(bot,m,text('on' if command=='newson' else 'off'))
+        except Exception:reply(bot,m,text('error'))
     @bot.message_handler(commands=['newsbrief'])
     def news_brief(m):
         from features.owner_operations import is_owner
-        if m.chat.type!='private' or not is_owner(m.from_user.id):bot.reply_to(m,text('owner'));return
+        if m.chat.type!='private' or not is_owner(m.from_user.id):reply(bot,m,text('owner'));return
         parts=m.text.split(maxsplit=2)
-        if len(parts)!=3 or len(parts[2])>500:bot.reply_to(m,text('brief_usage'));return
+        if len(parts)!=3 or len(parts[2])>500:reply(bot,m,text('brief_usage'));return
         try:
             with get_db_connection() as con,con.cursor() as cur:
                 cur.execute('SELECT data FROM news_items WHERE id=%s FOR UPDATE',(parts[1],));row=cur.fetchone()
-                if not row:bot.reply_to(m,text('brief_usage'));return
+                if not row:reply(bot,m,text('brief_usage'));return
                 item=row[0];item['brief']=parts[2];item['revision']=hashlib.sha256(parts[2].encode()).hexdigest()[:16]
                 cur.execute('UPDATE news_items SET data=%s::jsonb WHERE id=%s',(json.dumps(item,ensure_ascii=False),parts[1]))
-            bot.reply_to(m,text('brief_saved'))
-        except Exception:bot.reply_to(m,text('error'))
+            reply(bot,m,text('brief_saved'))
+        except Exception:reply(bot,m,text('error'))
     @bot.callback_query_handler(func=lambda c:bool(c.data and c.data.startswith('news:')))
     def news_page(c):
         try:bot.answer_callback_query(c.id)
@@ -217,6 +249,8 @@ def register(bot):
         if not c.message:return
         try:
             offset=int(c.data.split(':')[1]);cid=c.message.chat.id
+            if not 0<=offset<=250:return
+            if not touch(cid,c.message.message_id):return
             from features.owner_operations import feature_allowed
             if not feature_allowed('enabled.features.news.news_command',cid) or not setting_value('enabled.features.news.news_command',True,scope=cid if cid<0 else 0):return
             if not 0<=offset<=250:return
@@ -230,3 +264,9 @@ def register(bot):
                 except Exception:LOG.exception('News worker failed')
                 time.sleep(60)
         threading.Thread(target=loop,name='myanmar-news',daemon=True).start()
+        def cleanup_loop():
+            while True:
+                try:cleanup(bot)
+                except Exception:LOG.exception('News cleanup failed')
+                time.sleep(10)
+        threading.Thread(target=cleanup_loop,name='news-cleanup',daemon=True).start()
