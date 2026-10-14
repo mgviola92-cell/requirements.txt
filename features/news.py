@@ -1,4 +1,4 @@
-"""Shared durable RSS cache and opt-in Myanmar digest. Never copies full articles."""
+"""Shared durable RSS cache and opt-out Myanmar digest. Never copies full articles."""
 import hashlib,html,json,logging,threading,time
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from datetime import datetime,timezone
@@ -10,7 +10,7 @@ from core import news_digest as engine
 from data.news_sources import CATALOG
 
 LOG=logging.getLogger(__name__);READY=False;MMT=ZoneInfo('Asia/Yangon')
-DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':False,'interval_minutes':180,'auto_min_sources':2}
+DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':True,'interval_minutes':180,'auto_min_sources':2}
 MESSAGES={
  'heading':'📰 မြန်မာသတင်းစု\n{date}\n',
  'single':'ရင်းမြစ် ၁ ခု၏ ဖော်ပြချက်',

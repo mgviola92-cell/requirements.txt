@@ -12692,7 +12692,7 @@
     "kind": "setting",
     "category": "Myanmar News",
     "label": "Myanmar News · auto_enabled",
-    "default": false
+    "default": true
   },
   "cfg.features.news.interval_minutes": {
     "kind": "setting",
