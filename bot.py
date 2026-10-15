@@ -1324,6 +1324,11 @@ def ban_user(message):
     target = message.reply_to_message.from_user
 
     try:
+        from core.moderation import notice
+        explanation = notice(bot, message.chat.id, target, 'ban')
+        if explanation:
+            bot.reply_to(message, explanation)
+            return
         bot.ban_chat_member(
             message.chat.id,
             target.id
@@ -1367,6 +1372,11 @@ def unban_user(message):
     target = message.reply_to_message.from_user
 
     try:
+        from core.moderation import notice
+        explanation = notice(bot, message.chat.id, target, 'unban')
+        if explanation:
+            bot.reply_to(message, explanation)
+            return
         bot.unban_chat_member(
             message.chat.id,
             target.id,
@@ -1411,6 +1421,11 @@ def mute_user(message):
     target = message.reply_to_message.from_user
 
     try:
+        from core.moderation import notice
+        explanation = notice(bot, message.chat.id, target, 'mute')
+        if explanation:
+            bot.reply_to(message, explanation)
+            return
         permissions = ChatPermissions(
             can_send_messages=False
         )
@@ -1459,6 +1474,11 @@ def unmute_user(message):
     target = message.reply_to_message.from_user
 
     try:
+        from core.moderation import notice
+        explanation = notice(bot, message.chat.id, target, 'unmute')
+        if explanation:
+            bot.reply_to(message, explanation)
+            return
         permissions = ChatPermissions(
             can_send_messages=True,
             can_send_audios=True,

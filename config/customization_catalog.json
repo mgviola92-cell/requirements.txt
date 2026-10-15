@@ -12736,5 +12736,113 @@
     "fields": [],
     "html": false,
     "max_length": 700
+  },
+  "msg.core.moderation.missing_target": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · ❌ ဒီစာက User account ကပို့ထားတဲ့စာ မဟုတ်လို့ ဒီ command ကို သုံးလို့မရပါဘူး။",
+    "default": "❌ ဒီစာက User account ကပို့ထားတဲ့စာ မဟုတ်လို့ ဒီ command ကို သုံးလို့မရပါဘူး။",
+    "fields": [],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.ban_admin": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · ❌ {target_first_name} က Group Admin ဖြစ်နေလို့ ဘမ်းလို့မရပါဘူး။",
+    "default": "❌ {target_first_name} က Group Admin ဖြစ်နေလို့ ဘမ်းလို့မရပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.mute_admin": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · ❌ {target_first_name} က Group Admin ဖြစ်နေလို့ မြုလို့မရပါဘူး။",
+    "default": "❌ {target_first_name} က Group Admin ဖြစ်နေလို့ မြုလို့မရပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.already_banned": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🚫 {target_first_name} ကို ဘမ်းထားပြီးသားပါ။",
+    "default": "🚫 {target_first_name} ကို ဘမ်းထားပြီးသားပါ။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.not_banned": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🔓 {target_first_name} ကို ဘမ်းထားတာမရှိလို့ ထပ်ဖြည်စရာမလိုပါဘူး။",
+    "default": "🔓 {target_first_name} ကို ဘမ်းထားတာမရှိလို့ ထပ်ဖြည်စရာမလိုပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.already_muted": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🔇 {target_first_name} ကို မြုထားပြီးသားပါ။",
+    "default": "🔇 {target_first_name} ကို မြုထားပြီးသားပါ။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.not_muted": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🔊 {target_first_name} ကို မြုထားတာမရှိလို့ ထပ်ဖြည်စရာမလိုပါဘူး။",
+    "default": "🔊 {target_first_name} ကို မြုထားတာမရှိလို့ ထပ်ဖြည်စရာမလိုပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.banned_mute": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🚫 {target_first_name} ကို ဘမ်းထားလို့ မြုလို့မရပါဘူး။",
+    "default": "🚫 {target_first_name} ကို ဘမ်းထားလို့ မြုလို့မရပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.banned_unmute": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · 🚫 {target_first_name} ကို ဘမ်းထားပါတယ်။ ပြန်ဝင်ခွင့်ပေးချင်ရင် /မဘမ်း ကိုသုံးပါ။",
+    "default": "🚫 {target_first_name} ကို ဘမ်းထားပါတယ်။ ပြန်ဝင်ခွင့်ပေးချင်ရင် /မဘမ်း ကိုသုံးပါ။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
+  },
+  "msg.core.moderation.not_member": {
+    "kind": "message",
+    "category": "moderation",
+    "label": "Admin control · ❌ {target_first_name} က Group ထဲမှာ မရှိလို့ မြုလို့မရပါဘူး။",
+    "default": "❌ {target_first_name} က Group ထဲမှာ မရှိလို့ မြုလို့မရပါဘူး။",
+    "fields": [
+      "target_first_name"
+    ],
+    "max_length": 1024,
+    "html": false
   }
 }
