@@ -8,7 +8,7 @@ import hashlib
 from datetime import datetime
 from telebot.handler_backends import ContinueHandling
 from database.daily_challenge import (
-    initialize_daily_challenge, register_group, active_groups, previous_card,
+    initialize_daily_challenge, register_group, active_groups, previous_card, delivery_failed, delivery_ready,
     record_message, overview, claim, get_card_id, set_card_id, today,
     missions_for, mission_state, MMT, personal_overview, personal_claim, active_cycle,
 )
@@ -51,6 +51,7 @@ def register_daily_challenge(bot):
             if not force and now-_last_refresh.get(key,0)<30: return False
             _last_refresh[key]=now
         try:
+            if not delivery_ready(chat_id):return False
             existing=get_card_id(chat_id,day)
             if not existing and not feature_allowed('game:daily_challenge',chat_id):return False
             s=overview(chat_id,day=day)
@@ -62,6 +63,8 @@ def register_daily_challenge(bot):
                 except Exception as exc:
                     # Editing an unchanged card is normal, not a reason to spam another.
                     if 'message is not modified' in str(exc).lower():return True
+                    if not any(t in str(exc).lower() for t in ('message to edit not found','message_id_invalid','message not found')):
+                        raise
                     print('Daily Challenge edit error:',exc)
                 else:
                     return True
@@ -77,7 +80,9 @@ def register_daily_challenge(bot):
             return True
         except Exception as exc:
             print('Daily Challenge publish error:',exc)
-            with _lock:_last_refresh.pop((chat_id,day),None)
+            try:delivery_failed(chat_id,exc)
+            except Exception:pass
+            # Retain the short in-process throttle; durable retry backs off auto posts.
             return False
 
     def ensure_main(chat_id):

@@ -213,7 +213,7 @@ class OwnerOperationsTests(unittest.TestCase):
         bot=MagicMock();overview=Mock(return_value={})
         env={'_ready':True,'today':lambda:'today','time':time,'_lock':threading.RLock(),
              '_last_refresh':{},'get_card_id':Mock(return_value=None),'overview':overview,
-             'card':lambda snapshot:'photo','bot':bot}
+             'card':lambda snapshot:'photo','bot':bot,'delivery_ready':lambda cid:True}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[function],type_ignores=[])),'daily-publish','exec'),env)
         with patch.object(ops,'feature_allowed',return_value=False):
             self.assertFalse(env['publish'](-101,force=True));overview.assert_not_called();bot.send_photo.assert_not_called()

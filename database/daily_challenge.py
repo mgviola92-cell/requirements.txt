@@ -27,6 +27,8 @@ def initialize_daily_challenge():
               PRIMARY KEY(chat_id,day))''')
             cur.execute('''CREATE TABLE IF NOT EXISTS daily_groups (
               chat_id BIGINT PRIMARY KEY, last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW())''')
+            cur.execute('ALTER TABLE daily_groups ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT TRUE')
+            cur.execute('ALTER TABLE daily_groups ADD COLUMN IF NOT EXISTS retry_after TIMESTAMPTZ')
             cur.execute('''CREATE TABLE IF NOT EXISTS daily_game_events (
                 chat_id BIGINT NOT NULL, day DATE NOT NULL, user_id BIGINT NOT NULL,
                 event_id TEXT NOT NULL, kind TEXT NOT NULL, game TEXT NOT NULL,
@@ -50,13 +52,31 @@ def register_group(chat_id):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''INSERT INTO daily_groups(chat_id,last_seen) VALUES(%s,NOW())
-              ON CONFLICT(chat_id) DO UPDATE SET last_seen=NOW()''',(chat_id,))
+              ON CONFLICT(chat_id) DO UPDATE SET last_seen=NOW(),enabled=TRUE''',(chat_id,))
 
 def active_groups():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT chat_id FROM daily_groups WHERE last_seen>NOW()-INTERVAL '30 days'")
+            cur.execute("SELECT chat_id FROM daily_groups WHERE enabled AND (retry_after IS NULL OR retry_after<=NOW()) AND last_seen>NOW()-INTERVAL '30 days'")
             return [r[0] for r in cur.fetchall()]
+
+def delivery_ready(chat_id):
+    with get_db_connection() as conn,conn.cursor() as cur:
+        cur.execute('SELECT enabled AND (retry_after IS NULL OR retry_after<=NOW()) FROM daily_groups WHERE chat_id=%s',(chat_id,))
+        row=cur.fetchone()
+        return bool(row and row[0])
+
+
+def delivery_failed(chat_id, error):
+    """Stop unreachable chats; back off temporary errors without deleting progress."""
+    reason=str(error).lower()
+    code=getattr(error,'error_code',None)
+    permanent=(code in (400,403) and any(t in reason for t in (
+        'chat not found','group chat was deleted','bot was kicked','bot is not a member',
+        'user is deactivated','group chat was deactivated')))
+    with get_db_connection() as conn,conn.cursor() as cur:
+        cur.execute("UPDATE daily_groups SET enabled=%s,retry_after=NOW()+INTERVAL '30 minutes' WHERE chat_id=%s",(not permanent,chat_id))
+
 
 def previous_card(chat_id, day):
     with get_db_connection() as conn:

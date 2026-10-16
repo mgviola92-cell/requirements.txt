@@ -362,7 +362,10 @@ def tick(bot):
                 s['deadline']=now+30;game.emit(s,cid,'phase')
                 for p in s['players']:game.emit(s,p['id'],'panel')
             else:game.advance(s,now,random.SystemRandom())
-            persist(cur,s,now)
+            if now < s['deadline'] and not s['events']:
+                cur.execute("UPDATE nan_yate_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
+            else:
+                persist(cur,s,now)
         invalidate_rewards(s)
         if s['phase'] in ('finished','cancelled'):end_session(cid,'nan_yate')
     drain(bot)

@@ -4,6 +4,12 @@
 
 import os
 import psycopg
+import atexit
+import threading
+from psycopg_pool import ConnectionPool
+
+_pool = None
+_pool_lock = threading.Lock()
 
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -16,7 +22,7 @@ def database_available():
 
 def get_db_connection():
     """
-    Neon PostgreSQL connection အသစ်တစ်ခု ဖွင့်ပေးမည်။
+    Shared pool မှ Neon PostgreSQL connection ကို ခဏငှားပေးမည်။
 
     အသုံးပြုပုံ:
         with get_db_connection() as conn:
@@ -29,10 +35,18 @@ def get_db_connection():
             "Render Environment Variables ကို စစ်ပါ။"
         )
 
-    return psycopg.connect(
-        DATABASE_URL,
-        connect_timeout=20
-    )
+    global _pool
+    with _pool_lock:
+        if _pool is None:
+            pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=12,
+                                  timeout=20, max_idle=300, max_lifetime=1800,
+                                  kwargs={'connect_timeout':20}, open=False)
+            pool.open()
+            _pool = pool
+            atexit.register(pool.close)
+    # Commit on success / rollback on failure, then return to the shared pool.
+    return _pool.connection()
+
 
 
 def test_database_connection():

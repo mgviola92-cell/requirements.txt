@@ -249,7 +249,10 @@ def tick(bot):
             if now>s['deadline'] and now-s['updated']>30 and s['phase']!='lobby':
                 s['deadline']=now+30;g.event(s,'round');g.event(s,'drawer',uid=s['drawer'])
             else:g.advance(s,now,random.SystemRandom(),bank(s))
-            persist(cur,s,now)
+            if now < s['deadline'] and not s['events']:
+                cur.execute("UPDATE draw_guess_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
+            else:
+                persist(cur,s,now)
         if s['phase'] in ('finished','cancelled'):end_session(cid,'draw_guess');ACTIVE.discard(cid)
     drain(bot)
 

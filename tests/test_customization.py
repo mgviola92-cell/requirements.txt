@@ -195,7 +195,8 @@ class CustomizationTests(unittest.TestCase):
         conn=MagicMock();conn.__enter__.return_value=conn
         cur=conn.cursor.return_value.__enter__.return_value
         cur.fetchall.return_value=[];cur.fetchone.return_value=(0,0,0)
-        with patch.dict(os.environ,{'BOT_TOKEN':'123456:TEST','DATABASE_URL':'postgresql://test'},clear=False),patch('telebot.TeleBot',return_value=fakebot),patch('database.db.get_db_connection',return_value=conn),patch('database.db.DATABASE_URL','postgresql://test'),patch('psycopg.connect',return_value=conn),patch('threading.Thread.start'),patch('threading.Timer.start'),patch('flask.Flask.run'),contextlib.redirect_stdout(io.StringIO()):
+        pool=MagicMock();pool.connection.return_value=conn
+        with patch.dict(os.environ,{'BOT_TOKEN':'123456:TEST','DATABASE_URL':'postgresql://test'},clear=False),patch('telebot.TeleBot',return_value=fakebot),patch('database.db.get_db_connection',return_value=conn),patch('database.db.DATABASE_URL','postgresql://test'),patch('psycopg.connect',return_value=conn),patch('database.db._pool',pool),patch('threading.Thread.start'),patch('threading.Timer.start'),patch('flask.Flask.run'),contextlib.redirect_stdout(io.StringIO()):
             runpy.run_path('bot.py',run_name='__main__')
 
     def test_settings_are_not_frozen_in_function_defaults(self):

@@ -1,4 +1,4 @@
 pyTelegramBotAPI
 flask
-psycopg[binary]
+psycopg[binary,pool]
 Pillow
