@@ -431,7 +431,7 @@ def _resume_broadcasts():
             for jid in jobs:_send_broadcast(jid)
         except Exception as exc:
             print("Broadcast supervisor:",type(exc).__name__)
-        time.sleep(15)
+        time.sleep(60)
 
 def register_owner_dashboard(app,bot):
     global BOT

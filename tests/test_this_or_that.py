@@ -6,7 +6,6 @@ from PIL import Image
 from data import this_or_that as data
 from games import this_or_that as game
 from features import this_or_that as feature
-from ui import this_or_that_card as ui
 from core.sessions import can_start_session,start_session,end_session
 
 class EngineTests(unittest.TestCase):
@@ -35,12 +34,6 @@ class EngineTests(unittest.TestCase):
         s=game.new(-1,1,{});self.assertEqual(game.counts(s),(0,0,0,0))
         s['votes']={'1':'a','2':'b'};self.assertEqual(game.counts(s),(1,1,50,50))
 
-    def test_all_options_render_and_asset_missing_is_typography(self):
-        for i in range(0,80,2):
-            q={'a':data.OPTIONS[i],'b':data.OPTIONS[i+1]}
-            with Image.open(ui.card(q,i)) as image:self.assertEqual(image.size,(1200,760))
-        with patch.object(ui,'ATLAS','/nonexistent/photo.jpg'):
-            with Image.open(ui.card(data.question(0))) as image:self.assertEqual(image.size,(1200,760))
 
     def test_owner_option_text_and_auto_setting_validation(self):
         from core import customization as custom
@@ -61,9 +54,10 @@ class DeliveryTests(unittest.TestCase):
     def state(self):
         s=game.new(-1,1,{});game.open_round(s,0,time.time());s['card']=40;return s
 
-    def test_photo_failure_falls_back_to_text_before_old_card_removed(self):
+    def test_text_card_sent_before_old_card_removed(self):
         bot=MagicMock();bot.send_photo.side_effect=RuntimeError('photo error');bot.send_message.return_value.message_id=41
         s=self.state();feature.publish(bot,s)
+        bot.send_photo.assert_not_called()
         self.assertFalse(s['photo']);self.assertEqual(s['card'],41)
         bot.delete_message.assert_called_once_with(-1,40)
         self.assertIn('reply_markup',bot.send_message.call_args.kwargs)

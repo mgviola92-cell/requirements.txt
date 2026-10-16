@@ -268,12 +268,12 @@ PERSONAL_POOL = (
 )
 PERSONAL_REWARDS=((3,8),(8,15),(15,25))
 PERSONAL_DESCRIPTIONS={
-    ('message',''):'Send {n} different meaningful group messages',
-    ('play',''):'Participate in {n} group game actions',
-    ('correct',''):'Get {n} correct game answers',
-    ('win',''):'Win {n} mini-games',
-    ('correct','math_battle'):'Get {n} Math Battle answers correct',
-    ('correct','word_chain'):'Submit {n} correct Word Chain words',
+    ('message',''):'မတူညီသော အဓိပ္ပါယ်ရှိသည့်စာ {n} ကြိမ် ပို့ပါ',
+    ('play',''):'Group ဂိမ်းတွင် {n} ကြိမ် ပါဝင်ပါ',
+    ('correct',''):'ဂိမ်းမေးခွန်း {n} ခု မှန်အောင်ဖြေပါ',
+    ('win',''):'ဂိမ်း {n} ပွဲ အနိုင်ရပါ',
+    ('correct','math_battle'):'Math Battle အဖြေ {n} ခု မှန်အောင်ဖြေပါ',
+    ('correct','word_chain'):'Word Chain တွင် စကားလုံး {n} လုံး ဆက်ပါ',
 }
 
 def personal_missions(chat_id,user_id,day=None):

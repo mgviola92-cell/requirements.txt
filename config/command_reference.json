@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12",
+  "version": "2026-10-16",
   "categories": {
     "games": "🎮 ဂိမ်းများ",
     "game_control": "🛑 ဂိမ်းအကူနှင့် ရပ်ရန်",
@@ -24,12 +24,11 @@
       "usage": "/tot",
       "steps": [
         "/tot သို့မဟုတ် /thisorthat ပို့ပါ။",
-        "A/B option ပုံကတ်ထဲက ပိုကြိုက်တာကိုရွေးပါ။ တစ်ယောက်တစ် round တစ်မဲ။",
-        "၅ round၊ တစ် round ၃၀ စက္ကန့် default။ မဲအရေအတွက်နှင့် ရာခိုင်နှုန်းကို card တွင်ပြသည်။",
-        "ပွဲဆုံးလျှင် ပါဝင်သူကို +3 points default တစ်ကြိမ်ပေးသည်။",
-        "ပုံပို့မရလျှင် စာနှင့်ခလုတ်ဖြင့်ဆက်ဆော့သည်။"
+        "စာကတ်မှ A/B နှစ်ခုထဲက ပိုကြိုက်သည်ကို ခလုတ်နှိပ်ရွေးပါ။ တစ်ယောက်တစ် round တစ်မဲ။",
+        "၅ round၊ တစ် round ၃၀ စက္ကန့် default။ မဲအရေအတွက်နှင့် ရာခိုင်နှုန်း ပြသည်။",
+        "ပွဲဆုံးလျှင် ပါဝင်သူကို +3 points default တစ်ကြိမ်ပေးသည်။"
       ],
-      "notes": "Option ၈၀ ခုမှ မတူသော A/B အတွဲ ၃,၁၆၀။ ပုံ asset ၂၄ subject နှင့် abstract typography ပါသည်။ Restart ပြီးပြန်ဆက်နိုင်သည်။"
+      "notes": "Option ၈၀ ခုမှ မတူသော A/B အတွဲ ၃,၁၆၀။ ပုံ upload မလုပ်ပါ။ Restart ပြီးပြန်ဆက်နိုင်သည်။"
     },
     {
       "id": "totrules",
@@ -44,7 +43,7 @@
       "steps": [
         "This or That စည်းမျဉ်းနှင့် ဆုကိုဖတ်ပါ။"
       ],
-      "notes": "ပုံပို့မရလျှင် စာဖြင့်ဆက်ကစားနိုင်သည်။"
+      "notes": "စာကတ်နှင့် A/B ခလုတ်ဖြင့် ကစားသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "totstop",
@@ -157,63 +156,6 @@
       "notes": "တစ်ယောက်တစ်မဲ၊ native Telegram poll ဖြစ်သည်။ Activity-driven auto spawn လည်းပါသည်။ Manual poll ကိုစသူသာ /wyrstop ရပ်နိုင်၊ auto poll သည်အချိန်ပြည့်မှပိတ်သည်။"
     },
     {
-      "id": "boss",
-      "aliases": [
-        "boss",
-        "bossraid",
-        "raid"
-      ],
-      "title": "Group Boss Raid",
-      "category": "games",
-      "where": "Group",
-      "who": "Member",
-      "usage": "/boss",
-      "steps": [
-        "/boss ပို့၊ Boss card မှ ATTACK ခလုတ်ကိုနှိပ်ပါ။",
-        "ကိုယ့် cooldown ပြည့်မှ ထပ်တိုက်နိုင်သည်။ Crit၊ block၊ boss reaction နှင့် phase ပြောင်းမှုများပါသည်။",
-        "Card တွင် HP၊ အချိန်၊ damage၊ ပါဝင်သူနှင့် ထိပ်ဆုံးကစားသူများကိုကြည့်ပါ။",
-        "အချိန်မကုန်မီ HP ကိုသုညဖြစ်အောင် အတူတိုက်ကြပါ။"
-      ],
-      "notes": "Auto spawn ပါသည်။ Reward နှင့် damage စည်းမျဉ်းများ Owner setting အလိုက်ကွာနိုင်သည်။ /stop သည် Raid ရပ်ခလုတ်မဟုတ်။"
-    },
-    {
-      "id": "teambattle",
-      "aliases": [
-        "teambattle"
-      ],
-      "title": "Red / Blue Team Battle",
-      "category": "games",
-      "where": "Group",
-      "who": "Group Admin",
-      "usage": "/teambattle",
-      "steps": [
-        "Admin က /teambattle ပို့ပါ။",
-        "Battle card မှ RED/BLUE team ထဲ Join ပါ။",
-        "သက်ဆိုင်ရာဂိမ်းများက positive points ရလျှင် မိမိ team battle score ထဲပါဝင်မည်။",
-        "Half Time နှင့် Final မှ card ပြောင်းပြီး အသင်းရလဒ်/MVP ပြမည်။"
-      ],
-      "notes": "default duration ၆–၁၀ မိနစ်။ ယာယီ battle score နှင့် ရေရှည် rank points ခွဲထားသည်။ Card pin ရန် bot permission လိုသည်။ သီးသန့် /endteam command မရှိ။"
-    },
-    {
-      "id": "pair",
-      "aliases": [
-        "pair"
-      ],
-      "title": "Pair Challenge",
-      "category": "games",
-      "where": "Group",
-      "who": "Member",
-      "usage": "/pair",
-      "steps": [
-        "/pair ပို့ပြီး စသူက mode ရွေးပါ။",
-        "Co-op Duo = ၂ ယောက်၊ Co-op Squad = ၂–၄ ယောက်၊ Team Versus = ၄ ယောက် (2v2)။",
-        "Join ခလုတ်နှိပ်၊ လူပြည့်လျှင် စသူက START နှိပ်ပါ။",
-        "Round တစ်ခုစီမှာ A/B answer ခလုတ်တစ်ကြိမ်ရွေးပါ။ Quiz/Puzzle/Sync သို့မဟုတ် Versus challenges ပါသည်။",
-        "၅ rounds ပြီးမှ result/reward ပြမည်။"
-      ],
-      "notes": "Lobby မှ Leave ခလုတ်နှင့်ထွက်နိုင်သော်လည်း စသူသည် leave မရ။"
-    },
-    {
       "id": "math",
       "aliases": [
         "mathbattle",
@@ -251,7 +193,7 @@
         "အဖြေကို Group ထဲ တိုက်ရိုက်ရေးနိုင်သည်။ တစ်ယောက်တည်း ဆက်တိုက် valid answer ပေးမရ။",
         "မှန်သည့်အဖြေတိုင်း status card အသစ်ကိုအောက်သို့ပို့၊ ဟောင်းကိုဖျက်သည်။"
       ],
-      "notes": "Valid answer မရှိ ၆၀ စက္ကန့်ဖြစ်လျှင် စောစောပြီးနိုင်သည်။ Game အဖြေစာများကိုသာအချိန်ကြာမှဖျက်၊ ပုံမှန် group chat မဖျက်။"
+      "notes": "Valid answer မရှိ ၆၀ စက္ကန့်ဖြစ်လျှင် စောစောပြီးနိုင်သည်။ Game အဖြေစာများကိုသာအချိန်ကြာမှဖျက်၊ ပုံမှန် group chat မဖျက်။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "emoji",
@@ -287,7 +229,7 @@
         "GO ပေါ်လာမှ TAP ကိုအမြန်နှိပ်ပါ။",
         "ပထမအချိန်မီနှိပ်သူကို reward/result ပြမည်။"
       ],
-      "notes": "Hidden start delay default ၁၀–၁၈၀ စက္ကန့်၊ WAIT ၃–၈ စက္ကန့်၊ active ၁၀ စက္ကန့်။ Auto spawn လည်းပါသည်။"
+      "notes": "Hidden start delay default ၁၀–၁၈၀ စက္ကန့်၊ WAIT ၃–၈ စက္ကန့်၊ active ၁၀ စက္ကန့်။ Auto spawn လည်းပါသည်။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "trivia",
@@ -444,7 +386,7 @@
         "Main pinned group card တွင် group objectives ကိုကြည့်ပါ။",
         "မိမိ mission ပြည့်လျှင် /dailyclaim 1–3၊ group mission/contribution ပြည့်လျှင် /dailygroupclaim 1–3 သုံးပါ။"
       ],
-      "notes": "Main card နှင့် personal temporary card မတူ။ /daily သည် main card ကိုအစားမထိုး၊ temporary card ကိုအချိန်ကြာမှဖျက်သည်။"
+      "notes": "Main card နှင့် personal temporary card မတူ။ /daily သည် main card ကိုအစားမထိုး၊ temporary card ကိုအချိန်ကြာမှဖျက်သည်။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "drawrules",
@@ -953,7 +895,7 @@
       "steps": [
         "ကိုယ့်လက်ရှိ chat အတွက် points၊ rank၊ wins၊ games နှင့် progress card ကိုကြည့်ပါ။"
       ],
-      "notes": "Group အလိုက် stats သီးခြားဖြစ်သည်။ Private chat မှ Group ရွေးပြီး stats ကြည့်သည့် argument မရှိ။"
+      "notes": "Group အလိုက် stats သီးခြားဖြစ်သည်။ Private chat မှ Group ရွေးပြီး stats ကြည့်သည့် argument မရှိ။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "rank",
@@ -969,7 +911,7 @@
       "steps": [
         "လက်ရှိ chat ၏ top players card ကြည့်ပါ။"
       ],
-      "notes": "Points → wins → games အစဉ်ဖြင့် tie ဖြတ်သည်။ Activity မရှိသူများကိုမပြ။"
+      "notes": "Points → wins → games အစဉ်ဖြင့် tie ဖြတ်သည်။ Activity မရှိသူများကိုမပြ။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
     },
     {
       "id": "rules",
@@ -1371,20 +1313,6 @@
         "ကိုယ့် Telegram ID နှင့် configured owner ID ကိုက်မကိုက် စစ်ပါ။"
       ],
       "notes": "Owner permission ကိုပေးခြင်းမဟုတ်။"
-    },
-    {
-      "id": "auto_boss",
-      "aliases": [],
-      "title": "Activity-driven Boss Raid",
-      "category": "auto",
-      "where": "Group",
-      "who": "အလိုအလျောက် / Owner settings",
-      "usage": "/cmd auto",
-      "steps": [
-        "Group စကားပြော activity အလိုက် random အခွင့်အရေးဖြင့် Boss ပေါ်နိုင်သည်။",
-        "Owner editor ၏ Raid Auto Spawn မှ enabled/threshold/chance/quiet ပြင်နိုင်သည်။"
-      ],
-      "notes": "default လက်ခံ activity 60–125 message၊ chance 70%၊ raid ပြီးနောက် quiet 50–125 မိနစ်။ တစ်ယောက် spam ပို့ရုံနှင့်မပေါ်။"
     },
     {
       "id": "auto_speed",

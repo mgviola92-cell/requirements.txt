@@ -73,7 +73,7 @@ def initialize():
 def refresh(force=False):
     global _loaded_at,_values,_loading
     with _lock:
-        if not _ready or _loading or (not force and time.monotonic()-_loaded_at<10):return
+        if not _ready or _loading or (not force and time.monotonic()-_loaded_at<60):return
         _loading=True
     try:
         from database.db import get_db_connection

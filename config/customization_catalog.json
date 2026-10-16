@@ -1,20 +1,4 @@
 {
-  "cfg.bot.PAIR_ROUND_SECONDS": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Pair Round Seconds",
-    "default": 90,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.bot.PAIR_DUO_SUCCESS_REWARD": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Pair Duo Success Reward",
-    "default": 20,
-    "minimum": -1000,
-    "maximum": 10000
-  },
   "cfg.bot.TEXT_SPAM_LIMIT": {
     "kind": "setting",
     "category": "bot",
@@ -1189,841 +1173,6 @@
     "fixed_length": true,
     "ordered": true
   },
-  "cfg.games.boss_raid.RAID_DURATION": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Raid Duration",
-    "default": 180,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.games.boss_raid.BASE_DAMAGE_MIN": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Base Damage Min",
-    "default": 3,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_max": "cfg.games.boss_raid.BASE_DAMAGE_MAX"
-  },
-  "cfg.games.boss_raid.BASE_DAMAGE_MAX": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Base Damage Max",
-    "default": 8,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_min": "cfg.games.boss_raid.BASE_DAMAGE_MIN"
-  },
-  "cfg.games.boss_raid.CRIT_CHANCE_PERCENT": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Crit Chance Percent",
-    "default": 7,
-    "minimum": 0,
-    "maximum": 100
-  },
-  "cfg.games.boss_raid.CRIT_DAMAGE_MIN": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Crit Damage Min",
-    "default": 10,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_max": "cfg.games.boss_raid.CRIT_DAMAGE_MAX"
-  },
-  "cfg.games.boss_raid.CRIT_DAMAGE_MAX": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Crit Damage Max",
-    "default": 18,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_min": "cfg.games.boss_raid.CRIT_DAMAGE_MIN"
-  },
-  "cfg.games.boss_raid.BLOCK_CHANCE_PERCENT": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Block Chance Percent",
-    "default": 6,
-    "minimum": 0,
-    "maximum": 100
-  },
-  "cfg.games.boss_raid.BOSS_EVENT_CHANCE_PERCENT": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Boss Event Chance Percent",
-    "default": 8,
-    "minimum": 0,
-    "maximum": 100
-  },
-  "cfg.games.boss_raid.BOSS_EVENT_MIN_HITS": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Boss Event Min Hits",
-    "default": 8,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.games.boss_raid.MODIFIER_DURATION_HITS": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Modifier Duration Hits",
-    "default": 18,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.games.boss_raid.MODIFIER_DAMAGE_MULTIPLIERS": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Modifier Damage Multipliers",
-    "default": {
-      "rage": 0.82,
-      "exposed": 1.35,
-      "fortify": 0.68
-    },
-    "minimum": 0,
-    "maximum": 100000
-  },
-  "cfg.games.boss_raid.BOSSES": {
-    "kind": "setting",
-    "category": "games.boss_raid",
-    "label": "Bosses",
-    "default": [
-      {
-        "name": "Slime King",
-        "emoji": "🟢",
-        "tier": "EASY",
-        "hp": 650
-      },
-      {
-        "name": "Cave Troll",
-        "emoji": "👹",
-        "tier": "EASY",
-        "hp": 760
-      },
-      {
-        "name": "Wild Golem",
-        "emoji": "🪨",
-        "tier": "EASY",
-        "hp": 880
-      },
-      {
-        "name": "Venom Spider",
-        "emoji": "🕷️",
-        "tier": "EASY",
-        "hp": 980
-      },
-      {
-        "name": "Goblin Chief",
-        "emoji": "👺",
-        "tier": "EASY",
-        "hp": 1100
-      },
-      {
-        "name": "Frost Wolf",
-        "emoji": "🐺",
-        "tier": "EASY",
-        "hp": 1250
-      },
-      {
-        "name": "Orc Warlord",
-        "emoji": "🪓",
-        "tier": "NORMAL",
-        "hp": 1500
-      },
-      {
-        "name": "Stone Guardian",
-        "emoji": "🗿",
-        "tier": "NORMAL",
-        "hp": 1700
-      },
-      {
-        "name": "Sand Serpent",
-        "emoji": "🐍",
-        "tier": "NORMAL",
-        "hp": 1900
-      },
-      {
-        "name": "Dark Knight",
-        "emoji": "⚔️",
-        "tier": "NORMAL",
-        "hp": 2150
-      },
-      {
-        "name": "Thunder Beast",
-        "emoji": "⚡",
-        "tier": "NORMAL",
-        "hp": 2400
-      },
-      {
-        "name": "Swamp Hydra",
-        "emoji": "🐲",
-        "tier": "NORMAL",
-        "hp": 2700
-      },
-      {
-        "name": "Inferno Giant",
-        "emoji": "🔥",
-        "tier": "HARD",
-        "hp": 3100
-      },
-      {
-        "name": "Abyss Reaper",
-        "emoji": "💀",
-        "tier": "HARD",
-        "hp": 3500
-      },
-      {
-        "name": "Storm Titan",
-        "emoji": "🌩️",
-        "tier": "HARD",
-        "hp": 3900
-      },
-      {
-        "name": "Ancient Hydra",
-        "emoji": "🐉",
-        "tier": "HARD",
-        "hp": 4400
-      },
-      {
-        "name": "Demon Lord",
-        "emoji": "😈",
-        "tier": "HARD",
-        "hp": 5000
-      },
-      {
-        "name": "Void Colossus",
-        "emoji": "🌌",
-        "tier": "HARD",
-        "hp": 5700
-      },
-      {
-        "name": "Celestial Dragon",
-        "emoji": "🐲",
-        "tier": "LEGENDARY",
-        "hp": 6500
-      },
-      {
-        "name": "World Eater",
-        "emoji": "🌍",
-        "tier": "LEGENDARY",
-        "hp": 7400
-      },
-      {
-        "name": "Chaos Emperor",
-        "emoji": "👑",
-        "tier": "LEGENDARY",
-        "hp": 8400
-      },
-      {
-        "name": "Eclipse Titan",
-        "emoji": "🌑",
-        "tier": "LEGENDARY",
-        "hp": 9500
-      },
-      {
-        "name": "Immortal Demon",
-        "emoji": "👿",
-        "tier": "LEGENDARY",
-        "hp": 10800
-      },
-      {
-        "name": "Neon Destroyer",
-        "emoji": "☄️",
-        "tier": "LEGENDARY",
-        "hp": 12500
-      }
-    ],
-    "minimum": 0,
-    "maximum": 100000,
-    "fixed_length": true
-  },
-  "msg.games.boss_raid.PHASE_LINES.2506f29dfe": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · အားကောင်းတယ်ထင်နေတာလား… အခုမှစတာ။",
-    "default": "အားကောင်းတယ်ထင်နေတာလား… အခုမှစတာ။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.5a56009ce0": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ဒီလောက်နဲ့ ငါ့ကိုလှဲနိုင်မယ်ထင်လား။",
-    "default": "ဒီလောက်နဲ့ ငါ့ကိုလှဲနိုင်မယ်ထင်လား။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.373e73bd4b": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ကောင်းတယ်… နည်းနည်းတော့နာလာပြီ။",
-    "default": "ကောင်းတယ်… နည်းနည်းတော့နာလာပြီ။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.bab6f2d455": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ဆက်လာစမ်း၊ ဘယ်လောက်ခံနိုင်လဲကြည့်မယ်။",
-    "default": "ဆက်လာစမ်း၊ ဘယ်လောက်ခံနိုင်လဲကြည့်မယ်။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.d55c73eed3": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · အုပ်စုလိုက်လာလည်း ငါမကြောက်ဘူး။",
-    "default": "အုပ်စုလိုက်လာလည်း ငါမကြောက်ဘူး။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.59d805bf0a": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ဟေ့… အခုတော့ စိတ်ဝင်စားလာပြီ။",
-    "default": "ဟေ့… အခုတော့ စိတ်ဝင်စားလာပြီ။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.2baabf5b19": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ငါ့ HP ကိုကြည့်ပြီး မပျော်နဲ့ဦး။",
-    "default": "ငါ့ HP ကိုကြည့်ပြီး မပျော်နဲ့ဦး။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.2db2149e38": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · တကယ်တိုက်တတ်တာလား၊ button ပဲနှိပ်တတ်တာလား။",
-    "default": "တကယ်တိုက်တတ်တာလား၊ button ပဲနှိပ်တတ်တာလား။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.42b00313ab": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · ဒီတစ်ခါတော့ မင်းတို့ကံကောင်းတာ။",
-    "default": "ဒီတစ်ခါတော့ မင်းတို့ကံကောင်းတာ။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.7e21c6aca9": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · အရှိန်တင်လိုက်… ငါလည်းအရှိန်တင်တော့မယ်။",
-    "default": "အရှိန်တင်လိုက်… ငါလည်းအရှိန်တင်တော့မယ်။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.8636123094": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · နောက် Phase မှာ မငိုနဲ့။",
-    "default": "နောက် Phase မှာ မငိုနဲ့။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.PHASE_LINES.c078e26da6": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "PHASE_LINES · မဆိုးဘူး… ဒါပေမယ့် မလုံလောက်သေးဘူး။",
-    "default": "မဆိုးဘူး… ဒါပေမယ့် မလုံလောက်သေးဘူး။",
-    "fields": [],
-    "bank": "PHASE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.0628bd1e42": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · အချိန်ကုန်ပြီ။ အုပ်စုလိုက်လာပြီး ဒီလောက်ပဲလား။",
-    "default": "အချိန်ကုန်ပြီ။ အုပ်စုလိုက်လာပြီး ဒီလောက်ပဲလား။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.59f27adf1b": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · ငါ့ရှေ့မှာ party တစ်ခုလုံးတောင် မလုံလောက်ဘူး။",
-    "default": "ငါ့ရှေ့မှာ party တစ်ခုလုံးတောင် မလုံလောက်ဘူး။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.ddb5e057b8": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · ပြန်လေ့ကျင့်ပြီးမှလာခဲ့ကြ။ ဒီတစ်ခါ ငါနိုင်တယ်။",
-    "default": "ပြန်လေ့ကျင့်ပြီးမှလာခဲ့ကြ။ ဒီတစ်ခါ ငါနိုင်တယ်။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.256b7cc6cc": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · ATTACK ကိုတော့တော်တော်နှိပ်တယ်… damage ကဘယ်မှာလဲ။",
-    "default": "ATTACK ကိုတော့တော်တော်နှိပ်တယ်… damage ကဘယ်မှာလဲ။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.48f0b0b54d": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · ဒီ Raid ကို ငါပိုင်တယ်။ နောက်တစ်ခါ ပိုကောင်းအောင်လာ။",
-    "default": "ဒီ Raid ကို ငါပိုင်တယ်။ နောက်တစ်ခါ ပိုကောင်းအောင်လာ။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.f156fc77af": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · မင်းတို့အဖွဲ့ကို ငါ့ HP ကပဲ နှုတ်ဆက်လိုက်တယ်။",
-    "default": "မင်းတို့အဖွဲ့ကို ငါ့ HP ကပဲ နှုတ်ဆက်လိုက်တယ်။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.9441073a0b": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · အချိန်က မင်းတို့ကိုကယ်မပေးနိုင်ခဲ့ဘူး။",
-    "default": "အချိန်က မင်းတို့ကိုကယ်မပေးနိုင်ခဲ့ဘူး။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.f8b17f6c73": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · Fighters တွေများတာနဲ့ Boss မသေဘူးကွ။",
-    "default": "Fighters တွေများတာနဲ့ Boss မသေဘူးကွ။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.c4427f86d5": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · ဒီနေ့တော့ ငါ့နေ့ပဲ။ ပြန်လာချင်ရင်လာခဲ့။",
-    "default": "ဒီနေ့တော့ ငါ့နေ့ပဲ။ ပြန်လာချင်ရင်လာခဲ့။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.LOSE_LINES.bf3eeffd90": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "LOSE_LINES · တံခါးက ဟိုဘက်မှာ… defeat party ရေ။",
-    "default": "တံခါးက ဟိုဘက်မှာ… defeat party ရေ။",
-    "fields": [],
-    "bank": "LOSE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.259509ed8e": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · မဖြစ်နိုင်ဘူး… ဒီအုပ်စုက ငါ့ကိုတကယ်လှဲလိုက်တာလား။",
-    "default": "မဖြစ်နိုင်ဘူး… ဒီအုပ်စုက ငါ့ကိုတကယ်လှဲလိုက်တာလား။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.80f6afeedb": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ဒီတစ်ခါ မင်းတို့နိုင်တယ်… နောက်တစ်ခါ မလွယ်ဘူး။",
-    "default": "ဒီတစ်ခါ မင်းတို့နိုင်တယ်… နောက်တစ်ခါ မလွယ်ဘူး။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.47de48009c": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ငါ့အဆုံးသတ်က ဒီလိုဖြစ်မယ်မထင်ခဲ့ဘူး။",
-    "default": "ငါ့အဆုံးသတ်က ဒီလိုဖြစ်မယ်မထင်ခဲ့ဘူး။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.4dd1727f6f": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ကောင်းတယ်… ဒီ victory ကို ထိုက်တန်တယ်။",
-    "default": "ကောင်းတယ်… ဒီ victory ကို ထိုက်တန်တယ်။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.5ad1bd8f48": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ငါရှုံးပြီ။ ဒါပေမယ့် နောက် Boss က မင်းတို့ကိုစောင့်နေတယ်။",
-    "default": "ငါရှုံးပြီ။ ဒါပေမယ့် နောက် Boss က မင်းတို့ကိုစောင့်နေတယ်။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.8f3b5fc044": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ဒီအုပ်စုကို လျှော့တွက်မိတာ ငါ့အမှားပဲ။",
-    "default": "ဒီအုပ်စုကို လျှော့တွက်မိတာ ငါ့အမှားပဲ။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.8b6050e699": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · လက်ခံတယ်… ဒီ Raid ကို မင်းတို့ယူသွား။",
-    "default": "လက်ခံတယ်… ဒီ Raid ကို မင်းတို့ယူသွား။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.7039f4d814": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ငါ့ HP သုည… မင်းတို့ရဲ့ teamwork ကတော့ full ပဲ။",
-    "default": "ငါ့ HP သုည… မင်းတို့ရဲ့ teamwork ကတော့ full ပဲ။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.44a9cae223": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · ဒီနေ့ Champion က မင်းတို့ပဲ။",
-    "default": "ဒီနေ့ Champion က မင်းတို့ပဲ။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.WIN_LINES.a542c5deeb": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "WIN_LINES · နောက်တစ်ခါတွေ့ရင် ဒီလိုလွယ်မယ်မထင်နဲ့။",
-    "default": "နောက်တစ်ခါတွေ့ရင် ဒီလိုလွယ်မယ်မထင်နဲ့။",
-    "fields": [],
-    "bank": "WIN_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.9ca98ca85e": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss က မြေပြင်ကိုထုချလိုက်တယ် — Raid party တစ်ခုလုံး လှုပ်ခါ",
-    "default": "Boss က မြေပြင်ကိုထုချလိုက်တယ် — Raid party တစ်ခုလုံး လှုပ်ခါသွားတယ်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.efa7bbefed": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss ရဲ့ counter attack ဝင်လာတယ် — အရှိန်မလျှော့နဲ့!",
-    "default": "Boss ရဲ့ counter attack ဝင်လာတယ် — အရှိန်မလျှော့နဲ့!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.266640eeb9": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss က rage ဖြစ်လာပြီ — ဒီအချိန်က damage တင်ရမယ့်အချိန်!",
-    "default": "Boss က rage ဖြစ်လာပြီ — ဒီအချိန်က damage တင်ရမယ့်အချိန်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.b73fb61d72": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss က party ကို ခြိမ်းခြောက်လိုက်တယ် — နောက်မဆုတ်နဲ့!",
-    "default": "Boss က party ကို ခြိမ်းခြောက်လိုက်တယ် — နောက်မဆုတ်နဲ့!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.4448c5e318": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss ရဲ့ heavy strike ကျလာတယ် — Raid က ပိုပြင်းလာပြီ!",
-    "default": "Boss ရဲ့ heavy strike ကျလာတယ် — Raid က ပိုပြင်းလာပြီ!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_LINES.5f7d789a1c": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_LINES · Boss က roar လုပ်လိုက်တယ် — battlefield တစ်ခုလုံး တုန်သွားတယ်",
-    "default": "Boss က roar လုပ်လိုက်တယ် — battlefield တစ်ခုလုံး တုန်သွားတယ်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.ef87df93bd": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · 🌋 QUAKE",
-    "default": "🌋 QUAKE",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.ab28121979": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · Boss quake ကြောင့် party damage momentum ကျသွားတယ်!",
-    "default": "Boss quake ကြောင့် party damage momentum ကျသွားတယ်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.49244c4030": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · 💥 HEAVY SLAM",
-    "default": "💥 HEAVY SLAM",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.718d494a11": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · Heavy Slam! Boss က HP နည်းနည်းပြန်တက်သွားတယ်!",
-    "default": "Heavy Slam! Boss က HP နည်းနည်းပြန်တက်သွားတယ်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.152f32f6aa": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · 📣 WAR ROAR",
-    "default": "📣 WAR ROAR",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.BOSS_ATTACK_EFFECTS.e980afcaf1": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "BOSS_ATTACK_EFFECTS · War Roar! Boss defense တင်းလာတယ်!",
-    "default": "War Roar! Boss defense တင်းလာတယ်!",
-    "fields": [],
-    "bank": "BOSS_ATTACK_EFFECTS",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.c9576d85d0": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · 🔥 RAGE",
-    "default": "🔥 RAGE",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.e598da7812": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · Boss rage ဖြစ်နေတယ် — Phase resistance ပိုပြင်းလာပြီ!",
-    "default": "Boss rage ဖြစ်နေတယ် — Phase resistance ပိုပြင်းလာပြီ!",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.845bf5f0e1": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · 💢 EXPOSED",
-    "default": "💢 EXPOSED",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.44336abcf0": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · Boss guard ပွင့်သွားတယ် — အခုအချိန် ဝိုင်းချ!",
-    "default": "Boss guard ပွင့်သွားတယ် — အခုအချိန် ဝိုင်းချ!",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.cdee6e4ebf": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · 🛡 FORTIFY",
-    "default": "🛡 FORTIFY",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.boss_raid.MODIFIER_LINES.be0f06a65a": {
-    "kind": "message",
-    "category": "games.boss_raid",
-    "label": "MODIFIER_LINES · Boss က defense တင်လိုက်တယ် — မရပ်ဘဲ ဆက်တိုက်ချ!",
-    "default": "Boss က defense တင်လိုက်တယ် — မရပ်ဘဲ ဆက်တိုက်ချ!",
-    "fields": [],
-    "bank": "MODIFIER_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "cfg.games.pair_challenge.MODES": {
-    "kind": "setting",
-    "category": "games.pair_challenge",
-    "label": "Modes",
-    "default": {
-      "duo": {
-        "title": "CO-OP DUO",
-        "min": 2,
-        "max": 2,
-        "rounds": 5
-      },
-      "squad": {
-        "title": "CO-OP SQUAD",
-        "min": 2,
-        "max": 4,
-        "rounds": 5
-      },
-      "versus": {
-        "title": "TEAM VERSUS 2v2",
-        "min": 4,
-        "max": 4,
-        "rounds": 5
-      }
-    },
-    "minimum": 0,
-    "maximum": 100000
-  },
-  "cfg.games.team_battle.MIN_DURATION": {
-    "kind": "setting",
-    "category": "games.team_battle",
-    "label": "Min Duration",
-    "default": 360,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_max": "cfg.games.team_battle.MAX_DURATION"
-  },
-  "cfg.games.team_battle.MAX_DURATION": {
-    "kind": "setting",
-    "category": "games.team_battle",
-    "label": "Max Duration",
-    "default": 600,
-    "minimum": 1,
-    "maximum": 86400,
-    "pair_min": "cfg.games.team_battle.MIN_DURATION"
-  },
-  "msg.games.team_battle.HYPE_LINES.d865003488": {
-    "kind": "message",
-    "category": "games.team_battle",
-    "label": "HYPE_LINES · အရှိန်မလျှော့နဲ့ — ဒီပွဲက မပြီးသေးဘူး!",
-    "default": "အရှိန်မလျှော့နဲ့ — ဒီပွဲက မပြီးသေးဘူး!",
-    "fields": [],
-    "bank": "HYPE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.team_battle.HYPE_LINES.3e2d6bb713": {
-    "kind": "message",
-    "category": "games.team_battle",
-    "label": "HYPE_LINES · Score gap က ပြောင်းနိုင်သေးတယ် — points ရအောင် game တွေဆော့!",
-    "default": "Score gap က ပြောင်းနိုင်သေးတယ် — points ရအောင် game တွေဆော့!",
-    "fields": [],
-    "bank": "HYPE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.team_battle.HYPE_LINES.26ccb068c7": {
-    "kind": "message",
-    "category": "games.team_battle",
-    "label": "HYPE_LINES · Teamwork ပြချိန်ရောက်ပြီ — ကိုယ့်အသင်းအတွက် points ယူ!",
-    "default": "Teamwork ပြချိန်ရောက်ပြီ — ကိုယ့်အသင်းအတွက် points ယူ!",
-    "fields": [],
-    "bank": "HYPE_LINES",
-    "max_length": 512,
-    "html": false
-  },
-  "msg.games.team_battle.HYPE_LINES.0295637c4e": {
-    "kind": "message",
-    "category": "games.team_battle",
-    "label": "HYPE_LINES · Battle က ပူလာပြီ — comeback လုပ်လို့ရသေးတယ်!",
-    "default": "Battle က ပူလာပြီ — comeback လုပ်လို့ရသေးတယ်!",
-    "fields": [],
-    "bank": "HYPE_LINES",
-    "max_length": 512,
-    "html": false
-  },
   "cfg.games.speed_tap.SPEED_TAP_PENDING_MIN": {
     "kind": "setting",
     "category": "games.speed_tap",
@@ -2270,343 +1419,6 @@
     "category": "features.daily_challenge",
     "label": "Temp Card Seconds",
     "default": 60,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.ui.boss_raid_card.ACCENTS": {
-    "kind": "setting",
-    "category": "ui.boss_raid_card",
-    "label": "Accents",
-    "default": {
-      "crimson": [
-        240,
-        70,
-        70,
-        255
-      ],
-      "obsidian": [
-        185,
-        140,
-        255,
-        255
-      ],
-      "ember": [
-        255,
-        170,
-        60,
-        255
-      ],
-      "storm": [
-        90,
-        190,
-        255,
-        255
-      ]
-    },
-    "minimum": 0,
-    "maximum": 100000
-  },
-  "cfg.ui.boss_raid_card._STAGE_DARKEN": {
-    "kind": "setting",
-    "category": "ui.boss_raid_card",
-    "label": " Stage Darken",
-    "default": {
-      "normal": 38,
-      "damaged": 44,
-      "rage": 34,
-      "final": 28
-    },
-    "minimum": 0,
-    "maximum": 100000
-  },
-  "cfg.ui.boss_raid_card.ELEMENT_ACCENTS": {
-    "kind": "setting",
-    "category": "ui.boss_raid_card",
-    "label": "Element Accents",
-    "default": {
-      "fire": [
-        255,
-        92,
-        35,
-        255
-      ],
-      "ice": [
-        105,
-        215,
-        255,
-        255
-      ],
-      "poison": [
-        105,
-        235,
-        95,
-        255
-      ],
-      "lightning": [
-        245,
-        225,
-        75,
-        255
-      ],
-      "void": [
-        145,
-        80,
-        245,
-        255
-      ],
-      "celestial": [
-        245,
-        220,
-        145,
-        255
-      ],
-      "shadow": [
-        145,
-        115,
-        190,
-        255
-      ],
-      "earth": [
-        190,
-        135,
-        75,
-        255
-      ],
-      "nature": [
-        85,
-        205,
-        110,
-        255
-      ],
-      "sand": [
-        235,
-        190,
-        105,
-        255
-      ],
-      "chaos": [
-        245,
-        70,
-        160,
-        255
-      ],
-      "neon": [
-        45,
-        245,
-        225,
-        255
-      ]
-    },
-    "minimum": 0,
-    "maximum": 100000
-  },
-  "cfg.ui.speed_tap_card.CARD_WIDTH": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Card Width",
-    "default": 900,
-    "minimum": 640,
-    "maximum": 2400
-  },
-  "cfg.ui.speed_tap_card.CARD_HEIGHT": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Card Height",
-    "default": 560,
-    "minimum": 360,
-    "maximum": 2400
-  },
-  "cfg.ui.speed_tap_card.BACKGROUND_RECENT_LIMIT": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Background Recent Limit",
-    "default": 12,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.ui.speed_tap_card.BG_DARK": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Bg Dark",
-    "default": [
-      13,
-      16,
-      24,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.PANEL_MAIN": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Panel Main",
-    "default": [
-      20,
-      25,
-      36,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.PANEL_SOFT": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Panel Soft",
-    "default": [
-      31,
-      38,
-      52,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.PANEL_ACCENT": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Panel Accent",
-    "default": [
-      42,
-      50,
-      66,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.TEXT_MAIN": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Text Main",
-    "default": [
-      245,
-      247,
-      250,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.TEXT_MUTED": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Text Muted",
-    "default": [
-      170,
-      180,
-      196,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.ACCENT_YELLOW": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Accent Yellow",
-    "default": [
-      255,
-      221,
-      78,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.ACCENT_GREEN": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Accent Green",
-    "default": [
-      102,
-      232,
-      154,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.ACCENT_BLUE": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Accent Blue",
-    "default": [
-      103,
-      193,
-      255,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.ACCENT_PURPLE": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Accent Purple",
-    "default": [
-      180,
-      130,
-      255,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.speed_tap_card.ACCENT_RED": {
-    "kind": "setting",
-    "category": "ui.speed_tap_card",
-    "label": "Accent Red",
-    "default": [
-      255,
-      117,
-      117,
-      255
-    ],
-    "minimum": 0,
-    "maximum": 255,
-    "fixed_length": true
-  },
-  "cfg.ui.card_generator.DEFAULT_WIDTH": {
-    "kind": "setting",
-    "category": "ui.card_generator",
-    "label": "Default Width",
-    "default": 1200,
-    "minimum": 640,
-    "maximum": 2400
-  },
-  "cfg.ui.card_generator.DEFAULT_HEIGHT": {
-    "kind": "setting",
-    "category": "ui.card_generator",
-    "label": "Default Height",
-    "default": 675,
-    "minimum": 360,
-    "maximum": 2400
-  },
-  "cfg.ui.card_generator.DEFAULT_PADDING": {
-    "kind": "setting",
-    "category": "ui.card_generator",
-    "label": "Default Padding",
-    "default": 60,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.ui.card_generator.DEFAULT_RADIUS": {
-    "kind": "setting",
-    "category": "ui.card_generator",
-    "label": "Default Radius",
-    "default": 36,
     "minimum": 1,
     "maximum": 86400
   },
@@ -2935,463 +1747,6 @@
     "minimum": 0,
     "maximum": 100000,
     "fixed_length": true
-  },
-  "msg.bot._team_battle_caption.0a991c547e": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_caption · 🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!",
-    "default": "🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._team_battle_caption.f71d09da98": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_caption · 🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!",
-    "default": "🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._team_battle_caption.1b1530be8b": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_caption · 🏁 TEAM BATTLE FINAL — 🤝 DRAW!",
-    "default": "🏁 TEAM BATTLE FINAL — 🤝 DRAW!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._team_battle_caption.2c103557f6": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_caption · ⚔️ TEAM BATTLE — HALF-TIME",
-    "default": "⚔️ TEAM BATTLE — HALF-TIME",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._team_battle_caption.e20210a5a7": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_caption · ⚔️ TEAM BATTLE — RED vs BLUE",
-    "default": "⚔️ TEAM BATTLE — RED vs BLUE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._team_battle_hype.84d59cead4": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_team_battle_hype · ⚡ <b>TEAM BATTLE UPDATE</b>",
-    "default": "⚡ <b>TEAM BATTLE UPDATE</b>\n\n{mentions}\n{team_battle_hype_line}",
-    "fields": [
-      "mentions",
-      "team_battle_hype_line"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.team_battle_command.bbb78c78da": {
-    "kind": "message",
-    "category": "bot",
-    "label": "team_battle_command · ❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။",
-    "default": "❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.team_battle_command.51cf3349c8": {
-    "kind": "message",
-    "category": "bot",
-    "label": "team_battle_command · ⚔️ Team Battle က လက်ရှိ run နေပါတယ်။",
-    "default": "⚔️ Team Battle က လက်ရှိ run နေပါတယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_mode_keyboard.f0b01ce392": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_mode_keyboard · 👥 Duo (2)",
-    "default": "👥 Duo (2)",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_mode_keyboard.4082c66196": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_mode_keyboard · 🧩 Squad (2-4)",
-    "default": "🧩 Squad (2-4)",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_mode_keyboard.97797cba6d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_mode_keyboard · ⚔️ Team Versus (2v2)",
-    "default": "⚔️ Team Versus (2v2)",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_lobby_keyboard.af96eed561": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_lobby_keyboard · ➕ JOIN",
-    "default": "➕ JOIN",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_lobby_keyboard.3477a92e7d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_lobby_keyboard · ➖ LEAVE",
-    "default": "➖ LEAVE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_lobby_keyboard.9bbba5cd50": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_lobby_keyboard · ▶️ START",
-    "default": "▶️ START",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_answer_keyboard.cb16ac41d1": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_answer_keyboard · A •",
-    "default": "A • ",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_answer_keyboard.a2c9189d10": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_answer_keyboard · B •",
-    "default": "B • ",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_caption.26b1ab5a21": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_caption · 👥 PAIR CHALLENGE • Mode ရွေးပါ",
-    "default": "👥 PAIR CHALLENGE • Mode ရွေးပါ",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_caption.f7eb741797": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_caption · 👥  • / players",
-    "default": "👥 {mode} • {len_game__players}/{info__max} players",
-    "fields": [
-      "mode",
-      "len_game__players",
-      "info__max"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_caption.544825d56e": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_caption · 👥  • ROUND / • ⏳ s",
-    "default": "👥 {mode} • ROUND {game_get__round_no___1}/{game_get__total_rounds___5} • ⏳ {seconds}s",
-    "fields": [
-      "mode",
-      "game_get__round_no___1",
-      "game_get__total_rounds___5",
-      "seconds"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_caption.04c93385cc": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_caption · 👥  • ROUND /",
-    "default": "👥 {mode} • ROUND {game_get__round_no___0}/{game_get__total_rounds___5}",
-    "fields": [
-      "mode",
-      "game_get__round_no___0",
-      "game_get__total_rounds___5"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_round.28f9087847": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_round · 👥 PAIR CHALLENGE • ROUND / ပြီးပြီ\nနောက် round စနေပြီ…",
-    "default": "👥 PAIR CHALLENGE • ROUND {game__round_no}/{game__total_rounds} ပြီးပြီ\nနောက် round စနေပြီ…",
-    "fields": [
-      "game__round_no",
-      "game__total_rounds"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_next_round.b0b5c03920": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_next_round · ⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ပိတ်လိုက်ပါတယ်။ /pair နဲ့",
-    "default": "⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ပိတ်လိုက်ပါတယ်။ /pair နဲ့ အသစ်ပြန်စနိုင်ပါတယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.4726dc17a0": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · 👥 PAIR CHALLENGE • MATCH RESULT",
-    "default": "👥 PAIR CHALLENGE • MATCH RESULT",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.32dfb409ae": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · 🔴  -  🔵",
-    "default": "\n🔴 {score_get__red___0} - {score_get__blue___0} 🔵\n",
-    "fields": [
-      "score_get__red___0",
-      "score_get__blue___0"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.e529391bb2": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · 🤝 DRAW",
-    "default": "🤝 DRAW",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.a27b7b43e0": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · 🔴 RED TEAM WINS",
-    "default": "🔴 RED TEAM WINS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.76a08cf0cd": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · 🔵 BLUE TEAM WINS",
-    "default": "🔵 BLUE TEAM WINS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot._pair_finish_match.040076b839": {
-    "kind": "message",
-    "category": "bot",
-    "label": "_pair_finish_match · ✅ Cleared: /",
-    "default": "\n✅ Cleared: {game_get__cleared_rounds___0}/{game_get__total_rounds___5}",
-    "fields": [
-      "game_get__cleared_rounds___0",
-      "game_get__total_rounds___5"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_challenge_command.55567e57d4": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_challenge_command · 👥 Pair Challenge က run နေပြီးသားပါ။",
-    "default": "👥 Pair Challenge က run နေပြီးသားပါ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_mode_callback.cf1c7a4e77": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_mode_callback · Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။",
-    "default": "Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_mode_callback.9f10429d85": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_mode_callback · ဒီ lobby ပိတ်သွားပြီ။",
-    "default": "ဒီ lobby ပိတ်သွားပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_mode_callback.a4671ed879": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_mode_callback · Mode ရွေးပြီးပြီ။",
-    "default": "Mode ရွေးပြီးပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_join_callback.cea0027a59": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_join_callback · ဝင်ပြီးပြီ 👥",
-    "default": "ဝင်ပြီးပြီ 👥",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_join_callback.996f5cd83c": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_join_callback · ဝင်ထားပြီးသား။",
-    "default": "ဝင်ထားပြီးသား။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_join_callback.78229ee298": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_join_callback · Player ပြည့်ပြီ။",
-    "default": "Player ပြည့်ပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_join_callback.1123b0a3c2": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_join_callback · Lobby ပိတ်သွားပြီ။",
-    "default": "Lobby ပိတ်သွားပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_leave_callback.72e71ab9b8": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_leave_callback · Lobby က ထွက်ပြီးပြီ။",
-    "default": "Lobby က ထွက်ပြီးပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_leave_callback.3b81798531": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_leave_callback · Game owner က lobby ကနေ leave မလုပ်နိုင်ဘူး။",
-    "default": "Game owner က lobby ကနေ leave မလုပ်နိုင်ဘူး။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_leave_callback.916cf89eea": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_leave_callback · Leave လုပ်လို့မရဘူး။",
-    "default": "Leave လုပ်လို့မရဘူး။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_start_callback.1123b0a3c2": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_start_callback · Lobby ပိတ်သွားပြီ။",
-    "default": "Lobby ပိတ်သွားပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_start_callback.63f5a7da8b": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_start_callback · Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။",
-    "default": "Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_start_callback.d9d683780d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_start_callback · Player မလုံလောက်သေးဘူး။",
-    "default": "Player မလုံလောက်သေးဘူး။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_start_callback.c60febed91": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_start_callback · Start မရသေးဘူး။",
-    "default": "Start မရသေးဘူး။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_start_callback.950bcaed57": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_start_callback · Challenge စပြီ!",
-    "default": "Challenge စပြီ!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_answer_callback.dd3a25b6e6": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_answer_callback · Answer သိမ်းထားပြီ ✅",
-    "default": "Answer သိမ်းထားပြီ ✅",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_answer_callback.a903118b5b": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_answer_callback · ဒီ round မှာ တစ်ခါဖြေပြီးပြီ။",
-    "default": "ဒီ round မှာ တစ်ခါဖြေပြီးပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_answer_callback.da44f34257": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_answer_callback · ဒီ match ရဲ့ player မဟုတ်ဘူး။",
-    "default": "ဒီ match ရဲ့ player မဟုတ်ဘူး။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.pair_answer_callback.dcb97827a6": {
-    "kind": "message",
-    "category": "bot",
-    "label": "pair_answer_callback · Round ပိတ်သွားပြီ။",
-    "default": "Round ပိတ်သွားပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
   },
   "msg.bot.early_text_spam_middleware.461c489e1b": {
     "kind": "message",
@@ -4395,322 +2750,6 @@
     "max_length": 4000,
     "html": true
   },
-  "msg.bot.boss_raid_text.87248b6182": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🟥",
-    "default": "🟥",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.f16aae7997": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🥇",
-    "default": "🥇",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.fcb8c5cba3": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🥈",
-    "default": "🥈",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.d7daab43e2": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🥉",
-    "default": "🥉",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.3033eb7829": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🏆 RAID CLEARED",
-    "default": "🏆 RAID CLEARED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.bf8c7e3470": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · ☠️ PARTY DEFEATED",
-    "default": "☠️ PARTY DEFEATED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.8800a01483": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · ⚔️ PHASE   •  RAID LIVE",
-    "default": "⚔️ PHASE {raid__phase}  •  RAID LIVE",
-    "fields": [
-      "raid__phase"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.8205e7b0b3": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🔥 RAGE • damage resisted",
-    "default": "🔥 RAGE • damage resisted",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.f26ec6cdb0": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 💢 EXPOSED • bonus damage",
-    "default": "💢 EXPOSED • bonus damage",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.dd7c350667": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🛡 FORTIFY • heavy defense",
-    "default": "🛡 FORTIFY • heavy defense",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_text.b63264e85c": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · ╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n <b></b>\n🏷    │   \n╚═════════════",
-    "default": "╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n{boss__emoji} <b>{html_escape_boss__name____upper}</b>\n🏷 {boss__tier}   │   {state}\n╚══════════════════════╝\n\n❤️ <b>BOSS HP</b>\n{bar}\n<b>{hp}</b> / {mx}  •  {pct}%\n\n⏳ <b>{mins}:{secs}</b>   ⚔️ <b>{raid__total_damage}</b> DMG   👥 <b>{len_raid__fighters}</b>\n━━━━━━━━━━━━━━━━━━━━\n🏆 <b>TOP RAIDERS</b>\n",
-    "fields": [
-      "boss__emoji",
-      "html_escape_boss__name____upper",
-      "boss__tier",
-      "state",
-      "bar",
-      "hp",
-      "mx",
-      "pct",
-      "mins",
-      "secs",
-      "raid__total_damage",
-      "len_raid__fighters"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_text.aad03feb79": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🔥 <b>ATTACK! ATTACK! ATTACK!</b>\nတားထားတဲ့ cooldown မရှိဘူး။ Boss မလွတ",
-    "default": "🔥 <b>ATTACK! ATTACK! ATTACK!</b>\nတားထားတဲ့ cooldown မရှိဘူး။ Boss မလွတ်ခင် ဝိုင်းချ!",
-    "fields": [],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_text.7c0dfa4ec0": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_text · 🏁 <b>RAID ENDED</b>",
-    "default": "🏁 <b>RAID ENDED</b>",
-    "fields": [],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_reaction_message.d8f26c88ff": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_reaction_message · 🔥",
-    "default": "🔥",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_reaction_message.d7be117486": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_reaction_message · 💀",
-    "default": "💀",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_reaction_message.798373558e": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_reaction_message · 👑",
-    "default": "👑",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_reaction_message.b37ce1e384": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_reaction_message · <b></b>\n <b></b>: “”",
-    "default": "{icons_kind} <b>{title_kind}</b>\n{boss__emoji} <b>{html_escape_boss__name}</b>: “{html_escape_text}”",
-    "fields": [
-      "icons_kind",
-      "title_kind",
-      "boss__emoji",
-      "html_escape_boss__name",
-      "html_escape_text"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_finish.2aaec2c533": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_finish · 🏆 <b>RAID VICTORY!</b>",
-    "default": "🏆 <b>RAID VICTORY!</b>",
-    "fields": [],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_finish.d88c546a09": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_finish · ☠️ <b>PARTY DEFEATED!</b>",
-    "default": "☠️ <b>PARTY DEFEATED!</b>",
-    "fields": [],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_finish.6b3b78bd58": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_finish · ⚔️ Total Damage: <b></b>\n👥 Raiders: <b></b>",
-    "default": "\n\n⚔️ Total Damage: <b>{raid__total_damage}</b>\n👥 Raiders: <b>{len_raid__fighters}</b>",
-    "fields": [
-      "raid__total_damage",
-      "len_raid__fighters"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_finish.a6d051c7e1": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_finish · 🔒 45s Penalty\n🤐 Muted: <b></b>  •  🛡 Protected: <b></b>",
-    "default": "\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>",
-    "fields": [
-      "muted",
-      "protected"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
-  "msg.bot.boss_raid_command.9d5a77359f": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_command · 👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။",
-    "default": "👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.spawn_boss_raid.816e4abbc0": {
-    "kind": "message",
-    "category": "bot",
-    "label": "spawn_boss_raid · ⏳  game/event ရှိနေပါတယ်။",
-    "default": "⏳ {blocker} game/event ရှိနေပါတယ်။",
-    "fields": [
-      "blocker"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.spawn_boss_raid.08d8d3cd3d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "spawn_boss_raid · 👹 Boss Raid တစ်ခု run နေပြီးသားပါ။",
-    "default": "👹 Boss Raid တစ်ခု run နေပြီးသားပါ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.40664a38b5": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · ❌ Invalid raid.",
-    "default": "❌ Invalid raid.",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.297b636641": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · 🏁 ဒီ Raid ပြီးသွားပြီ။",
-    "default": "🏁 ဒီ Raid ပြီးသွားပြီ။",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.621a4f997d": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · ❌ Invalid action.",
-    "default": "❌ Invalid action.",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.5fd6ba05e7": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · 🛡️ Boss BLOCK!",
-    "default": "🛡️ Boss BLOCK!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.abdf13fa28": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · 💥 CRITICAL! - HP",
-    "default": "💥 CRITICAL! -{result__damage} HP",
-    "fields": [
-      "result__damage"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.d224fdaed5": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · ⚔️ - HP",
-    "default": "⚔️ -{result__damage} HP",
-    "fields": [
-      "result__damage"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.bot.boss_raid_callback.d10eb19c7e": {
-    "kind": "message",
-    "category": "bot",
-    "label": "boss_raid_callback · <b></b>",
-    "default": "<b>{html_escape_event__title}</b>\n{html_escape_event__text}{extra}",
-    "fields": [
-      "html_escape_event__title",
-      "html_escape_event__text",
-      "extra"
-    ],
-    "max_length": 4000,
-    "html": true
-  },
   "msg.bot.math_battle_next.0a8bfed147": {
     "kind": "message",
     "category": "bot",
@@ -5248,7 +3287,7 @@
     "kind": "message",
     "category": "bot",
     "label": "commands_list · 🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎭 /imposter — Imposter\n🎯 /guess — Num",
-    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n⚔️ /boss, /bossraid, /raid — Boss Raid\n🔴 /teambattle — Team Battle (Admin)\n👥 /pair — Pair Challenge\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
+    "default": "🤖 BOT COMMANDS\n\n🎮 GAMES & EVENTS\n🎨 /draw ၊ /drawguess — Draw & Guess\n📜 /drawrules — Draw စည်းမျဉ်း\n🗂️ /studio — Capsule / Sound / Memories / Custom Commands\n🏯 /nanyate ၊ /နန်းရိပ် — နန်းရိပ်\n📜 /nanyaterules — နန်းရိပ်စည်းမျဉ်း\n🛑 /nanyatestop — နန်းရိပ်ရပ် (Admin)\n🎭 /imposter — Imposter\n🎯 /guess — Number Guess\n🧠 /trivia — Trivia\n🪙 /coin — Coin Flip\n🎲 /dice — Dice\n🎰 /slot — Slot\n🎱 /8ball — Magic 8 Ball\n❤️ /love — Love Calculator\n🎲 /random — Random Number\n🧮 /mathbattle, /math — Math Battle\n🛑 /endmath, /stopmath — Stop Math Battle\n🔗 /wordchain, /wc — Word Chain\n🛑 /endwordchain, /stopwc — Stop Word Chain\n🧩 /emoji, /emojiguess — Emoji Guess\n⚡ /speedtap — Speed Tap\n🤔 /wyr, /wouldyourather — Would You Rather\n📅 /daily, /dailychallenge — Daily Challenge\n🎭 /imposterstop — Stop Imposter (Admin)\n🛑 /wyrstop — Stop WYR\n\n🏆 PROFILE & ACTIVITY\n👤 /profile — Profile\n🏆 /rank ၊ /top — Leaderboard\n🎁 /dailyclaim — Daily Reward Claim\n👥 /dailygroupclaim — Group Daily Claim\n\n📣 GROUP & ADMIN\n📢 /all ၊ /everyone — Mention Members\n📣 /admincall ၊ /အက်မင်ခေါ် — Mention Admins\n🛑 /stop, /နား — Stop Mentions\n⚠️ /warn — Warn Member\n🚫 /ဘမ်း — Ban\n🔓 /မဘမ်း — Unban\n🔇 /တိတ်စမ်း — Mute\n🔊 /ဖွင့်လိုက် — Unmute\n\n📋 INFORMATION & UTILITIES\n📜 /rules — Group Rules\n👮 /admins — Admin List\n🆔 /id — User / Chat ID\n🏓 /ping — Ping\n⏱️ /uptime — Uptime\n📋 /cmd — This Command List\n\n👑 OWNER PRIVATE CHAT\n🔐 /owner — Owner Control Panel\n⚙️ /control ၊ /groupcontrol — Settings & Messages\n🛠️ /ownertools — Test / Schedule / Assistants / Usage\n👥 /staff — Assistant Panel\n📨 /ownersend — Send replied message\n💾 /ownersave — Save replied message\n❌ /ownercancel — Cancel owner action\n🔍 /broadcastcheck — Check owner access\n\nℹ️ မြန်မာ Command Aliases အချို့လည်း ရှိပါတယ်။",
     "fields": [],
     "max_length": 4000,
     "html": false
@@ -5462,18 +3501,6 @@
     "max_length": 4000,
     "html": false
   },
-  "enabled.bot.team_battle_command": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Enable team battle command",
-    "default": true
-  },
-  "enabled.bot.pair_challenge_command": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Enable pair challenge command",
-    "default": true
-  },
   "enabled.bot.member_registry_middleware": {
     "kind": "setting",
     "category": "bot",
@@ -5484,12 +3511,6 @@
     "kind": "setting",
     "category": "bot",
     "label": "Enable speed tap activity middleware",
-    "default": true
-  },
-  "enabled.bot.boss_activity_middleware": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Enable boss activity middleware",
     "default": true
   },
   "enabled.bot.early_text_spam_middleware": {
@@ -5604,12 +3625,6 @@
     "kind": "setting",
     "category": "bot",
     "label": "Enable speed tap command",
-    "default": true
-  },
-  "enabled.bot.boss_raid_command": {
-    "kind": "setting",
-    "category": "bot",
-    "label": "Enable boss raid command",
     "default": true
   },
   "enabled.bot.math_battle_command": {
@@ -6813,905 +4828,6 @@
     "label": "Enable daily activity",
     "default": true
   },
-  "msg.ui.math_battle_card._base.303fa51fa7": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "_base · MATH BATTLE",
-    "default": "MATH BATTLE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card._base.9e200f76d6": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "_base · #f9fbff",
-    "default": "#f9fbff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card._base.9b789c62dd": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "_base · ROUND /5",
-    "default": "ROUND {game__round_____1}/5",
-    "fields": [
-      "game__round_____1"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card._base.d5fc71983e": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "_base · #fcd67d",
-    "default": "#fcd67d",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.0fb5c2c981": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #a2b9ce",
-    "default": "#a2b9ce",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.c659d630ce": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #ffffff",
-    "default": "#ffffff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.313347f075": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · TIME   s",
-    "default": "TIME   {remain}s",
-    "fields": [
-      "remain"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.a78fc0a3da": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #67e8f9",
-    "default": "#67e8f9",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.7b78c497fc": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · FIRST +10  /  +5  /  +3",
-    "default": "FIRST +10  /  +5  /  +3",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.d5fc71983e": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #fcd67d",
-    "default": "#fcd67d",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.3c693343e5": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · LIVE TOP 3  ·  MATCH SCORE",
-    "default": "LIVE TOP 3  ·  MATCH SCORE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.e3689f943a": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #adbacd",
-    "default": "#adbacd",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.fb30ca441f": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #f9dc7c",
-    "default": "#f9dc7c",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.7275a5427c": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #e5edf7",
-    "default": "#e5edf7",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.8034a6279b": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · SCORE",
-    "default": "{score} SCORE",
-    "fields": [
-      "score"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.round_card.b580cf24f1": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "round_card · #a2b5c9",
-    "default": "#a2b5c9",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.8f72d317fb": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · FINAL RESULTS",
-    "default": "FINAL RESULTS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.d5fc71983e": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · #fcd67d",
-    "default": "#fcd67d",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.c659d630ce": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · #ffffff",
-    "default": "#ffffff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.8034a6279b": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · SCORE",
-    "default": "{score} SCORE",
-    "fields": [
-      "score"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.a78fc0a3da": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · #67e8f9",
-    "default": "#67e8f9",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.fea182ba9a": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · NO CORRECT ANSWERS",
-    "default": "NO CORRECT ANSWERS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.math_battle_card.result_card.d14f901611": {
-    "kind": "message",
-    "category": "ui.math_battle_card",
-    "label": "result_card · #fff",
-    "default": "#fff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.leaderboard_card.generate_leaderboard_card.aadabb5be3": {
-    "kind": "message",
-    "category": "ui.leaderboard_card",
-    "label": "generate_leaderboard_card · No ranking data yet.",
-    "default": "No ranking data yet.",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.leaderboard_card.generate_leaderboard_card.16c39df3dc": {
-    "kind": "message",
-    "category": "ui.leaderboard_card",
-    "label": "generate_leaderboard_card · PTS",
-    "default": "{points} PTS",
-    "fields": [
-      "points"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.leaderboard_card.generate_leaderboard_card.f38234de89": {
-    "kind": "message",
-    "category": "ui.leaderboard_card",
-    "label": "generate_leaderboard_card · W   /  G",
-    "default": "W {wins}  /  G {games}",
-    "fields": [
-      "wins",
-      "games"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.live_card.806b396235": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "live_card · GROUP BOSS RAID",
-    "default": "GROUP BOSS RAID",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.9bc03d1b33": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · 🏆",
-    "default": "🏆",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.129fac6289": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · ☠",
-    "default": "☠",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.426d902d50": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · BOSS SAYS",
-    "default": "BOSS SAYS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.8799612e18": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · ⚔ TOTAL DAMAGE",
-    "default": "⚔ TOTAL DAMAGE   {raid__total_damage}",
-    "fields": [
-      "raid__total_damage"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.375502346c": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · 👥 RAIDERS",
-    "default": "👥 RAIDERS        {len_raid__fighters}",
-    "fields": [
-      "len_raid__fighters"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.8c0c54db2f": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · 🔒 PENALTY         muted /  protected",
-    "default": "🔒 PENALTY        {muted} muted / {protected} protected",
-    "fields": [
-      "muted",
-      "protected"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.boss_raid_card.result_card.2351188390": {
-    "kind": "message",
-    "category": "ui.boss_raid_card",
-    "label": "result_card · ✨ BOSS DEFEATED — RAID CLEARED",
-    "default": "✨ BOSS DEFEATED — RAID CLEARED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.039e89b7b0": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · TEAM BATTLE  •  RED vs BLUE",
-    "default": "TEAM BATTLE  •  RED vs BLUE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.66e64e5eb3": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · 🔴 RED",
-    "default": "🔴 RED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.b3fe66b9a2": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · 🔵 BLUE",
-    "default": "🔵 BLUE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.528eda0fd9": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · TOP CONTRIBUTORS",
-    "default": "TOP CONTRIBUTORS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.c07df0bbf9": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · Waiting for points…",
-    "default": "Waiting for points…",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.0aeddd57fe": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · 🔴 RED TEAM WINS!",
-    "default": "🔴 RED TEAM WINS!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.61397559d7": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · 🔵 BLUE TEAM WINS!",
-    "default": "🔵 BLUE TEAM WINS!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.3cbe00b61b": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · 🤝 DRAW!",
-    "default": "🤝 DRAW!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.team_battle_card.generate_team_battle_card.bc3cdb6f32": {
-    "kind": "message",
-    "category": "ui.team_battle_card",
-    "label": "generate_team_battle_card · Game points = Rank Points + Team Battle score",
-    "default": "Game points = Rank Points + Team Battle score",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.rank_card.generate_rank_card.2fca910e80": {
-    "kind": "message",
-    "category": "ui.rank_card",
-    "label": "generate_rank_card · POINTS",
-    "default": "{points} POINTS",
-    "fields": [
-      "points"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.rank_card.generate_rank_card.27b10dcd73": {
-    "kind": "message",
-    "category": "ui.rank_card",
-    "label": "generate_rank_card · WINS",
-    "default": "WINS  {wins}",
-    "fields": [
-      "wins"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.rank_card.generate_rank_card.58d9d5edd4": {
-    "kind": "message",
-    "category": "ui.rank_card",
-    "label": "generate_rank_card · GAMES",
-    "default": "GAMES  {games}",
-    "fields": [
-      "games"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.rank_card.generate_rank_card.098dfe63ae": {
-    "kind": "message",
-    "category": "ui.rank_card",
-    "label": "generate_rank_card · LOSSES",
-    "default": "LOSSES  {losses}",
-    "fields": [
-      "losses"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.rank_card.generate_rank_card.0c1e636b5f": {
-    "kind": "message",
-    "category": "ui.rank_card",
-    "label": "generate_rank_card · DRAWS",
-    "default": "DRAWS  {draws}",
-    "fields": [
-      "draws"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.34fa94d927": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · WORD CHAIN",
-    "default": "WORD CHAIN",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.342ab59c3a": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · CURRENT WORD",
-    "default": "CURRENT WORD",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.d636181d18": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · MOVES",
-    "default": "MOVES  {game__moves}",
-    "fields": [
-      "game__moves"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.7f962780e4": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · ANSWER  00:",
-    "default": "ANSWER  00:{idle}",
-    "fields": [
-      "idle"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.18d121def7": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · ROUND  ∞",
-    "default": "ROUND  ∞",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.status_card.ee5d2412a8": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "status_card · TOP 3  —",
-    "default": "TOP 3  —",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.result_card.34fa94d927": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "result_card · WORD CHAIN",
-    "default": "WORD CHAIN",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.result_card.20dd48d9c7": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "result_card · No valid answers",
-    "default": "No valid answers",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.word_chain_card.result_card.1ee49a904e": {
-    "kind": "message",
-    "category": "ui.word_chain_card",
-    "label": "result_card · + more players",
-    "default": "+{len_rows____5} more players",
-    "fields": [
-      "len_rows____5"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_pending_card.3810f17222": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_pending_card · SPEED TAP",
-    "default": "SPEED TAP",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_pending_card.6ff80ddfcf": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_pending_card · RANDOM START",
-    "default": "RANDOM START",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_pending_card.3003ffda55": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_pending_card · ဘယ်အချိန်စမလဲ မသိရဘူး 👀",
-    "default": "ဘယ်အချိန်စမလဲ မသိရဘူး 👀",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_wait_card.3810f17222": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_wait_card · SPEED TAP",
-    "default": "SPEED TAP",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_wait_card.7c1a52e0e5": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_wait_card · GO ပေါ်လာမှ နှိပ်ပါ",
-    "default": "GO ပေါ်လာမှ နှိပ်ပါ",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_wait_card.3d489cbaf7": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_wait_card · စောနှိပ်ရင် အနိုင်မရပါ",
-    "default": "စောနှိပ်ရင် အနိုင်မရပါ",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_go_card.3810f17222": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_go_card · SPEED TAP",
-    "default": "SPEED TAP",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_go_card.da1a00cca3": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_go_card · GO!",
-    "default": "GO!",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_go_card.ee998f0753": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_go_card · ⚡ TAP NOW ⚡",
-    "default": "⚡ TAP NOW ⚡",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_result_card.0c78ebda7b": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_result_card · SPEED TAP RESULT",
-    "default": "SPEED TAP RESULT",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_result_card.f155e700b6": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_result_card · 🏆 WINNER",
-    "default": "🏆 WINNER",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_result_card.28644bf787": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_result_card · ms",
-    "default": "{reaction_ms} ms",
-    "fields": [
-      "reaction_ms"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_result_card.d84ad2b09a": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_result_card · + Points",
-    "default": "+{reward_points} Points",
-    "fields": [
-      "reward_points"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_result_card.7bdf173a87": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_result_card · ✨ JACKPOT +",
-    "default": "✨ JACKPOT +{jackpot_bonus}",
-    "fields": [
-      "jackpot_bonus"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_timeout_card.3810f17222": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_timeout_card · SPEED TAP",
-    "default": "SPEED TAP",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_timeout_card.aee564fe1c": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_timeout_card · TIME'S UP",
-    "default": "TIME'S UP",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.speed_tap_card.generate_speed_tap_timeout_card.3cae975e9f": {
-    "kind": "message",
-    "category": "ui.speed_tap_card",
-    "label": "generate_speed_tap_timeout_card · ဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး",
-    "default": "ဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.87cabb089d": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · DAILY CHALLENGE",
-    "default": "DAILY CHALLENGE",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.c82f339b4e": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #f8fbff",
-    "default": "#f8fbff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.a39511cdaa": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · x2 DAY",
-    "default": "x2 DAY",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.e1019911a6": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · 3 MISSIONS",
-    "default": "3 MISSIONS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.70f86e7f9d": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #facc72",
-    "default": "#facc72",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.184ca52e5d": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #65e8e6",
-    "default": "#65e8e6",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.89be61dde6": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · YOUR PRIVATE DAILY MISSIONS",
-    "default": "YOUR PRIVATE DAILY MISSIONS",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.6ff801da48": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #70e1d9",
-    "default": "#70e1d9",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.c659d630ce": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #ffffff",
-    "default": "#ffffff",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.9217a52300": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · - PTS",
-    "default": "{lo____2_if_double_else_1}-{hi____2_if_double_else_1} PTS",
-    "fields": [
-      "lo____2_if_double_else_1",
-      "hi____2_if_double_else_1"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.df5f8096db": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #e2edf9",
-    "default": "#e2edf9",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.3be410c9af": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · YOU /",
-    "default": "YOU {min_progress__need}/{need}   {status}",
-    "fields": [
-      "min_progress__need",
-      "need",
-      "status"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.cd11e3d1fd": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #b6d5e5",
-    "default": "#b6d5e5",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.79d86ebe67": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · |  PERSONAL VIEW  |  AUTO-DELETE 60s",
-    "default": "{stats__day}  |  PERSONAL VIEW  |  AUTO-DELETE 60s",
-    "fields": [
-      "stats__day"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.daily_challenge_card.card.5ba94e4b6e": {
-    "kind": "message",
-    "category": "ui.daily_challenge_card",
-    "label": "card · #ceddea",
-    "default": "#ceddea",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.pair_challenge_card.lobby_card.31b4520298": {
-    "kind": "message",
-    "category": "ui.pair_challenge_card",
-    "label": "lobby_card · PLAYERS",
-    "default": "PLAYERS  {len_players}",
-    "fields": [
-      "len_players"
-    ],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.pair_challenge_card.lobby_card.cfcad563bc": {
-    "kind": "message",
-    "category": "ui.pair_challenge_card",
-    "label": "lobby_card · Waiting for players…",
-    "default": "Waiting for players…",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.pair_challenge_card.result_card.0890796138": {
-    "kind": "message",
-    "category": "ui.pair_challenge_card",
-    "label": "result_card · TEAM RESULT",
-    "default": "TEAM RESULT",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.pair_challenge_card.result_card.98517903a0": {
-    "kind": "message",
-    "category": "ui.pair_challenge_card",
-    "label": "result_card · CHALLENGES CLEARED",
-    "default": "CHALLENGES CLEARED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.ui.pair_challenge_card.result_card.b2ca916eeb": {
-    "kind": "message",
-    "category": "ui.pair_challenge_card",
-    "label": "result_card · TRY AGAIN",
-    "default": "TRY AGAIN",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
   "msg.core.keyboards.vote_keyboard.1502f51af1": {
     "kind": "message",
     "category": "core.keyboards",
@@ -7752,24 +4868,6 @@
     "max_length": 4000,
     "html": false
   },
-  "msg.core.keyboards.boss_attack_keyboard.87bd70daf1": {
-    "kind": "message",
-    "category": "core.keyboards",
-    "label": "boss_attack_keyboard · 🏁 RAID FINISHED",
-    "default": "🏁 RAID FINISHED",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
-  "msg.core.keyboards.boss_attack_keyboard.750ba0278d": {
-    "kind": "message",
-    "category": "core.keyboards",
-    "label": "boss_attack_keyboard · ⚔️ ATTACK",
-    "default": "⚔️ ATTACK",
-    "fields": [],
-    "max_length": 4000,
-    "html": false
-  },
   "msg.core.keyboards.speed_tap_keyboard.a4231c927e": {
     "kind": "message",
     "category": "core.keyboards",
@@ -7805,48 +4903,6 @@
     "fields": [],
     "max_length": 4000,
     "html": false
-  },
-  "cfg.boss_auto.enabled": {
-    "kind": "setting",
-    "category": "boss_auto",
-    "label": "Enabled",
-    "default": true,
-    "minimum": 1,
-    "maximum": 86400
-  },
-  "cfg.boss_auto.threshold": {
-    "kind": "setting",
-    "category": "boss_auto",
-    "label": "Threshold",
-    "default": [
-      60,
-      125
-    ],
-    "minimum": 1,
-    "maximum": 86400,
-    "fixed_length": true,
-    "ordered": true
-  },
-  "cfg.boss_auto.chance": {
-    "kind": "setting",
-    "category": "boss_auto",
-    "label": "Chance",
-    "default": 0.7,
-    "minimum": 0,
-    "maximum": 1
-  },
-  "cfg.boss_auto.quiet": {
-    "kind": "setting",
-    "category": "boss_auto",
-    "label": "Quiet",
-    "default": [
-      3000,
-      7500
-    ],
-    "minimum": 1,
-    "maximum": 86400,
-    "fixed_length": true,
-    "ordered": true
   },
   "cfg.wyr_auto.enabled": {
     "kind": "setting",
@@ -11445,7 +8501,7 @@
     "kind": "message",
     "category": "This or That",
     "label": "This or That · round",
-    "default": "🖼️ This or That — {round}/{rounds}\nဒီနှစ်ခုထဲက ပိုကြိုက်တာကို ရွေးပါ။\n\nA · {a}\n{av} မဲ · {ap}%\nB · {b}\n{bv} မဲ · {bp}%\n\nမဲတစ်ယောက်တစ်ကြိမ်။ {seconds} စက္ကန့်။",
+    "default": "⚖️ This or That — {round}/{rounds}\nဒီနှစ်ခုထဲက ပိုကြိုက်တာကို ရွေးပါ။\n\nA · {a}\n{av} မဲ · {ap}%\nB · {b}\n{bv} မဲ · {bp}%\n\nမဲတစ်ယောက်တစ်ကြိမ်။ {seconds} စက္ကန့်။",
     "fields": [
       "round",
       "rounds",
@@ -11621,7 +8677,7 @@
     "kind": "message",
     "category": "This or That",
     "label": "This or That · rules",
-    "default": "🖼️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nပုံပို့မရလျှင် စာနှင့်ခလုတ်ဖြင့်ဆက်ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။",
+    "default": "⚖️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nစာကတ်နှင့် ရွေးချယ်ရန်ခလုတ်များဖြင့် ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။",
     "fields": [],
     "html": false,
     "max_length": 700
@@ -12843,6 +9899,446 @@
       "target_first_name"
     ],
     "max_length": 1024,
+    "html": false
+  },
+  "msg.ui.text_cards.speed_pending": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Speed Pending",
+    "default": "⚡ SPEED TAP\n━━━━━━━━━━━━━━\n🎲 အချိန်မရွေး စတင်မယ်။\n🟢 GO ပေါ်လာတာနဲ့ အမြန်ဆုံးနှိပ်ပါ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.speed_wait": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Speed Wait",
+    "default": "⏳ ခဏစောင့်ပါ…\nGO မပေါ်ခင် နှိပ်ရင် မနိုင်ပါ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.speed_go": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Speed Go",
+    "default": "👇 အောက်ကခလုတ်ကို အမြန်နှိပ်ပါ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.math": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Math",
+    "default": "🧮 MATH BATTLE · {round}/5\n━━━━━━━━━━━━━━\n\n{question}\n\n⏳ {seconds} စက္ကန့်\n⚡ အဖြေမှန်အမြန်ဆုံး ၃ ယောက်: +10 / +5 / +3 score\n\n🏆 လက်ရှိအမှတ်\n{leaders}",
+    "fields": [
+      "round",
+      "question",
+      "seconds",
+      "leaders"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.math_result": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Math Result",
+    "default": "🏁 MATH BATTLE · ရလဒ်\n━━━━━━━━━━━━━━\n{leaders}",
+    "fields": [
+      "leaders"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.word": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Word",
+    "default": "🔤 WORD CHAIN · {mode}\n━━━━━━━━━━━━━━\n\n🔗 လက်ရှိစကားလုံး: {word}\n➡️ ဆက်ရမည့်အစ: {required}\n\n⏳ နောက်အဖြေအတွက် {seconds} စက္ကန့်\n✅ ဆက်ထားပြီး {moves} ကြိမ်\n\n🏆 ထိပ်ဆုံးကစားသမားများ\n{leaders}\n\nတစ်ယောက်တည်း နှစ်ကြိမ်ဆက်တိုက် မဖြေရပါ။",
+    "fields": [
+      "mode",
+      "word",
+      "required",
+      "seconds",
+      "moves",
+      "leaders"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.word_result": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Word Result",
+    "default": "🏁 WORD CHAIN · ရလဒ်\n━━━━━━━━━━━━━━\n{reason}\n\n{leaders}",
+    "fields": [
+      "reason",
+      "leaders"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.profile": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Profile",
+    "default": "👤 {name}\n━━━━━━━━━━━━━━\n{emoji} {rank}\n⭐ အမှတ် {points}\n\n🏆 နိုင် {wins} · ရှုံး {losses} · သရေ {draws}\n🎮 ကစားပြီး {games} ပွဲ\n\n{progress}",
+    "fields": [
+      "name",
+      "emoji",
+      "rank",
+      "points",
+      "wins",
+      "losses",
+      "draws",
+      "games",
+      "progress"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.rank": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Rank",
+    "default": "🏆 GROUP RANKING\n━━━━━━━━━━━━━━\n{leaders}",
+    "fields": [
+      "leaders"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.empty": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Empty",
+    "default": "ပါဝင်သူ မရှိသေးပါ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.math_row": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Math Row",
+    "default": "{rank}. {name} · {score} score{reward}",
+    "fields": [
+      "rank",
+      "name",
+      "score",
+      "reward"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.word_row": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Word Row",
+    "default": "{rank}. {name} · {words} လုံး · {reward}",
+    "fields": [
+      "rank",
+      "name",
+      "words",
+      "reward"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.rank_row": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Rank Row",
+    "default": "{medal} {name}\n    ⭐ {points} · 🏆 {wins} · 🎮 {games}",
+    "fields": [
+      "medal",
+      "name",
+      "points",
+      "wins",
+      "games"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.next_rank": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Next Rank",
+    "default": "{bar} {percent}%\nနောက်တစ်ဆင့် {rank} အတွက် {remaining} မှတ်လိုသည်။",
+    "fields": [
+      "bar",
+      "percent",
+      "rank",
+      "remaining"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.max_rank": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Max Rank",
+    "default": "💫 အမြင့်ဆုံး Rank ရောက်ရှိပြီးပါပြီ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.daily": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Daily",
+    "default": "🎯 DAILY CHALLENGE\n━━━━━━━━━━━━━━\n📅 {day} · {mode}{double}\n\n{missions}\n\n{claim}",
+    "fields": [
+      "day",
+      "mode",
+      "double",
+      "missions",
+      "claim"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal",
+    "default": "ကိုယ်ပိုင်မစ်ရှင်များ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.group": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Group",
+    "default": "Group မစ်ရှင်များ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.double": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Double",
+    "default": " · ✨ ဆုနှစ်ဆနေ့",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.daily_mission": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Daily Mission",
+    "default": "{number}. {description}\n{bar} {progress}/{needed}\n🎁 {lo}–{hi} points · {status}",
+    "fields": [
+      "number",
+      "description",
+      "bar",
+      "progress",
+      "needed",
+      "lo",
+      "hi",
+      "status"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.daily_group_mission": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Daily Group Mission",
+    "default": "{number}. {description}\n{bar} {progress}/{needed}\n👥 {users}/{unique} ယောက် · ကိုယ်တိုင် {mine}/{personal}\n🎁 {lo}–{hi} points{status}",
+    "fields": [
+      "number",
+      "description",
+      "bar",
+      "progress",
+      "needed",
+      "users",
+      "unique",
+      "mine",
+      "personal",
+      "lo",
+      "hi",
+      "status"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.claimed": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Claimed",
+    "default": "✅ ဆုယူပြီး",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.ready": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Ready",
+    "default": "✅ ဆုယူနိုင်ပြီ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.ongoing": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Ongoing",
+    "default": "⏳ ဆက်လုပ်ရန်",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.claim_personal": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Claim Personal",
+    "default": "ဆုယူရန် /dailyclaim 1–3",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.claim_group": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Claim Group",
+    "default": "ဆုယူရန် /dailygroupclaim 1–3",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.message": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Message",
+    "default": "အဓိပ္ပါယ်ရှိပြီး မတူညီသောစာများ ပို့ပါ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.play": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Play",
+    "default": "Group ဂိမ်းများ ပါဝင်ကစားပါ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.correct": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Correct",
+    "default": "ဂိမ်းမေးခွန်းများ မှန်အောင်ဖြေပါ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.win": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Win",
+    "default": "Group ဂိမ်းများ အနိုင်ရပါ",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.reward": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reward",
+    "default": " +{points} points",
+    "fields": [
+      "points"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.reward_error": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reward Error",
+    "default": "ဆုသိမ်းမရသေး",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.word_leader": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Word Leader",
+    "default": "{rank}. {name} · {words} လုံး",
+    "fields": [
+      "rank",
+      "name",
+      "words"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_message": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Message",
+    "default": "မတူညီသော အဓိပ္ပါယ်ရှိသည့်စာ {n} ကြိမ် ပို့ပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_play": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Play",
+    "default": "Group ဂိမ်းတွင် {n} ကြိမ် ပါဝင်ပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_correct": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Correct",
+    "default": "ဂိမ်းမေးခွန်း {n} ခု မှန်အောင်ဖြေပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_win": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Win",
+    "default": "ဂိမ်း {n} ပွဲ အနိုင်ရပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_math": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Math",
+    "default": "Math Battle အဖြေ {n} ခု မှန်အောင်ဖြေပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.personal_word": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Personal Word",
+    "default": "Word Chain တွင် စကားလုံး {n} လုံး ဆက်ပါ",
+    "fields": [
+      "n"
+    ],
+    "html": false
+  },
+  "msg.ui.text_cards.reason_idle": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reason Idle",
+    "default": "အချိန်မီ ဆက်ဖြေသူမရှိပါ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.reason_limit": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reason Limit",
+    "default": "ပွဲချိန်ပြည့်ပါပြီ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.reason_stop": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reason Stop",
+    "default": "Admin က ပွဲရပ်လိုက်ပါပြီ။",
+    "fields": [],
+    "html": false
+  },
+  "msg.ui.text_cards.reason_end": {
+    "kind": "message",
+    "category": "ui.text_cards",
+    "label": "Reason End",
+    "default": "ပွဲပြီးပါပြီ။",
+    "fields": [],
     "html": false
   }
 }

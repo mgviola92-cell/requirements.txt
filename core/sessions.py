@@ -13,7 +13,7 @@ import time
 #   (chat_id, session_type)
 #
 # Example:
-#   (-100123456789, "boss_raid")
+#   (-100123456789, "math_battle")
 # =========================================================
 
 _active_sessions = {}
@@ -33,15 +33,14 @@ SESSION_PRIORITIES = {
     # MAJOR EVENTS
     # -----------------------------------------
 
-    "boss_raid": 100,
-    "team_battle": 95,
+
     "math_battle": 90,
 
     # -----------------------------------------
     # MULTIPLAYER GAMES
     # -----------------------------------------
 
-    "pair_challenge": 80,
+
     "imposter": 78,
     "nan_yate": 85,
     "draw_guess": 77,
@@ -87,10 +86,10 @@ SESSION_PRIORITIES = {
 # =========================================================
 
 EXCLUSIVE_SESSIONS = {
-    "boss_raid",
-    "team_battle",
+
+
     "math_battle",
-    "pair_challenge",
+
     "imposter",
     "nan_yate",
     "draw_guess",

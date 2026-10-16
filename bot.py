@@ -1,3 +1,14 @@
+from ui.text_cards import (
+    TextCard, send_card, edit_card, get_speed_tap_background,
+    speed_pending as speed_pending_card,
+    speed_wait as speed_wait_card,
+    speed_go as speed_go_card,
+    speed_result as speed_result_card,
+    speed_timeout as speed_timeout_card,
+    math_round as math_round_card, math_result as math_result_card,
+    word_status as word_chain_status_card, word_result as word_chain_result_card,
+    profile as profile_card, leaderboard as leaderboard_card,
+)
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 import telebot
 from telebot import types
@@ -69,7 +80,6 @@ from core.keyboards import (
     two_buttons,
     vote_keyboard,
     accept_decline_keyboard,
-    boss_attack_keyboard,
     speed_tap_keyboard,
     claim_keyboard,
     pagination_keyboard,
@@ -93,28 +103,6 @@ from core.asset_manager import (
     asset_exists,
 )
 
-from ui.card_generator import (
-    create_card,
-    open_image,
-    resize_cover,
-    add_background_image,
-    draw_panel,
-    draw_text,
-    draw_progress_bar,
-    paste_image,
-    card_to_bytes,
-    save_card,
-)
-
-from ui.rank_card import (
-    generate_rank_card,
-    generate_rank_card_bytes,
-)
-
-from ui.leaderboard_card import (
-    generate_leaderboard_card,
-    generate_leaderboard_card_bytes,
-)
 
 from games.emoji_guess import (
     EMOJI_GUESS_TIME,
@@ -144,8 +132,7 @@ from games.math_battle import (
     advance as advance_math_battle,
     stop as stop_math_battle,
 )
-from ui.math_battle_card import round_card as math_round_card, result_card as math_result_card
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from games.word_chain import (
     IDLE_SECONDS as WORD_CHAIN_IDLE_SECONDS,
@@ -156,8 +143,6 @@ from games.word_chain import (
     finish as finish_word_chain,
 )
 from core.rewards import add_bonus_points
-from ui.word_chain_card import status_card as word_chain_status_card
-from ui.word_chain_card import result_card as word_chain_result_card
 
 from games.speed_tap import (
     SPEED_TAP_PENDING_MIN,
@@ -182,67 +167,6 @@ from features.speed_tap_auto import (
     record_speed_tap_activity,
 )
 
-from games.boss_raid import (
-    RAID_DURATION as BOSS_RAID_DURATION,
-    start_raid as start_boss_raid,
-    get_raid as get_boss_raid,
-    set_message_id as set_boss_raid_message_id,
-    attack as attack_boss_raid,
-    finish_raid as finish_boss_raid,
-    top_fighters as boss_top_fighters,
-    ending_line as boss_ending_line,
-    claim_ending as claim_boss_raid_ending,
-)
-
-from ui.boss_raid_card import (
-    get_boss_artwork,
-    live_card as generate_boss_live_card,
-    visual_stage as get_boss_visual_stage,
-    result_card as generate_boss_result_card,
-)
-
-
-from games.pair_challenge import (
-    MODES as PAIR_MODES,
-    create_lobby as create_pair_lobby,
-    get as get_pair_challenge,
-    set_message as set_pair_challenge_message,
-    select_mode as select_pair_mode,
-    join as join_pair_challenge,
-    leave as leave_pair_challenge,
-    can_start as can_start_pair_challenge,
-    start_round as start_pair_round,
-    answer as answer_pair_challenge,
-    finish_round as finish_pair_round,
-    match_complete as pair_match_complete,
-    finish_match as finish_pair_match,
-    cancel as cancel_pair_challenge,
-)
-from ui.pair_challenge_card import (
-    lobby_card as pair_lobby_card,
-    challenge_card as pair_challenge_card,
-    result_card as pair_challenge_result_card,
-)
-
-from games.team_battle import (
-    start_battle as start_team_battle,
-    get_battle as get_team_battle,
-    set_message_id as set_team_battle_message_id,
-    finish_battle as finish_team_battle,
-    member_ids as team_battle_member_ids,
-    hype_line as team_battle_hype_line,
-    set_update_listener as set_team_battle_update_listener,
-)
-from ui.team_battle_card import generate_team_battle_card
-
-from ui.speed_tap_card import (
-    get_speed_tap_background,
-    generate_speed_tap_pending_card_bytes,
-    generate_speed_tap_wait_card_bytes,
-    generate_speed_tap_go_card_bytes,
-    generate_speed_tap_result_card_bytes,
-    generate_speed_tap_timeout_card_bytes,
-)
 
 # =========================================================
 # 😀 EMOJI GUESS QUESTION SELECTOR
@@ -337,432 +261,10 @@ from features.imposter import register as register_imposter
 register_imposter(bot)
 
 
-# =========================================================
-# 🔴🔵 TEAM BATTLE — RED vs BLUE
-# Permanent game rewards stay unchanged; positive earned points are mirrored
-# into the temporary active battle score by core.rewards.
-# =========================================================
-_team_battle_edit_lock = threading.RLock()
-_team_battle_last_edit = {}
-
-def _team_battle_caption(battle, stage="live"):
-    red = int(battle.get("scores", {}).get("red", 0))
-    blue = int(battle.get("scores", {}).get("blue", 0))
-    if stage == "final":
-        if red > blue:
-            return _custom_text('msg.bot._team_battle_caption.0a991c547e', '🏁 TEAM BATTLE FINAL — 🔴 RED TEAM WINS!', {})
-        if blue > red:
-            return _custom_text('msg.bot._team_battle_caption.f71d09da98', '🏁 TEAM BATTLE FINAL — 🔵 BLUE TEAM WINS!', {})
-        return _custom_text('msg.bot._team_battle_caption.1b1530be8b', '🏁 TEAM BATTLE FINAL — 🤝 DRAW!', {})
-    if stage == "half":
-        return _custom_text('msg.bot._team_battle_caption.2c103557f6', '⚔️ TEAM BATTLE — HALF-TIME', {})
-    return _custom_text('msg.bot._team_battle_caption.e20210a5a7', '⚔️ TEAM BATTLE — RED vs BLUE', {})
-
-def _team_battle_replace_card(battle, stage):
-    chat_id = battle["chat_id"]
-    old_id = battle.get("message_id")
-    try:
-        sent = bot.send_photo(
-            chat_id,
-            generate_team_battle_card(battle, stage),
-            caption=_team_battle_caption(battle, stage),
-        )
-        safe_pin_message(bot, chat_id, sent.message_id, disable_notification=True)
-        set_team_battle_message_id(chat_id, battle["id"], sent.message_id, stage)
-        if old_id and old_id != sent.message_id:
-            safe_unpin_message(bot, chat_id, old_id)
-            safe_delete_message(bot, chat_id, old_id)
-        return sent.message_id
-    except Exception as exc:
-        print("Team Battle card replace error:", exc)
-        return None
-
-def _team_battle_live_update(battle):
-    chat_id = battle["chat_id"]
-    mid = battle.get("message_id")
-    if not mid or battle.get("finished"):
-        return
-    now = time.monotonic()
-    with _team_battle_edit_lock:
-        last = _team_battle_last_edit.get(chat_id, 0.0)
-        if now - last < 1.5:
-            return
-        _team_battle_last_edit[chat_id] = now
-    try:
-        bot.edit_message_media(
-            InputMediaPhoto(
-                generate_team_battle_card(battle, battle.get("stage", "live")),
-                caption=_team_battle_caption(battle, battle.get("stage", "live")),
-            ),
-            chat_id=chat_id,
-            message_id=mid,
-        )
-    except Exception as exc:
-        print("Team Battle live edit error:", exc)
-
-def _team_battle_member_mention(chat_id, uid):
-    try:
-        member = bot.get_chat_member(chat_id, uid)
-        user = member.user
-        name = html.escape(user.first_name or user.username or "Player")
-        return f'<a href="tg://user?id={uid}">{name}</a>'
-    except Exception:
-        return "Player"
-
-def _team_battle_hype(chat_id, battle_id):
-    battle = get_team_battle(chat_id)
-    if not battle or battle["id"] != battle_id or battle.get("finished"):
-        return
-    ids = team_battle_member_ids(battle)
-    if ids:
-        picks = random.sample(ids, min(len(ids), random.randint(1, min(4, len(ids)))))
-        mentions = " ".join(_team_battle_member_mention(chat_id, uid) for uid in picks)
-        try:
-            msg = bot.send_message(
-                chat_id,
-                _custom_text('msg.bot._team_battle_hype.84d59cead4', '⚡ <b>TEAM BATTLE UPDATE</b>\n\n{mentions}\n{team_battle_hype_line}', {'mentions': f'{mentions}', 'team_battle_hype_line': f'{team_battle_hype_line()}'}),
-                parse_mode="HTML",
-            )
-            threading.Timer(35, lambda: safe_delete_message(bot, chat_id, msg.message_id)).start()
-        except Exception as exc:
-            print("Team Battle hype error:", exc)
-    remaining = max(0, battle["ends_at"] - time.time())
-    if remaining > 70:
-        schedule_task(
-            min(random.randint(55, 105), max(20, remaining - 20)),
-            _team_battle_hype,
-            chat_id,
-            battle_id,
-            task_id=f"team_battle_hype:{chat_id}",
-            replace=True,
-        )
-
-def _team_battle_half(chat_id, battle_id):
-    battle = get_team_battle(chat_id)
-    if not battle or battle["id"] != battle_id or battle.get("finished"):
-        return
-    _team_battle_replace_card(battle, "half")
-
-def _team_battle_final(chat_id, battle_id):
-    battle = finish_team_battle(chat_id, battle_id)
-    if not battle:
-        return
-    _team_battle_replace_card(battle, "final")
-    cancel_task(f"team_battle_hype:{chat_id}")
-    _team_battle_last_edit.pop(chat_id, None)
-
-set_team_battle_update_listener(_team_battle_live_update)
-
-@bot.message_handler(commands=["teambattle"])
-def team_battle_command(message):
-    if message.chat.type not in ("group", "supergroup"):
-        return
-    if not is_user_admin(bot, message.chat.id, message.from_user.id):
-        bot.reply_to(message, _custom_text('msg.bot.team_battle_command.bbb78c78da', '❌ Team Battle ကို Admin ပဲ စနိုင်ပါတယ်။', {}))
-        return
-    started, battle = start_team_battle(message.chat.id)
-    if not started:
-        bot.reply_to(message, _custom_text('msg.bot.team_battle_command.51cf3349c8', '⚔️ Team Battle က လက်ရှိ run နေပါတယ်။', {}))
-        return
-    try:
-        sent = bot.send_photo(
-            message.chat.id,
-            generate_team_battle_card(battle, "live"),
-            caption=_team_battle_caption(battle, "live"),
-        )
-        set_team_battle_message_id(message.chat.id, battle["id"], sent.message_id, "live")
-        safe_pin_message(bot, message.chat.id, sent.message_id, disable_notification=True)
-    except Exception as exc:
-        print("Team Battle start card error:", exc)
-        return
-
-    half_delay = max(1, battle["half_at"] - time.time())
-    final_delay = max(2, battle["ends_at"] - time.time())
-    schedule_task(
-        half_delay, _team_battle_half, message.chat.id, battle["id"],
-        task_id=f"team_battle_half:{message.chat.id}", replace=True,
-    )
-    schedule_task(
-        final_delay, _team_battle_final, message.chat.id, battle["id"],
-        task_id=f"team_battle_final:{message.chat.id}", replace=True,
-    )
-    schedule_task(
-        random.randint(45, 80), _team_battle_hype, message.chat.id, battle["id"],
-        task_id=f"team_battle_hype:{message.chat.id}", replace=True,
-    )
-
-
 try:
     initialize_member_registry()
 except Exception as exc:
     print(f"Member registry init error: {exc}")
-
-
-# =========================================================
-# 👥 PAIR CHALLENGE — Duo / Squad / 2v2
-# =========================================================
-PAIR_ROUND_SECONDS = 90
-PAIR_DUO_SUCCESS_REWARD = 20
-
-def _pair_mode_keyboard(game):
-    kb = InlineKeyboardMarkup()
-    gid = game["id"]
-    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.f0b01ce392', '👥 Duo (2)', {}), callback_data=f"pairmode:{gid}:duo"))
-    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.4082c66196', '🧩 Squad (2-4)', {}), callback_data=f"pairmode:{gid}:squad"))
-    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_mode_keyboard.97797cba6d', '⚔️ Team Versus (2v2)', {}), callback_data=f"pairmode:{gid}:versus"))
-    return kb
-
-def _pair_lobby_keyboard(game):
-    kb = InlineKeyboardMarkup()
-    gid = game["id"]
-    kb.row(
-        InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.af96eed561', '➕ JOIN', {}), callback_data=f"pairjoin:{gid}"),
-        InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.3477a92e7d', '➖ LEAVE', {}), callback_data=f"pairleave:{gid}"),
-    )
-    kb.row(InlineKeyboardButton(_custom_text('msg.bot._pair_lobby_keyboard.9bbba5cd50', '▶️ START', {}), callback_data=f"pairstart:{gid}"))
-    return kb
-
-def _pair_answer_keyboard(game):
-    kb = InlineKeyboardMarkup()
-    gid = game["id"]
-    options = (game.get("challenge") or {}).get("options", ["A", "B"])
-    kb.row(
-        InlineKeyboardButton(_custom_text('msg.bot._pair_answer_keyboard.cb16ac41d1', 'A • ', {}) + options[0], callback_data=f"pairans:{gid}:a"),
-        InlineKeyboardButton(_custom_text('msg.bot._pair_answer_keyboard.a2c9189d10', 'B • ', {}) + options[1], callback_data=f"pairans:{gid}:b"),
-    )
-    return kb
-
-def _pair_caption(game, seconds=None):
-    mode = _custom_setting('cfg.games.pair_challenge.MODES', PAIR_MODES).get(game.get("mode"), {}).get("title", "PAIR CHALLENGE")
-    if game.get("state") == "mode":
-        return _custom_text('msg.bot._pair_caption.26b1ab5a21', '👥 PAIR CHALLENGE • Mode ရွေးပါ', {})
-    if game.get("state") == "lobby":
-        info = _custom_setting('cfg.games.pair_challenge.MODES', PAIR_MODES)[game["mode"]]
-        return _custom_text('msg.bot._pair_caption.f7eb741797', '👥 {mode} • {len_game__players}/{info__max} players', {'mode': f'{mode}', 'len_game__players': f"{len(game['players'])}", 'info__max': f"{info['max']}"})
-    if game.get("state") == "playing":
-        if seconds is None:
-            seconds = max(0, int(game.get("ends_at", time.time()) - time.time() + 0.999))
-        return _custom_text('msg.bot._pair_caption.544825d56e', '👥 {mode} • ROUND {game_get__round_no___1}/{game_get__total_rounds___5} • ⏳ {seconds}s', {'mode': f'{mode}', 'game_get__round_no___1': f"{game.get('round_no', 1)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}", 'seconds': f'{seconds}'})
-    return _custom_text('msg.bot._pair_caption.04c93385cc', '👥 {mode} • ROUND {game_get__round_no___0}/{game_get__total_rounds___5}', {'mode': f'{mode}', 'game_get__round_no___0': f"{game.get('round_no', 0)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}"})
-
-def _pair_edit_lobby(game):
-    mid = game.get("message_id")
-    if not mid:
-        return
-    try:
-        bot.edit_message_media(
-            InputMediaPhoto(pair_lobby_card(game), caption=_pair_caption(game)),
-            chat_id=game["chat_id"], message_id=mid,
-            reply_markup=_pair_lobby_keyboard(game) if game.get("mode") else _pair_mode_keyboard(game),
-        )
-    except Exception as exc:
-        print("Pair lobby update error:", exc)
-
-def _pair_show_round(game):
-    try:
-        bot.edit_message_media(
-            InputMediaPhoto(pair_challenge_card(game), caption=_pair_caption(game, _custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))),
-            chat_id=game["chat_id"], message_id=game["message_id"],
-            reply_markup=_pair_answer_keyboard(game),
-        )
-    except Exception as exc:
-        print("Pair round card error:", exc)
-    schedule_task(
-        1, _pair_countdown, game["chat_id"], game["id"],
-        task_id=f"pair_tick:{game['chat_id']}", replace=True,
-    )
-
-def _pair_countdown(chat_id, game_id):
-    game = get_pair_challenge(chat_id)
-    if not game or game["id"] != game_id or game.get("state") != "playing":
-        return
-    left = max(0, int(game["ends_at"] - time.time() + 0.999))
-    if left <= 0:
-        _pair_finish_round(chat_id, game_id)
-        return
-    # Keep Telegram edits sparse to avoid 429; deadline is tracked by wall clock.
-    if left <= 10 or left % 5 == 0:
-        try:
-            bot.edit_message_caption(
-                _pair_caption(game, left),
-                chat_id=chat_id, message_id=game["message_id"],
-                reply_markup=_pair_answer_keyboard(game),
-            )
-        except Exception as exc:
-            if "message is not modified" not in str(exc).lower():
-                print("Pair countdown update error:", exc)
-    schedule_task(1, _pair_countdown, chat_id, game_id, task_id=f"pair_tick:{chat_id}", replace=True)
-
-def _pair_finish_round(chat_id, game_id):
-    game = finish_pair_round(chat_id, game_id)
-    if not game:
-        return
-    cancel_task(f"pair_tick:{chat_id}")
-    if pair_match_complete(game):
-        _pair_finish_match(chat_id, game_id)
-        return
-    try:
-        bot.edit_message_caption(
-            _custom_text('msg.bot._pair_finish_round.28f9087847', '👥 PAIR CHALLENGE • ROUND {game__round_no}/{game__total_rounds} ပြီးပြီ\nနောက် round စနေပြီ…', {'game__round_no': f"{game['round_no']}", 'game__total_rounds': f"{game['total_rounds']}"}),
-            chat_id=chat_id, message_id=game["message_id"], reply_markup=None,
-        )
-    except Exception:
-        pass
-    schedule_task(
-        2, _pair_next_round, chat_id, game_id,
-        task_id=f"pair_next:{chat_id}", replace=True,
-    )
-
-def _pair_next_round(chat_id, game_id):
-    game = start_pair_round(chat_id, game_id, duration=_custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))
-    if game:
-        _pair_show_round(game)
-        return
-    from games.pair_challenge import abort_unavailable
-    aborted = abort_unavailable(chat_id, game_id)
-    if not aborted:
-        return
-    cancel_task(f"pair_tick:{chat_id}")
-    cancel_task(f"pair_next:{chat_id}")
-    try:
-        bot.send_message(chat_id, _custom_text('msg.bot._pair_next_round.b0b5c03920', '⚠️ မေးခွန်းအသစ် မရသေးလို့ Pair Challenge ကို ပိတ်လိုက်ပါတယ်။ /pair နဲ့ အသစ်ပြန်စနိုင်ပါတယ်။', {}))
-        if aborted.get("message_id"):
-            safe_delete_message(bot, chat_id, aborted["message_id"])
-    except Exception as exc:
-        print("Pair abort notification:", exc)
-
-def _pair_finish_match(chat_id, game_id):
-    game = finish_pair_match(chat_id, game_id)
-    if not game:
-        return
-    cancel_task(f"pair_tick:{chat_id}")
-    cancel_task(f"pair_next:{chat_id}")
-    old_id = game.get("message_id")
-    # Reward processing is independent of Telegram photo delivery.
-    # finish_pair_match has a one-time state guard.
-    for uid in game.get("winners", []):
-        try:
-            add_bonus_points(chat_id, uid, _custom_setting('cfg.bot.PAIR_DUO_SUCCESS_REWARD', PAIR_DUO_SUCCESS_REWARD), reason="pair_challenge")
-        except Exception as reward_exc:
-            print("Pair reward error:", reward_exc)
-    try:
-        caption = _custom_text('msg.bot._pair_finish_match.4726dc17a0', '👥 PAIR CHALLENGE • MATCH RESULT', {})
-        if game.get("mode") == "versus":
-            score = game.get("match_scores", {})
-            winner = game.get("match_winner", "draw")
-            caption += _custom_text('msg.bot._pair_finish_match.32dfb409ae', '\n🔴 {score_get__red___0} - {score_get__blue___0} 🔵\n', {'score_get__red___0': f"{score.get('red', 0)}", 'score_get__blue___0': f"{score.get('blue', 0)}"})
-            caption += _custom_text('msg.bot._pair_finish_match.e529391bb2', '🤝 DRAW', {}) if winner == "draw" else (_custom_text('msg.bot._pair_finish_match.a27b7b43e0', '🔴 RED TEAM WINS', {}) if winner == "red" else _custom_text('msg.bot._pair_finish_match.76a08cf0cd', '🔵 BLUE TEAM WINS', {}))
-        else:
-            caption += _custom_text('msg.bot._pair_finish_match.040076b839', '\n✅ Cleared: {game_get__cleared_rounds___0}/{game_get__total_rounds___5}', {'game_get__cleared_rounds___0': f"{game.get('cleared_rounds', 0)}", 'game_get__total_rounds___5': f"{game.get('total_rounds', 5)}"})
-        sent = bot.send_photo(chat_id, pair_challenge_result_card(game), caption=caption)
-        if old_id:
-            safe_delete_message(bot, chat_id, old_id)
-        delay_delete_message(chat_id, sent.message_id, 120)
-    except Exception as exc:
-        print("Pair Challenge result error:", exc)
-
-@bot.message_handler(commands=["pair"])
-def pair_challenge_command(message):
-    if message.chat.type not in ("group", "supergroup"):
-        return
-    created, game = create_pair_lobby(
-        message.chat.id, message.from_user.id,
-        message.from_user.first_name or message.from_user.username or "Player",
-    )
-    if not created:
-        bot.reply_to(message, _custom_text('msg.bot.pair_challenge_command.55567e57d4', '👥 Pair Challenge က run နေပြီးသားပါ။', {}))
-        return
-    try:
-        sent = bot.send_photo(
-            message.chat.id, pair_lobby_card(game),
-            caption=_pair_caption(game), reply_markup=_pair_mode_keyboard(game),
-        )
-        set_pair_challenge_message(message.chat.id, game["id"], sent.message_id)
-    except Exception as exc:
-        cancel_pair_challenge(message.chat.id, game["id"])
-        print("Pair Challenge start error:", exc)
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairmode:"))
-def pair_mode_callback(call):
-    _, gid, mode = call.data.split(":", 2)
-    result = select_pair_mode(call.message.chat.id, gid, call.from_user.id, mode)
-    status = result.get("status")
-    if status == "owner_only":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.cf1c7a4e77', 'Game စတဲ့သူပဲ mode ရွေးလို့ရမယ်။', {}))
-        return
-    if status != "ok":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.9f10429d85', 'ဒီ lobby ပိတ်သွားပြီ။', {}))
-        return
-    bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_mode_callback.a4671ed879', 'Mode ရွေးပြီးပြီ။', {}))
-    _pair_edit_lobby(result["game"])
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairjoin:"))
-def pair_join_callback(call):
-    _, gid = call.data.split(":", 1)
-    result = join_pair_challenge(
-        call.message.chat.id, gid, call.from_user.id,
-        call.from_user.first_name or call.from_user.username or "Player",
-    )
-    status = result.get("status")
-    if status == "ok":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.cea0027a59', 'ဝင်ပြီးပြီ 👥', {}))
-        _pair_edit_lobby(result["game"])
-    elif status == "already":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.996f5cd83c', 'ဝင်ထားပြီးသား။', {}))
-    elif status == "full":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.78229ee298', 'Player ပြည့်ပြီ။', {}))
-    else:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_join_callback.1123b0a3c2', 'Lobby ပိတ်သွားပြီ။', {}))
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairleave:"))
-def pair_leave_callback(call):
-    _, gid = call.data.split(":", 1)
-    result = leave_pair_challenge(call.message.chat.id, gid, call.from_user.id)
-    status = result.get("status")
-    if status == "ok":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.72e71ab9b8', 'Lobby က ထွက်ပြီးပြီ။', {}))
-        _pair_edit_lobby(result["game"])
-    elif status == "owner":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.3b81798531', 'Game owner က lobby ကနေ leave မလုပ်နိုင်ဘူး။', {}))
-    else:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_leave_callback.916cf89eea', 'Leave လုပ်လို့မရဘူး။', {}))
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairstart:"))
-def pair_start_callback(call):
-    _, gid = call.data.split(":", 1)
-    current = get_pair_challenge(call.message.chat.id)
-    if not current or current["id"] != gid:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.1123b0a3c2', 'Lobby ပိတ်သွားပြီ။', {}))
-        return
-    if call.from_user.id != current["owner_id"]:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.63f5a7da8b', 'Game စတဲ့သူပဲ START လုပ်လို့ရမယ်။', {}))
-        return
-    if not can_start_pair_challenge(current):
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.d9d683780d', 'Player မလုံလောက်သေးဘူး။', {}))
-        return
-    game = start_pair_round(call.message.chat.id, gid, duration=_custom_setting('cfg.bot.PAIR_ROUND_SECONDS', PAIR_ROUND_SECONDS))
-    if not game:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.c60febed91', 'Start မရသေးဘူး။', {}))
-        return
-    bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_start_callback.950bcaed57', 'Challenge စပြီ!', {}))
-    _pair_show_round(game)
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("pairans:"))
-def pair_answer_callback(call):
-    _, gid, choice = call.data.split(":", 2)
-    result = answer_pair_challenge(call.message.chat.id, gid, call.from_user.id, choice)
-    status = result.get("status")
-    if status == "ok":
-        updated = result.get("game") or {}
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.dd3a25b6e6', 'Answer သိမ်းထားပြီ ✅', {}))
-        if len(updated.get("answers", {})) >= len(updated.get("players", {})):
-            _pair_finish_round(call.message.chat.id, gid)
-    elif status == "already":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.a903118b5b', 'ဒီ round မှာ တစ်ခါဖြေပြီးပြီ။', {}))
-    elif status == "not_player":
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.da44f34257', 'ဒီ match ရဲ့ player မဟုတ်ဘူး။', {}))
-    else:
-        bot.answer_callback_query(call.id, _custom_text('msg.bot.pair_answer_callback.dcb97827a6', 'Round ပိတ်သွားပြီ။', {}))
 
 
 # =========================================================
@@ -827,14 +329,6 @@ def speed_tap_activity_middleware(message):
     return ContinueHandling()
 
 
-@bot.message_handler(func=lambda m:True,content_types=["text"])
-def boss_activity_middleware(message):
-    if (message.chat.type in ("group","supergroup") and message.from_user
-            and not message.from_user.is_bot and message.text
-            and not message.text.lstrip().startswith("/")):
-        try:boss_auto_spawner.record(message.chat.id,message.from_user.id)
-        except Exception as exc:print("Boss auto activity:",type(exc).__name__)
-    return ContinueHandling()
 
 # =========================================================
 # 🚨 EARLY TEXT SPAM MIDDLEWARE
@@ -1218,7 +712,7 @@ def roll_dice(message):
         dice_value = dice_msg.dice.value
 
         time.sleep(3)
-        bot.reply_to(dice_msg, _custom_text('msg.bot.roll_dice.6b5751fffd', '🎲 တောသား <b>{user_name}</b> ရဲ့ အန်စာတုံးရလဒ်ကတော့ <b>{dice_value} မှတ်</b> ဖြစ်ပါတယ်။', {'user_name': f'{user_name}', 'dice_value': f'{dice_value}'}), parse_mode='HTML')
+        bot.reply_to(dice_msg, _custom_text('msg.bot.roll_dice.6b5751fffd', '🎲 တောသား <b>{user_name}</b> ရဲ့ အန်စာတုံးရလဒ်ကတော့ <b>{dice_value} မှတ်</b> ဖြစ်ပါတယ်။', {'user_name': html.escape(str(user_name)), 'dice_value': f'{dice_value}'}), parse_mode='HTML')
     except Exception as e:
         print(f"Dice Error: {e}")
 
@@ -1237,7 +731,7 @@ def roll_slot(message):
         else:
             result_text = _custom_text('msg.bot.roll_slot.85bddb384b', '🎰 မပေါက်ပါဘူး တောသားရာ၊ နောက်တစ်ယောက်ဆက်လှည့်', {})
 
-        bot.reply_to(slot_msg, _custom_text('msg.bot.roll_slot.55e5e8c25a', '👤 <b>{user_name}</b>\n{result_text}', {'user_name': f'{user_name}', 'result_text': f'{result_text}'}), parse_mode='HTML')
+        bot.reply_to(slot_msg, _custom_text('msg.bot.roll_slot.55e5e8c25a', '👤 <b>{user_name}</b>\n{result_text}', {'user_name': html.escape(str(user_name)), 'result_text': f'{result_text}'}), parse_mode='HTML')
     except Exception as e:
         print(f"Slot Error: {e}")
 
@@ -4070,13 +3564,13 @@ def speed_tap_command(message=None, auto_chat_id=None):
     try:
 
         pending_card = (
-            generate_speed_tap_pending_card_bytes(
+            speed_pending_card(
                 background_path=
                     pending_background,
             )
         )
 
-        pending_message = bot.send_photo(
+        pending_message = send_card(bot,
             chat_id,
             pending_card,
             caption=(
@@ -4174,7 +3668,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
         try:
 
             wait_card = (
-                generate_speed_tap_wait_card_bytes(
+                speed_wait_card(
                     wait_seconds=
                         wait_seconds,
                     background_path=
@@ -4182,7 +3676,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                 )
             )
 
-            game_message = bot.send_photo(
+            game_message = send_card(bot,
                 chat_id,
                 wait_card,
                 caption=(
@@ -4243,14 +3737,14 @@ def speed_tap_command(message=None, auto_chat_id=None):
             try:
 
                 timeout_card = (
-                    generate_speed_tap_timeout_card_bytes(
+                    speed_timeout_card(
                         background_path=
                             background_path,
                     )
                 )
 
                 media = (
-                    telebot.types.InputMediaPhoto(
+                    TextCard(
                         media=timeout_card,
                         caption=(
                             _custom_text('msg.bot.speed_tap_timeout.b54ae63ceb', "⏰ <b>TIME'S UP!</b>\nဘယ်သူမှ အချိန်မီ မနှိပ်လိုက်ဘူး 😴", {})
@@ -4259,7 +3753,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                     )
                 )
 
-                bot.edit_message_media(
+                edit_card(bot,
                     media=media,
                     chat_id=chat_id,
                     message_id=
@@ -4328,14 +3822,14 @@ def speed_tap_command(message=None, auto_chat_id=None):
             try:
 
                 go_card = (
-                    generate_speed_tap_go_card_bytes(
+                    speed_go_card(
                         background_path=
                             background_path,
                     )
                 )
 
                 media = (
-                    telebot.types.InputMediaPhoto(
+                    TextCard(
                         media=go_card,
                         caption=(
                             _custom_text('msg.bot.speed_tap_go.932695820e', '🟢 <b>GO! GO! GO!</b>\n⚡ TAP NOW!', {})
@@ -4344,7 +3838,7 @@ def speed_tap_command(message=None, auto_chat_id=None):
                     )
                 )
 
-                bot.edit_message_media(
+                edit_card(bot,
                     media=media,
                     chat_id=chat_id,
                     message_id=
@@ -4663,7 +4157,7 @@ def speed_tap_callback(call):
     try:
 
         result_card = (
-            generate_speed_tap_result_card_bytes(
+            speed_result_card(
                 winner_name=user_name,
                 reaction_ms=reaction_ms,
                 reward_points=
@@ -4686,16 +4180,16 @@ def speed_tap_callback(call):
             jackpot_text = ""
 
         media = (
-            telebot.types.InputMediaPhoto(
+            TextCard(
                 media=result_card,
                 caption=(
-                    _custom_text('msg.bot.speed_tap_callback.c6b090162e', '⚡ <b>SPEED TAP RESULT</b>\n\n🏆 Winner: <b>{user_name}</b>\n⏱ Reaction: <b>{reaction_ms} ms</b>\n⭐ Reward: <b>+{reward_points} Points</b>{jackpot_text}', {'user_name': f'{user_name}', 'reaction_ms': f'{reaction_ms}', 'reward_points': f'{reward_points}', 'jackpot_text': f'{jackpot_text}'})
+                    _custom_text('msg.bot.speed_tap_callback.c6b090162e', '⚡ <b>SPEED TAP RESULT</b>\n\n🏆 Winner: <b>{user_name}</b>\n⏱ Reaction: <b>{reaction_ms} ms</b>\n⭐ Reward: <b>+{reward_points} Points</b>{jackpot_text}', {'user_name': html.escape(str(user_name)), 'reaction_ms': f'{reaction_ms}', 'reward_points': f'{reward_points}', 'jackpot_text': f'{jackpot_text}'})
                 ),
                 parse_mode="HTML",
             )
         )
 
-        bot.edit_message_media(
+        edit_card(bot,
             media=media,
             chat_id=chat_id,
             message_id=
@@ -4727,258 +4221,6 @@ def speed_tap_callback(call):
         chat_id
     )
 
-# =========================================================
-# 👹 GROUP BOSS RAID — GAME HUD / REACTIONS / DEFEAT PENALTY
-# =========================================================
-boss_raid_edit_lock=threading.RLock()
-boss_raid_last_edit={}
-boss_raid_visual_state={}
-
-def boss_raid_text(raid):
-    boss=raid["boss"];hp=max(0,raid["hp"]);mx=raid["max_hp"];pct=(hp/mx*100) if mx else 0
-    filled=max(0,min(16,int(round(pct/100*16))));bar=_custom_text('msg.bot.boss_raid_text.87248b6182', '🟥', {})*filled+"⬛"*(16-filled)
-    left=max(0,int(raid["ends_at"]-time.time()));mins,secs=divmod(left,60)
-    top=boss_top_fighters(raid,3);medals=[_custom_text('msg.bot.boss_raid_text.f16aae7997', '🥇', {}),_custom_text('msg.bot.boss_raid_text.fcb8c5cba3', '🥈', {}),_custom_text('msg.bot.boss_raid_text.d7daab43e2', '🥉', {})]
-    rows=[f'{medals[i]} <b>{html.escape(str(p["name"]))}</b>  •  {p["damage"]:,} DMG' for i,p in enumerate(top)]
-    while len(rows)<3:rows.append(f'{medals[len(rows)]} —')
-    if raid.get("result")=="victory":state=_custom_text('msg.bot.boss_raid_text.3033eb7829', '🏆 RAID CLEARED', {})
-    elif raid.get("finished"):state=_custom_text('msg.bot.boss_raid_text.bf8c7e3470', '☠️ PARTY DEFEATED', {})
-    else:state=_custom_text('msg.bot.boss_raid_text.8800a01483', '⚔️ PHASE {raid__phase}  •  RAID LIVE', {'raid__phase': f"{raid['phase']}"})
-    mod=raid.get("modifier")
-    mod_text={"rage":_custom_text('msg.bot.boss_raid_text.8205e7b0b3', '🔥 RAGE • damage resisted', {}),"exposed":_custom_text('msg.bot.boss_raid_text.f26ec6cdb0', '💢 EXPOSED • bonus damage', {}),"fortify":_custom_text('msg.bot.boss_raid_text.dd7c350667', '🛡 FORTIFY • heavy defense', {})}.get(mod)
-    if mod_text:state+=f'\n{mod_text} • {raid.get("modifier_hits_left",0)} hits left'
-    return (
-        _custom_text('msg.bot.boss_raid_text.b63264e85c', '╔═══ 👹 <b>GROUP BOSS RAID</b> 👹 ═══╗\n{boss__emoji} <b>{html_escape_boss__name____upper}</b>\n🏷 {boss__tier}   │   {state}\n╚══════════════════════╝\n\n❤️ <b>BOSS HP</b>\n{bar}\n<b>{hp}</b> / {mx}  •  {pct}%\n\n⏳ <b>{mins}:{secs}</b>   ⚔️ <b>{raid__total_damage}</b> DMG   👥 <b>{len_raid__fighters}</b>\n━━━━━━━━━━━━━━━━━━━━\n🏆 <b>TOP RAIDERS</b>\n', {'boss__emoji': f"{boss['emoji']}", 'html_escape_boss__name____upper': f"{html.escape(boss['name']).upper()}", 'boss__tier': f"{boss['tier']}", 'state': f'{state}', 'bar': f'{bar}', 'hp': f'{hp:,}', 'mx': f'{mx:,}', 'pct': f'{pct:.1f}', 'mins': f'{mins:02d}', 'secs': f'{secs:02d}', 'raid__total_damage': f"{raid['total_damage']:,}", 'len_raid__fighters': f"{len(raid['fighters'])}"})+"\n".join(rows)+
-        '\n━━━━━━━━━━━━━━━━━━━━\n'
-        +(_custom_text('msg.bot.boss_raid_text.aad03feb79', '🔥 <b>ATTACK! ATTACK! ATTACK!</b>\nတားထားတဲ့ cooldown မရှိဘူး။ Boss မလွတ်ခင် ဝိုင်းချ!', {}) if not raid.get("finished") else _custom_text('msg.bot.boss_raid_text.7c0dfa4ec0', '🏁 <b>RAID ENDED</b>', {}))
-    )
-
-def boss_raid_edit(chat_id,raid,force=False):
-    mid=raid.get("message_id")
-    if not mid:return
-    now=time.monotonic()
-    with boss_raid_edit_lock:
-        last=boss_raid_last_edit.get(chat_id,0)
-        if not force and now-last<1.0:return
-        boss_raid_last_edit[chat_id]=now
-    try:
-        state=boss_raid_visual_state.get(chat_id,{})
-        if state:
-            bot.edit_message_caption(chat_id=chat_id,message_id=mid,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False)))
-        else:
-            bot.edit_message_text(boss_raid_text(raid),chat_id,mid,parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"],disabled=raid.get("finished",False)))
-    except Exception as ex:
-        if "message is not modified" not in str(ex).lower():print("Boss Raid edit error:",ex)
-
-def boss_reaction_message(chat_id,raid,text,kind="phase"):
-    boss=raid["boss"];icons={"phase":_custom_text('msg.bot.boss_reaction_message.d8f26c88ff', '🔥', {}),"win":_custom_text('msg.bot.boss_reaction_message.d7be117486', '💀', {}),"lose":_custom_text('msg.bot.boss_reaction_message.798373558e', '👑', {})}
-    title={"phase":"BOSS REACTION","win":"BOSS DEFEATED","lose":"BOSS VICTORY"}
-    try:
-        m=bot.send_message(chat_id,_custom_text('msg.bot.boss_reaction_message.b37ce1e384', '{icons_kind} <b>{title_kind}</b>\n{boss__emoji} <b>{html_escape_boss__name}</b>: “{html_escape_text}”', {'icons_kind': f'{icons[kind]}', 'title_kind': f'{title[kind]}', 'boss__emoji': f"{boss['emoji']}", 'html_escape_boss__name': f"{html.escape(boss['name'])}", 'html_escape_text': f'{html.escape(text)}'}),parse_mode="HTML")
-        delay_delete_message(chat_id,m.message_id,45 if kind=="phase" else 75)
-    except Exception as ex:print("Boss reaction error:",ex)
-
-def boss_raid_mute_fighters(chat_id,raid):
-    until=int(time.time())+45
-    try:admins={x.user.id for x in bot.get_chat_administrators(chat_id)}
-    except Exception:admins=set()
-    muted=0;protected=0
-    for uid in raid.get("fighters",{}):
-        if uid in admins:protected+=1;continue
-        try:
-            member=bot.get_chat_member(chat_id,uid)
-            if member.status in ("administrator","creator"):
-                protected+=1;continue
-            mute_permissions=types.ChatPermissions(
-                can_send_messages=False,
-                can_send_audios=False,
-                can_send_documents=False,
-                can_send_photos=False,
-                can_send_videos=False,
-                can_send_video_notes=False,
-                can_send_voice_notes=False,
-                can_send_polls=False,
-                can_send_other_messages=False,
-                can_add_web_page_previews=False,
-                can_change_info=False,
-                can_invite_users=False,
-                can_pin_messages=False,
-                can_manage_topics=False,
-            )
-            result=bot.restrict_chat_member(
-                chat_id,
-                uid,
-                permissions=mute_permissions,
-                until_date=until,
-                use_independent_chat_permissions=True,
-            )
-            if result:muted+=1
-            else:print("Boss defeat mute returned False:",uid)
-        except Exception as ex:print("Boss defeat mute error:",uid,repr(ex))
-    return muted,protected
-
-def boss_raid_finish(chat_id,raid,won):
-    owned=claim_boss_raid_ending(chat_id,raid["id"])
-    if not owned:return
-    raid=owned
-    # Raid recovery quiet starts at the actual end, including manually started raids.
-    boss_auto_spawner.note_spawn(chat_id)
-    try:end_session(chat_id,"boss_raid")
-    except Exception as ex:print("Boss end_session error:",ex)
-
-    line=boss_ending_line(raid)
-    muted,protected=(0,0)
-    if not won:
-        try:muted,protected=boss_raid_mute_fighters(chat_id,raid)
-        except Exception as ex:print("Boss penalty error:",ex)
-
-    # IMPORTANT: keep visual state until the live PHOTO caption is finalized.
-    state=boss_raid_visual_state.get(chat_id,{})
-    art=state.get("art");variant=state.get("variant")
-    result_art=get_boss_artwork(raid["boss"]["name"],"normal" if won else "final") or art
-
-    # Skip the final live-card edit: send the outcome before any optional cleanup.
-    # A slow media edit or Telegram 429 must not delay the result.
-
-    # Unpin is independent: a failed edit/result render must never leave the raid pinned.
-    if raid.get("message_id"):
-        try:
-            boss_raid_force_unpin(chat_id,raid["message_id"])
-        except Exception as ex:print("Boss unpin error:",ex)
-
-    boss_raid_visual_state.pop(chat_id,None)
-    boss_raid_last_edit.pop(chat_id,None)
-
-    # Always send a clear result. Visual rendering failure falls back to text.
-    title=_custom_text('msg.bot.boss_raid_finish.2aaec2c533', '🏆 <b>RAID VICTORY!</b>', {}) if won else _custom_text('msg.bot.boss_raid_finish.d88c546a09', '☠️ <b>PARTY DEFEATED!</b>', {})
-    caption=title+f'\n\n{raid["boss"]["emoji"]} <b>{html.escape(raid["boss"]["name"])}</b>\n“{html.escape(line)}”'
-    if won:
-        caption+=_custom_text('msg.bot.boss_raid_finish.6b3b78bd58', '\n\n⚔️ Total Damage: <b>{raid__total_damage}</b>\n👥 Raiders: <b>{len_raid__fighters}</b>', {'raid__total_damage': f"{raid['total_damage']:,}", 'len_raid__fighters': f"{len(raid['fighters'])}"})
-    else:
-        caption+=_custom_text('msg.bot.boss_raid_finish.a6d051c7e1', '\n\n🔒 45s Penalty\n🤐 Muted: <b>{muted}</b>  •  🛡 Protected: <b>{protected}</b>', {'muted': f'{muted}', 'protected': f'{protected}'})
-
-    try:
-        card=generate_boss_result_card(raid,won,line,muted,protected,art=result_art,variant=variant,composition=state.get("composition"))
-        msg=bot.send_photo(chat_id,card,caption=caption,parse_mode="HTML")
-        delay_delete_message(chat_id,msg.message_id,90)
-    except Exception as ex:
-        print("Boss result card error:",ex)
-        try:
-            msg=bot.send_message(chat_id,caption,parse_mode="HTML")
-            delay_delete_message(chat_id,msg.message_id,90)
-        except Exception as fallback_ex:
-            print("Boss result fallback error:",fallback_ex)
-
-def boss_raid_force_unpin(chat_id,message_id):
-    if not message_id:return
-    try:
-        if not safe_unpin_message(bot,chat_id,message_id):
-            bot.unpin_chat_message(chat_id,message_id)
-    except Exception as ex:
-        print("Boss force unpin error:",ex)
-
-def boss_raid_timeout(chat_id,raid_id):
-    raid=get_boss_raid(chat_id)
-    if not raid or raid["id"]!=raid_id:return
-    if raid.get("result")=="victory":
-        boss_raid_finish(chat_id,raid,True)
-        return
-    if not raid.get("finished"):
-        raid=finish_boss_raid(chat_id,raid_id,"timeout")
-    if raid:
-        boss_raid_finish(chat_id,raid,False)
-
-@bot.message_handler(commands=['boss','bossraid','raid'])
-def boss_raid_command(message):
-    if message.chat.type not in ('group','supergroup'):
-        bot.reply_to(message,_custom_text('msg.bot.boss_raid_command.9d5a77359f', '👹 Boss Raid ကို Group ထဲမှာပဲ ကစားလို့ရပါတယ်။', {}));return
-    if spawn_boss_raid(message.chat.id,message):
-        boss_auto_spawner.note_spawn(message.chat.id)
-
-
-def spawn_boss_raid(chat_id,message=None):
-    allowed,blocker=can_start_session(chat_id,"boss_raid")
-    if not allowed:
-        if message:
-            sent=bot.reply_to(message,_custom_text('msg.bot.spawn_boss_raid.816e4abbc0', '⏳ {blocker} game/event ရှိနေပါတယ်။', {'blocker': f'{blocker}'}))
-            delay_delete_message(chat_id,sent.message_id,15)
-        return False
-    created,raid=start_boss_raid(chat_id)
-    if not created:
-        if message:bot.reply_to(message,_custom_text('msg.bot.spawn_boss_raid.08d8d3cd3d', '👹 Boss Raid တစ်ခု run နေပြီးသားပါ။', {}))
-        return False
-    ok,_=start_session(chat_id,"boss_raid",data={"raid_id":raid["id"]},duration=_custom_setting('cfg.games.boss_raid.RAID_DURATION', BOSS_RAID_DURATION))
-    if not ok:
-        finish_boss_raid(chat_id,raid["id"],"cancelled")
-        return False
-    try:
-        art=get_boss_artwork(raid["boss"]["name"],get_boss_visual_stage(raid))
-        try:
-            live,variant,composition=generate_boss_live_card(raid,art=art)
-            sent=bot.send_photo(chat_id,live,caption=boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-            boss_raid_visual_state[chat_id]={"art":art,"variant":variant,"composition":composition,"stage":get_boss_visual_stage(raid)}
-        except Exception as ex:
-            print("Boss live card error:",ex)
-            sent=bot.send_message(chat_id,boss_raid_text(raid),parse_mode="HTML",reply_markup=boss_attack_keyboard(raid["id"]))
-            boss_raid_visual_state[chat_id]={"art":art,"variant":None,"stage":get_boss_visual_stage(raid)}
-        set_boss_raid_message_id(chat_id,raid["id"],sent.message_id)
-        safe_pin_message(bot,chat_id,sent.message_id,disable_notification=True)
-        if message:delay_delete_message(chat_id,message.message_id,10)
-        schedule_task(_custom_setting('cfg.games.boss_raid.RAID_DURATION', BOSS_RAID_DURATION)+0.2,boss_raid_timeout,chat_id,raid["id"],task_id=f'boss_timeout:{chat_id}',replace=True)
-        return True
-    except Exception as exc:
-        finish_boss_raid(chat_id,raid["id"],"cancelled")
-        end_session(chat_id,"boss_raid")
-        boss_raid_visual_state.pop(chat_id,None)
-        print("Boss spawn failed:",type(exc).__name__)
-        return False
-
-@bot.callback_query_handler(func=lambda call: bool(call.data) and call.data.startswith("boss:"))
-def boss_raid_callback(call):
-    parts=call.data.split(":")
-    if len(parts)!=3:bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.40664a38b5', '❌ Invalid raid.', {}));return
-    raid_id,action=parts[1],parts[2]
-    if action=="closed":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.297b636641', '🏁 ဒီ Raid ပြီးသွားပြီ။', {}));return
-    if action!="attack":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.621a4f997d', '❌ Invalid action.', {}));return
-    chat_id=call.message.chat.id;name=call.from_user.first_name or call.from_user.username or "Player"
-    result=attack_boss_raid(chat_id,raid_id,call.from_user.id,name)
-    if result["status"]!="ok":bot.answer_callback_query(call.id,_custom_text('msg.bot.boss_raid_callback.297b636641', '🏁 ဒီ Raid ပြီးသွားပြီ။', {}));return
-    raid=result["raid"]
-    note=_custom_text('msg.bot.boss_raid_callback.5fd6ba05e7', '🛡️ Boss BLOCK!', {}) if result["blocked"] else (_custom_text('msg.bot.boss_raid_callback.abdf13fa28', '💥 CRITICAL! -{result__damage} HP', {'result__damage': f"{result['damage']}"}) if result["crit"] else _custom_text('msg.bot.boss_raid_callback.d224fdaed5', '⚔️ -{result__damage} HP', {'result__damage': f"{result['damage']}"}))
-    bot.answer_callback_query(call.id,note)
-    # Re-render the same pinned photo only when the boss crosses a visual HP stage.
-    # 24 base images become Normal / Damaged / Rage / Final variants at runtime.
-    state=boss_raid_visual_state.get(chat_id,{})
-    new_stage=get_boss_visual_stage(raid)
-    if state and state.get("art") and state.get("stage")!=new_stage and raid.get("message_id") and not raid.get("finished"):
-        try:
-            stage_art=get_boss_artwork(raid["boss"]["name"],new_stage) or state.get("art")
-            live,variant,composition=generate_boss_live_card(raid,art=stage_art,variant=state.get("variant"),composition=state.get("composition"))
-            media=types.InputMediaPhoto(live,caption=boss_raid_text(raid),parse_mode="HTML")
-            bot.edit_message_media(media=media,chat_id=chat_id,message_id=raid["message_id"],reply_markup=boss_attack_keyboard(raid["id"]))
-            state["art"]=stage_art;state["stage"]=new_stage;state["variant"]=variant;state["composition"]=composition
-            boss_raid_visual_state[chat_id]=state
-            boss_raid_last_edit[chat_id]=time.monotonic()
-        except Exception as ex:
-            print("Boss visual stage edit error:",ex)
-            boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
-    else:
-        boss_raid_edit(chat_id,raid,force=raid.get("finished",False))
-    reaction=result.get("reaction")
-    if reaction:boss_reaction_message(chat_id,raid,reaction["text"],"phase")
-    event=result.get("event")
-    if event:
-        try:
-            extra=""
-            if event.get("hits"):
-                extra=f'\nEffect: {event.get("hits")} attacks'
-            if event.get("heal"):
-                extra=f'\nBoss recovered {event.get("heal")} HP'
-            ev=bot.send_message(chat_id,_custom_text('msg.bot.boss_raid_callback.d10eb19c7e', '<b>{html_escape_event__title}</b>\n{html_escape_event__text}{extra}', {'html_escape_event__title': f"{html.escape(event['title'])}", 'html_escape_event__text': f"{html.escape(event['text'])}", 'extra': f'{extra}'}),parse_mode="HTML")
-            delay_delete_message(chat_id,ev.message_id,28)
-        except Exception as ex:print("Boss event message error:",ex)
-    if raid.get("finished") and raid.get("result")=="victory":
-        cancel_task(f'boss_timeout:{chat_id}');boss_raid_finish(chat_id,raid,True)
 
 # =========================================================
 # 😀 EMOJI GUESS
@@ -5072,7 +4314,7 @@ def math_battle_next(chat_id, game_id, round_index):
                     except Exception as e:
                         print('Math reward error:', e)
             try:
-                sent=bot.send_photo(chat_id, math_result_card(result, rewards), caption=_custom_text('msg.bot.math_battle_next.38b4dc7164', '🏁 MATH BATTLE — FINAL RESULT', {}))
+                sent=send_card(bot,chat_id, math_result_card(result, rewards), caption=_custom_text('msg.bot.math_battle_next.38b4dc7164', '🏁 MATH BATTLE — FINAL RESULT', {}))
                 delay_delete_message(chat_id, sent.message_id, 120)
             except Exception as e:
                 print('Math final card error:', e)
@@ -5080,7 +4322,7 @@ def math_battle_next(chat_id, game_id, round_index):
         if status != 'next': return
         old_id=current.get('message_id')
         try:
-            sent=bot.send_photo(chat_id, math_round_card(result), reply_markup=math_battle_keyboard(result), caption=_custom_text('msg.bot.math_battle_next.f8209dc30d', '🧮 MATH BATTLE · ROUND {result__round_____1}/5', {'result__round_____1': f"{result['round'] + 1}"}))
+            sent=send_card(bot,chat_id, math_round_card(result), reply_markup=math_battle_keyboard(result), caption=_custom_text('msg.bot.math_battle_next.f8209dc30d', '🧮 MATH BATTLE · ROUND {result__round_____1}/5', {'result__round_____1': f"{result['round'] + 1}"}))
             if not set_math_message(chat_id,game_id,result['round'],sent.message_id):
                 bot.delete_message(chat_id,sent.message_id)
                 return
@@ -5113,8 +4355,9 @@ def math_battle_tick(chat_id, game_id, round_index, message_id):
             _custom_text('msg.bot.math_battle_tick.8427e98671', '🧮 MATH BATTLE · ROUND {round_index___1}/5\n⏳ Time left: {seconds_left}s', {'round_index___1': f'{round_index + 1}', 'seconds_left': f'{seconds_left}'})
         )
         try:
-            bot.edit_message_caption(
-                caption=caption,
+            bot.edit_message_text(
+                text=math_round_card(game),
+                parse_mode=None,
                 chat_id=chat_id,
                 message_id=message_id,
                 reply_markup=math_battle_keyboard(game),
@@ -5155,7 +4398,7 @@ def math_battle_command(message):
             sent=bot.reply_to(message,_custom_text('msg.bot.math_battle_command.872485792f', '⏳ {game} game/event ရှိနေပါတယ်။', {'game': f'{game}'}))
             delay_delete_message(chat_id,sent.message_id,20)
             return
-        sent=bot.send_photo(chat_id,math_round_card(game),caption=_custom_text('msg.bot.math_battle_command.0036cff47e', '🧮 MATH BATTLE · ROUND 1/5', {}),reply_markup=math_battle_keyboard(game))
+        sent=send_card(bot,chat_id,math_round_card(game),caption=_custom_text('msg.bot.math_battle_command.0036cff47e', '🧮 MATH BATTLE · ROUND 1/5', {}),reply_markup=math_battle_keyboard(game))
         set_math_message(chat_id,game['id'],0,sent.message_id)
         math_battle_schedule_tick(chat_id,get_math_battle(chat_id))
         math_battle_arm_deadline(get_math_battle(chat_id))
@@ -5196,8 +4439,8 @@ def math_battle_callback(call):
                 math_battle_next(chat_id,game_id,int(round_text))
             elif g.get('message_id'):
                 try:
-                    bot.edit_message_media(
-                        InputMediaPhoto(math_round_card(g),caption=_custom_text('msg.bot.math_battle_callback.d78a7f99d6', '🧮 MATH BATTLE · ROUND {g__round_____1}/5', {'g__round_____1': f"{g['round'] + 1}"})),
+                    edit_card(bot,
+                        TextCard(math_round_card(g),caption=_custom_text('msg.bot.math_battle_callback.d78a7f99d6', '🧮 MATH BATTLE · ROUND {g__round_____1}/5', {'g__round_____1': f"{g['round'] + 1}"})),
                         chat_id=chat_id,message_id=g['message_id'],reply_markup=math_battle_keyboard(g))
                 except Exception: pass
     except Exception as e:
@@ -5248,10 +4491,9 @@ def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
 
         seconds_left = max(0, int(remaining + 0.999))
         try:
-            bot.edit_message_caption(
-                caption=(
-                    _custom_text('msg.bot.word_chain_tick.c85b4aa789', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ\n⏳ Next answer: {seconds_left}s', {'seconds_left': f'{seconds_left}'})
-                ),
+            bot.edit_message_text(
+                text=word_chain_status_card(game),
+                parse_mode=None,
                 chat_id=chat_id,
                 message_id=expected_message_id,
             )
@@ -5333,7 +4575,7 @@ def word_chain_close(chat_id, game_id, reason='timeout'):
         }.get(reason, 'Game ended')
         try:
             result_image = word_chain_result_card(ended, reward_rows, reason_label)
-            sent = bot.send_photo(chat_id, result_image, caption=_custom_text('msg.bot.word_chain_close.adf900914a', '🏁 WORD CHAIN RESULT', {}))
+            sent = send_card(bot,chat_id, result_image, caption=_custom_text('msg.bot.word_chain_close.adf900914a', '🏁 WORD CHAIN RESULT', {}))
             delay_delete_message(chat_id, sent.message_id, 90)
         except Exception as error:
             print(f'Word Chain Result Card Error: {error}')
@@ -5386,7 +4628,7 @@ def word_chain_command(message):
         bot.reply_to(message, _custom_text('msg.bot.word_chain_command.f761cd480c', 'Game တစ်ခု run နေပြီ: {game}', {'game': f'{game}'}))
         return
     try:
-        sent = bot.send_photo(chat_id, word_chain_status_card(game), caption=_custom_text('msg.bot.word_chain_command.12dddc207a', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ', {}))
+        sent = send_card(bot,chat_id, word_chain_status_card(game), caption=_custom_text('msg.bot.word_chain_command.12dddc207a', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ', {}))
         set_word_chain_message_id(chat_id, game['id'], sent.message_id)
         word_chain_start_live(chat_id, get_word_chain_game(chat_id))
         schedule_task(
@@ -5453,7 +4695,7 @@ def word_chain_answer(message):
         with word_chain_card_lock:
             latest = get_word_chain_game(chat_id)
             if latest and latest['id'] == game['id'] and latest['moves'] == result['moves']:
-                sent = bot.send_photo(
+                sent = send_card(bot,
                     chat_id, word_chain_status_card(latest),
                     caption=_custom_text('msg.bot.word_chain_answer.12dddc207a', '🔤 WORD CHAIN — စကားလုံးဆက်ပါ', {}),
                 )
@@ -6407,7 +5649,7 @@ def profile_command(message):
         # Generate visual profile/rank card
         # -----------------------------------------
 
-        rank_image = generate_rank_card_bytes(
+        rank_image = profile_card(
             player_name=(
                 user.first_name
                 or "Player"
@@ -6420,9 +5662,8 @@ def profile_command(message):
         )
 
         # Telegram file name
-        rank_image.name = "profile_rank_card.png"
 
-        sent = bot.send_photo(
+        sent = send_card(bot,
             message.chat.id,
             rank_image,
             caption=_custom_text('msg.bot.profile_command.2c5fbbc6fd', '🏆 PLAYER PROFILE', {}),
@@ -6560,17 +5801,14 @@ def rank_command(message):
         # -------------------------------------
 
         rank_image = (
-            generate_leaderboard_card_bytes(
+            leaderboard_card(
                 players=leaderboard_players,
                 title="GROUP RANKING",
             )
         )
 
-        rank_image.name = (
-            "group_leaderboard.png"
-        )
 
-        sent = bot.send_photo(
+        sent = send_card(bot,
             chat_id,
             rank_image,
             caption=_custom_text('msg.bot.rank_command.907014a800', '🏆 GROUP RANKING', {}),
@@ -6941,19 +6179,6 @@ configure_speed_tap_auto(
 )
 
 from features.activity_spawn import ActivitySpawner
-
-
-def can_auto_spawn_boss(chat_id):
-    raid=get_boss_raid(chat_id)
-    return bool(can_start_session(chat_id,"boss_raid")[0]
-                and not (raid and not raid.get("finished"))
-                and not get_emoji_game(chat_id) and not get_speed_tap_game(chat_id))
-
-
-boss_auto_spawner=ActivitySpawner(
-    spawn_boss_raid, threshold=(60,125), chance=0.70, quiet=(50*60,125*60),
-    can_spawn=can_auto_spawn_boss, config_key="boss_auto",
-)
 
 
 import threading

@@ -81,7 +81,7 @@ def vote_keyboard(
 # =========================================================
 # ✅ ACCEPT / ❌ DECLINE
 #
-# Pair Challenge / Roast Battle
+# Accept / Decline prompts
 # =========================================================
 
 def accept_decline_keyboard(
@@ -100,30 +100,9 @@ def accept_decline_keyboard(
 # =========================================================
 # ⚔️ ATTACK BUTTON
 #
-# Boss Raid
+# Inline game actions
 # =========================================================
 
-def boss_attack_keyboard(
-    raid_id,
-    disabled=False
-):
-    markup = InlineKeyboardMarkup()
-
-    if disabled:
-        text = _custom_text('msg.core.keyboards.boss_attack_keyboard.87bd70daf1', '🏁 RAID FINISHED', {})
-        callback = f"boss:{raid_id}:closed"
-    else:
-        text = _custom_text('msg.core.keyboards.boss_attack_keyboard.750ba0278d', '⚔️ ATTACK', {})
-        callback = f"boss:{raid_id}:attack"
-
-    markup.add(
-        InlineKeyboardButton(
-            text=text,
-            callback_data=callback
-        )
-    )
-
-    return markup
 
 
 # =========================================================

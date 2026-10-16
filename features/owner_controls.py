@@ -15,7 +15,7 @@ controls=Blueprint('owner_controls',__name__,url_prefix='/owner/control')
 KEYS=sorted(CATALOG)
 CATEGORIES=sorted({e['category'] for e in CATALOG.values()})
 LABELS={'bot':'Commands & Group Management','system':'System Messages','core.rewards':'Game Rewards',
-        'core.keyboards':'Buttons','boss_auto':'Raid Auto Spawn','wyr_auto':'WYR Auto Spawn',
+        'core.keyboards':'Buttons','wyr_auto':'WYR Auto Spawn',
         'config.ranks':'Rank Tiers','database.daily_challenge':'Daily Missions & Rewards'}
 
 def category_label(category):

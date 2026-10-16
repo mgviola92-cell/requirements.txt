@@ -12,7 +12,7 @@ from database.daily_challenge import (
     record_message, overview, claim, get_card_id, set_card_id, today,
     missions_for, mission_state, MMT, personal_overview, personal_claim, active_cycle,
 )
-from ui.daily_challenge_card import card
+from ui.text_cards import daily as card, send_card, edit_card, TextCard
 
 TEMP_CARD_SECONDS = 60
 
@@ -58,19 +58,21 @@ def register_daily_challenge(bot):
             s['chat_id']=chat_id
             if existing:
                 try:
-                    from telebot.types import InputMediaPhoto
-                    bot.edit_message_media(InputMediaPhoto(card(s)),chat_id,existing)
+                    edit_card(bot,TextCard(card(s)),chat_id,existing)
                 except Exception as exc:
                     # Editing an unchanged card is normal, not a reason to spam another.
                     if 'message is not modified' in str(exc).lower():return True
-                    if not any(t in str(exc).lower() for t in ('message to edit not found','message_id_invalid','message not found')):
+                    if not any(t in str(exc).lower() for t in ('message to edit not found','message_id_invalid','message not found','there is no text in the message','message has no text')):
                         raise
                     print('Daily Challenge edit error:',exc)
                 else:
                     return True
                 # Only send a replacement if an existing message was deleted or invalid.
-            sent=bot.send_photo(chat_id,card(s),caption=_custom_text('msg.features.daily_challenge.publish.d2c45eae88', '🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3', {}))
+            sent=send_card(bot,chat_id,card(s),caption=_custom_text('msg.features.daily_challenge.publish.d2c45eae88', '🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3', {}))
             set_card_id(chat_id,sent.message_id,day)
+            if existing:
+                try:bot.delete_message(chat_id,existing)
+                except Exception:pass
             try:bot.pin_chat_message(chat_id,sent.message_id,disable_notification=True)
             except Exception as exc:print('Daily Challenge pin unavailable:',exc)
             old=previous_card(chat_id,day)
@@ -95,16 +97,17 @@ def register_daily_challenge(bot):
         try:
             snapshot=overview(chat_id,day=day)
             snapshot['chat_id']=chat_id
-            from telebot.types import InputMediaPhoto
-            try:bot.edit_message_media(InputMediaPhoto(card(snapshot)),chat_id,existing)
+            try:edit_card(bot,TextCard(card(snapshot)),chat_id,existing)
             except Exception as exc:
                 if 'message is not modified' not in str(exc).lower():
-                    if any(t in str(exc).lower() for t in ('message to edit not found','message_id_invalid','message not found')):
+                    if any(t in str(exc).lower() for t in ('message to edit not found','message_id_invalid','message not found','there is no text in the message','message has no text')):
                         if day==today():publish(chat_id,force=True)
                         else:
-                            replacement=bot.send_photo(chat_id,card(snapshot),
+                            replacement=send_card(bot,chat_id,card(snapshot),
                                 caption=_custom_text('msg.features.daily_challenge.ensure_main.d2c45eae88', '🎯 GROUP DAILY CHALLENGE | /dailygroupclaim 1-3', {}))
                             set_card_id(chat_id,replacement.message_id,day)
+                            try:bot.delete_message(chat_id,existing)
+                            except Exception:pass
                             try:bot.pin_chat_message(chat_id,replacement.message_id,disable_notification=True)
                             except Exception as error:print('Daily recovery pin:',error)
                         return
@@ -148,7 +151,7 @@ def register_daily_challenge(bot):
             # Recover deleted/unpinned main card without changing its mission cycle.
             ensure_main(message.chat.id)
             snapshot=personal_overview(message.chat.id,message.from_user.id)
-            sent=bot.send_photo(message.chat.id,card(snapshot),
+            sent=send_card(bot,message.chat.id,card(snapshot),
                 caption=_custom_text('msg.features.daily_challenge.daily_command.f22d1476f5', '🎯 Your Daily Challenge | /dailyclaim 1, 2 or 3', {}),
                 reply_to_message_id=message.message_id)
             _delete_later(bot,message.chat.id,sent.message_id)

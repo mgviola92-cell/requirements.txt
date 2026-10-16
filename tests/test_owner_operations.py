@@ -51,7 +51,7 @@ class OwnerOperationsTests(unittest.TestCase):
         ops._cache['releases']['game:speed_tap']='test'
         self.assertTrue(ops.feature_allowed('game:speed_tap',-100))
         self.assertFalse(ops.feature_allowed('game:speed_tap',-101))
-        self.assertTrue(ops.feature_allowed('game:boss_raid',-101))
+        self.assertTrue(ops.feature_allowed('game:math_battle',-101))
     def test_real_speedtap_engine_and_session_are_both_gated(self):
         from games.speed_tap import create_speed_tap_game,end_speed_tap_game
         ops._cache['releases']['game:speed_tap']='test'
@@ -168,22 +168,22 @@ class OwnerOperationsTests(unittest.TestCase):
         self.assertEqual(len([b for b in buttons if b.callback_data.startswith('ops:game:')]),8)
         self.assertEqual(buttons[0].callback_data,'ops:game:this_or_that')
         self.assertTrue(any(b.callback_data=='ops:features:1' for b in buttons))
-        self.assertTrue(any(b.text=='👹 Boss Raid' and b.callback_data=='ops:game:boss_raid' for b in buttons))
+        self.assertTrue(any(b.text=='🧮 Math Battle' and b.callback_data=='ops:game:math_battle' for b in buttons))
         self.assertFalse(any('enabled.' in b.text or 'Command' in b.text for b in buttons))
 
     def test_game_publish_updates_engine_and_manual_command_together(self):
         conn,cur=self.connection()
-        ops._cache['releases'][ops.GAME_HANDLERS['boss_raid']]='test'
-        with patch.object(ops,'get_db_connection',return_value=conn):ops.change_release(42,'game:boss_raid','all')
+        ops._cache['releases'][ops.GAME_HANDLERS['math_battle']]='test'
+        with patch.object(ops,'get_db_connection',return_value=conn):ops.change_release(42,'game:math_battle','all')
         inserts=[c.args[1] for c in cur.execute.call_args_list if 'INSERT INTO owner_feature_releases' in c.args[0]]
-        self.assertIn(('game:boss_raid','all'),inserts)
-        self.assertIn((ops.GAME_HANDLERS['boss_raid'],'all'),inserts)
-        self.assertEqual(ops._cache['releases'][ops.GAME_HANDLERS['boss_raid']],'all')
+        self.assertIn(('game:math_battle','all'),inserts)
+        self.assertIn((ops.GAME_HANDLERS['math_battle'],'all'),inserts)
+        self.assertEqual(ops._cache['releases'][ops.GAME_HANDLERS['math_battle']],'all')
 
     def test_game_menu_has_all_existing_games_newest_first(self):
         kinds=[kind for kind,_ in ops.ordered_games()]
         self.assertEqual(kinds[:4],['this_or_that','draw_guess','nan_yate','imposter'])
-        self.assertEqual(len(kinds),21)
+        self.assertEqual(len(kinds),18)
         self.assertTrue({'coin','trivia','guess','dice','slot','eight_ball','love','random','daily_challenge'}<=set(kinds))
         self.assertEqual(set(ops.GAME_HANDLERS),set(kinds))
         self.assertEqual(set(ops.GAME_COMMANDS),set(kinds))
@@ -213,9 +213,9 @@ class OwnerOperationsTests(unittest.TestCase):
         bot=MagicMock();overview=Mock(return_value={})
         env={'_ready':True,'today':lambda:'today','time':time,'_lock':threading.RLock(),
              '_last_refresh':{},'get_card_id':Mock(return_value=None),'overview':overview,
-             'card':lambda snapshot:'photo','bot':bot,'delivery_ready':lambda cid:True}
+             'card':lambda snapshot:'card','edit_card':__import__('ui.text_cards',fromlist=['edit_card']).edit_card,'TextCard':__import__('ui.text_cards',fromlist=['TextCard']).TextCard,'bot':bot,'delivery_ready':lambda cid:True}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[function],type_ignores=[])),'daily-publish','exec'),env)
         with patch.object(ops,'feature_allowed',return_value=False):
             self.assertFalse(env['publish'](-101,force=True));overview.assert_not_called();bot.send_photo.assert_not_called()
             env['get_card_id'].return_value=123
-            self.assertTrue(env['publish'](-101,force=True));bot.edit_message_media.assert_called_once()
+            self.assertTrue(env['publish'](-101,force=True));bot.edit_message_text.assert_called_once()

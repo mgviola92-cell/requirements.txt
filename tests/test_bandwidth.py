@@ -57,14 +57,14 @@ class BandwidthTests(unittest.TestCase):
         persist.assert_not_called();self.assertIn("jsonb_set(state,'{updated}'",cur.execute.call_args.args[0])
     def publish_handler(self,bot,cur):
         source=ast.parse(Path('features/daily_challenge.py').read_text());fn=next(n for n in ast.walk(source) if isinstance(n,ast.FunctionDef) and n.name=='publish')
-        env=dict(_ready=True,today=lambda:'day',time=time,_lock=threading.RLock(),_last_refresh={},delivery_ready=lambda cid:True,get_card_id=lambda *a:9,overview=lambda *a,**k:{},card=lambda s:MagicMock(),bot=bot,delivery_failed=MagicMock(),_custom_text=lambda k,d,f:d)
+        env=dict(_ready=True,today=lambda:'day',time=time,_lock=threading.RLock(),_last_refresh={},delivery_ready=lambda cid:True,get_card_id=lambda *a:9,overview=lambda *a,**k:{},card=lambda s:MagicMock(),bot=bot,delivery_failed=MagicMock(),_custom_text=lambda k,d,f:d,edit_card=__import__('ui.text_cards',fromlist=['edit_card']).edit_card,TextCard=__import__('ui.text_cards',fromlist=['TextCard']).TextCard)
         exec(compile(ast.Module(body=[fn],type_ignores=[]),'daily','exec'),env);return env
     def test_edit_permission_failure_does_not_upload_replacement(self):
-        bot=MagicMock();bot.edit_message_media.side_effect=RuntimeError('Forbidden: bot was kicked')
+        bot=MagicMock();bot.edit_message_text.side_effect=RuntimeError('Forbidden: bot was kicked')
         env=self.publish_handler(bot,None)
         self.assertFalse(env['publish'](-42));bot.send_photo.assert_not_called();env['delivery_failed'].assert_called_once()
     def test_backoff_skips_any_image_upload(self):
         bot=MagicMock();env=self.publish_handler(bot,None);env['delivery_ready']=lambda cid:False
-        self.assertFalse(env['publish'](-42));bot.send_photo.assert_not_called();bot.edit_message_media.assert_not_called()
+        self.assertFalse(env['publish'](-42));bot.send_photo.assert_not_called();bot.edit_message_text.assert_not_called()
 
 if __name__=='__main__':unittest.main()

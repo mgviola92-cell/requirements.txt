@@ -9,10 +9,9 @@ from core.sessions import start_session,end_session,can_start_session
 from features.activity_spawn import ActivitySpawner
 from games import this_or_that as game
 from data.this_or_that import CAPACITY
-from ui.this_or_that_card import card
 LOG=logging.getLogger(__name__)
 MESSAGES={
- 'round':'🖼️ This or That — {round}/{rounds}\nဒီနှစ်ခုထဲက ပိုကြိုက်တာကို ရွေးပါ။\n\nA · {a}\n{av} မဲ · {ap}%\nB · {b}\n{bv} မဲ · {bp}%\n\nမဲတစ်ယောက်တစ်ကြိမ်။ {seconds} စက္ကန့်။',
+ 'round':'⚖️ This or That — {round}/{rounds}\nဒီနှစ်ခုထဲက ပိုကြိုက်တာကို ရွေးပါ။\n\nA · {a}\n{av} မဲ · {ap}%\nB · {b}\n{bv} မဲ · {bp}%\n\nမဲတစ်ယောက်တစ်ကြိမ်။ {seconds} စက္ကန့်။',
  'results':'🏁 This or That ပြီးပြီ\n\n{results}\n\nပါဝင်သူ {count} ယောက်။ ပါဝင်ဆု +{reward} points။',
  'a':'🅰️ A ရွေးမယ်','b':'🅱️ B ရွေးမယ်','stop':'🛑 ရပ်မယ် (Admin)',
  'confirm':'ပွဲကိုဖျက်သိမ်းမလား? ဆုမပေးပါ။','yes':'ဖျက်သိမ်းမယ်','no':'ဆက်ဆော့မယ်',
@@ -20,7 +19,7 @@ MESSAGES={
  'voted':'ဒီ round မှာ မဲပေးပြီးပြီ။','accepted':'မဲလက်ခံပြီးပြီ။','admin':'Group Admin သာ ရပ်နိုင်သည်။',
  'group':'Group ထဲမှာ /tot ပို့ပါ။','busy':'အခြားပွဲရှိနေသည်။ ပြီးမှ ပြန်စမ်းပါ။','error':'ခေတ္တမစနိုင်သေးပါ။ ခဏနေရင် ပြန်စမ်းပါ။',
  'missing':'ရပ်ရန်ပွဲမရှိပါ။','member':'Group အဖွဲ့ဝင်သာ မဲပေးနိုင်သည်။',
- 'rules':'🖼️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nပုံပို့မရလျှင် စာနှင့်ခလုတ်ဖြင့်ဆက်ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။'}
+ 'rules':'⚖️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nစာကတ်နှင့် ရွေးချယ်ရန်ခလုတ်များဖြင့် ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။'}
 DEFAULTS=dict(game.DEFAULTS)
 READY=False
 
@@ -73,10 +72,7 @@ def delete(bot,cid,mid):
 
 def publish(bot,s):
     old=s.get('card');s['deadline']=time.time()+s['rules']['round_seconds']
-    try:
-        sent=bot.send_photo(s['chat_id'],card(s['question'],s['id']+str(s['round']),s.get('style')),caption=body(s),reply_markup=keyboard(s),parse_mode=None);photo=True
-    except Exception:
-        sent=bot.send_message(s['chat_id'],body(s),reply_markup=keyboard(s),parse_mode=None);photo=False
+    sent=bot.send_message(s['chat_id'],body(s),reply_markup=keyboard(s),parse_mode=None);photo=False
     s['card']=sent.message_id;s['photo']=photo;s['edited']=time.time();s['dirty']=False
     delete(bot,s['chat_id'],old)
 
@@ -134,9 +130,7 @@ def tick(bot,cid):
         elif s['dirty'] and time.time()-s['edited']>=2:edit(bot,s);save(cur,s)
     if awarded:
         from features.draw_guess import refresh_points
-        from core.rewards import _team_battle_points
         refresh_points(cid)
-        for uid,points in awarded:_team_battle_points(cid,uid,points)
 
 def register(bot):
     global READY

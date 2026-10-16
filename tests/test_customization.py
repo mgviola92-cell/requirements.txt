@@ -19,7 +19,7 @@ class CustomizationTests(unittest.TestCase):
         self.previous=c._values.copy();self.ready=c._ready
         c._values={};c._ready=False
         self.message_key=next(k for k,e in c.CATALOG.items() if e['kind']=='message' and e['fields'])
-        self.setting_key='cfg.games.boss_raid.RAID_DURATION'
+        self.setting_key='cfg.games.speed_tap.SPEED_TAP_ACTIVE_TIME'
     def tearDown(self):c._values=self.previous;c._ready=self.ready
 
     def test_all_catalog_defaults_validate(self):
@@ -57,12 +57,12 @@ class CustomizationTests(unittest.TestCase):
             with self.subTest(value=value),self.assertRaises(ValueError):c.validate(self.setting_key,value)
 
     def test_bounded_probabilities(self):
-        c.validate('cfg.boss_auto.chance',.5)
+        c.validate('cfg.wyr_auto.chance',.5)
         for value in (1.5,-.1):
-            with self.assertRaises(ValueError):c.validate('cfg.boss_auto.chance',value)
+            with self.assertRaises(ValueError):c.validate('cfg.wyr_auto.chance',value)
 
     def test_ranges_and_round_lengths_validated(self):
-        with self.assertRaises(ValueError):c.validate('cfg.boss_auto.threshold',[125,60])
+        with self.assertRaises(ValueError):c.validate('cfg.wyr_auto.threshold',[125,60])
         with self.assertRaises(ValueError):c.validate('cfg.games.math_battle.TIMES',[10,20])
 
     def test_html_rejects_script_and_bad_link(self):
@@ -72,10 +72,10 @@ class CustomizationTests(unittest.TestCase):
             with self.assertRaises(ValueError):c.validate(key,value)
 
     def test_burmese_bank_customization_is_live(self):
-        key=next(k for k,e in c.CATALOG.items() if e.get('bank') and e['category']=='games.boss_raid')
+        key=next(k for k,e in c.CATALOG.items() if e.get('bank') and e['category']=='bot')
         entry=c.CATALOG[key];c._values[(-100,key)]='ပြင်ထားတဲ့စာ'
-        with c.group_scope(-100):self.assertEqual(c.bank_text('games.boss_raid',[entry['default']]),['ပြင်ထားတဲ့စာ'])
-        with c.group_scope(-200):self.assertEqual(c.bank_text('games.boss_raid',[entry['default']]),[entry['default']])
+        with c.group_scope(-100):self.assertEqual(c.bank_text('bot',[entry['default']]),['ပြင်ထားတဲ့စာ'])
+        with c.group_scope(-200):self.assertEqual(c.bank_text('bot',[entry['default']]),[entry['default']])
 
     def test_numeric_tuple_preserves_original_runtime_type(self):
         c._values[(-100,'cfg.games.math_battle.TIMES')]=[50,65,80,95,110]
@@ -103,9 +103,9 @@ class CustomizationTests(unittest.TestCase):
 
     def test_real_auto_gate_respects_group_disable(self):
         from features.activity_spawn import ActivitySpawner
-        c._values[(-100,'cfg.boss_auto.enabled')]=False
+        c._values[(-100,'cfg.wyr_auto.enabled')]=False
         spawn=Mock(return_value=True)
-        gate=ActivitySpawner(spawn,threshold=(2,2),chance=1,quiet=(1,1),config_key='boss_auto')
+        gate=ActivitySpawner(spawn,threshold=(2,2),chance=1,quiet=(1,1),config_key='wyr_auto')
         gate.record(-100,1);gate.record(-100,2)
         spawn.assert_not_called()
 
@@ -130,7 +130,7 @@ class CustomizationTests(unittest.TestCase):
             c.save(-100,self.setting_key,240,42)
             self.assertEqual(c.effective(self.setting_key,-100),240)
             c.save(-100,self.setting_key,None,42,reset=True)
-        self.assertEqual(c.effective(self.setting_key,-100),180)
+        self.assertEqual(c.effective(self.setting_key,-100),c.CATALOG[self.setting_key]["default"])
         self.assertTrue(any('owner_customization_log' in call.args[0] for call in cur.execute.call_args_list))
 
     def test_restart_refresh_restores_saved_override(self):
@@ -168,12 +168,13 @@ class CustomizationTests(unittest.TestCase):
             with client.session_transaction() as session:session['owner']=True;session['csrf']='right'
             response=client.post('/owner/control/edit',data={'key':self.setting_key,'scope':-100,'csrf':'right','action':'save','value':'240'})
         self.assertEqual(response.status_code,200)
-        from games.boss_raid import start_raid,finish_raid
-        # The bot's caller passes the effective duration into this existing game engine.
+        from games.speed_tap import create_speed_tap_game,start_speed_tap_wait,end_speed_tap_game
         with c.group_scope(-100):duration=c.setting_value(self.setting_key,180)
-        ok,raid=start_raid(-999,duration=duration)
-        self.assertTrue(ok);self.assertEqual(raid['ends_at']-raid['started_at'],240)
-        finish_raid(-999,raid['id'],'cancelled')
+        ok,_=create_speed_tap_game(-999,1)
+        self.assertTrue(ok)
+        game=start_speed_tap_wait(-999,duration)
+        self.assertEqual(game['wait_seconds'],240)
+        end_speed_tap_game(-999)
 
     def test_new_private_editor_is_owner_only(self):
         bot=MagicMock();handlers={}
