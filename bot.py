@@ -4372,7 +4372,7 @@ def math_battle_tick(chat_id, game_id, round_index, message_id):
             if remaining <= 0:
                 math_battle_next(chat_id, game_id, round_index)
             else:
-                step = 1 if remaining <= 10 else 5
+                step = 3 if remaining <= 10 else 5
                 schedule_task(
                     min(step, max(.15, remaining)),
                     math_battle_tick,
@@ -4501,7 +4501,7 @@ def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
             if 'message is not modified' not in str(error).lower():
                 print(f'Word Chain Live Caption Error: {error}')
 
-        step = 1 if remaining <= 10 else 5
+        step = 3 if remaining <= 10 else 5
         schedule_task(
             min(step, max(0.2, remaining)), word_chain_tick,
             chat_id, game_id, expected_moves, expected_message_id,
@@ -4511,7 +4511,7 @@ def word_chain_tick(chat_id, game_id, expected_moves, expected_message_id):
 def word_chain_start_live(chat_id, game):
     if not game or not game.get('message_id'):
         return
-    step = 1 if game['idle_deadline'] - time.monotonic() <= 10 else 5
+    step = 3 if game['idle_deadline'] - time.monotonic() <= 10 else 5
     schedule_task(
         step, word_chain_tick,
         chat_id, game['id'], game['moves'], game['message_id'],

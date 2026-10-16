@@ -47,6 +47,7 @@ def initialize():
         cur.execute('CREATE INDEX IF NOT EXISTS news_publish_date ON news_items(published DESC)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_health(source_id TEXT PRIMARY KEY,checked TIMESTAMPTZ,last_ok TIMESTAMPTZ,status TEXT NOT NULL,items INTEGER NOT NULL DEFAULT 0)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_groups(chat_id BIGINT PRIMARY KEY,enabled BOOLEAN, next_due TIMESTAMPTZ, retry_after TIMESTAMPTZ)')
+        cur.execute('CREATE TABLE IF NOT EXISTS news_feed_cache(source_id TEXT PRIMARY KEY,validators JSONB NOT NULL)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_jobs(key TEXT PRIMARY KEY,next_run TIMESTAMPTZ NOT NULL)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_sent(chat_id BIGINT NOT NULL,item_id TEXT NOT NULL,revision TEXT NOT NULL, sent_at TIMESTAMPTZ DEFAULT NOW(),PRIMARY KEY(chat_id,item_id))')
 
@@ -81,16 +82,27 @@ def cleanup(bot):
 
 def ingest(source,now):
     sid=source['id']
-    try:items,missing=engine.fetch(source,now);status='ok' if not missing else 'missing-date:'+str(missing)
+    validators={};received=False
+    try:
+        with get_db_connection() as con,con.cursor() as cur:
+            cur.execute('SELECT validators FROM news_feed_cache WHERE source_id=%s',(sid,));row=cur.fetchone()
+            if row:validators=dict(row[0])
+        items,missing=engine.fetch(source,now,validators)
+        received=True
+        status='not-modified' if items is None else 'ok' if not missing else 'missing-date:'+str(missing)
+        items=items or []
     except Exception as exc:items=[];status=type(exc).__name__
     with get_db_connection() as con,con.cursor() as cur:
         for item in items:
             cur.execute('SELECT data FROM news_items WHERE id=%s',(item['key'],));old=cur.fetchone()
             if old and old[0].get('brief') and old[0]['title']==item['title']:
                 item['brief']=old[0]['brief'];item['revision']=old[0]['revision']
-            cur.execute('INSERT INTO news_items VALUES(%s,%s::jsonb,%s) ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data,published=EXCLUDED.published',(item['key'],json.dumps(item,ensure_ascii=False),datetime.fromtimestamp(item['published'],timezone.utc)))
-        success=status=='ok' or status.startswith('missing-date:')
-        cur.execute('INSERT INTO news_health VALUES(%s,NOW(),%s,%s,%s) ON CONFLICT(source_id) DO UPDATE SET checked=NOW(),last_ok=COALESCE(EXCLUDED.last_ok,news_health.last_ok),status=EXCLUDED.status,items=EXCLUDED.items',(sid,datetime.now(timezone.utc) if success else None,status,len(items)))
+            if old and old[0]==item:continue
+            cur.execute('INSERT INTO news_items VALUES(%s,%s::jsonb,%s) ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data,published=EXCLUDED.published WHERE news_items.data IS DISTINCT FROM EXCLUDED.data OR news_items.published IS DISTINCT FROM EXCLUDED.published',(item['key'],json.dumps(item,ensure_ascii=False),datetime.fromtimestamp(item['published'],timezone.utc)))
+        if received:
+            cur.execute('INSERT INTO news_feed_cache VALUES(%s,%s::jsonb) ON CONFLICT(source_id) DO UPDATE SET validators=EXCLUDED.validators WHERE news_feed_cache.validators IS DISTINCT FROM EXCLUDED.validators',(sid,json.dumps(validators)))
+        success=status in ('ok','not-modified') or status.startswith('missing-date:')
+        cur.execute("INSERT INTO news_health VALUES(%s,NOW(),%s,%s,%s) ON CONFLICT(source_id) DO UPDATE SET checked=NOW(),last_ok=COALESCE(EXCLUDED.last_ok,news_health.last_ok),status=EXCLUDED.status,items=CASE WHEN EXCLUDED.status='not-modified' THEN news_health.items ELSE EXCLUDED.items END",(sid,datetime.now(timezone.utc) if success else None,status,len(items)))
     return len(items),status
 
 def refresh():
@@ -122,7 +134,7 @@ def enabled(cid,row=None):return row if row is not None else cfg('auto_enabled',
 def render(cid,groups,health,offset=0):
     limit=cfg('items',cid);shown=groups[offset:offset+limit]
     if not shown:
-        good=any(status=='ok' or status.startswith('missing-date:') for _,status,_ in health)
+        good=any(status in ('ok','not-modified') or status.startswith('missing-date:') for _,status,_ in health)
         return (text('empty') if good else text('unavailable') if health else text('warming')),[],0
     parts=[html.escape(text('heading',date=stamp(time.time())))];sent=[];page_count=0
     newest=max((d.timestamp() for _,_,d in health if d),default=0)
@@ -208,7 +220,7 @@ def register(bot):
             with get_db_connection() as con,con.cursor() as cur:cur.execute('SELECT source_id,status,checked,items FROM news_health');health={sid:(status,checked,count) for sid,status,checked,count in cur.fetchall()}
             rows=[]
             for sid in sources_for(m.chat.id):
-                status,checked,count=health.get(sid,('pending',None,0));symbol='✅' if status=='ok' else '⏳' if status=='pending' else '⚠️'
+                status,checked,count=health.get(sid,('pending',None,0));symbol='✅' if status in ('ok','not-modified') else '⏳' if status=='pending' else '⚠️'
                 rows.append(f'{symbol} {CATALOG[sid]["name"]} [{sid}]\n{status} · {count} news · '+(stamp(checked.timestamp()) if checked else '—'))
             value=text('sources',sources='\n'.join(rows))
             # Split only at source boundaries, keeping each Telegram message bounded.

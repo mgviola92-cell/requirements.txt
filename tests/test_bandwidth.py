@@ -31,7 +31,7 @@ class BandwidthTests(unittest.TestCase):
         with patch.object(daily,'get_db_connection',return_value=con):self.assertEqual(daily.active_groups(),[-1])
         sql=cur.execute.call_args.args[0];self.assertIn('WHERE enabled',sql);self.assertIn('retry_after<=NOW()',sql)
     def test_noop_draw_tick_does_not_resend_image_or_words(self):
-        s=game.create('g',-42,1,{},100);s.update(phase='guess',deadline=300,updated=195,image='X'*300000,words=[('ကြောင်',[])])
+        s=game.create('g',-42,1,{},100);s.update(phase='guess',deadline=300,updated=185,image='X'*300000,words=[('ကြောင်',[])])
         con,cur=self.connection();cur.fetchall.return_value=[(-42,)]
         @contextmanager
         def tx(**kw):yield cur,s,-42
@@ -49,7 +49,7 @@ class BandwidthTests(unittest.TestCase):
         persist.assert_called_once();self.assertEqual(s['phase'],'cancelled')
     def test_noop_nan_tick_only_updates_heartbeat(self):
         from games import nan_yate as g
-        s=g.create('n',-42,1,{},100);s.update(phase='night',deadline=300,updated=195)
+        s=g.create('n',-42,1,{},100);s.update(phase='night',deadline=300,updated=185)
         con,cur=self.connection();cur.fetchall.return_value=[(-42,)]
         @contextmanager
         def tx(**kw):yield cur,s,-42

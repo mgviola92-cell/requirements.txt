@@ -21,6 +21,7 @@ MESSAGES={
  'missing':'ရပ်ရန်ပွဲမရှိပါ။','member':'Group အဖွဲ့ဝင်သာ မဲပေးနိုင်သည်။',
  'rules':'⚖️ /tot သို့မဟုတ် /thisorthat\nရွေးချယ်မှုမဲပေး ၅ round။ တစ် round လျှင် ၃၀ စက္ကန့် default။ မှန်/မှားမရှိပါ။ တစ်ယောက်တစ် round တစ်မဲ။ ပါဝင်သူကို ပွဲဆုံးလျှင် +3 points default။ Admin /totstop ဖြင့်ရပ်နိုင်သည်။\nစာကတ်နှင့် ရွေးချယ်ရန်ခလုတ်များဖြင့် ကစားသည်။ ပွဲအတွင်းမေးခွန်းမထပ်ပါ။'}
 DEFAULTS=dict(game.DEFAULTS)
+WAKE=threading.Event()
 READY=False
 
 def text(key,**fields):return message_text('msg.features.this_or_that.'+key,MESSAGES[key],fields)
@@ -34,6 +35,7 @@ def locked(cid):
         yield cur,row[0] if row else None
 
 def save(cur,s):
+    WAKE.set()
     cur.execute('INSERT INTO this_that_games(chat_id,state) VALUES(%s,%s::jsonb) ON CONFLICT(chat_id) DO UPDATE SET state=EXCLUDED.state',(s['chat_id'],json.dumps(s,ensure_ascii=False)))
 
 def choose(cur,s):
@@ -200,6 +202,7 @@ def register(bot):
     if READY:
         def loop():
             while True:
+                WAKE.clear();chats=[True]
                 try:
                     with get_db_connection() as con,con.cursor() as cur:
                         cur.execute("SELECT chat_id FROM this_that_games WHERE state->>'phase'='playing'");chats=[r[0] for r in cur.fetchall()]
@@ -207,5 +210,5 @@ def register(bot):
                         try:tick(bot,cid)
                         except Exception:LOG.exception('This or That tick failed')
                 except Exception:LOG.warning('This or That recovery unavailable')
-                time.sleep(2)
+                WAKE.wait(2 if chats else 30)
         threading.Thread(target=loop,name='this-or-that',daemon=True).start()

@@ -19,10 +19,12 @@ from flask import Blueprint,request,jsonify,Response,send_file
 from telebot import types
 from telebot.handler_backends import ContinueHandling
 from database.db import get_db_connection
+from core import telegram_media
 from core.customization import message_text,setting_value,group_scope
 from core.sessions import start_session,end_session
 from games import draw_guess as g
 
+WAKE=threading.Event()
 LOG=logging.getLogger(__name__)
 ACTIVE=set();STARTED=False;USERNAME=None
 MESSAGES={'title':'🎨 Draw & Guess','lobby':'🎨 Draw & Guess\nလူစုနေသည် — {count}/{maximum}\nPrivate ခလုတ်ဖွင့်ပြီး ပါဝင်မှုအတည်ပြုပါ။ အနည်းဆုံး {minimum} ယောက်။',
@@ -76,6 +78,7 @@ def png(raw):
 
 
 def init_db():
+    telegram_media.initialize()
     with get_db_connection() as con,con.cursor() as cur:
         cur.execute('CREATE TABLE IF NOT EXISTS draw_guess_games(chat_id BIGINT PRIMARY KEY,game_id TEXT UNIQUE NOT NULL,state JSONB NOT NULL,updated_at TIMESTAMPTZ DEFAULT NOW())')
         cur.execute('CREATE TABLE IF NOT EXISTS draw_guess_outbox(id BIGSERIAL PRIMARY KEY,game_id TEXT NOT NULL,event JSONB NOT NULL,done BOOLEAN NOT NULL DEFAULT FALSE,attempts INTEGER NOT NULL DEFAULT 0,next_try TIMESTAMPTZ DEFAULT NOW())')
@@ -96,6 +99,7 @@ def tx(cid=None,gid=None):
 
 
 def persist(cur,s,now):
+    WAKE.set()
     s['updated']=now
     for e in s['events']:
         if e['kind']=='cancelled':
@@ -215,9 +219,9 @@ def drain(bot):
                             if s['phase']=='lobby':s['lobby_card']=m.message_id
                     elif kind=='image':
                         data=io.BytesIO(base64.b64decode(s['image']));data.name='drawing.png';body=text('round',round=s['round'],rounds=s['rules']['rounds'],name=g.player(s,s['drawer'])['name'])
-                        if s.get('card'):bot.edit_message_media(types.InputMediaPhoto(data,caption=body),cid,s['card'])
+                        if s.get('card'):telegram_media.edit_photo(bot,cid,s['card'],data,caption=body)
                         else:
-                            m=bot.send_photo(cid,data,caption=body);s['card']=m.message_id;remember(s,cid,m)
+                            m=telegram_media.send_photo(bot,cid,data,caption=body);s['card']=m.message_id;remember(s,cid,m)
                         cur.execute("UPDATE draw_guess_outbox SET done=TRUE WHERE game_id=%s AND event->>'kind'='image' AND id<=%s",(gid,watermark))
                     elif kind=='correct':m=bot.send_message(cid,text('correct',name=g.player(s,e['uid'])['name'],word=e['word']));remember(s,cid,m)
                     elif kind=='timeout':m=bot.send_message(cid,text('timeout',word=e['word']));remember(s,cid,m)
@@ -250,11 +254,17 @@ def tick(bot):
                 s['deadline']=now+30;g.event(s,'round');g.event(s,'drawer',uid=s['drawer'])
             else:g.advance(s,now,random.SystemRandom(),bank(s))
             if now < s['deadline'] and not s['events']:
-                cur.execute("UPDATE draw_guess_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
+                if now-s.get('updated',0)>=10:cur.execute("UPDATE draw_guess_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
             else:
                 persist(cur,s,now)
         if s['phase'] in ('finished','cancelled'):end_session(cid,'draw_guess');ACTIVE.discard(cid)
     drain(bot)
+    if chats:return True
+    # Keep scheduled cleanup/retries responsive after the last game has ended.
+    with get_db_connection() as con,con.cursor() as cur:
+        cur.execute('SELECT EXISTS(SELECT 1 FROM draw_guess_outbox WHERE NOT done)')
+        pending=cur.fetchone()
+    return bool(pending and pending[0])
 
 
 def register(app,bot):
@@ -382,9 +392,10 @@ def register(app,bot):
         STARTED=True
         def loop():
             while True:
-                try:tick(bot)
+                WAKE.clear();active=True
+                try:active=tick(bot)
                 except Exception as exc:LOG.warning('Draw worker: %s',type(exc).__name__)
-                time.sleep(3)
+                WAKE.wait(3 if active else 30)
         # Restore group guards before polling.
         with get_db_connection() as con,con.cursor() as cur:
             cur.execute("SELECT chat_id FROM draw_guess_games WHERE state->>'phase' NOT IN ('finished','cancelled')")

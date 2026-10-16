@@ -15,6 +15,7 @@ from core.customization import message_text,setting_value,group_scope
 from core.sessions import start_session,end_session
 from games import nan_yate as game
 
+WAKE=threading.Event()
 LOG=logging.getLogger(__name__)
 MESSAGES={
  'title':'🏯 နန်းရိပ် — လုပ်ကြံမှုနှင့် သက်သေ',
@@ -128,6 +129,7 @@ def transaction(cid=None,gid=None):
 
 
 def persist(cur,s,now):
+    WAKE.set()
     s['updated']=now
     for e in s['events']:
         # Delivery has the immutable event + version. Stale phase panels are skipped.
@@ -363,12 +365,18 @@ def tick(bot):
                 for p in s['players']:game.emit(s,p['id'],'panel')
             else:game.advance(s,now,random.SystemRandom())
             if now < s['deadline'] and not s['events']:
-                cur.execute("UPDATE nan_yate_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
+                if now-s.get('updated',0)>=10:cur.execute("UPDATE nan_yate_games SET state=jsonb_set(state,'{updated}',%s::jsonb),updated_at=NOW() WHERE chat_id=%s",(str(now),cid))
             else:
                 persist(cur,s,now)
         invalidate_rewards(s)
         if s['phase'] in ('finished','cancelled'):end_session(cid,'nan_yate')
     drain(bot)
+    if chats:return True
+    # Keep scheduled cleanup/retries responsive after the last game has ended.
+    with get_db_connection() as con,con.cursor() as cur:
+        cur.execute('SELECT EXISTS(SELECT 1 FROM nan_yate_outbox WHERE NOT done)')
+        pending=cur.fetchone()
+    return bool(pending and pending[0])
 
 
 def admin(bot,cid,uid):
@@ -544,7 +552,8 @@ def register(bot):
             WORKER_STARTED=True
             def loop():
                 while True:
-                    try:tick(bot)
+                    WAKE.clear();active=True
+                    try:active=tick(bot)
                     except Exception as exc:LOG.warning('Nan Yate worker: %s',type(exc).__name__)
-                    time.sleep(3)
+                    WAKE.wait(3 if active else 30)
             threading.Thread(target=loop,name='nan-yate',daemon=True).start()

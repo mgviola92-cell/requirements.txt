@@ -2,6 +2,7 @@
 Only attributed feed headlines are used automatically. Owner-written briefs can
 replace them; full articles are neither copied nor purportedly summarized.
 """
+import urllib.error
 import hashlib,html,re,unicodedata,urllib.parse,urllib.request,xml.etree.ElementTree as ET
 from datetime import datetime,timezone
 from email.utils import parsedate_to_datetime
@@ -52,10 +53,24 @@ def parse(raw,source,now):
         accepted.append({'key':key,'source':source['id'],'family':source['family'],'name':source['name'],'title':title,'url':url,'published':stamp,'brief':'','revision':hashlib.sha256(title.encode()).hexdigest()[:16],'correction':bool(CORRECTION.search(title))})
     return accepted,missing
 
-def fetch(source,now):
-    request=urllib.request.Request(source['url'],headers={'User-Agent':'MyanmarNewsDigest/1.0 (RSS reader)','Accept':'application/rss+xml, application/atom+xml, application/xml,text/xml'})
-    with urllib.request.urlopen(request,timeout=8) as response:raw=response.read(MAX_BYTES+1)
-    return parse(raw,source,now)
+def fetch(source,now,validators=None):
+    headers={'User-Agent':'MyanmarNewsDigest/1.0 (RSS reader)','Accept':'application/rss+xml, application/atom+xml, application/xml,text/xml'}
+    if validators:
+        if validators.get('etag'):headers['If-None-Match']=validators['etag']
+        if validators.get('modified'):headers['If-Modified-Since']=validators['modified']
+    request=urllib.request.Request(source['url'],headers=headers)
+    try:
+        with urllib.request.urlopen(request,timeout=8) as response:
+            if getattr(response,'status',None)==304:return None,0
+            raw=response.read(MAX_BYTES+1)
+            result=parse(raw,source,now)
+            if validators is not None:
+                validators.clear()
+                validators.update(etag=response.headers.get('ETag'),modified=response.headers.get('Last-Modified'))
+            return result
+    except urllib.error.HTTPError as exc:
+        if exc.code==304:exc.close();return None,0
+        raise
 
 def similar(a,b):
     if abs(a['published']-b['published'])>24*3600:return False
