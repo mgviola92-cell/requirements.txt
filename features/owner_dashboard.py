@@ -3,7 +3,7 @@ from core.customization import message_text as _custom_text, setting_value as _c
 import os, time, secrets, threading, html, json
 from datetime import datetime, timezone
 from functools import wraps
-from flask import Blueprint, request, session, redirect, url_for, render_template_string, abort
+from flask import Blueprint, request, session, redirect, url_for, render_template_string, abort, jsonify
 from werkzeug.security import check_password_hash
 from database.db import get_db_connection
 from telebot.handler_backends import ContinueHandling
@@ -100,14 +100,25 @@ def _load_panel_state(uid):
         except (ValueError,TypeError):pass
     return chat_id,card_id,None
 
+_GROUP_SEEN={}
+_GROUP_SEEN_LOCK=__import__("threading").RLock()
+
 def record_group(chat, active=True):
     if getattr(chat,"type",None) not in ("group","supergroup"): return
+    import time
+    value=((getattr(chat,'title','') or '')[:160],active)
+    with _GROUP_SEEN_LOCK:
+        old=_GROUP_SEEN.get(chat.id)
+        if old and old[0]==value and time.monotonic()-old[1]<60:return
     try:
         with get_db_connection() as conn, conn.cursor() as cur:
             cur.execute("""INSERT INTO owner_groups(chat_id,title,active,last_seen)
              VALUES(%s,%s,%s,NOW()) ON CONFLICT(chat_id) DO UPDATE SET
              title=EXCLUDED.title,active=EXCLUDED.active,last_seen=NOW()""",
              (chat.id,(getattr(chat,"title","") or "")[:160],active))
+        with _GROUP_SEEN_LOCK:
+            if len(_GROUP_SEEN)>5000:_GROUP_SEEN.clear()
+            _GROUP_SEEN[chat.id]=(value,time.monotonic())
     except Exception as exc:
         print("Owner group tracking failed:",type(exc).__name__)
 
@@ -179,6 +190,7 @@ SHELL=CSS+"""<main><nav><strong>👑 BOT CONTROL</strong>
 <a href="{{url_for('owner_dashboard.broadcast')}}">Broadcast</a>
 <a href="/owner/control/">⚙️ Group Control & Messages</a>
 <a href="/owner/tools/">🛠️ Owner Tools</a>
+<a href="/owner/bandwidth">📊 Bandwidth</a>
 <a href="/owner/studio/">🗂️ Group Studio</a>
 <a href="{{url_for('owner_dashboard.edit_welcome')}}">✏️ Welcome Editor</a>
 <form action="{{url_for('owner_dashboard.logout')}}" method="post">
@@ -707,3 +719,15 @@ def register_owner_dashboard(app,bot):
 
     from features.owner_operations import register as register_operations
     register_operations(app,bot,owner_replace_card,clear_owner_draft)
+
+
+@dashboard.route('/bandwidth')
+@_protect
+def bandwidth_report():
+    from core.traffic_meter import snapshot
+    report=snapshot()
+    if request.args.get('format')=='json':return jsonify(report)
+    body='<h1>📊 Bandwidth payload report</h1><p>ဘော့ပြန်စသည့်အချိန်မှ စတင်တွက်ထားသည်။ TLS / protocol overhead မပါပါ။ Database ပမာဏသည် ခန့်မှန်းချက်ဖြစ်ပြီး Render billing meter မဟုတ်ပါ။</p><p><a href="?format=json">Download / view JSON</a></p><table><tr><th>အမျိုးအစား / Function</th><th>Calls</th><th>ပို့ပြီး</th><th>လက်ခံပြီး</th></tr>'
+    for row in report['rows']:
+        body+=f"<tr><td>{html.escape(row['category'])}<br>{html.escape(row['label'])}</td><td>{row['calls']}</td><td>{row['sent_bytes']:,} bytes</td><td>{row['received_bytes']:,} bytes</td></tr>"
+    return _shell(body+'</table>')

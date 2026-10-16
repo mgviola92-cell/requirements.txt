@@ -7,6 +7,7 @@ import psycopg
 import atexit
 import threading
 from psycopg_pool import ConnectionPool
+from core.traffic_meter import MeteredCursor
 
 _pool = None
 _pool_lock = threading.Lock()
@@ -18,6 +19,14 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 def database_available():
     """DATABASE_URL ရှိ/မရှိ စစ်ရန်"""
     return bool(DATABASE_URL)
+
+
+def _close_pool(pool):
+    # Flush best-effort metadata while database connections are still available.
+    try:
+        from core.batched_writes import flush_all
+        flush_all()
+    finally:pool.close()
 
 
 def get_db_connection():
@@ -40,10 +49,10 @@ def get_db_connection():
         if _pool is None:
             pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=12,
                                   timeout=20, max_idle=300, max_lifetime=1800,
-                                  kwargs={'connect_timeout':20}, open=False)
+                                  kwargs={'connect_timeout':20,'cursor_factory':MeteredCursor}, open=False)
             pool.open()
             _pool = pool
-            atexit.register(pool.close)
+            atexit.register(_close_pool,pool)
     # Commit on success / rollback on failure, then return to the shared pool.
     return _pool.connection()
 

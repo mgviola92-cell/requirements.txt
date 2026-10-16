@@ -83,6 +83,18 @@ def init_db():
         cur.execute('CREATE TABLE IF NOT EXISTS draw_guess_games(chat_id BIGINT PRIMARY KEY,game_id TEXT UNIQUE NOT NULL,state JSONB NOT NULL,updated_at TIMESTAMPTZ DEFAULT NOW())')
         cur.execute('CREATE TABLE IF NOT EXISTS draw_guess_outbox(id BIGSERIAL PRIMARY KEY,game_id TEXT NOT NULL,event JSONB NOT NULL,done BOOLEAN NOT NULL DEFAULT FALSE,attempts INTEGER NOT NULL DEFAULT 0,next_try TIMESTAMPTZ DEFAULT NOW())')
         cur.execute('CREATE INDEX IF NOT EXISTS draw_guess_outbox_due ON draw_guess_outbox(next_try) WHERE NOT done')
+        cur.execute('CREATE TABLE IF NOT EXISTS draw_guess_images(game_id TEXT NOT NULL,epoch INTEGER NOT NULL,image TEXT NOT NULL,PRIMARY KEY(game_id,epoch))')
+        # Move legacy embedded drawings once; timers will subsequently read only the small state.
+        cur.execute("""INSERT INTO draw_guess_images(game_id,epoch,image)
+            SELECT game_id,(state->>'epoch')::integer,state->>'image' FROM draw_guess_games
+            WHERE state->>'image' IS NOT NULL
+            ON CONFLICT(game_id,epoch) DO UPDATE SET image=EXCLUDED.image""")
+        cur.execute("""UPDATE draw_guess_games SET state=jsonb_set(jsonb_set(state,'{image_epoch}',state->'epoch'),'{image}','null'::jsonb)
+            WHERE state->>'image' IS NOT NULL""")
+        cur.execute("""DELETE FROM draw_guess_images i WHERE NOT EXISTS(
+            SELECT 1 FROM draw_guess_games g WHERE g.game_id=i.game_id
+            AND (g.state->>'epoch')::integer=i.epoch AND g.state->>'phase' NOT IN ('finished','cancelled'))""")
+
 
 
 @contextmanager
@@ -101,17 +113,34 @@ def tx(cid=None,gid=None):
 def persist(cur,s,now):
     WAKE.set()
     s['updated']=now
+    if s['phase'] in ('finished','cancelled'):
+        cur.execute('DELETE FROM draw_guess_images WHERE game_id=%s',(s['id'],))
+    elif any(e['kind']=='round' for e in s['events']):
+        cur.execute('DELETE FROM draw_guess_images WHERE game_id=%s AND epoch<>%s',(s['id'],s['epoch']))
+    stored=dict(s)
+    if s.get('image'):
+        cur.execute('INSERT INTO draw_guess_images VALUES(%s,%s,%s) ON CONFLICT(game_id,epoch) DO UPDATE SET image=EXCLUDED.image WHERE draw_guess_images.image IS DISTINCT FROM EXCLUDED.image',(s['id'],s['epoch'],s['image']))
+        s['image_epoch']=s['epoch'];stored['image_epoch']=s['epoch']
+    stored['image']=None
     for e in s['events']:
         if e['kind']=='cancelled':
             e['chat_id']=s['chat_id'];e['messages']=cleanup_targets(s)
         e['epoch']=s['epoch'];e['round']=s['round']
         cur.execute('INSERT INTO draw_guess_outbox(game_id,event) VALUES(%s,%s::jsonb)',(s['id'],json.dumps(e,ensure_ascii=False)))
-    s['events']=[]
-    cur.execute('INSERT INTO draw_guess_games VALUES(%s,%s,%s::jsonb,NOW()) ON CONFLICT(chat_id) DO UPDATE SET game_id=EXCLUDED.game_id,state=EXCLUDED.state,updated_at=NOW()',(s['chat_id'],s['id'],json.dumps(s,ensure_ascii=False)))
+    s['events']=[];stored['events']=[]
+    cur.execute('INSERT INTO draw_guess_games VALUES(%s,%s,%s::jsonb,NOW()) ON CONFLICT(chat_id) DO UPDATE SET game_id=EXCLUDED.game_id,state=EXCLUDED.state,updated_at=NOW()',(s['chat_id'],s['id'],json.dumps(stored,ensure_ascii=False)))
     from features.group_studio import credit
     for a in s['awards']:credit(cur,a['key'],s['chat_id'],int(a['uid']),a['points'])
     s['awards']=[]
     cur.execute("UPDATE draw_guess_games SET state=jsonb_set(state,'{awards}','[]'::jsonb) WHERE game_id=%s",(s['id'],))
+
+
+def drawing(cur,s):
+    if s.get('image'):return s['image']  # compatibility with a transaction started before migration
+    if s.get('image_epoch')!=s.get('epoch'):return None
+    cur.execute('SELECT image FROM draw_guess_images WHERE game_id=%s AND epoch=%s',(s['id'],s['epoch']))
+    row=cur.fetchone()
+    return row[0] if row else None
 
 
 def refresh_points(cid):
@@ -218,7 +247,7 @@ def drain(bot):
                             m=bot.send_message(cid,body,reply_markup=k);remember(s,cid,m)
                             if s['phase']=='lobby':s['lobby_card']=m.message_id
                     elif kind=='image':
-                        data=io.BytesIO(base64.b64decode(s['image']));data.name='drawing.png';body=text('round',round=s['round'],rounds=s['rules']['rounds'],name=g.player(s,s['drawer'])['name'])
+                        data=io.BytesIO(base64.b64decode(drawing(cur,s)));data.name='drawing.png';body=text('round',round=s['round'],rounds=s['rules']['rounds'],name=g.player(s,s['drawer'])['name'])
                         if s.get('card'):telegram_media.edit_photo(bot,cid,s['card'],data,caption=body)
                         else:
                             m=telegram_media.send_photo(bot,cid,data,caption=body);s['card']=m.message_id;remember(s,cid,m)
@@ -288,7 +317,8 @@ def register(app,bot):
                     if time.time()<s.get('last_image',0)+4:raise ValueError('rate')
                     s['image']=png(data.get('image'));g.submit(s,uid,time.time());s['last_image']=time.time();persist(cur,s,time.time())
                 elif data.get('action')!='state':raise ValueError('closed')
-                result=dict(labels={k:text('brush_'+k) for k in ('eraser','undo','clear','send','loading','clear_confirm','expired')},word=s['word'],title=text('title'),hint=text('hint'),deadline=s['deadline'],saved=text('saved'),image='data:image/png;base64,'+s['image'] if s['image'] else None)
+                image=drawing(cur,s)
+                result=dict(labels={k:text('brush_'+k) for k in ('eraser','undo','clear','send','loading','clear_confirm','expired')},word=s['word'],title=text('title'),hint=text('hint'),deadline=s['deadline'],saved=text('saved'),image='data:image/png;base64,'+image if image else None)
             return jsonify(result)
         except Exception as exc:
             key=str(exc) if isinstance(exc,ValueError) and str(exc) in MESSAGES else 'error'

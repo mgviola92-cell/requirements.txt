@@ -48,11 +48,20 @@ def initialize_daily_challenge():
                 PRIMARY KEY(chat_id,cycle_day,user_id,mission))""")
     return True
 
+_GROUP_SEEN={}
+_GROUP_SEEN_LOCK=__import__("threading").RLock()
+
 def register_group(chat_id):
+    import time
+    with _GROUP_SEEN_LOCK:
+        if time.monotonic()-_GROUP_SEEN.get(chat_id,-60)<60:return
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''INSERT INTO daily_groups(chat_id,last_seen) VALUES(%s,NOW())
               ON CONFLICT(chat_id) DO UPDATE SET last_seen=NOW(),enabled=TRUE''',(chat_id,))
+    with _GROUP_SEEN_LOCK:
+        if len(_GROUP_SEEN)>5000:_GROUP_SEEN.clear()
+        _GROUP_SEEN[chat_id]=time.monotonic()
 
 def active_groups():
     with get_db_connection() as conn:

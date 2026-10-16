@@ -4,6 +4,11 @@ Telegram Bot API does not expose a complete group member directory or online sta
 This registry stores non-bot users the bot actually sees in messages/joins/replies.
 """
 from database.db import get_db_connection
+from core.batched_writes import BatchWriter
+from datetime import datetime,timezone
+
+_MEMBERS=BatchWriter("""INSERT INTO group_member_registry(chat_id,user_id,username,first_name,last_name,first_seen,last_seen)
+VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(chat_id,user_id) DO UPDATE SET username=EXCLUDED.username,first_name=EXCLUDED.first_name,last_name=EXCLUDED.last_name,last_seen=EXCLUDED.last_seen""")
 
 
 def initialize_member_registry():
@@ -35,25 +40,12 @@ def initialize_member_registry():
 def remember_member(chat_id, user_id, username=None, first_name=None, last_name=None):
     if not chat_id or not user_id:
         return False
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO group_member_registry
-                    (chat_id, user_id, username, first_name, last_name, first_seen, last_seen)
-                VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
-                ON CONFLICT (chat_id, user_id) DO UPDATE SET
-                    username = EXCLUDED.username,
-                    first_name = EXCLUDED.first_name,
-                    last_name = EXCLUDED.last_name,
-                    last_seen = NOW()
-                """,
-                (chat_id, user_id, username, first_name, last_name),
-            )
-    return True
+    now=datetime.now(timezone.utc)
+    return _MEMBERS.submit((chat_id,user_id),(chat_id,user_id,username,first_name,last_name,now,now))
 
 
 def get_known_member_ids(chat_id, limit=5000):
+    _MEMBERS.flush()
     limit = max(1, min(int(limit), 10000))
     with get_db_connection() as conn:
         with conn.cursor() as cur:
@@ -67,4 +59,7 @@ def get_known_member_ids(chat_id, limit=5000):
                 """,
                 (chat_id, limit),
             )
-            return [row[0] for row in cur.fetchall()]
+            known=[row[0] for row in cur.fetchall()]
+    # Include activity still pending during a transient database write failure.
+    pending=[row[1] for row in reversed(_MEMBERS.snapshot()) if row[0]==chat_id]
+    return list(dict.fromkeys(pending+known))[:limit]

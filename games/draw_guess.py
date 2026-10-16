@@ -70,7 +70,7 @@ def next_round(s,now,rng,words=WORDS):
     if s['round']>=s['rules']['rounds'] or len(live)<2:
         finish(s);return
     s['round']+=1;s['epoch']+=1;s['phase']='draw';s['deadline']=now+s['rules']['draw_seconds']
-    s['drawer']=live[(s['round']-1)%len(live)]['id'];s['image']=None;s['ticket']=None;s['card']=None
+    s['drawer']=live[(s['round']-1)%len(live)]['id'];s['image']=None;s['image_epoch']=None;s['ticket']=None;s['card']=None
     choices=[(w,a) for w,a in words if w not in s['used']]
     if not choices:s['used']=[];choices=list(words)
     s['word'],s['aliases']=choose_word(choices,len(live),rng);s['used'].append(s['word'])

@@ -12,6 +12,9 @@ from flask import Blueprint,request,abort
 from telebot import types
 from telebot.handler_backends import ContinueHandling
 from database.db import get_db_connection
+from core.batched_writes import BatchWriter
+
+_USAGE=BatchWriter("INSERT INTO owner_usage_events(chat_id,kind,label,event_key,created_at) VALUES(%s,%s,%s,%s,%s) ON CONFLICT(event_key) DO NOTHING")
 
 MMT=ZoneInfo('Asia/Yangon')
 PERMISSIONS={'edit','announce','stats'}
@@ -169,13 +172,14 @@ def game_launch(kind):
 
 def usage(chat_id,kind,label='',event_key=None):
     if not _ready or chat_id>=0:return
-    try:
-        with get_db_connection() as conn,conn.cursor() as cur:
-            cur.execute('INSERT INTO owner_usage_events(chat_id,kind,label,event_key) VALUES(%s,%s,%s,%s) ON CONFLICT(event_key) DO NOTHING',(chat_id,kind,label[:160],event_key))
-    except Exception as exc:print('Usage record:',type(exc).__name__)
+    params=(chat_id,kind,label[:160],event_key,datetime.now(timezone.utc))
+    if not _USAGE.submit(event_key or secrets.token_hex(16),params):
+        # A full retry queue must not stop games or reward transactions.
+        print('Usage queue full; activity sample skipped')
 
 
 def stats():
+    _USAGE.flush()
     with get_db_connection() as conn,conn.cursor() as cur:
         cur.execute('''SELECT g.title,e.chat_id,
           COUNT(*) FILTER(WHERE e.kind='message'),COUNT(*) FILTER(WHERE e.kind='command'),

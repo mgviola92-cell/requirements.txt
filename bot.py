@@ -231,6 +231,8 @@ def get_next_emoji_question(chat_id):
     
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+from core.traffic_meter import install_telegram
+install_telegram()
 bot = telebot.TeleBot(BOT_TOKEN)
 from core.customization import initialize as initialize_customization, install_handler_controls
 initialize_customization()
@@ -239,6 +241,8 @@ install_handler_controls(bot)
 from flask import Flask
 from features.owner_dashboard import register_owner_dashboard
 app = Flask(__name__)
+from core.traffic_meter import install_flask
+install_flask(app)
 register_owner_dashboard(app, bot)
 
 from features.nan_yate import register as register_nan_yate

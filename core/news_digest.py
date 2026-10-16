@@ -2,6 +2,7 @@
 Only attributed feed headlines are used automatically. Owner-written briefs can
 replace them; full articles are neither copied nor purportedly summarized.
 """
+from core.traffic_meter import record as record_traffic
 import urllib.error
 import hashlib,html,re,unicodedata,urllib.parse,urllib.request,xml.etree.ElementTree as ET
 from datetime import datetime,timezone
@@ -58,11 +59,13 @@ def fetch(source,now,validators=None):
     if validators:
         if validators.get('etag'):headers['If-None-Match']=validators['etag']
         if validators.get('modified'):headers['If-Modified-Since']=validators['modified']
+    record_traffic('news_payload',source.get('id','feed'),sent=sum(len(k.encode())+len(str(v).encode()) for k,v in headers.items()))
     request=urllib.request.Request(source['url'],headers=headers)
     try:
         with urllib.request.urlopen(request,timeout=8) as response:
             if getattr(response,'status',None)==304:return None,0
             raw=response.read(MAX_BYTES+1)
+            record_traffic('news_payload',source.get('id','feed'),received=len(raw),calls=0)
             result=parse(raw,source,now)
             if validators is not None:
                 validators.clear()
