@@ -359,7 +359,13 @@ def tick(bot):
             if not s or s['phase'] in ('finished','cancelled'):continue
             start_session(cid,'nan_yate',recover=True)
             now=time.time()
-            if now>s['deadline'] and now-s['updated']>30 and s['phase']!='lobby':
+            from core.startup_safety import abandoned
+            if abandoned(s,now):
+                # Supersede unsent phase/DM events; keep deletion cleanup jobs.
+                cur.execute("UPDATE nan_yate_outbox SET done=TRUE WHERE game_id=%s AND NOT done AND event->>'kind' NOT IN ('delete','cancelled')",(s['id'],))
+                s['events']=[]
+                game.cancel(s)
+            elif now>s['deadline'] and now-s['updated']>30 and s['phase']!='lobby':
                 # A real process outage: preserve selections and give everyone another chance.
                 s['deadline']=now+30;game.emit(s,cid,'phase')
                 for p in s['players']:game.emit(s,p['id'],'panel')

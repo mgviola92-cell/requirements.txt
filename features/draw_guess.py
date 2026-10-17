@@ -279,7 +279,13 @@ def tick(bot):
         with tx(cid=cid) as (cur,s,_):
             if not s or s['phase'] in ('finished','cancelled'):continue
             start_session(cid,'draw_guess',recover=True);now=time.time()
-            if now>s['deadline'] and now-s['updated']>30 and s['phase']!='lobby':
+            from core.startup_safety import abandoned
+            if abandoned(s,now):
+                # Supersede unsent phase/DM events; keep deletion cleanup jobs.
+                cur.execute("UPDATE draw_guess_outbox SET done=TRUE WHERE game_id=%s AND NOT done AND event->>'kind' NOT IN ('delete','cancelled')",(s['id'],))
+                s['events']=[]
+                g.cancel(s)
+            elif now>s['deadline'] and now-s['updated']>30 and s['phase']!='lobby':
                 s['deadline']=now+30;g.event(s,'round');g.event(s,'drawer',uid=s['drawer'])
             else:g.advance(s,now,random.SystemRandom(),bank(s))
             if now < s['deadline'] and not s['events']:

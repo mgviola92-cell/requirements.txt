@@ -137,7 +137,8 @@ def register_daily_challenge(bot):
                 now=datetime.now(MMT)
                 for chat_id in active_groups():
                     if post_time_reached(chat_id,now) and not get_card_id(chat_id,now.date()):
-                        publish(chat_id,force=True)
+                        from core.startup_safety import AUTO_POSTS
+                        if AUTO_POSTS.allow('daily',chat_id):publish(chat_id,force=True)
             except Exception as exc:print('Daily auto scheduler error:',exc)
             time.sleep(60)
 

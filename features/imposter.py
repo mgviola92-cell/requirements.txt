@@ -248,6 +248,14 @@ def _next_turn(bot,chat_id,s):
 
 def _tick(bot,chat_id,s):
     now=time.time()
+    if now-s.get('deadline',now)>3600:
+        # A long hosting outage must not replay turns or award an unattended match.
+        s['phase']='cancelled';_save(chat_id,s)
+        end_session(chat_id,'imposter');ACTIVE_CHATS.discard(chat_id)
+        if s.get('message_id'):
+            try:bot.edit_message_reply_markup(chat_id,s['message_id'],reply_markup=None)
+            except Exception:pass
+        return
     if (s["phase"]=="final" and len(s.get("votes",{}))>=len(_eligible(s))
         and now>=s.get("vote_earliest_finish",s.get("deadline",now+1))):
         _finish(bot,chat_id,s)

@@ -174,6 +174,8 @@ def auto(bot):
     now=datetime.now(timezone.utc)
     for cid,explicit,due,retry in targets:
         if not enabled(cid,explicit) or due and due>now or retry and retry>now or not feature_allowed('enabled.features.news.news_command',cid) or not setting_value('enabled.features.news.news_command',True,scope=cid):continue
+        from core.startup_safety import AUTO_POSTS
+        if not AUTO_POSTS.allow('news',cid):continue
         try:
             with group_scope(cid):
                 with get_db_connection() as con,con.cursor() as cur:

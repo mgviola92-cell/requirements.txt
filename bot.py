@@ -233,7 +233,8 @@ def get_next_emoji_question(chat_id):
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 from core.traffic_meter import install_telegram
 install_telegram()
-bot = telebot.TeleBot(BOT_TOKEN)
+from core.startup_safety import FreshUpdatesBot
+bot = FreshUpdatesBot(BOT_TOKEN)
 from core.customization import initialize as initialize_customization, install_handler_controls
 initialize_customization()
 install_handler_controls(bot)
@@ -6174,7 +6175,7 @@ def spawn_auto_speed_tap(chat_id):
     if not can_auto_spawn_speed_tap(chat_id):
         return False
     # Reuse the existing pending -> WAIT -> GO -> result flow.
-    return bool(speed_tap_command(auto_chat_id=chat_id))
+    return bool(speed_tap_command(None, auto_chat_id=chat_id))
 
 
 configure_speed_tap_auto(
@@ -6197,7 +6198,8 @@ def run_bot():
         try:
             bot.infinity_polling(
                 timeout=30,
-                long_polling_timeout=30
+                long_polling_timeout=30,
+                skip_pending=True
             )
         except Exception as e:
             print(f"⚠️ Connection Error: {e}")

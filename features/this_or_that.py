@@ -124,7 +124,15 @@ def tick(bot,cid):
     awarded=[]
     with group_scope(cid),locked(cid) as (cur,s):
         if not s or s['phase']!='playing':return
-        if time.time()>=s['deadline']:
+        now=time.time()
+        if now-s['deadline']>max(120,s['rules']['round_seconds']):
+            # Do not replay five rounds into an empty group after a long outage.
+            game.cancel(s)
+            try:bot.edit_message_text(text('cancelled'),cid,s['card'],reply_markup=None,parse_mode=None)
+            except Exception:pass
+            save(cur,s);end_session(cid,'this_or_that')
+            return
+        if now>=s['deadline']:
             game.close_round(s)
             if s['phase']=='finished':awarded=finish(bot,cur,s)
             else:game.open_round(s,choose(cur,s),time.time());publish(bot,s)
