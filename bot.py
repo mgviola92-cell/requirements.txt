@@ -264,6 +264,8 @@ from features.would_you_rather import register as register_would_you_rather
 register_would_you_rather(bot)
 from features.imposter import register as register_imposter
 register_imposter(bot)
+from features.checkers import register as register_checkers
+register_checkers(bot)
 
 
 try:

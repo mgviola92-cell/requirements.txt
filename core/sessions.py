@@ -42,6 +42,7 @@ SESSION_PRIORITIES = {
 
 
     "imposter": 78,
+    "checkers": 76,
     "nan_yate": 85,
     "draw_guess": 77,
     "this_or_that": 65,
@@ -86,6 +87,7 @@ SESSION_PRIORITIES = {
 # =========================================================
 
 EXCLUSIVE_SESSIONS = {
+    "checkers",
 
 
     "math_battle",

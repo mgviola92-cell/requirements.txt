@@ -27,20 +27,21 @@ GAME_LABELS={
     'emoji_guess':'😀 Emoji Guess','speed_tap':'⚡ Speed Tap','word_chain':'🔗 Word Chain',
     'math_battle':'🧮 Math Battle','daily_challenge':'📅 Daily Challenge',
 
-    'would_you_rather':'🤔 Would You Rather','imposter':'🎭 Imposter','nan_yate':'🏯 နန်းရိပ်','draw_guess':'🎨 Draw & Guess','this_or_that':'⚖️ This or That'}
+    'would_you_rather':'🤔 Would You Rather','imposter':'🎭 Imposter','nan_yate':'🏯 နန်းရိပ်','draw_guess':'🎨 Draw & Guess','this_or_that':'⚖️ This or That','checkers':'🐯 ကျားကွက်'}
 GAME_COMMANDS={'coin':'/coin','trivia':'/trivia','guess':'/guess','dice':'/dice','slot':'/slot',
     'eight_ball':'/8ball','love':'/love','random':'/random','daily_challenge':'/daily',
     'math_battle':'/mathbattle',
     'imposter':'/imposter','word_chain':'/wordchain',
-    'emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr','nan_yate':'/nanyate','draw_guess':'/draw','this_or_that':'/tot'}
+    'emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr','nan_yate':'/nanyate','draw_guess':'/draw','this_or_that':'/tot','checkers':'/checkers'}
 GAME_HANDLERS={k:'enabled.bot.'+fn for k,fn in {
     'coin':'coin_command','trivia':'trivia_command','guess':'guess_command','dice':'roll_dice',
     'slot':'roll_slot','eight_ball':'eight_ball_command','love':'love_calculator','random':'random_command',
     'math_battle':'math_battle_command',
     'word_chain':'word_chain_command',
     'emoji_guess':'emoji_guess_command','speed_tap':'speed_tap_command'}.items()}
-GAME_HANDLERS.update(this_or_that='enabled.features.this_or_that.command',draw_guess='enabled.features.draw_guess.command',nan_yate='enabled.features.nan_yate.command',imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command',daily_challenge='enabled.features.daily_challenge.daily_command')
+GAME_HANDLERS.update(checkers='enabled.features.checkers.command',this_or_that='enabled.features.this_or_that.command',draw_guess='enabled.features.draw_guess.command',nan_yate='enabled.features.nan_yate.command',imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command',daily_challenge='enabled.features.daily_challenge.daily_command')
 COMMAND_GAMES.update({command.lstrip('/'):kind for kind,command in GAME_COMMANDS.items()})
+COMMAND_GAMES['ကျားကွက်']='checkers'
 COMMAND_GAMES['drawguess']='draw_guess'
 COMMAND_GAMES['thisorthat']='this_or_that'
 

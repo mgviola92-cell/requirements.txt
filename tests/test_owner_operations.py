@@ -166,7 +166,7 @@ class OwnerOperationsTests(unittest.TestCase):
             handlers['owner_tools_action'](q)
         buttons=[b for row in replace.call_args.args[3].keyboard for b in row]
         self.assertEqual(len([b for b in buttons if b.callback_data.startswith('ops:game:')]),8)
-        self.assertEqual(buttons[0].callback_data,'ops:game:this_or_that')
+        self.assertEqual(buttons[0].callback_data,'ops:game:checkers')
         self.assertTrue(any(b.callback_data=='ops:features:1' for b in buttons))
         self.assertTrue(any(b.text=='🧮 Math Battle' and b.callback_data=='ops:game:math_battle' for b in buttons))
         self.assertFalse(any('enabled.' in b.text or 'Command' in b.text for b in buttons))
@@ -182,8 +182,8 @@ class OwnerOperationsTests(unittest.TestCase):
 
     def test_game_menu_has_all_existing_games_newest_first(self):
         kinds=[kind for kind,_ in ops.ordered_games()]
-        self.assertEqual(kinds[:4],['this_or_that','draw_guess','nan_yate','imposter'])
-        self.assertEqual(len(kinds),18)
+        self.assertEqual(kinds[:5],['checkers','this_or_that','draw_guess','nan_yate','imposter'])
+        self.assertEqual(len(kinds),19)
         self.assertTrue({'coin','trivia','guess','dice','slot','eight_ball','love','random','daily_challenge'}<=set(kinds))
         self.assertEqual(set(ops.GAME_HANDLERS),set(kinds))
         self.assertEqual(set(ops.GAME_COMMANDS),set(kinds))
