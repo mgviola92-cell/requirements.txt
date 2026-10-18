@@ -1484,6 +1484,40 @@
         "Source link နှင့် published date ကိုထိန်းထားပြီး brief အသစ်ကိုသုံးမည်။"
       ],
       "notes": "ယခင် auto ပို့ပြီးသောသတင်းကိုပြင်လျှင် eligible subscribed groups မှနောက်ပို့ချိန်တွင် update ရနိုင်သည်။ အကြောင်းအရာမှန်ကန်မှုကို Owner စစ်ရမည်။"
+    },
+    {
+      "id": "comfort_start",
+      "aliases": [
+        "ချော့ပေး"
+      ],
+      "title": "ချော့စာ စတင်",
+      "category": "owner",
+      "where": "Group",
+      "who": "Owner",
+      "usage": "/ချော့ပေး",
+      "steps": [
+        "Owner /control → Settings & Functions → ချော့စာ မှ Target User ID နှင့် ခေါ်နာမည် ထည့်ပါ။",
+        "Emoji ဘဏ် Edit နှိပ်၍ emoji များကို space ခြားပို့ပါ။ Premium emoji ကို private editor မှပို့မှ ID သိမ်းနိုင်သည်။",
+        "Group ထဲ /ချော့ပေး ပို့ပါ။ Default ၆ ကြောင်းကို ၃၀ စက္ကန့်ခြားပို့သည်။ စာတိုဘဏ် 243 ကြောင်းကို random ရွေးသည်။",
+        "သတ်မှတ်ထားသူ စာပြောလျှင် နောက်တစ်ကြောင်းကို ထိုစာအား reply လုပ်သည်။ Privacy/permission ကြောင့် bot မမြင်သောစာကို reply မလုပ်နိုင်ပါ။"
+      ],
+      "notes": "Pool ကုန်မှ latest30 ရှောင်ပြီး ပြန်သုံးသည်။ Restart နောက် အဟောင်းပြန်မပို့။ အများဆုံး12ကြောင်း/15မိနစ်။"
+    },
+    {
+      "id": "comfort_stop",
+      "aliases": [
+        "ရပြီ"
+      ],
+      "title": "ချော့စာ ရပ်ရန်",
+      "category": "owner",
+      "where": "Group",
+      "who": "Owner / Target only",
+      "usage": "/ရပြီ",
+      "steps": [
+        "Owner နှင့် သတ်မှတ်ထားသူသာ ရပ်နိုင်သည်။ တခြား member/Admin မရပါ။",
+        "Target က ရပ်လျှင် ထပ်မပို့ရန် မှတ်ထားသည်။ သူသာ ပြန်လက်ခံမယ်ခလုတ်ကို နှိပ်နိုင်သည်။"
+      ],
+      "notes": "Owner ရပ်လျှင် နောက် cooldown ပြည့်မှ ပြန်စနိုင်သည်။ စတင်ပြီးသား Telegram request တစ်ခု ရောက်နေပြီးဖြစ်နိုင်သည်။"
     }
   ]
 }

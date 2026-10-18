@@ -246,6 +246,9 @@ from core.traffic_meter import install_flask
 install_flask(app)
 register_owner_dashboard(app, bot)
 
+from features.comfort import register as register_comfort
+register_comfort(bot)
+
 from features.nan_yate import register as register_nan_yate
 register_nan_yate(bot)
 from features.group_studio import register as register_group_studio, register_custom_handler

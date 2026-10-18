@@ -40,6 +40,7 @@ def read_scope(value):
 
 def decode_value(key,text):
     entry=CATALOG[key]
+    if key in ('cfg.features.comfort.nickname','cfg.features.comfort.emojis'):return text.strip()
     if entry['kind']=='message':return text
     if isinstance(entry['default'],bool) and text.strip().lower() in ('on','off'):return text.strip().lower()=='on'
     try:return json.loads(text)
@@ -200,7 +201,7 @@ def register(app,bot,replace_card,back_button,clear_draft):
                               ON CONFLICT(owner_id) DO UPDATE SET scope=EXCLUDED.scope,key=EXCLUDED.key,expires_at=EXCLUDED.expires_at''',(uid,scope,key))
                         kb=types.InlineKeyboardMarkup();kb.add(button('❌ Cancel',f'ctl:item:{scope}:{ix}'))
                         e=CATALOG[key];fields=' '.join('{'+f+'}' for f in e.get('fields',[]))
-                        card(uid,'✏️ '+e['label'][:150]+'\n\n'+('စာအသစ်ကို ဒီမှာရေးပို့ပါ။' if e['kind']=='message' else 'Value အသစ်ပို့ပါ။ Number / true,false / JSON list သုံးပါ။')+'\n\n'+fields[:800],kb)
+                        card(uid,'✏️ '+e['label'][:150]+'\n\n'+('စာအသစ်ကို ဒီမှာရေးပို့ပါ။' if e['kind']=='message' else ('Emoji တွေကို space ခြားပြီး ပို့ပါ။ Premium emoji ID ပါ သိမ်းမည်။' if key=='cfg.features.comfort.emojis' else 'ခေါ်နာမည် ပို့ပါ။' if key=='cfg.features.comfort.nickname' else 'Value အသစ်ပို့ပါ။ Number / true,false / JSON list သုံးပါ။'))+'\n\n'+fields[:800],kb)
             bot.answer_callback_query(q.id)
         except Exception as exc:
             print('Owner control:',type(exc).__name__)
@@ -217,7 +218,11 @@ def register(app,bot,replace_card,back_button,clear_draft):
                 pending=cur.fetchone()
             if not pending:return ContinueHandling()
             scope,key=pending
-            value=decode_value(key,msg.text)
+            if key=='cfg.features.comfort.emojis':
+                from core.comfort_content import encode_emojis
+                value=encode_emojis(msg)
+            elif key=='cfg.features.comfort.nickname':value=msg.text.strip()
+            else:value=decode_value(key,msg.text)
             save(scope,key,value,uid)
             clear_edit(uid);item(uid,scope,KEYS.index(key))
         except ValueError as exc:bot.reply_to(msg,'⚠️ '+str(exc))
