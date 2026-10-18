@@ -13322,5 +13322,885 @@
     ],
     "html": false,
     "max_length": 500
+  },
+  "msg.comfort.line.343": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 344 · ဘေဘီရယ် ကိုကိုတောင်းပန်ပါတယ်ကွာ",
+    "default": "ဘေဘီရယ် ကိုကိုတောင်းပန်ပါတယ်ကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.344": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 345 · ကိုကို့ကို စိတ်ဆိုးနေတုန်းလားဟင်",
+    "default": "ကိုကို့ကို စိတ်ဆိုးနေတုန်းလားဟင်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.345": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 346 · ဘေဘီပြောတာ ကိုကိုသေချာနားထောင်ရမှာနော်",
+    "default": "ဘေဘီပြောတာ ကိုကိုသေချာနားထောင်ရမှာနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.346": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 347 · အလေးမထားသလို ဖြစ်သွားတာ ကိုကို့အမှားပဲ",
+    "default": "အလေးမထားသလို ဖြစ်သွားတာ ကိုကို့အမှားပဲ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.347": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 348 · ဘေဘီ့စကားက ကိုကို့အတွက် အရေးကြီးပါတယ်",
+    "default": "ဘေဘီ့စကားက ကိုကို့အတွက် အရေးကြီးပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.348": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 349 · အင်းပါလို့ပဲ ပြန်ပြီး နားမထောင်မိဘူးနော်",
+    "default": "အင်းပါလို့ပဲ ပြန်ပြီး နားမထောင်မိဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.349": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 350 · ဘေဘီပြောနေတုန်း ကိုကိုအာရုံတခြားရောက်နေတ",
+    "default": "ဘေဘီပြောနေတုန်း ကိုကိုအာရုံတခြားရောက်နေတာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.350": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 351 · အဲ့ဒါကြောင့် ဘေဘီစိတ်မကောင်းဖြစ်တာပေါ့နေ",
+    "default": "အဲ့ဒါကြောင့် ဘေဘီစိတ်မကောင်းဖြစ်တာပေါ့နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.351": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 352 · ကိုကို မငြင်းတော့ဘူး နားထောင်မယ်",
+    "default": "ကိုကို မငြင်းတော့ဘူး နားထောင်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.352": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 353 · ဘေဘီရယ် နောက်အဲ့လိုမဖြစ်အောင် ကိုကိုသတိထ",
+    "default": "ဘေဘီရယ် နောက်အဲ့လိုမဖြစ်အောင် ကိုကိုသတိထားမယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.353": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 354 · ကိုကိုက နားထောင်နေတယ်ထင်တာ တကယ်က မသေချာဘ",
+    "default": "ကိုကိုက နားထောင်နေတယ်ထင်တာ တကယ်က မသေချာဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.354": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 355 · ဘေဘီပြောတာကို ပေါ့ပေါ့ယူမိတယ်ကွာ",
+    "default": "ဘေဘီပြောတာကို ပေါ့ပေါ့ယူမိတယ်ကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.355": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 356 · ကိုကို့ကို ပြောပြနေတာကိုး နားထောင်ပေးရမှ",
+    "default": "ကိုကို့ကို ပြောပြနေတာကိုး နားထောင်ပေးရမှာပေါ့",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.356": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 357 · ပြောပြီးသားကို ထပ်ပြောနေရလို့ ဘေဘီပင်ပန်",
+    "default": "ပြောပြီးသားကို ထပ်ပြောနေရလို့ ဘေဘီပင်ပန်းသွားပြီနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.357": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 358 · ကိုကို့ကြောင့် ဘေဘီစိတ်ကုန်သွားတာလားဟင်",
+    "default": "ကိုကို့ကြောင့် ဘေဘီစိတ်ကုန်သွားတာလားဟင်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.358": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 359 · ဘေဘီနဲ့ပြောနေရင် ကိုကိုသေချာအာရုံစိုက်မယ",
+    "default": "ဘေဘီနဲ့ပြောနေရင် ကိုကိုသေချာအာရုံစိုက်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.359": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 360 · ပြောတာအဆုံးမရောက်ခင် ကိုကိုဝင်ပြောမိတာနေ",
+    "default": "ပြောတာအဆုံးမရောက်ခင် ကိုကိုဝင်ပြောမိတာနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.360": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 361 · ဘေဘီပြောလို့မပြီးသေးဘူး ကိုကိုစောင့်ရမှာ",
+    "default": "ဘေဘီပြောလို့မပြီးသေးဘူး ကိုကိုစောင့်ရမှာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.361": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 362 · ကိုကိုရှင်းပြဖို့ပဲ စဉ်းစားပြီး ဘေဘီ့စကာ",
+    "default": "ကိုကိုရှင်းပြဖို့ပဲ စဉ်းစားပြီး ဘေဘီ့စကားကို မကြားမိဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.362": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 363 · အဲ့ဒါကို အခုမှ ကိုကိုသေချာတွေးမိတာ",
+    "default": "အဲ့ဒါကို အခုမှ ကိုကိုသေချာတွေးမိတာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.363": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 364 · ဘေဘီ အဲ့လိုခံစားရတာ မဆန်းဘူးနော်",
+    "default": "ဘေဘီ အဲ့လိုခံစားရတာ မဆန်းဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.364": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 365 · ကိုကို့ကို လာပြောချင်တဲ့စိတ်တောင် ပျောက်",
+    "default": "ကိုကို့ကို လာပြောချင်တဲ့စိတ်တောင် ပျောက်သွားစေမိတာလား",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.365": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 366 · ဘေဘီ့စကားကို ကိုကိုဂရုမစိုက်ဘူးလို့ ခံစာ",
+    "default": "ဘေဘီ့စကားကို ကိုကိုဂရုမစိုက်ဘူးလို့ ခံစားရတာပေါ့",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.366": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 367 · အဲ့လိုခံစားရအောင် လုပ်မိတာ ကိုကိုတောင်းပ",
+    "default": "အဲ့လိုခံစားရအောင် လုပ်မိတာ ကိုကိုတောင်းပန်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.367": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 368 · ဘေဘီရယ် ကိုကိုက တကယ်ဂရုစိုက်ပါတယ်ကွာ",
+    "default": "ဘေဘီရယ် ကိုကိုက တကယ်ဂရုစိုက်ပါတယ်ကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.368": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 369 · ဂရုစိုက်တာကို အပြောနဲ့တင် မပြီးစေချင်ဘူး",
+    "default": "ဂရုစိုက်တာကို အပြောနဲ့တင် မပြီးစေချင်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.369": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 370 · နောက်တစ်ခါ ဘေဘီပြောရင် ကိုကိုသေချာနားထော",
+    "default": "နောက်တစ်ခါ ဘေဘီပြောရင် ကိုကိုသေချာနားထောင်မယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.370": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 371 · ကိုကိုမအားရင်လည်း မအားသေးဘူးလို့ သေချာပြ",
+    "default": "ကိုကိုမအားရင်လည်း မအားသေးဘူးလို့ သေချာပြောမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.371": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 372 · နားမထောင်ဘဲ နားထောင်နေသလို မလုပ်တော့ဘူး",
+    "default": "နားမထောင်ဘဲ နားထောင်နေသလို မလုပ်တော့ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.372": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 373 · ဘေဘီစိတ်မကောင်းတာကို ကိုကိုပေါ့ပေါ့ထင်မိ",
+    "default": "ဘေဘီစိတ်မကောင်းတာကို ကိုကိုပေါ့ပေါ့ထင်မိတာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.373": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 374 · အဲ့ဒီစကားက ဘေဘီ့အတွက် အရေးကြီးတာပဲနော်",
+    "default": "အဲ့ဒီစကားက ဘေဘီ့အတွက် အရေးကြီးတာပဲနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.374": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 375 · ကိုကိုက အဲ့လောက်မဟုတ်ပါဘူးဆိုပြီး မပြောသ",
+    "default": "ကိုကိုက အဲ့လောက်မဟုတ်ပါဘူးဆိုပြီး မပြောသင့်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.375": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 376 · ဘေဘီခံစားရတာကို ကိုကိုဆုံးဖြတ်ပေးလို့ မရ",
+    "default": "ဘေဘီခံစားရတာကို ကိုကိုဆုံးဖြတ်ပေးလို့ မရဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.376": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 377 · ဘေဘီရယ် ဒီတစ်ခါ ကိုကိုနားလည်ချင်လို့ မေး",
+    "default": "ဘေဘီရယ် ဒီတစ်ခါ ကိုကိုနားလည်ချင်လို့ မေးတာပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.377": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 378 · ဘယ်နေရာမှာ စိတ်မကောင်းဖြစ်သွားလဲဟင်",
+    "default": "ဘယ်နေရာမှာ စိတ်မကောင်းဖြစ်သွားလဲဟင်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.378": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 379 · ကိုကိုပြန်မငြင်းဘူး ဘေဘီပြောတာကို အရင်နာ",
+    "default": "ကိုကိုပြန်မငြင်းဘူး ဘေဘီပြောတာကို အရင်နားထောင်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.379": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 380 · ဘေဘီ့အသံလေး ကြားချင်နေပြီကွာ",
+    "default": "ဘေဘီ့အသံလေး ကြားချင်နေပြီကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.380": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 381 · ကိုကိုက ဘေဘီနဲ့ အရင်လို စကားပြောချင်တာ",
+    "default": "ကိုကိုက ဘေဘီနဲ့ အရင်လို စကားပြောချင်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.381": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 382 · ဘေဘီ့ကို လာစချင်ပေမဲ့ အခုမစရဲဘူး",
+    "default": "ဘေဘီ့ကို လာစချင်ပေမဲ့ အခုမစရဲဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.382": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 383 · ကိုကိုက ဘေဘီရယ်တော့မှ လိုက်ရယ်ချင်တာ",
+    "default": "ကိုကိုက ဘေဘီရယ်တော့မှ လိုက်ရယ်ချင်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.383": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 384 · ဘေဘီ စိတ်ဆိုးနေတာကိုတော့ ကိုကိုမရယ်ပါဘူး",
+    "default": "ဘေဘီ စိတ်ဆိုးနေတာကိုတော့ ကိုကိုမရယ်ပါဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.384": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 385 · ကိုကို့ကို ဆူချင်ရင် ဆူလို့ရတယ် နားထောင်",
+    "default": "ကိုကို့ကို ဆူချင်ရင် ဆူလို့ရတယ် နားထောင်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.385": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 386 · ဘာမကြိုက်တာလဲ ပြောနော် ကိုကိုမှတ်ထားမယ်",
+    "default": "ဘာမကြိုက်တာလဲ ပြောနော် ကိုကိုမှတ်ထားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.386": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 387 · ကိုကို့ကို ထပ်သတိပေးနေရတာ မဖြစ်စေချင်ဘူး",
+    "default": "ကိုကို့ကို ထပ်သတိပေးနေရတာ မဖြစ်စေချင်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.387": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 388 · ဘေဘီ တစ်ခါပြောရင် ကိုကိုသေချာမှတ်ရမှာ",
+    "default": "ဘေဘီ တစ်ခါပြောရင် ကိုကိုသေချာမှတ်ရမှာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.388": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 389 · ကိုကိုမမှတ်မိတာကို ဘေဘီပဲ ထပ်ရှင်းနေရတာန",
+    "default": "ကိုကိုမမှတ်မိတာကို ဘေဘီပဲ ထပ်ရှင်းနေရတာနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.389": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 390 · နောက်တစ်ခါဆို ကိုကိုနားလည်တာ ဟုတ်မဟုတ် ပ",
+    "default": "နောက်တစ်ခါဆို ကိုကိုနားလည်တာ ဟုတ်မဟုတ် ပြန်မေးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.390": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 391 · ဘေဘီရယ် ကိုကိုလွမ်းနေတယ်နော်",
+    "default": "ဘေဘီရယ် ကိုကိုလွမ်းနေတယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.391": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 392 · အရင်လို ဘေဘီရေဆိုပြီး လာခေါ်ချင်တာ",
+    "default": "အရင်လို ဘေဘီရေဆိုပြီး လာခေါ်ချင်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.392": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 393 · ကိုကို့ဘေဘီ အခုနည်းနည်းသက်သာသွားပြီလား",
+    "default": "ကိုကို့ဘေဘီ အခုနည်းနည်းသက်သာသွားပြီလား",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.393": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 394 · ချက်ချင်း စိတ်ပြေရမယ်လို့ ကိုကိုမပြောဘူး",
+    "default": "ချက်ချင်း စိတ်ပြေရမယ်လို့ ကိုကိုမပြောဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.394": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 395 · ဘေဘီစိတ်အေးတဲ့အချိန် ကိုကို့ကို ပြောပါ",
+    "default": "ဘေဘီစိတ်အေးတဲ့အချိန် ကိုကို့ကို ပြောပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.395": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 396 · ကိုကိုကတော့ ဘေဘီ့စကားကို နားထောင်ဖို့ ရှ",
+    "default": "ကိုကိုကတော့ ဘေဘီ့စကားကို နားထောင်ဖို့ ရှိတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.396": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 397 · ဘေဘီ မပြောချင်သေးရင် ကိုကိုနားလည်ပါတယ်",
+    "default": "ဘေဘီ မပြောချင်သေးရင် ကိုကိုနားလည်ပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.397": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 398 · တောင်းပန်ပါတယ်ကွာ ဘေဘီ့ကို စိတ်မကောင်းဖြ",
+    "default": "တောင်းပန်ပါတယ်ကွာ ဘေဘီ့ကို စိတ်မကောင်းဖြစ်စေမိပြီ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.398": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 399 · ကိုကိုက ဘေဘီ့ကို အလေးမထားချင်တာ မဟုတ်ဘူး",
+    "default": "ကိုကိုက ဘေဘီ့ကို အလေးမထားချင်တာ မဟုတ်ဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.399": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 400 · ဒါပေမဲ့ လုပ်ပုံက အဲ့လိုဖြစ်သွားတာကို ကို",
+    "default": "ဒါပေမဲ့ လုပ်ပုံက အဲ့လိုဖြစ်သွားတာကို ကိုကိုလက်ခံတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.400": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 401 · ကိုကို့အတွက် ဘေဘီ့စကားက ပေါ့ပေါ့လေးမဟုတ်",
+    "default": "ကိုကို့အတွက် ဘေဘီ့စကားက ပေါ့ပေါ့လေးမဟုတ်ပါဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.401": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 402 · ဘေဘီပြောတာကို ရယ်ပြီးကျော်လိုက်မိတာ ကိုက",
+    "default": "ဘေဘီပြောတာကို ရယ်ပြီးကျော်လိုက်မိတာ ကိုကိုမကောင်းဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.402": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 403 · အေးပါ ဘေဘီ ကိုကိုနားထောင်နေတယ် ပြောနော်",
+    "default": "အေးပါ ဘေဘီ ကိုကိုနားထောင်နေတယ် ပြောနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.403": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 404 · ဘေဘီရယ် ကိုကိုနောက်မဖြစ်စေချင်လို့ ပြင်န",
+    "default": "ဘေဘီရယ် ကိုကိုနောက်မဖြစ်စေချင်လို့ ပြင်နေတာပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.404": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 405 · မဖြစ်တော့ဘူးလို့ ပြောရုံနဲ့ မယုံနိုင်သေး",
+    "default": "မဖြစ်တော့ဘူးလို့ ပြောရုံနဲ့ မယုံနိုင်သေးတာလည်း နားလည်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.405": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 406 · ကိုကိုလုပ်တာကိုပဲ ကြည့်ပေးနော်",
+    "default": "ကိုကိုလုပ်တာကိုပဲ ကြည့်ပေးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.406": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 407 · နောက်အဲ့လိုထပ်လုပ်ရင် ကိုကို့ကို ပြောနော",
+    "default": "နောက်အဲ့လိုထပ်လုပ်ရင် ကိုကို့ကို ပြောနော် မငြင်းဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.407": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 408 · ကိုကို့အမှားကို ကိုကိုပဲ တာဝန်ယူမယ်",
+    "default": "ကိုကို့အမှားကို ကိုကိုပဲ တာဝန်ယူမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.408": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 409 · ဘေဘီ့ကို ပြန်ချော့ခိုင်းမယ့်သူ မဖြစ်ချင်",
+    "default": "ဘေဘီ့ကို ပြန်ချော့ခိုင်းမယ့်သူ မဖြစ်ချင်ဘူးကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.409": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 410 · ကိုကိုတောင်းပန်ရမယ့်အချိန်ပဲနော်",
+    "default": "ကိုကိုတောင်းပန်ရမယ့်အချိန်ပဲနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.410": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 411 · ဘေဘီ့အကြောင်း ကိုကိုပိုနားလည်ချင်သေးတယ်",
+    "default": "ဘေဘီ့အကြောင်း ကိုကိုပိုနားလည်ချင်သေးတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.411": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 412 · ကိုကိုနားမလည်တာရှိရင် မေးမယ် မခန့်မှန်းတ",
+    "default": "ကိုကိုနားမလည်တာရှိရင် မေးမယ် မခန့်မှန်းတော့ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.412": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 413 · ဘေဘီရယ် ကိုကို့ကို စိတ်ဆိုးနေလည်း ချစ်တယ",
+    "default": "ဘေဘီရယ် ကိုကို့ကို စိတ်ဆိုးနေလည်း ချစ်တယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.413": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 414 · ကိုကိုက ချော့တာညံ့ပေမဲ့ ဘေဘီ့ကို အရမ်းချ",
+    "default": "ကိုကိုက ချော့တာညံ့ပေမဲ့ ဘေဘီ့ကို အရမ်းချစ်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.414": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 415 · ဘေဘီပြောတာကို ကြားရုံမဟုတ်ဘဲ နားလည်အောင်",
+    "default": "ဘေဘီပြောတာကို ကြားရုံမဟုတ်ဘဲ နားလည်အောင် နားထောင်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.415": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 416 · ကိုကို့ဆီလာပြောလို့ ရတယ်ဆိုတာ ဘေဘီခံစားရ",
+    "default": "ကိုကို့ဆီလာပြောလို့ ရတယ်ဆိုတာ ဘေဘီခံစားရစေချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.416": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 417 · ကိုကိုနဲ့ စကားပြောရတာ မပင်ပန်းစေချင်ဘူးန",
+    "default": "ကိုကိုနဲ့ စကားပြောရတာ မပင်ပန်းစေချင်ဘူးနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.417": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 418 · ဘေဘီရယ် အရင်လို ပြန်ရယ်မောချင်ပြီကွာ",
+    "default": "ဘေဘီရယ် အရင်လို ပြန်ရယ်မောချင်ပြီကွာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.418": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 419 · ကိုကို့ဘေဘီကို ကိုကိုပဲ စိတ်မကောင်းဖြစ်စ",
+    "default": "ကိုကို့ဘေဘီကို ကိုကိုပဲ စိတ်မကောင်းဖြစ်စေမိတာနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.419": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 420 · ဘေဘီ နာသွားတာကို ကိုကိုသိပါတယ်",
+    "default": "ဘေဘီ နာသွားတာကို ကိုကိုသိပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.420": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 421 · ကိုကို့စကားထက် ဘေဘီ့စကားကို အရင်ပေးပြောရ",
+    "default": "ကိုကို့စကားထက် ဘေဘီ့စကားကို အရင်ပေးပြောရမှာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.421": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 422 · အခု ကိုကိုဖုန်းပဲကြည့်ပြီး နားထောင်နေတာမ",
+    "default": "အခု ကိုကိုဖုန်းပဲကြည့်ပြီး နားထောင်နေတာမျိုး မလုပ်တော့ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.422": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ 423 · ဘေဘီပြောနေချိန် ကိုကိုအာရုံမပျက်အောင် နေ",
+    "default": "ဘေဘီပြောနေချိန် ကိုကိုအာရုံမပျက်အောင် နေမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
   }
 }
