@@ -1549,36 +1549,6 @@
         "Source link နှင့် published date ကိုထိန်းထားပြီး brief အသစ်ကိုသုံးမည်။"
       ],
       "notes": "ယခင် auto ပို့ပြီးသောသတင်းကိုပြင်လျှင် eligible subscribed groups မှနောက်ပို့ချိန်တွင် update ရနိုင်သည်။ အကြောင်းအရာမှန်ကန်မှုကို Owner စစ်ရမည်။"
-    },
-    {
-      "id": "mp3test",
-      "aliases": [
-        "mp3test"
-      ],
-      "title": "ယာယီ MP3 စမ်းသပ်မှု",
-      "category": "owner",
-      "where": "Private",
-      "who": "Owner",
-      "usage": "/mp3test",
-      "steps": [
-        "/mp3test ပို့ပြီး သီချင်းနာမည် ပို့ပါ။ /mp3testcancel ဖြင့် နာမည်စောင့်မှုရပ်ပါ။"
-      ],
-      "notes": "ယာယီ YouTube MP3 စမ်းသပ်မှုသာ။ ရလည်းမရလည်း ပြန်ဖြုတ်မည်။"
-    },
-    {
-      "id": "mp3testcancel",
-      "aliases": [
-        "mp3testcancel"
-      ],
-      "title": "MP3 နာမည်စောင့်မှု ပယ်ဖျက်",
-      "category": "owner",
-      "where": "Private",
-      "who": "Owner",
-      "usage": "/mp3testcancel",
-      "steps": [
-        "/mp3test ပို့ပြီး သီချင်းနာမည် ပို့ပါ။ /mp3testcancel ဖြင့် နာမည်စောင့်မှုရပ်ပါ။"
-      ],
-      "notes": "ယာယီ YouTube MP3 စမ်းသပ်မှုသာ။ ရလည်းမရလည်း ပြန်ဖြုတ်မည်။"
     }
   ]
 }

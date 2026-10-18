@@ -2,5 +2,3 @@ pyTelegramBotAPI
 flask
 psycopg[binary,pool]
 Pillow
-yt-dlp[default]
-imageio-ffmpeg
