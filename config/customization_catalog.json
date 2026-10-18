@@ -12102,9 +12102,8 @@
     "kind": "message",
     "category": "ချော့စာ",
     "label": "ချော့စာ · started",
-    "default": "ချော့စာ {count} ကြောင်းကို {interval} စက္ကန့်ခြား ပို့မည်။ Owner နှင့် သတ်မှတ်ထားသူက /ရပြီ ဖြင့်ရပ်နိုင်သည်။",
+    "default": "ချော့စာ တစ်ကြောင်းစီ {interval} စက္ကန့်ခြား ဆက်ပို့မည်။ Owner နှင့် သတ်မှတ်ထားသူက /ရပြီ ဖြင့်ရပ်နိုင်သည်။",
     "fields": [
-      "count",
       "interval"
     ],
     "html": false,
@@ -12201,14 +12200,6 @@
     "category": "ချော့စာ",
     "label": "ချော့စာ · Emoji ဘဏ် · space ခြားပို့",
     "default": ""
-  },
-  "cfg.features.comfort.count": {
-    "kind": "setting",
-    "category": "ချော့စာ",
-    "label": "ချော့စာ · တစ်ခါပို့မည့် စာအရေအတွက်",
-    "default": 6,
-    "minimum": 1,
-    "maximum": 12
   },
   "cfg.features.comfort.interval": {
     "kind": "setting",

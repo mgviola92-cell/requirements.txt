@@ -104,12 +104,12 @@ class ControlsTests(unittest.TestCase):
         self.handlers['activity'](self.message(2,'hello'))
         self.assertEqual(self.run['reply'][0],22)
 
-    def test_worker_bounded_and_uses_recent_reply(self):
-        run=copy.copy(self.run);run['event']=MagicMock();run['event'].is_set.return_value=False;run['event'].wait.return_value=False;run['reply']=(99,1000)
-        self.cur.fetchone.side_effect=[('active',),(False,),('active',),(False,)]
+    def test_worker_continues_past_six_until_stop_and_uses_recent_reply(self):
+        run=copy.copy(self.run);run['event']=MagicMock();run['event'].is_set.return_value=False;run['event'].wait.side_effect=[False]*7+[True];run['reply']=(99,1000)
+        self.cur.fetchone.side_effect=[('active',),(False,)]*8
         with patch.object(f,'transaction',self.tx),patch.object(f,'next_line',return_value='ချစ်တယ်'),patch.object(f,'cfg',return_value=''),patch.object(f,'stop_run') as stop,patch.object(f.time,'time',return_value=1001):f.run_worker(self.bot,run)
-        self.assertEqual(self.bot.send_message.call_count,2)
-        run['event'].wait.assert_called_once_with(run['interval'])
+        self.assertEqual(self.bot.send_message.call_count,8)
+        self.assertEqual(run['event'].wait.call_count,8)
         self.assertEqual(self.bot.send_message.call_args_list[0].kwargs['reply_parameters'].message_id,99)
         self.assertNotIn('reply_parameters',self.bot.send_message.call_args_list[1].kwargs)
         stop.assert_called_once()

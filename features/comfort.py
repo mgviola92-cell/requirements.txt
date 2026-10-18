@@ -1,4 +1,4 @@
-"""Bounded owner-started comfort series, target-controlled stop, no catch-up spam."""
+"""Owner-started comfort series, target-controlled stop, no catch-up spam."""
 import logging
 import os
 import random
@@ -18,7 +18,7 @@ LOCK=threading.RLock()
 ACTIVE={}
 READY=False
 RNG=random.SystemRandom()
-DEFAULTS={'target_id':0,'nickname':'ကလေး','emojis':'','count':6,'interval':5,'cooldown':600}
+DEFAULTS={'target_id':0,'nickname':'ကလေး','emojis':'','interval':5,'cooldown':600}
 MESSAGES={
  'group':'Group ထဲမှာ /ချော့ပေး ပို့ပါ။ ရပ်ရန် /ရပြီ။',
  'owner':'ဒီ command ကို Owner သာ စနိုင်သည်။',
@@ -27,7 +27,7 @@ MESSAGES={
  'busy':'ချော့စာအစီအစဉ် ရှိနေပြီ။ အရင်ပွဲပြီးမှ ပြန်စပါ။',
  'cooldown':'ခဏနားထားပါ။ ထပ်မံပို့ရန် cooldown မပြည့်သေးပါ။',
  'declined':'သူက ရပ်ထားပါသည်။ သူကိုယ်တိုင် ပြန်လက်ခံမှ ထပ်စနိုင်မည်။',
- 'started':'ချော့စာ {count} ကြောင်းကို {interval} စက္ကန့်ခြား ပို့မည်။ Owner နှင့် သတ်မှတ်ထားသူက /ရပြီ ဖြင့်ရပ်နိုင်သည်။',
+ 'started':'ချော့စာ တစ်ကြောင်းစီ {interval} စက္ကန့်ခြား ဆက်ပို့မည်။ Owner နှင့် သတ်မှတ်ထားသူက /ရပြီ ဖြင့်ရပ်နိုင်သည်။',
  'stopped':'ချော့စာပို့မှု ရပ်ပြီးပြီ။',
  'none':'ရပ်ရန် ချော့စာအစီအစဉ် မရှိပါ။',
  'permission':'Owner နှင့် သတ်မှတ်ထားသူသာ /ရပြီ သုံးနိုင်သည်။',
@@ -79,9 +79,11 @@ def next_line(cur,target,cid,name):
 def run_worker(bot,run):
     cid=run['chat'];target=run['target']
     try:
-        for index in range(run['count']):
-            if index and run['event'].wait(run['interval']):break
-            if run['event'].is_set() or time.time()>=run['expires']:break
+        first=True
+        while not run['event'].is_set():
+            if not first and run['event'].wait(run['interval']):break
+            first=False
+            if run['event'].is_set():break
             with group_scope(cid):
                 with transaction() as cur:
                     cur.execute("SELECT status FROM comfort_runs WHERE chat_id=%s AND run_id=%s",(cid,run['id']))
@@ -146,13 +148,13 @@ def register(bot):
                 now=time.time()
                 if now-last<cfg('cooldown',cid):bot.reply_to(m,text('cooldown'));return
                 run={'id':secrets.token_hex(6),'chat':cid,'target':target,'name':(cfg('nickname',cid).strip() or 'ကလေး')[:40],
-                     'count':min(12,max(1,cfg('count',cid))),'interval':min(300,max(5,cfg('interval',cid))),
-                     'expires':now+900,'event':threading.Event(),'reply':None}
+                     'interval':min(300,max(5,cfg('interval',cid))),
+                     'event':threading.Event(),'reply':None}
                 cur.execute("INSERT INTO comfort_runs(chat_id,run_id,target_id,status) VALUES(%s,%s,%s,'active') ON CONFLICT(chat_id) DO UPDATE SET run_id=EXCLUDED.run_id,target_id=EXCLUDED.target_id,status='active'",(cid,run['id'],target))
                 cur.execute('UPDATE comfort_targets SET last_started=%s WHERE target_id=%s',(now,target))
             with LOCK:ACTIVE[cid]=run
             try:
-                bot.reply_to(m,text('started',count=run['count'],interval=run['interval']))
+                bot.reply_to(m,text('started',interval=run['interval']))
                 threading.Thread(target=run_worker,args=(bot,run),name='comfort-series',daemon=True).start()
             except Exception:
                 stop_run(cid,run['id'],'error');raise
