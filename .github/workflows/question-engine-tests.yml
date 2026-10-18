@@ -32,7 +32,7 @@ jobs:
       - name: Compile bot and question source modules
         run: python -m compileall -q bot.py core features games ui data tests
       - name: Install test database driver
-        run: python -m pip install 'psycopg[binary]' Pillow pyTelegramBotAPI flask
+        run: python -m pip install 'psycopg[binary,pool]' Pillow pyTelegramBotAPI flask
       - name: Run offline unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Audit all 50 procedural templates

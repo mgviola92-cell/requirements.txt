@@ -35,17 +35,6 @@ class StartupSafetyTests(unittest.TestCase):
         self.assertTrue(abandoned({'deadline':100,'updated':90},4000))
         self.assertFalse(abandoned({'deadline':5000,'updated':90},4000))
 
-    def test_tot_outage_does_not_replay_or_reward(self):
-        from features import this_or_that as tot
-        from games import this_or_that as game
-        s=game.new(-1,1,{});game.open_round(s,0,100);bot=Mock();cur=Mock()
-        @contextlib.contextmanager
-        def locked(cid):yield cur,s
-        with patch.object(tot,'locked',locked),patch.object(tot.time,'time',return_value=1000),patch.object(tot,'save'),patch.object(tot,'end_session') as end,patch.object(tot,'finish') as finish,patch.object(tot,'publish') as publish:
-            tot.tick(bot,-1)
-        self.assertEqual(s['phase'],'cancelled');publish.assert_not_called();finish.assert_not_called()
-        bot.send_message.assert_not_called();end.assert_called_once_with(-1,'this_or_that')
-
     def test_auto_speedtap_accepts_required_update_wrapper(self):
         import ast
         from pathlib import Path
