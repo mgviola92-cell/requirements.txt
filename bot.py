@@ -238,6 +238,8 @@ bot = FreshUpdatesBot(BOT_TOKEN)
 from core.customization import initialize as initialize_customization, install_handler_controls
 initialize_customization()
 install_handler_controls(bot)
+from features.mp3_probe import register as register_mp3_probe
+register_mp3_probe(bot)
 
 from flask import Flask
 from features.owner_dashboard import register_owner_dashboard
