@@ -19,7 +19,6 @@ changes to the independent PythonAnywhere copy or Music Bot.
 - Daily checks today's card only; it does not iterate through missed calendar
   days. News sends one current digest and advances next_due from NOW(), rather
   than sending one digest for every missed interval.
-- This or That cancels when a round is overdue by more than max(120 seconds,
   configured round length), removing the old keyboard without creating later
   rounds or granting participation rewards for that abandoned match.
 - Draw and Nan Yate cancel after a deadline has passed and the stored heartbeat

@@ -256,8 +256,6 @@ from features.news import register as register_news
 register_news(bot)
 from features.draw_guess import register as register_draw_guess
 register_draw_guess(app,bot)
-from features.this_or_that import register as register_this_or_that
-register_this_or_that(bot)
 
 register_daily_challenge(bot)
 from features.would_you_rather import register as register_would_you_rather

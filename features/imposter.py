@@ -208,7 +208,7 @@ def _finish(bot,chat_id,s,reason="vote"):
         s["rewards_claimed"]=True
         _save(chat_id,s)
         rewarded=([p["id"] for p in _eligible(s) if p["id"]!=s["imposter"]]
-                  if reason=="secret_wrong" else
+                  if reason in ("secret_wrong","imposter_afk") else
                   ([s["imposter"]] if reason=="secret_right" else
                    correct + ([] if found else [s["imposter"]])))
         for uid in rewarded:
@@ -443,7 +443,9 @@ def register(bot):
                 if action=="decision" and s["phase"]=="decision" and len(data)>3:
                     if str(uid) in s["decisions"]:return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.6b8d484594', 'မဲပေးပြီးသားပါ။', {}))
                     s["decisions"][str(uid)]=data[3]
-                    if len(s["decisions"])>=len(_eligible(s)):s["deadline"]=0
+                    if len(s["decisions"])>=len(_eligible(s)):
+                         # Complete the vote without confusing it with a long downtime.
+                         s["deadline"]=time.time()
                     _save(chat_id,s);_edit(bot,chat_id,s)
                     return bot.answer_callback_query(q.id,_custom_text('msg.features.imposter.callback.28c1e333ce', 'မဲပေးပြီးပါပြီ။', {}))
                 if action=="tiebreak" and s["phase"]=="tie":

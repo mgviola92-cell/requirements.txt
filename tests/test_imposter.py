@@ -68,3 +68,15 @@ class ImposterOfflineTests(unittest.TestCase):
         text=_view(state)
         self.assertIn("ROUND 1",text)
         self.assertNotIn(state["word"],text)
+
+    def test_all_decision_votes_keep_recent_deadline(self):
+        import inspect
+        from features.imposter import register
+        source=inspect.getsource(register)
+        self.assertNotIn('s["deadline"]=0',source)
+        self.assertIn('s["deadline"]=time.time()',source)
+
+    def test_imposter_afk_awards_remaining_team(self):
+        import inspect
+        from features.imposter import _finish
+        self.assertIn('("secret_wrong","imposter_afk")',inspect.getsource(_finish))
