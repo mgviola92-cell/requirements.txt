@@ -66,10 +66,10 @@ class BandwidthRoundTwoTests(unittest.TestCase):
             node=next(n for n in ast.walk(ast.parse(Path('features/'+file+'.py').read_text())) if isinstance(n,ast.FunctionDef) and n.name=='loop')
             for active in (False,True):
                 wake=Mock();wake.wait.side_effect=StopIteration;con=MagicMock();con.__enter__.return_value=con;con.cursor.return_value.__enter__.return_value.fetchall.return_value=[(-1,)] if active else []
-                env=dict(WAKE=wake,tick=Mock(return_value=active),bot=Mock(),LOG=Mock(),get_db_connection=lambda:con)
+                env=dict(db_work=NS(delay=lambda:900),WAKE=wake,tick=Mock(return_value=active),bot=Mock(),LOG=Mock(),get_db_connection=lambda:con)
                 exec(compile(ast.Module(body=[node],type_ignores=[]),'worker','exec'),env)
                 with self.assertRaises(StopIteration):env['loop']()
-                wake.wait.assert_called_once_with(delay if active else 30)
+                wake.wait.assert_called_once_with(delay if active else 900)
     def test_unchanged_news_item_not_serialized_and_uploaded_again(self):
         from features import news as feature
         item=dict(key='k',title='headline',published=1000,brief='',revision='v1')

@@ -1,3 +1,4 @@
+from core import db_work
 """Group capsule, soundboard, memories and safe custom-command chains."""
 import html
 import base64
@@ -20,6 +21,7 @@ from core.group_content import capture,deliver,validate,substitute,NAME
 LOG=logging.getLogger(__name__)
 MMT=ZoneInfo('Asia/Yangon')
 STARTED=False
+WORK_WAKE=db_work.signal('group_studio_jobs')
 MESSAGES={
  'help':'🗂️ Group Studio\n\n⏳ /capsule YYYY-MM-DD HH:MM — စာ/ပုံ/အသံကို reply ပြီး အနာဂတ်တွင်ဖွင့်ရန် (မြန်မာအချိန်)\n/capsules — ကိုယ့် capsule စာရင်း\n/capsulecancel ID — မဖွင့်ရသေးတာပယ်ဖျက်\n\n🎙️ /soundadd name — voice/audio ကို reply ပြီးသိမ်း (Admin)\n/sound name — ပြန်ဖွင့်\n/sounds — အသံစာရင်း\n/sounddel name — ဖျက် (Admin)\n\n📖 /memorysave ခေါင်းစဉ် — message ကို reply ပြီး အမှတ်တရသိမ်း\n/memories — စာရင်း\n/memory ID — ပြန်ကြည့်\n/memorybook [YYYY-MM] — အမှတ်တရစာအုပ် HTML ဖိုင်\n/memorydel ID — ကိုယ့်အမှတ်တရဖျက်\n\n🪄 /commandadd name — စာ/မီဒီယာကို reply ပြီး command ဖန်တီး (Admin)\n/commandappend name — နောက်တစ်ဆင့်ထည့်\n/commanddel name — ဖျက်\n/commands — စာရင်း\n/name args — ကိုယ်ပိုင် command သုံး\nစာတွင် {name}, {user}, {group}, {args} သုံးနိုင်သည်။\n\nOwner private chat မှ အသံ/command သိမ်းလျှင် Group အားလုံးအတွက် default ဖြစ်သည်။',
  'saved':'✅ သိမ်းပြီးပြီ။','deleted':'✅ ဖျက်ပြီးပြီ။ ',
@@ -380,9 +382,13 @@ def register(app,bot):
         STARTED=True
         def loop():
             while True:
-                try:run_jobs(bot)
+                WORK_WAKE.clear();wait=60
+                try:
+                    run_jobs(bot)
+                    due=db_work.next_due("SELECT MIN(due_at) FROM group_studio_jobs WHERE status='pending'")
+                    wait=db_work.delay(due)
                 except Exception as exc:LOG.warning('Studio worker: %s',type(exc).__name__)
-                time.sleep(3)
+                WORK_WAKE.wait(wait)
         threading.Thread(target=loop,name='group-studio',daemon=True).start()
 
 

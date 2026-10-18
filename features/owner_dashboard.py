@@ -1,3 +1,4 @@
+from core import db_work
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Owner-only Flask dashboard. Locked until Render env secrets are configured."""
 import os, time, secrets, threading, html, json
@@ -433,17 +434,21 @@ def _process_broadcast(jobid, conn):
         except Exception as exc:print("Broadcast finalize:",type(exc).__name__)
         with _job_lock:_running=False
 
+BROADCAST_WAKE=db_work.signal('owner_broadcasts','owner_broadcast_targets')
+
 def _resume_broadcasts():
     """Retry pending work after transient DB failures without waiting for restart."""
     while True:
+        BROADCAST_WAKE.clear();wait=60
         try:
             with get_db_connection() as conn,conn.cursor() as cur:
                 cur.execute("SELECT id FROM owner_broadcasts WHERE status='running' ORDER BY id")
                 jobs=[r[0] for r in cur.fetchall()]
             for jid in jobs:_send_broadcast(jid)
+            wait=60 if jobs else db_work.delay()
         except Exception as exc:
             print("Broadcast supervisor:",type(exc).__name__)
-        time.sleep(60)
+        BROADCAST_WAKE.wait(wait)
 
 def register_owner_dashboard(app,bot):
     global BOT

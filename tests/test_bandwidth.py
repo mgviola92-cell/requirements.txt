@@ -14,7 +14,8 @@ class BandwidthTests(unittest.TestCase):
     def test_pool_reused_and_transaction_context_returned(self):
         pool=MagicMock();pool.connection.return_value=MagicMock()
         with patch.object(db,'DATABASE_URL','postgresql://test'),patch.object(db,'_pool',None),patch.object(db,'ConnectionPool',return_value=pool) as factory,patch.object(db.atexit,'register'):
-            first=db.get_db_connection();second=db.get_db_connection()
+            with db.get_db_connection() as first:pass
+            with db.get_db_connection() as second:pass
             factory.assert_called_once();pool.open.assert_called_once()
             self.assertIs(first,second);self.assertEqual(pool.connection.call_count,2)
             self.assertEqual(factory.call_args.kwargs['max_size'],12)

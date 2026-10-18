@@ -1,3 +1,4 @@
+from core import db_work
 """Shared durable RSS cache and opt-out Myanmar digest. Never copies full articles."""
 import hashlib,html,json,logging,threading,time
 from concurrent.futures import ThreadPoolExecutor,as_completed
@@ -10,6 +11,8 @@ from core import news_digest as engine
 from data.news_sources import CATALOG
 
 LOG=logging.getLogger(__name__);READY=False;MMT=ZoneInfo('Asia/Yangon')
+NEWS_WAKE=db_work.signal('news_groups','owner_groups','owner_customizations')
+CLEANUP_WAKE=db_work.signal('news_messages')
 DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':True,'interval_minutes':180,'auto_min_sources':2}
 MESSAGES={
  'heading':'📰 မြန်မာသတင်းစု\n{date}\n',
@@ -171,11 +174,12 @@ def auto(bot):
     from features.owner_operations import feature_allowed
     with get_db_connection() as con,con.cursor() as cur:
         cur.execute('SELECT g.chat_id,n.enabled,n.next_due,n.retry_after FROM owner_groups g LEFT JOIN news_groups n ON n.chat_id=g.chat_id WHERE g.active');targets=cur.fetchall()
-    now=datetime.now(timezone.utc)
+    now=datetime.now(timezone.utc);next_attempt=None
     for cid,explicit,due,retry in targets:
         if not enabled(cid,explicit) or due and due>now or retry and retry>now or not feature_allowed('enabled.features.news.news_command',cid) or not setting_value('enabled.features.news.news_command',True,scope=cid):continue
         from core.startup_safety import AUTO_POSTS
-        if not AUTO_POSTS.allow('news',cid):continue
+        if not AUTO_POSTS.allow('news',cid):
+            next_attempt=time.time()+60;continue
         try:
             with group_scope(cid):
                 with get_db_connection() as con,con.cursor() as cur:
@@ -202,6 +206,8 @@ def auto(bot):
             LOG.exception('News delivery failed')
             with get_db_connection() as con,con.cursor() as cur:
                 cur.execute("INSERT INTO news_groups(chat_id,retry_after) VALUES(%s,NOW()+INTERVAL '10 minutes') ON CONFLICT(chat_id) DO UPDATE SET retry_after=EXCLUDED.retry_after,next_due=EXCLUDED.retry_after",(cid,))
+
+    return next_attempt
 
 def register(bot):
     global READY
@@ -274,13 +280,24 @@ def register(bot):
     if READY:
         def loop():
             while True:
-                try:refresh();auto(bot)
+                NEWS_WAKE.clear();wait=60
+                try:
+                    refresh();auto_due=auto(bot)
+                    # A missing/disabled group's next delivery is discovered by the
+                    # aligned recovery scan or an owner/group-settings commit.
+                    due=db_work.next_due("SELECT MIN(next_run) FROM (SELECT next_run FROM news_jobs WHERE key='fetch' UNION ALL SELECT GREATEST(next_due,retry_after) FROM news_groups WHERE enabled IS DISTINCT FROM FALSE AND GREATEST(next_due,retry_after)>NOW()) deadlines")
+                    if auto_due is not None:due=min(due,auto_due) if due is not None else auto_due
+                    wait=db_work.delay(due)
                 except Exception:LOG.exception('News worker failed')
-                time.sleep(60)
+                NEWS_WAKE.wait(wait)
         threading.Thread(target=loop,name='myanmar-news',daemon=True).start()
         def cleanup_loop():
             while True:
-                try:cleanup(bot)
+                CLEANUP_WAKE.clear();wait=60
+                try:
+                    cleanup(bot)
+                    due=db_work.next_due('SELECT MIN(expires_at) FROM news_messages')
+                    wait=db_work.delay(due)
                 except Exception:LOG.exception('News cleanup failed')
-                time.sleep(10)
+                CLEANUP_WAKE.wait(wait)
         threading.Thread(target=cleanup_loop,name='news-cleanup',daemon=True).start()

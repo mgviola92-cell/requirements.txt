@@ -1,3 +1,4 @@
+from core import db_work
 """Draw & Guess Mini App and Telegram UI with private authenticated drawing tickets."""
 import base64
 import hashlib
@@ -24,7 +25,7 @@ from core.customization import message_text,setting_value,group_scope
 from core.sessions import start_session,end_session
 from games import draw_guess as g
 
-WAKE=threading.Event()
+WAKE=db_work.signal('draw_guess_games','draw_guess_outbox')
 LOG=logging.getLogger(__name__)
 ACTIVE=set();STARTED=False;USERNAME=None
 MESSAGES={'title':'🎨 Draw & Guess','lobby':'🎨 Draw & Guess\nလူစုနေသည် — {count}/{maximum}\nPrivate ခလုတ်ဖွင့်ပြီး ပါဝင်မှုအတည်ပြုပါ။ အနည်းဆုံး {minimum} ယောက်။',
@@ -431,7 +432,7 @@ def register(app,bot):
                 WAKE.clear();active=True
                 try:active=tick(bot)
                 except Exception as exc:LOG.warning('Draw worker: %s',type(exc).__name__)
-                WAKE.wait(3 if active else 30)
+                WAKE.wait(3 if active else db_work.delay())
         # Restore group guards before polling.
         with get_db_connection() as con,con.cursor() as cur:
             cur.execute("SELECT chat_id FROM draw_guess_games WHERE state->>'phase' NOT IN ('finished','cancelled')")

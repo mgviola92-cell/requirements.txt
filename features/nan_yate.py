@@ -1,3 +1,4 @@
+from core import db_work
 """Telegram Nan Yate adapter: transactional state, durable outbox, restart recovery."""
 import html
 import json
@@ -15,7 +16,7 @@ from core.customization import message_text,setting_value,group_scope
 from core.sessions import start_session,end_session
 from games import nan_yate as game
 
-WAKE=threading.Event()
+WAKE=db_work.signal('nan_yate_games','nan_yate_outbox')
 LOG=logging.getLogger(__name__)
 MESSAGES={
  'title':'🏯 နန်းရိပ် — လုပ်ကြံမှုနှင့် သက်သေ',
@@ -561,5 +562,5 @@ def register(bot):
                     WAKE.clear();active=True
                     try:active=tick(bot)
                     except Exception as exc:LOG.warning('Nan Yate worker: %s',type(exc).__name__)
-                    WAKE.wait(3 if active else 30)
+                    WAKE.wait(3 if active else db_work.delay())
             threading.Thread(target=loop,name='nan-yate',daemon=True).start()

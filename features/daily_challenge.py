@@ -1,3 +1,4 @@
+from core import db_work
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Daily Challenge: persistent groups, random daily missions, scheduled auto-post.
 Register once immediately after TeleBot creation, before all other handlers.
@@ -5,7 +6,7 @@ Register once immediately after TeleBot creation, before all other handlers.
 import threading
 import time
 import hashlib
-from datetime import datetime
+from datetime import datetime,timedelta
 from telebot.handler_backends import ContinueHandling
 from database.daily_challenge import (
     initialize_daily_challenge, register_group, active_groups, previous_card, delivery_failed, delivery_ready,
@@ -30,6 +31,7 @@ _lock=threading.RLock()
 _last_refresh={}
 _ready=False
 _registered=False
+DAILY_WAKE=db_work.signal('daily_groups','daily_cards','owner_customizations')
 
 def register_daily_challenge(bot):
     global _ready, _registered
@@ -130,17 +132,27 @@ def register_daily_challenge(bot):
         return now.hour*60+now.minute >= random_post_minute(chat_id,now.date())
 
     def daily_auto_loop():
-        # Every group gets a different random posting time each day.
-        # A missed post is recovered after a restart; the Neon card id prevents duplicates.
+        # Cache completed daily posts in memory. Rebuild on startup/day rollover;
+        # durable card IDs still prevent duplicates after crashes.
+        posted=set();cache_day=None
         while True:
+            DAILY_WAKE.clear();wait=60
             try:
-                now=datetime.now(MMT)
+                now=datetime.now(MMT);day=now.date()
+                if cache_day!=day:posted.clear();cache_day=day
+                midnight=now.replace(hour=0,minute=0,second=0,microsecond=0)
+                next_at=(midnight+timedelta(days=1)).timestamp()
                 for chat_id in active_groups():
-                    if post_time_reached(chat_id,now) and not get_card_id(chat_id,now.date()):
-                        from core.startup_safety import AUTO_POSTS
-                        if AUTO_POSTS.allow('daily',chat_id):publish(chat_id,force=True)
+                    if chat_id in posted:continue
+                    due=(midnight+timedelta(minutes=random_post_minute(chat_id,day))).timestamp()
+                    if due>now.timestamp():next_at=min(next_at,due);continue
+                    if get_card_id(chat_id,day):posted.add(chat_id);continue
+                    from core.startup_safety import AUTO_POSTS
+                    if AUTO_POSTS.allow('daily',chat_id) and publish(chat_id,force=True):posted.add(chat_id)
+                    else:next_at=min(next_at,time.time()+60)
+                wait=db_work.delay(next_at)
             except Exception as exc:print('Daily auto scheduler error:',exc)
-            time.sleep(60)
+            DAILY_WAKE.wait(wait)
 
     threading.Thread(target=daily_auto_loop,daemon=True,name='daily_challenge_scheduler').start()
 

@@ -1,3 +1,4 @@
+from core import db_work
 from core.customization import message_text as _custom_text, setting_value as _custom_setting, bank_text as _custom_bank
 """Imposter Protocol: Telegram text UI + private callback alerts; Neon-backed state.
 
@@ -30,7 +31,7 @@ MAX_ROUNDS = 5
 MIN_PLAYERS = 4
 _schedulers_started = False
 ACTIVE_CHATS = set()
-WATCH_WAKE = threading.Event()
+WATCH_WAKE = db_work.signal('imposter_games')
 
 def _db_init():
     with get_db_connection() as con:
@@ -328,8 +329,8 @@ def _watch(bot):
                     current=_load(chat_id)
                     if _active(current):_tick(bot,chat_id,current)
         except Exception as exc:print("Imposter watch:",exc)
-        # New saves wake this worker immediately; idle recovery polls only every ten minutes.
-        WATCH_WAKE.wait(3 if ACTIVE_CHATS else 600)
+        # New saves wake this worker immediately; idle recovery scans share a fifteen-minute boundary.
+        WATCH_WAKE.wait(3 if ACTIVE_CHATS else db_work.delay())
 
 def register(bot):
     global _schedulers_started

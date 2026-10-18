@@ -1,3 +1,4 @@
+from core import db_work
 """Owner operations, durable schedules, narrowly scoped assistants and staged releases."""
 import html
 import functools
@@ -16,6 +17,7 @@ from core.batched_writes import BatchWriter
 
 _USAGE=BatchWriter("INSERT INTO owner_usage_events(chat_id,kind,label,event_key,created_at) VALUES(%s,%s,%s,%s,%s) ON CONFLICT(event_key) DO NOTHING")
 
+SCHEDULE_WAKE=db_work.signal('owner_schedules','owner_broadcasts')
 MMT=ZoneInfo('Asia/Yangon')
 PERMISSIONS={'edit','announce','stats'}
 COMMAND_GAMES={'mathbattle':'math_battle','math':'math_battle','wordchain':'word_chain','wc':'word_chain','emoji':'emoji_guess','emojiguess':'emoji_guess','speedtap':'speed_tap','wyr':'would_you_rather','wouldyourather':'would_you_rather','imposter':'imposter','နန်းရိပ်':'nan_yate'}
@@ -266,6 +268,7 @@ def due_schedules():
 def supervisor():
     last_cleanup=0
     while True:
+        SCHEDULE_WAKE.clear();wait=60
         try:
             due_schedules()
             with get_db_connection() as conn,conn.cursor() as cur:
@@ -274,8 +277,14 @@ def supervisor():
                     cur.execute("DELETE FROM owner_usage_events WHERE created_at<NOW()-INTERVAL '90 days'")
                     cur.execute('DELETE FROM owner_operation_drafts WHERE expires_at<NOW()')
                 cur.execute("UPDATE owner_schedules s SET status=b.status FROM owner_broadcasts b WHERE s.job_id=b.id AND s.status='queued' AND b.status!='running'")
+                cur.execute("SELECT MIN(due_at) FROM owner_schedules WHERE status='pending'")
+                row=cur.fetchone();due=db_work.timestamp(row[0]) if row else None
+                cur.execute("SELECT EXISTS(SELECT 1 FROM owner_schedules WHERE status='queued')")
+                queued=cur.fetchone()[0]
+            # A due schedule blocked by another running broadcast must back off.
+            wait=60 if queued or due is not None and due<=time.time() else db_work.delay(due)
         except Exception as exc:print('Owner schedule:',type(exc).__name__)
-        time.sleep(60)
+        SCHEDULE_WAKE.wait(wait)
 
 
 def leave_group(actor,cid,bot):

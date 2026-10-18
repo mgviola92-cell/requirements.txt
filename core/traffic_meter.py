@@ -10,6 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 import psycopg
+from core import db_work
 
 _STARTED=time.time()
 _LOCK=threading.Lock()
@@ -52,11 +53,15 @@ class MeteredCursor(psycopg.Cursor):
     def execute(self,query,params=None,**kwargs):
         self._traffic_label=query_label(query)
         record('database_estimate',self._traffic_label,sent=size(query)+size(params))
-        return super().execute(query,params,**kwargs)
+        result=super().execute(query,params,**kwargs)
+        if self.rowcount!=0:db_work.wrote(self.connection,query)
+        return result
     def executemany(self,query,params_seq,**kwargs):
         params=list(params_seq);self._traffic_label=query_label(query)
         record('database_estimate',self._traffic_label,sent=sum(size(query)+size(p) for p in params),calls=len(params))
-        return super().executemany(query,params,**kwargs)
+        result=super().executemany(query,params,**kwargs)
+        if self.rowcount!=0:db_work.wrote(self.connection,query)
+        return result
     def _received(self,value):
         record('database_estimate',getattr(self,'_traffic_label','other'),received=size(value),calls=0)
         return value

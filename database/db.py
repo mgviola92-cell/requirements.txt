@@ -6,6 +6,8 @@ import os
 import psycopg
 import atexit
 import threading
+from contextlib import contextmanager
+from core import db_work
 from psycopg_pool import ConnectionPool
 from core.traffic_meter import MeteredCursor
 
@@ -29,6 +31,7 @@ def _close_pool(pool):
     finally:pool.close()
 
 
+@contextmanager
 def get_db_connection():
     """
     Shared pool မှ Neon PostgreSQL connection ကို ခဏငှားပေးမည်။
@@ -54,7 +57,14 @@ def get_db_connection():
             _pool = pool
             atexit.register(_close_pool,pool)
     # Commit on success / rollback on failure, then return to the shared pool.
-    return _pool.connection()
+    with _pool.connection() as connection:
+        db_work.begin(connection)
+        try:
+            yield connection
+        finally:
+            # Detach before pool hand-off, but notify only after commit succeeds.
+            writes=db_work.take(connection)
+    db_work.dispatch(writes)
 
 
 
