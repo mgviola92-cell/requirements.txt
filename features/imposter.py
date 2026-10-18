@@ -30,6 +30,7 @@ MAX_ROUNDS = 5
 MIN_PLAYERS = 4
 _schedulers_started = False
 ACTIVE_CHATS = set()
+WATCH_WAKE = threading.Event()
 
 def _db_init():
     with get_db_connection() as con:
@@ -55,6 +56,8 @@ def _save(chat_id,s):
             cur.execute("""INSERT INTO imposter_games(chat_id,state) VALUES(%s,%s::jsonb)
                 ON CONFLICT(chat_id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()""",
                 (chat_id,json.dumps(s,ensure_ascii=False)))
+
+    WATCH_WAKE.set()
 
 def _word(chat_id):
     with get_db_connection() as con:
@@ -313,6 +316,7 @@ def _tick(bot,chat_id,s):
 
 def _watch(bot):
     while True:
+        WATCH_WAKE.clear()
         try:
             with get_db_connection() as con:
                 with con.cursor() as cur:
@@ -324,7 +328,8 @@ def _watch(bot):
                     current=_load(chat_id)
                     if _active(current):_tick(bot,chat_id,current)
         except Exception as exc:print("Imposter watch:",exc)
-        time.sleep(3)
+        # New saves wake this worker immediately; idle recovery polls only every ten minutes.
+        WATCH_WAKE.wait(3 if ACTIVE_CHATS else 600)
 
 def register(bot):
     global _schedulers_started

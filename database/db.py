@@ -47,8 +47,8 @@ def get_db_connection():
     global _pool
     with _pool_lock:
         if _pool is None:
-            pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=12,
-                                  timeout=20, max_idle=300, max_lifetime=1800,
+            pool = ConnectionPool(DATABASE_URL, min_size=0, max_size=12,
+                                  timeout=20, max_idle=60, max_lifetime=1800,
                                   kwargs={'connect_timeout':20,'cursor_factory':MeteredCursor}, open=False)
             pool.open()
             _pool = pool
