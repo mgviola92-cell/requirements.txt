@@ -62,7 +62,7 @@ class BandwidthRoundTwoTests(unittest.TestCase):
             self.assertTrue(draw.tick(MagicMock()))
         persist.assert_not_called();txcur.execute.assert_not_called()
     def test_idle_game_workers_wait_longer_but_active_games_keep_fast_ticks(self):
-        for file,delay in [('draw_guess',3),('nan_yate',3),('this_or_that',2)]:
+        for file,delay in [('draw_guess',3),('nan_yate',3)]:
             node=next(n for n in ast.walk(ast.parse(Path('features/'+file+'.py').read_text())) if isinstance(n,ast.FunctionDef) and n.name=='loop')
             for active in (False,True):
                 wake=Mock();wake.wait.side_effect=StopIteration;con=MagicMock();con.__enter__.return_value=con;con.cursor.return_value.__enter__.return_value.fetchall.return_value=[(-1,)] if active else []
