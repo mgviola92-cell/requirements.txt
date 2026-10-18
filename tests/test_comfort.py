@@ -12,7 +12,7 @@ from features import comfort as f
 
 class ContentTests(unittest.TestCase):
     def test_authored_bank_unique_short_and_no_emoji(self):
-        self.assertGreaterEqual(len(LINES),200)
+        self.assertGreaterEqual(len(LINES),340)
         self.assertEqual(len(LINES),len(set(LINES)))
         self.assertTrue(all(len(x)<130 and '\n' not in x for x in LINES))
         self.assertTrue(all(not any(ord(c)>0xffff or 0x2600<=ord(c)<=0x27ff for c in x) for x in LINES))
@@ -43,6 +43,8 @@ class ContentTests(unittest.TestCase):
         for i,line in enumerate(LINES):
             key='msg.comfort.line.'+str(i)
             self.assertEqual(CATALOG[key]['default'],line);validate(key,line)
+        self.assertEqual(f.DEFAULTS['interval'],5)
+        validate('cfg.features.comfort.interval',5)
         for k in f.DEFAULTS:validate('cfg.features.comfort.'+k,f.DEFAULTS[k])
 
 
@@ -107,6 +109,7 @@ class ControlsTests(unittest.TestCase):
         self.cur.fetchone.side_effect=[('active',),(False,),('active',),(False,)]
         with patch.object(f,'transaction',self.tx),patch.object(f,'next_line',return_value='ချစ်တယ်'),patch.object(f,'cfg',return_value=''),patch.object(f,'stop_run') as stop,patch.object(f.time,'time',return_value=1001):f.run_worker(self.bot,run)
         self.assertEqual(self.bot.send_message.call_count,2)
+        run['event'].wait.assert_called_once_with(run['interval'])
         self.assertEqual(self.bot.send_message.call_args_list[0].kwargs['reply_parameters'].message_id,99)
         self.assertNotIn('reply_parameters',self.bot.send_message.call_args_list[1].kwargs)
         stop.assert_called_once()

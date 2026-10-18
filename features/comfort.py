@@ -18,7 +18,7 @@ LOCK=threading.RLock()
 ACTIVE={}
 READY=False
 RNG=random.SystemRandom()
-DEFAULTS={'target_id':0,'nickname':'ကလေး','emojis':'','count':6,'interval':30,'cooldown':600}
+DEFAULTS={'target_id':0,'nickname':'ကလေး','emojis':'','count':6,'interval':5,'cooldown':600}
 MESSAGES={
  'group':'Group ထဲမှာ /ချော့ပေး ပို့ပါ။ ရပ်ရန် /ရပြီ။',
  'owner':'ဒီ command ကို Owner သာ စနိုင်သည်။',
@@ -146,7 +146,7 @@ def register(bot):
                 now=time.time()
                 if now-last<cfg('cooldown',cid):bot.reply_to(m,text('cooldown'));return
                 run={'id':secrets.token_hex(6),'chat':cid,'target':target,'name':(cfg('nickname',cid).strip() or 'ကလေး')[:40],
-                     'count':min(12,max(1,cfg('count',cid))),'interval':max(15,cfg('interval',cid)),
+                     'count':min(12,max(1,cfg('count',cid))),'interval':min(300,max(5,cfg('interval',cid))),
                      'expires':now+900,'event':threading.Event(),'reply':None}
                 cur.execute("INSERT INTO comfort_runs(chat_id,run_id,target_id,status) VALUES(%s,%s,%s,'active') ON CONFLICT(chat_id) DO UPDATE SET run_id=EXCLUDED.run_id,target_id=EXCLUDED.target_id,status='active'",(cid,run['id'],target))
                 cur.execute('UPDATE comfort_targets SET last_started=%s WHERE target_id=%s',(now,target))

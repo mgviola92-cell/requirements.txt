@@ -12214,8 +12214,8 @@
     "kind": "setting",
     "category": "ချော့စာ",
     "label": "ချော့စာ · စာတစ်ကြောင်းခြား စက္ကန့်",
-    "default": 30,
-    "minimum": 15,
+    "default": 5,
+    "minimum": 5,
     "maximum": 300
   },
   "cfg.features.comfort.cooldown": {
@@ -12231,5 +12231,1105 @@
     "category": "ချော့စာ",
     "label": "ချော့စာ ဖွင့်/ပိတ်",
     "default": true
+  },
+  "msg.comfort.line.243": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 244",
+    "default": "{name}ရေ ကိုယ်ဒီဘက်မှာ အချစ်အပြည့်နဲ့ရှိနေတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.244": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 245",
+    "default": "စိတ်ကောက်မျက်နှာလေးကိုတောင် ကိုယ်ချစ်နေမိတာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.245": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 246",
+    "default": "ကိုယ့်အကြိုက်ဆုံးလူလေး စိတ်ချမ်းသာပါစေ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.246": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 247",
+    "default": "ဒီနေ့ရဲ့ အချိုဆုံးစကားက {name}နာမည်လေးပဲ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.247": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 248",
+    "default": "{name}ကို ချစ်တဲ့ဘက်မှာ ကိုယ်အမြဲရှိတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.248": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 249",
+    "default": "စိတ်ပြေတဲ့နေ့ လက်ဖက်ရည်အတူသောက်ကြမယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.249": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 250",
+    "default": "တွေ့ရင် မျက်နှာလေးကြည့်ပြီး သေချာတောင်းပန်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.250": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 251",
+    "default": "လက်လေးကိုင်ခွင့်ရရင် အေးအေးလေးကိုင်ထားချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.251": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 252",
+    "default": "ကိုယ့်ရဲ့ အချစ်ဆုံးလေးဆီ စကားချိုချိုလာအပ်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.252": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 253",
+    "default": "{name}မျက်နှာလေး စိတ်ထဲပေါ်လာလို့ ပြုံးမိပြန်ပြီ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.253": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 254",
+    "default": "ချစ်ရတဲ့သူကို နာကျင်စေမိတာ ကိုယ်ပြန်ပြင်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.254": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 255",
+    "default": "ကိုယ့်အမှားကို {name}ရှင်းပြမှပဲ သိတဲ့သူမဖြစ်ချင်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.255": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 256",
+    "default": "နောက်တစ်ခါ စကားမပြောခင် {name}ခံစားချက်ကို အရင်တွေးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.256": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 257",
+    "default": "{name}ရဲ့ တစ်နေ့တာလေးကို ကိုယ်အဆင်ပြေစေချင်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.257": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 258",
+    "default": "ချစ်တယ်လို့ပြောတဲ့အသံလေး ပိုနူးညံ့အောင်ကြိုးစားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.258": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 259",
+    "default": "စိတ်ဆိုးလည်း ကိုယ့်ဆီက ဂရုစိုက်မှုလေးယူထားနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.259": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 260",
+    "default": "ကိုယ့်အချစ်လေး စိတ်ပင်ပန်းနေတာ နားလည်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.260": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 261",
+    "default": "ဒီနေ့ {name}အတွက် အားပေးစကားလေးတစ်ခွန်းဖြစ်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.261": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 262",
+    "default": "ချစ်တဲ့လူကို အနိုင်ပေးတာထက် နားလည်ပေးတတ်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.262": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 263",
+    "default": "ကိုယ်လွဲခဲ့တဲ့အချက်လေးကို သေချာမှတ်ထားပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.263": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 264",
+    "default": "{name}တိတ်နေတဲ့အချိန်ကိုလည်း ကိုယ်လေးစားပေးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.264": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 265",
+    "default": "ကိုယ်တို့ကြားက အေးချမ်းမှုလေးကို ပြန်ရှာကြမယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.265": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 266",
+    "default": "{name}အပေါ်ထားတဲ့ အချစ်လေးက လျော့မသွားပါဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.266": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 267",
+    "default": "ဒီချော့စာလေးကို ကိုယ့်အသံနဲ့ကြားတယ်လို့ သဘောထားနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.267": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 268",
+    "default": "ချစ်စရာလေးရေ ကိုယ်လာချော့တာပါဗျာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.268": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 269",
+    "default": "{name}ဆီလာရင် ကိုယ့်စကားတွေပါ ချိုလာတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.269": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 270",
+    "default": "ကိုယ့်ရဲ့ အကြိုက်ဆုံးအကြောင်းအရာက {name}အကြောင်းပဲ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.270": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 271",
+    "default": "စိတ်ကောက်လေးကို အချစ်စကားလေး လာပေးတာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.271": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 272",
+    "default": "{name}ရဲ့ ရယ်သံလေးက ကိုယ်ကြားချင်ဆုံးအသံပဲ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.272": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 273",
+    "default": "ခပ်တိုးတိုးလေးပြောမယ် ကိုယ်ချစ်တယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.273": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 274",
+    "default": "{name}မကြိုက်တဲ့အပြောလေးတွေ ကိုယ်ဖြည်းဖြည်းပြင်နေမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.274": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 275",
+    "default": "ကိုယ့်တောင်းပန်စကားထဲမှာ ဆင်ခြေမထည့်တော့ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.275": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 276",
+    "default": "ဒီတစ်ခါ {name}စကားကို သေချာသိမ်းထားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.276": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 277",
+    "default": "စိတ်ထဲမရှင်းသေးတာတွေ ကိုယ်တို့အတူရှင်းကြမယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.277": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 278",
+    "default": "{name}သက်သာဖို့ ကိုယ်ဘာလုပ်ပေးနိုင်မလဲ စဉ်းစားနေတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.278": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 279",
+    "default": "အဆင်ပြေလားဆိုတဲ့စကားကို စိတ်ရင်းနဲ့မေးချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.279": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 280",
+    "default": "ကိုယ့်လူလေး ပင်ပန်းရင် နားပါနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.280": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 281",
+    "default": "ရေလေးသောက်ဖို့လည်း သတိရပေးနော် {name}",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.281": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 282",
+    "default": "ဗိုက်ဆာနေရင် စားစရာလေး အရင်စားထားနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.282": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 283",
+    "default": "{name}ရဲ့ စိတ်အေးချမ်းမှုက ကိုယ့်အတွက် အရေးပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.283": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 284",
+    "default": "စိတ်မကောင်းတဲ့နေ့မှာ {name}တစ်ယောက်တည်းမခံစားစေချင်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.284": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 285",
+    "default": "{name}အပေါ် နူးညံ့ပေးဖို့ ကိုယ်ရွေးထားတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.285": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 286",
+    "default": "နေ့ရက်မကောင်းလည်း {name}ကို ချစ်တာတော့ကောင်းကောင်းရှိတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.286": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 287",
+    "default": "အပြုံးလေးတစ်ပွင့် အဆင်သင့်ဖြစ်မှ ကိုယ့်ဆီပို့နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.287": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 288",
+    "default": "စိတ်ပြေလို့ပြုံးတဲ့နေ့ ကိုယ်လည်းလိုက်ပြုံးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.288": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 289",
+    "default": "{name}ပြောပြတဲ့ အသေးအဖွဲလေးတွေပါ ကိုယ်မှတ်မိချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.289": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 290",
+    "default": "ဂရုစိုက်တာကို {name}ခံစားရအောင် လုပ်ပေးချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.290": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 291",
+    "default": "ကိုယ့်ဘက်က အေးအေးလေး စကားစခေါ်တာနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.291": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 292",
+    "default": "{name}ဆီမှာ ကိုယ်ပိုပြီးနူးညံ့တတ်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.292": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 293",
+    "default": "ချစ်တဲ့စိတ်လေးနဲ့ ကိုယ့်မာနကို ခဏဘေးချထားတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.293": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 294",
+    "default": "ကိုယ်တို့စကားတွေ ပိုချိုလာမယ့်နေ့ကို မျှော်နေတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.294": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 295",
+    "default": "{name}ရဲ့ သေးသေးလေးသောဆန္ဒကိုလည်း ကိုယ်ဂရုစိုက်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.295": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 296",
+    "default": "{name}ဝမ်းနည်းတာကို ကိုယ်ရယ်စရာမလုပ်ပါဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.296": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 297",
+    "default": "နောက်တစ်ခါ {name}စိတ်ထိခိုက်မယ့်စကားကို ကိုယ်ရှောင်မယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.297": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 298",
+    "default": "ချစ်ရတဲ့သူနဲ့ဆို ကိုယ်ပိုကောင်းတဲ့သူဖြစ်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.298": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 299",
+    "default": "{name}ရဲ့ အကြိုက်လေးတွေကို ကိုယ်သင်ယူချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.299": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 300",
+    "default": "စိတ်ကောက်နေတဲ့ချစ်သူလေးဆီ အချစ်တစ်စိတ်လာအပ်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.300": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 301",
+    "default": "ဒီစာလေးက {name}ကို လွမ်းတဲ့သူဆီကပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.301": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 302",
+    "default": "{name}ဘက်ကိုကြည့်ရင် ကိုယ့်စိတ်လေးနူးသွားတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.302": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 303",
+    "default": "ကိုယ့်အချစ်လေးဆီ နွေးနွေးထွေးထွေးနှုတ်ဆက်လိုက်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.303": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 304",
+    "default": "ချော့ဖို့စကားရှာရင်း ချစ်တာတွေပါ ပိုများလာတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.304": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 305",
+    "default": "{name}နဲ့ပြန်ရယ်ချင်လို့ ကိုယ်တောင်းပန်တာ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.305": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 306",
+    "default": "ဒီနေ့ {name}ရဲ့ နားခိုရာလေးဖြစ်ပေးချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.306": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 307",
+    "default": "စိတ်ဆိုးရတဲ့အကြောင်းကို နားလည်ဖို့ ကိုယ်အလေးထားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.307": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 308",
+    "default": "မကြိုက်တာကို {name}စိတ်ချလက်ချ ပြောလို့ရစေချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.308": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 309",
+    "default": "ကိုယ့်စကားကြောင့် နာသွားတဲ့နေရာလေးကို ပြန်သက်သာစေချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.309": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 310",
+    "default": "စကားချိုတာထက် သဘောထားချိုဖို့ ကိုယ်ကြိုးစားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.310": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 311",
+    "default": "{name}ရေ ကိုယ်တို့နူးနူးညံ့ညံ့ ပြန်စကြည့်ကြမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.311": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 312",
+    "default": "ဒီဘက်က အချစ်လေးတစ်ခု {name}ဆီရောက်သွားပြီ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.312": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 313",
+    "default": "{name}နဲ့ပြောတဲ့စကားတွေကို ကိုယ်ပေါ့ပေါ့မထားချင်ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.313": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 314",
+    "default": "ခဏလေးတောင် စိတ်ချမ်းသာသွားရင် ကိုယ်ဝမ်းသာတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.314": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 315",
+    "default": "ကိုယ်လွမ်းတဲ့သူက ဒီစာလေးဖတ်နေတဲ့ {name}ပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.315": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 316",
+    "default": "{name}အနားမှာဆို စကားတွေထက် ဂရုစိုက်ပေးချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.316": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 317",
+    "default": "စိတ်ပြေတဲ့အခါ ကိုယ့်ကို စကားလေးတစ်ခွန်းခေါ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.317": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 318",
+    "default": "ကိုယ့်အကြိုက်ဆုံးအပြုံးက {name}အပြုံးလေးပဲ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.318": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 319",
+    "default": "{name}စိတ်မကြည်ရင်လည်း ကိုယ်ကနူးနူးညံ့ညံ့ပဲနော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.319": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 320",
+    "default": "ချစ်တဲ့စိတ်ကို ပြိုင်ငြင်းတဲ့နေရာမှာ မသုံးတော့ဘူး",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.320": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 321",
+    "default": "ဒီနေ့ကို ပိုပေါ့ပါးသွားစေမယ့် စကားလေးဖြစ်ချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.321": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 322",
+    "default": "{name}သဘောကျတဲ့ အသေးအဖွဲလေးတွေပါ သတိထားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.322": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 323",
+    "default": "ကိုယ်တောင်းပန်တာက {name}ခံစားရတာကို အရေးထားလို့ပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.323": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 324",
+    "default": "ချစ်ရသူလေး စိတ်ထဲမှာ နွေးထွေးပါစေ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.324": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 325",
+    "default": "{name}အတွက် ကိုယ့်အသံလေး နူးညံ့နေချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.325": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 326",
+    "default": "အချစ်ကို စကားတိုတိုနဲ့ ထပ်အတည်ပြုလိုက်တယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.326": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 327",
+    "default": "ကိုယ့်စိတ်ထဲက အနူးညံ့ဆုံးနေရာလေးမှာ {name}ရှိတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.327": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 328",
+    "default": "{name}အတွက် ရယ်စရာလေးတွေ ပြန်စုထားဦးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.328": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 329",
+    "default": "အဆင်ပြေတဲ့နေ့ လမ်းအတူလျှောက်ချင်တယ်နော်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.329": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 330",
+    "default": "ချစ်တဲ့သူနဲ့ စကားပြေပြေပြောရတာကို ကိုယ်လွမ်းတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.330": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 331",
+    "default": "ကိုယ့်ကြောင့် ရှုပ်သွားတဲ့စိတ်လေးကို ပြန်အေးစေချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.331": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 332",
+    "default": "{name}နဲ့အတူ အမှတ်တရကောင်းလေးတွေ ထပ်ရှိချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.332": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 333",
+    "default": "တောင်းပန်ပြီးနောက် ပြောင်းလဲပေးဖို့လည်း ကိုယ်မှတ်ထားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.333": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 334",
+    "default": "{name}ပြောတာကို အဓိပ္ပာယ်မလွဲအောင် သေချာမေးမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.334": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 335",
+    "default": "ကိုယ့်အချစ်လေးအတွက် ဒီနေ့လည်း ဆုတောင်းထားတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.335": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 336",
+    "default": "စိတ်ကောက်လေးဆီ ချစ်ပါတယ်ဆိုတဲ့စာ လာရောက်ပေးပို့တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.336": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 337",
+    "default": "ကိုယ်မတတ်တဲ့ချော့နည်းကို {name}အတွက် သင်နေတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.337": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 338",
+    "default": "{name}ကို သိကျွမ်းရတာ ကိုယ့်အတွက် ကံကောင်းခြင်းပါ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.338": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 339",
+    "default": "{name}နဲ့ဆို ရိုးရိုးနေ့လေးကိုတောင် ကိုယ်နှစ်သက်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.339": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 340",
+    "default": "အေးအေးချမ်းချမ်း ပြန်ရင်းနှီးနိုင်ဖို့ ကိုယ်ကြိုးစားမယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.340": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 341",
+    "default": "{name}ပျော်တဲ့အရာလေးတွေ ကိုယ်ပိုသိချင်တယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.341": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 342",
+    "default": "ဒီစာလေးဖတ်တဲ့အချိန် {name}စိတ်လေးပေါ့ပါးပါစေ",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
+  },
+  "msg.comfort.line.342": {
+    "kind": "message",
+    "category": "ချော့စာ စာတိုဘဏ်",
+    "label": "ချော့စာ စာတို 343",
+    "default": "ကိုယ့်ချစ်သူလေးရေ အေးအေးလေးပဲ ချော့နေပါတယ်",
+    "fields": [
+      "name"
+    ],
+    "html": false,
+    "max_length": 500
   }
 }
