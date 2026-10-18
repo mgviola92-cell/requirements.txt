@@ -17,6 +17,14 @@ class ContentTests(unittest.TestCase):
         self.assertTrue(all(len(x)<130 and '\n' not in x for x in LINES))
         self.assertTrue(all(not any(ord(c)>0xffff or 0x2600<=ord(c)<=0x27ff for c in x) for x in LINES))
 
+    def test_bank_avoids_self_announcing_bot_language(self):
+        self.assertFalse(any(x in line for line in LINES for x in ('ချော့စာ','ဌာန','ရောက်လာပါပြီ')))
+
+    def test_editor_uses_numeric_line_order(self):
+        from features.owner_controls import KEYS
+        keys=[k for k in KEYS if k.startswith('msg.comfort.line.')]
+        self.assertEqual(keys,['msg.comfort.line.'+str(i) for i in range(len(LINES))])
+
     def test_no_repeat_and_duplicate_customization(self):
         lines=[(str(i),s) for i,s in enumerate(LINES)]+[('duplicate',LINES[0])]
         used=set();rng=random.Random(881)

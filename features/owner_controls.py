@@ -12,7 +12,12 @@ from database.db import get_db_connection
 from core.customization import CATALOG,effective,save,preview,validate
 
 controls=Blueprint('owner_controls',__name__,url_prefix='/owner/control')
-KEYS=sorted(CATALOG)
+def catalog_order(key):
+    if key.startswith('msg.comfort.line.'):
+        return ('msg.comfort.line.',int(key.rsplit('.',1)[1]))
+    return (key,-1)
+
+KEYS=sorted(CATALOG,key=catalog_order)
 CATEGORIES=sorted({e['category'] for e in CATALOG.values()})
 LABELS={'bot':'Commands & Group Management','system':'System Messages','core.rewards':'Game Rewards',
         'core.keyboards':'Buttons','wyr_auto':'WYR Auto Spawn',
