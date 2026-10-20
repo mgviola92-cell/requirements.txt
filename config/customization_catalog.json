@@ -8673,12 +8673,12 @@
   },
   "msg.features.news.brief_note": {
     "kind": "message",
-    "category": "features.news",
-    "label": "News · brief_note",
-    "default": "📖 ဖတ်မယ် ခလုတ်နှိပ်၍ Telegram ထဲမှာ ဖတ်နိုင်သည်။",
+    "category": "Myanmar News",
+    "label": "Myanmar News · brief_note",
+    "default": "ခေါင်းစဉ်ကိုဖတ်ပြီး သတင်းဌာနအမည်ကိုနှိပ်၍ အပြည့်အစုံဖတ်နိုင်သည်။",
     "fields": [],
     "html": false,
-    "max_length": 1500
+    "max_length": 700
   },
   "msg.features.news.checked": {
     "kind": "message",
@@ -14202,88 +14202,5 @@
     ],
     "html": false,
     "max_length": 500
-  },
-  "msg.features.news.read": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · read",
-    "default": "📖 သတင်း {number} ဖတ်မယ်",
-    "fields": [
-      "number"
-    ],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.list": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · list",
-    "default": "📋 သတင်းစာရင်း",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.original": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · original",
-    "default": "🔗 မူရင်းဖတ်ရန်",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.read_previous": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · read_previous",
-    "default": "⬅️ အရင်သတင်း",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.read_next": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · read_next",
-    "default": "နောက်သတင်း ➡️",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.extract_label": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · extract_label",
-    "default": "သတင်းဌာန၏ feed မှ ကောက်နုတ်ချက်",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.extract_note": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · extract_note",
-    "default": "ကောက်နုတ်ချက်သာဖြစ်ပြီး ဆောင်းပါးအပြည့်မဟုတ်ပါ။ မူရင်းဘာသာစကားအတိုင်း ပြထားသည်။",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.no_detail": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · no_detail",
-    "default": "ဒီသတင်းအတွက် အသေးစိတ်စာသားကို ရင်းမြစ်က မပေးထားသေးပါ။ အောက်က မူရင်းဖတ်ရန် ခလုတ်ဖြင့် ဖတ်နိုင်သည်။",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
-  },
-  "msg.features.news.gone": {
-    "kind": "message",
-    "category": "features.news",
-    "label": "News · gone",
-    "default": "ဒီသတင်းကို လက်ရှိစာရင်းမှာ မရနိုင်တော့ပါ။ /news ဖြင့် အသစ်ပြန်ဖွင့်ပါ။",
-    "fields": [],
-    "html": false,
-    "max_length": 1500
   }
 }
