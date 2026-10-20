@@ -30,6 +30,16 @@ def field(item,names):
 def safe_url(value):
     p=urllib.parse.urlsplit(value)
     return bool(p.scheme in ('http','https') and p.hostname and not p.username and not p.password)
+def excerpt(value,title=''):
+    """Short attributed feed extract, never a fabricated summary or full article."""
+    value=re.sub(r'<(script|style)\b[^>]*>.*?</\1>', '',str(value or ''),flags=re.I|re.S)
+    value=plain(value)
+    if not value or normalized(value)==normalized(title):return ''
+    words=value.split()
+    clipped=' '.join(words[:100])
+    clipped=clipped[:1200]
+    return clipped.rstrip()+('…' if len(clipped)<len(value) else '')
+
 def parse(raw,source,now):
     if len(raw)>MAX_BYTES:raise ValueError('feed too large')
     if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():raise ValueError('unsafe XML')
@@ -51,7 +61,7 @@ def parse(raw,source,now):
             if source['id']=='reuters' and credited.casefold()!='reuters':continue
             if source['id']=='ap' and credited.casefold() not in ('associated press','ap news','apnews'):continue
         key=hashlib.sha256(url.encode()).hexdigest()[:24]
-        accepted.append({'key':key,'source':source['id'],'family':source['family'],'name':source['name'],'title':title,'url':url,'published':stamp,'brief':'','revision':hashlib.sha256(title.encode()).hexdigest()[:16],'correction':bool(CORRECTION.search(title))})
+        accepted.append({'key':key,'source':source['id'],'family':source['family'],'name':source['name'],'title':title,'url':url,'published':stamp,'excerpt':excerpt(field(item,('description','summary')) or field(item,('encoded','content')),title),'brief':'','revision':hashlib.sha256(title.encode()).hexdigest()[:16],'correction':bool(CORRECTION.search(title))})
     return accepted,missing
 
 def fetch(source,now,validators=None):

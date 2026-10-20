@@ -34,7 +34,16 @@ MESSAGES={
  'brief_saved':'✅ ကိုယ်ပိုင်အကျဉ်းချုပ် သိမ်းပြီးပြီ။ ယခင်ပို့ထားသောသတင်းဖြစ်လျှင် auto ဖွင့်ထားသော Group များသို့ update အဖြစ်နောက်ပို့ချိန်တွင်ရောက်မည်။',
  'update':'🔄 ပြင်ဆင်/ဖြည့်စွက်ထားသော ဖော်ပြချက်',
  'brief_label':'✍️ Owner ရေးသားထားသော အကျဉ်းချုပ်',
- 'brief_note':'ခေါင်းစဉ်ကိုဖတ်ပြီး သတင်းဌာနအမည်ကိုနှိပ်၍ အပြည့်အစုံဖတ်နိုင်သည်။',
+ 'brief_note':'📖 ဖတ်မယ် ခလုတ်နှိပ်၍ Telegram ထဲမှာ ဖတ်နိုင်သည်။',
+ 'read':'📖 သတင်း {number} ဖတ်မယ်',
+ 'list':'📋 သတင်းစာရင်း',
+ 'original':'🔗 မူရင်းဖတ်ရန်',
+ 'read_previous':'⬅️ အရင်သတင်း',
+ 'read_next':'နောက်သတင်း ➡️',
+ 'extract_label':'သတင်းဌာန၏ feed မှ ကောက်နုတ်ချက်',
+ 'extract_note':'ကောက်နုတ်ချက်သာဖြစ်ပြီး ဆောင်းပါးအပြည့်မဟုတ်ပါ။ မူရင်းဘာသာစကားအတိုင်း ပြထားသည်။',
+ 'no_detail':'ဒီသတင်းအတွက် အသေးစိတ်စာသားကို ရင်းမြစ်က မပေးထားသေးပါ။ အောက်က မူရင်းဖတ်ရန် ခလုတ်ဖြင့် ဖတ်နိုင်သည်။',
+ 'gone':'ဒီသတင်းကို လက်ရှိစာရင်းမှာ မရနိုင်တော့ပါ။ /news ဖြင့် အသစ်ပြန်ဖွင့်ပါ။',
  'checked':'Feed နောက်ဆုံးစစ်ချိန်: {date}',
  'next':'နောက်သတင်းများ','previous':'ယခင်သတင်းများ'}
 
@@ -89,9 +98,10 @@ def ingest(source,now):
     try:
         with get_db_connection() as con,con.cursor() as cur:
             cur.execute('SELECT validators FROM news_feed_cache WHERE source_id=%s',(sid,));row=cur.fetchone()
-            if row:validators=dict(row[0])
+            if row and row[0].get('_reader')==1:validators=dict(row[0])
         items,missing=engine.fetch(source,now,validators)
         received=True
+        validators['_reader']=1
         status='not-modified' if items is None else 'ok' if not missing else 'missing-date:'+str(missing)
         items=items or []
     except Exception as exc:items=[];status=type(exc).__name__
@@ -162,13 +172,38 @@ def render(cid,groups,health,offset=0):
     parts.extend(footer)
     return '\n'.join(parts),sent,page_count
 
-def keyboard(offset,total,count):
+def keyboard(offset,total,count,groups=None):
     count=max(1,count)
     k=types.InlineKeyboardMarkup();buttons=[]
+    for n,group in enumerate((groups or [])[offset:offset+count],offset+1):
+        lead=next((a for a in group if a.get('brief')),group[0])
+        k.row(types.InlineKeyboardButton(text('read',number=n)[:50],callback_data=f"news:r:{lead['key']}:{offset}"))
     if offset:buttons.append(types.InlineKeyboardButton(text('previous')[:50],callback_data='news:'+str(max(0,offset-count))))
     if offset+count<total:buttons.append(types.InlineKeyboardButton(text('next')[:50],callback_data='news:'+str(offset+count)))
     if buttons:k.row(*buttons)
     return k
+
+def reader(groups,key,offset):
+    """Resolve stable IDs against current selected/age-filtered cache, no network."""
+    found=next(((i,g,a) for i,g in enumerate(groups) for a in g if a['key']==key),None)
+    if found is None:return None
+    index,group,lead=found
+    value=lead.get('brief') or lead.get('excerpt') or ''
+    label=text('brief_label') if lead.get('brief') else text('extract_label')
+    parts=['📰 <b>'+html.escape(lead['title'][:400])+'</b>',html.escape(lead['name'])+' · '+html.escape(stamp(lead['published']))]
+    if value:
+        parts.extend(['<b>'+html.escape(label)+'</b>',html.escape(engine.excerpt(value)),html.escape(text('extract_note')) if not lead.get('brief') else ''])
+    else:parts.append(html.escape(text('no_detail')))
+    parts.append(html.escape(text('disclaimer')))
+    k=types.InlineKeyboardMarkup();neighbors=[]
+    for dest,label_key in ((index-1,'read_previous'),(index+1,'read_next')):
+        if 0<=dest<len(groups):
+            other=groups[dest][0]
+            neighbors.append(types.InlineKeyboardButton(text(label_key)[:50],callback_data=f"news:r:{other['key']}:{offset}"))
+    if neighbors:k.row(*neighbors)
+    k.row(types.InlineKeyboardButton(text('list')[:50],callback_data='news:'+str(offset)),types.InlineKeyboardButton(text('original')[:50],url=lead['url']))
+    return '\n\n'.join(p for p in parts if p),k
+
 
 def auto(bot):
     from features.owner_operations import feature_allowed
@@ -195,9 +230,9 @@ def auto(bot):
                         # Only explicitly edited briefs / publisher corrections trigger updates.
                         if not any((a.get('brief') or a['correction']) and sent.get(a['key'])!=a['revision'] for a in group):continue
                     eligible.append(group)
-                body,items,_=render(cid,eligible,health)
+                body,items,count=render(cid,eligible,health)
                 if items:
-                    send(bot,cid,body,parse_mode='HTML',disable_web_page_preview=True)
+                    send(bot,cid,body,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(0,len(eligible),count,eligible))
                     with get_db_connection() as con,con.cursor() as cur:
                         for item in items:cur.execute('INSERT INTO news_sent(chat_id,item_id,revision) VALUES(%s,%s,%s) ON CONFLICT(chat_id,item_id) DO UPDATE SET revision=EXCLUDED.revision,sent_at=NOW()',(cid,item['key'],item['revision']))
                 with get_db_connection() as con,con.cursor() as cur:
@@ -220,7 +255,7 @@ def register(bot):
     def news_command(m):
         try:
             groups,health=load(m.chat.id);body,items,count=render(m.chat.id,groups,health)
-            send(bot,m.chat.id,body,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(0,len(groups),count))
+            send(bot,m.chat.id,body,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(0,len(groups),count,groups))
         except Exception:reply(bot,m,text('error'))
     @bot.message_handler(commands=['newssources'])
     def news_sources(m):
@@ -268,14 +303,22 @@ def register(bot):
         except Exception:pass
         if not c.message:return
         try:
-            offset=int(c.data.split(':')[1]);cid=c.message.chat.id
+            parts=c.data.split(':');reading=len(parts)==4 and parts[1]=='r'
+            offset=int(parts[3] if reading else parts[1]);cid=c.message.chat.id
             if not 0<=offset<=250:return
             if not touch(cid,c.message.message_id):return
             from features.owner_operations import feature_allowed
             if not feature_allowed('enabled.features.news.news_command',cid) or not setting_value('enabled.features.news.news_command',True,scope=cid if cid<0 else 0):return
             if not 0<=offset<=250:return
-            groups,health=load(cid);body,_,count=render(cid,groups,health,offset)
-            bot.edit_message_text(body,cid,c.message.message_id,parse_mode='HTML',disable_web_page_preview=True,reply_markup=keyboard(offset,len(groups),count))
+            groups,health=load(cid)
+            if reading:
+                result=reader(groups,parts[2],offset)
+                if result is None:
+                    body=text('gone');markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(text('list'),callback_data='news:0'))
+                else:body,markup=result
+            else:
+                body,_,count=render(cid,groups,health,offset);markup=keyboard(offset,len(groups),count,groups)
+            bot.edit_message_text(body,cid,c.message.message_id,parse_mode='HTML',disable_web_page_preview=True,reply_markup=markup)
         except Exception:LOG.debug('News page unavailable')
     if READY:
         def loop():

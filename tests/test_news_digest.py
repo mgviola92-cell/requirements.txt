@@ -123,3 +123,47 @@ class CleanupTests(unittest.TestCase):
         self.assertIn('🕒',body)
 
 if __name__=='__main__':unittest.main()
+
+class ReaderTests(unittest.TestCase):
+    def test_extract_is_clean_bounded_and_not_title(self):
+        self.assertEqual(engine.excerpt('Same headline','Same headline'),'')
+        value=engine.excerpt('<script>evil()</script><p>'+('word '*500)+'</p>')
+        self.assertNotIn('evil',value);self.assertLessEqual(len(value.split()),100)
+        self.assertLessEqual(len(engine.excerpt('က'*5000)),1201)
+
+    def test_feed_extract_and_legacy_fallback(self):
+        data=engine.parse(xml(extra='<description>&lt;p&gt;A detailed report about Myanmar.&lt;/p&gt;</description>'),CATALOG['myanmar_now'],NOW)[0][0]
+        self.assertEqual(data['excerpt'],'A detailed report about Myanmar.')
+        body,kb=news.reader([[item()]],'1',0)
+        self.assertIn(news.text('no_detail'),body)
+        self.assertEqual(kb.keyboard[-1][0].callback_data,'news:0')
+
+    def test_stable_id_navigation_and_html(self):
+        a=item('a');a['excerpt']='Details & <unsafe>'
+        b=item('b');groups=[[b],[a]]
+        body,kb=news.reader(groups,'a',0)
+        self.assertIn('Details &amp;',body);self.assertNotIn('<unsafe>',body)
+        self.assertEqual(kb.keyboard[0][0].callback_data,'news:r:b:0')
+        self.assertIsNone(news.reader(groups,'deleted',0))
+        buttons=news.keyboard(0,2,2,groups).keyboard
+        self.assertEqual(buttons[0][0].callback_data,'news:r:b:0')
+        self.assertEqual(buttons[1][0].callback_data,'news:r:a:0')
+
+    def test_owner_brief_has_priority_without_claiming_translation(self):
+        a=item();a.update(brief='Owner text',excerpt='Source text')
+        body,_=news.reader([[a]],'1',0)
+        self.assertIn('Owner text',body);self.assertNotIn('Source text',body)
+        self.assertLess(len(body),4096)
+
+    def test_reader_callback_edits_same_card_and_renews_deadline(self):
+        bot=MagicMock();callbacks=[]
+        bot.message_handler.side_effect=lambda **kw:lambda fn:fn
+        bot.callback_query_handler.side_effect=lambda **kw:lambda fn:callbacks.append(fn) or fn
+        with patch.object(news,'initialize',side_effect=RuntimeError()),patch.object(news,'READY',False):news.register(bot)
+        a=item();a['excerpt']='Cached article detail'
+        c=MagicMock();c.id='tap';c.data='news:r:1:0';c.message.chat.id=-42;c.message.message_id=99
+        with patch.object(news,'touch',return_value=True) as touch,patch.object(news,'load',return_value=([[a]],[])),patch('features.owner_operations.feature_allowed',return_value=True),patch.object(news,'setting_value',return_value=True):callbacks[0](c)
+        touch.assert_called_once_with(-42,99)
+        self.assertIn('Cached article detail',bot.edit_message_text.call_args.args[0])
+        self.assertEqual(bot.edit_message_text.call_args.args[1:],(-42,99))
+        bot.send_message.assert_not_called()
