@@ -1,0 +1,11 @@
+# News source picker and automatic delivery
+
+Private owner: `/owner` → 📰 သတင်းဌာနရွေးရန်, or `/newsowner`. Toggle sources, page through eight per page, Select All/Clear All, then Save. Draft selection does not change live preferences; stale cards and concurrent external changes are refused. Empty selection is valid and pauses news. The global selection applies to manual and automatic news in every group. Group admins retain `/newson` and `/newsoff`.
+
+Automatic news no longer requires two media families. After each shared feed polling interval (default 30 minutes), eligible groups receive one digest of up to five latest new stories. Titles use bold text and a leading bar with extra spacing. Source links, attribution and five-minute inactivity cleanup remain. No inline article reader or article scraping.
+
+Source activation dates are persisted and synchronized in the same transaction as the owner setting/audit log. A disabled source starts a new activation boundary when re-enabled; saving unchanged sources does not move their boundaries. Initial deployment and newly enabled groups establish a current-time baseline. Previously cached/published news is not backfilled. Newly discovered stories carry a stable discovery timestamp, so feed acquisition latency does not make them disappear behind an already advanced group cursor.
+
+Per-group durable cursors plus existing sent IDs prevent ordinary repeat delivery. Missed outage windows are dropped after one refresh interval; no catch-up flood. Only the latest configured page is sent, so this is a compact digest rather than guaranteed delivery of every published story. Telegram send and DB bookkeeping cannot be one atomic transaction: an abrupt crash after delivery but before bookkeeping can still duplicate a digest. Existing retry/backoff and startup rate gate remain. All feed HTTP requests remain shared and conditional; no new per-group HTTP polling.
+
+Two small tables: news_source_activation and news_auto_state. Old interval_minutes and auto_min_sources editor entries are compatibility fields and no longer govern auto delivery; refresh_minutes controls its interval. Source settings can also be edited/reset on the existing web editor and establish the same activation boundaries.

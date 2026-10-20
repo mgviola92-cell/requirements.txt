@@ -13,7 +13,7 @@ from data.news_sources import CATALOG
 LOG=logging.getLogger(__name__);READY=False;MMT=ZoneInfo('Asia/Yangon')
 NEWS_WAKE=db_work.signal('news_groups','owner_groups','owner_customizations')
 CLEANUP_WAKE=db_work.signal('news_messages')
-DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':True,'interval_minutes':180,'auto_min_sources':2}
+DEFAULTS={'source_ids':list(CATALOG),'refresh_minutes':30,'max_age_hours':72,'items':5,'auto_enabled':True,'interval_minutes':30,'auto_min_sources':1}
 MESSAGES={
  'heading':'📰 မြန်မာသတင်းစု\n{date}\n',
  'single':'ရင်းမြစ် ၁ ခု၏ ဖော်ပြချက်',
@@ -26,7 +26,7 @@ MESSAGES={
  'admin':'Group Admin သို့မဟုတ် Bot Owner သာ ပြင်နိုင်သည်။',
  'on':'✅ ဒီ Group အတွက် auto news ဖွင့်ပြီးပြီ။ Source များတွင်သတင်းအသစ်ရှိပြီး သတ်မှတ်ချက်ပြည့်မှ ပို့မည်။',
  'off':'⏸ ဒီ Group အတွက် auto news ပိတ်ပြီးပြီ။ /news နဲ့ ဆက်ဖတ်နိုင်သည်။',
- 'status':'📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nAuto ပို့ရန် သတင်းတစ်ပုဒ်ကို မတူသော သတင်းဌာနအုပ်စု အနည်းဆုံး {minimum} ခုက ဆင်တူဖော်ပြထားရမည်။ Telegram Group အရေအတွက်ကို ဆိုလိုခြင်းမဟုတ်ပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။',
+ 'status':'📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nOwner ရွေးထားသော သတင်းဌာန တစ်ခုခုက သတင်းအသစ်ရလျှင် ပို့မည်။ မီဒီယာနှစ်ခု တူညီဖော်ပြရန် မလိုပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။',
  'error':'သတင်းစနစ်ကို ခေတ္တမသုံးနိုင်သေးပါ။ ပြန်စမ်းပါ။',
  'sources':'🗞️ News sources\n{sources}\n\n✅ = feed ဖတ်ရ၊ ⏳ = မစစ်ရသေး၊ ⚠️ = error / timestamp မရှိ။ Feed ဖတ်ရခြင်းနှင့် သတင်းအသစ်ရှိခြင်းမတူပါ။',
  'owner':'Bot Owner private chat တွင်သာ ပြင်နိုင်သည်။',
@@ -40,7 +40,7 @@ MESSAGES={
 
 def text(key,**fields):return message_text('msg.features.news.'+key,MESSAGES[key],fields)
 def cfg(key,cid=0):return setting_value('cfg.features.news.'+key,DEFAULTS[key],cid if cid<0 else 0)
-def sources_for(cid):return [s for s in cfg('source_ids',cid) if s in CATALOG]
+def sources_for(cid):return [s for s in cfg('source_ids',0) if s in CATALOG]
 def stamp(value):return datetime.fromtimestamp(value,MMT).strftime('%d/%m/%Y %H:%M')+' MMT'
 
 def initialize():
@@ -53,6 +53,16 @@ def initialize():
         cur.execute('CREATE TABLE IF NOT EXISTS news_feed_cache(source_id TEXT PRIMARY KEY,validators JSONB NOT NULL)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_jobs(key TEXT PRIMARY KEY,next_run TIMESTAMPTZ NOT NULL)')
         cur.execute('CREATE TABLE IF NOT EXISTS news_sent(chat_id BIGINT NOT NULL,item_id TEXT NOT NULL,revision TEXT NOT NULL, sent_at TIMESTAMPTZ DEFAULT NOW(),PRIMARY KEY(chat_id,item_id))')
+        from database.news_preferences import initialize as initialize_preferences
+        initialize_preferences(cur)
+        cur.execute('SELECT source_id FROM news_source_activation')
+        known={r[0] for r in cur.fetchall()};selected=set(sources_for(0))
+        for sid in CATALOG:
+            if sid not in known:cur.execute('INSERT INTO news_source_activation(source_id,enabled) VALUES(%s,%s) ON CONFLICT DO NOTHING',(sid,sid in selected))
+        cur.execute('INSERT INTO news_auto_state(chat_id) SELECT chat_id FROM owner_groups WHERE active ON CONFLICT DO NOTHING')
+        cur.execute("INSERT INTO news_jobs VALUES('single-source-v1',NOW()) ON CONFLICT DO NOTHING RETURNING key")
+        if cur.fetchone():cur.execute('UPDATE news_groups SET next_due=NOW() WHERE enabled IS DISTINCT FROM FALSE')
+
 
 def track(message):
     """Persist inactivity deadlines so restart does not leave news cards behind."""
@@ -98,6 +108,8 @@ def ingest(source,now):
     with get_db_connection() as con,con.cursor() as cur:
         for item in items:
             cur.execute('SELECT data FROM news_items WHERE id=%s',(item['key'],));old=cur.fetchone()
+            if not old:item['discovered']=now
+            elif 'discovered' in old[0]:item['discovered']=old[0]['discovered']
             if old and old[0].get('brief') and old[0]['title']==item['title']:
                 item['brief']=old[0]['brief'];item['revision']=old[0]['revision']
             if old and old[0]==item:continue
@@ -139,7 +151,7 @@ def render(cid,groups,health,offset=0):
     if not shown:
         good=any(status in ('ok','not-modified') or status.startswith('missing-date:') for _,status,_ in health)
         return (text('empty') if good else text('unavailable') if health else text('warming')),[],0
-    parts=[html.escape(text('heading',date=stamp(time.time())))];sent=[];page_count=0
+    parts=['<b>'+html.escape(text('heading',date=stamp(time.time())))+'</b>'];sent=[];page_count=0
     newest=max((d.timestamp() for _,_,d in health if d),default=0)
     footer=([html.escape(text('checked',date=stamp(newest)))] if newest else [])+[html.escape(text('brief_note')),html.escape(text('disclaimer'))]
     for n,group in enumerate(shown,offset+1):
@@ -152,7 +164,7 @@ def render(cid,groups,health,offset=0):
             if item['family'] in seen:continue
             seen.add(item['family'])
             links.append('<a href="'+html.escape(item['url'],quote=True)+'">'+html.escape(item['name'])+'</a>')
-        block=f'<b>{n}. {html.escape(title)}</b>\n{html.escape(label)}\n'+(' · '.join(links[:4]))+'\n'+'🕒 '+html.escape(stamp(lead['published']))+'\n'
+        block=f'<b>▌ {n}။ {html.escape(title)}</b>\n\n🗞 '+(' · '.join(links[:4]))+' · 🕒 '+html.escape(stamp(lead['published']))+'\n'+html.escape(label)+'\n'
         from features.owner_operations import is_owner
         if cid>0 and is_owner(cid):block+='ID: <code>'+lead['key']+'</code>\n'
         if lead.get('brief'):block+=html.escape(text('brief_label'))+'\n'
@@ -174,6 +186,8 @@ def auto(bot):
     from features.owner_operations import feature_allowed
     with get_db_connection() as con,con.cursor() as cur:
         cur.execute('SELECT g.chat_id,n.enabled,n.next_due,n.retry_after FROM owner_groups g LEFT JOIN news_groups n ON n.chat_id=g.chat_id WHERE g.active');targets=cur.fetchall()
+        cur.execute('SELECT source_id,since FROM news_source_activation WHERE enabled')
+        activated=dict(cur.fetchall())
     now=datetime.now(timezone.utc);next_attempt=None
     for cid,explicit,due,retry in targets:
         if not enabled(cid,explicit) or due and due>now or retry and retry>now or not feature_allowed('enabled.features.news.news_command',cid) or not setting_value('enabled.features.news.news_command',True,scope=cid):continue
@@ -183,14 +197,20 @@ def auto(bot):
         try:
             with group_scope(cid):
                 with get_db_connection() as con,con.cursor() as cur:
-                    cur.execute("INSERT INTO news_groups(chat_id,next_due) VALUES(%s,NOW()+%s*INTERVAL '1 minute') ON CONFLICT(chat_id) DO UPDATE SET next_due=EXCLUDED.next_due WHERE (news_groups.next_due IS NULL OR news_groups.next_due<=NOW()) AND (news_groups.retry_after IS NULL OR news_groups.retry_after<=NOW()) RETURNING chat_id",(cid,cfg('interval_minutes',cid)))
+                    cur.execute("INSERT INTO news_groups(chat_id,next_due) VALUES(%s,NOW()+%s*INTERVAL '1 minute') ON CONFLICT(chat_id) DO UPDATE SET next_due=EXCLUDED.next_due WHERE (news_groups.next_due IS NULL OR news_groups.next_due<=NOW()) AND (news_groups.retry_after IS NULL OR news_groups.retry_after<=NOW()) RETURNING chat_id",(cid,cfg('refresh_minutes',0)))
                     if not cur.fetchone():continue
                 groups,health=load(cid)
                 with get_db_connection() as con,con.cursor() as cur:
                     cur.execute('SELECT item_id,revision FROM news_sent WHERE chat_id=%s',(cid,));sent=dict(cur.fetchall())
+                    cur.execute('SELECT cursor_at FROM news_auto_state WHERE chat_id=%s',(cid,));state=cur.fetchone()
+                # Drop outage backlog; only the latest polling window can auto-post.
+                cutoff=max(state[0].timestamp() if state else now.timestamp(),now.timestamp()-cfg('refresh_minutes',0)*60)
                 eligible=[]
                 for group in groups:
-                    if len(engine.families(group))<cfg('auto_min_sources',cid):continue
+                    group=[a for a in group if a['source'] in activated and
+                           max(cutoff,activated[a['source']].timestamp())<a.get('discovered',a['published'])<=now.timestamp() and
+                           activated[a['source']].timestamp()<a['published']<=now.timestamp()]
+                    if not group:continue
                     if any(a['key'] in sent for a in group):
                         # Only explicitly edited briefs / publisher corrections trigger updates.
                         if not any((a.get('brief') or a['correction']) and sent.get(a['key'])!=a['revision'] for a in group):continue
@@ -201,7 +221,8 @@ def auto(bot):
                     with get_db_connection() as con,con.cursor() as cur:
                         for item in items:cur.execute('INSERT INTO news_sent(chat_id,item_id,revision) VALUES(%s,%s,%s) ON CONFLICT(chat_id,item_id) DO UPDATE SET revision=EXCLUDED.revision,sent_at=NOW()',(cid,item['key'],item['revision']))
                 with get_db_connection() as con,con.cursor() as cur:
-                    cur.execute("INSERT INTO news_groups(chat_id,next_due) VALUES(%s,NOW()+%s*INTERVAL '1 minute') ON CONFLICT(chat_id) DO UPDATE SET next_due=EXCLUDED.next_due",(cid,cfg('interval_minutes',cid)))
+                    cur.execute('INSERT INTO news_auto_state(chat_id,cursor_at) VALUES(%s,%s) ON CONFLICT(chat_id) DO UPDATE SET cursor_at=EXCLUDED.cursor_at',(cid,now))
+                    cur.execute("INSERT INTO news_groups(chat_id,next_due) VALUES(%s,NOW()+%s*INTERVAL '1 minute') ON CONFLICT(chat_id) DO UPDATE SET next_due=EXCLUDED.next_due",(cid,cfg('refresh_minutes',0)))
         except Exception:
             LOG.exception('News delivery failed')
             with get_db_connection() as con,con.cursor() as cur:
@@ -245,7 +266,9 @@ def register(bot):
                 with get_db_connection() as con,con.cursor() as cur:cur.execute('SELECT enabled FROM news_groups WHERE chat_id=%s',(m.chat.id,));row=cur.fetchone()
                 reply(bot,m,text('status',enabled='ဖွင့်ထားသည် ✅' if enabled(m.chat.id,row[0] if row else None) else 'ပိတ်ထားသည် ⏸',minutes=cfg('interval_minutes',m.chat.id),hours=cfg('max_age_hours',m.chat.id),minimum=cfg('auto_min_sources',m.chat.id),sources=len(sources_for(m.chat.id))));return
             if not manage(m):reply(bot,m,text('admin'));return
-            with get_db_connection() as con,con.cursor() as cur:cur.execute('INSERT INTO news_groups(chat_id,enabled,next_due,retry_after) VALUES(%s,%s,NOW(),NULL) ON CONFLICT(chat_id) DO UPDATE SET enabled=EXCLUDED.enabled,next_due=NOW(),retry_after=NULL',(m.chat.id,command=='newson'))
+            with get_db_connection() as con,con.cursor() as cur:
+                cur.execute('INSERT INTO news_groups(chat_id,enabled,next_due,retry_after) VALUES(%s,%s,NOW(),NULL) ON CONFLICT(chat_id) DO UPDATE SET enabled=EXCLUDED.enabled,next_due=NOW(),retry_after=NULL',(m.chat.id,command=='newson'))
+                if command=='newson':cur.execute('INSERT INTO news_auto_state(chat_id) VALUES(%s) ON CONFLICT(chat_id) DO UPDATE SET cursor_at=NOW()',(m.chat.id,))
             reply(bot,m,text('on' if command=='newson' else 'off'))
         except Exception:reply(bot,m,text('error'))
     @bot.message_handler(commands=['newsbrief'])

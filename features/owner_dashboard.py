@@ -531,6 +531,7 @@ def register_owner_dashboard(app,bot):
 
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
+        kb.add(types.InlineKeyboardButton("📰 သတင်းဌာနရွေးရန်",callback_data="nws:open"))
         kb.add(types.InlineKeyboardButton("⚙️ Group Control & Messages",callback_data="ctl:home:0"))
         kb.add(types.InlineKeyboardButton("🛠️ Owner Tools",callback_data="ops:home"))
         from features.draw_guess import base_url
@@ -718,6 +719,9 @@ def register_owner_dashboard(app,bot):
                 print("Owner direct message:",type(exc).__name__)
                 bot.reply_to(msg,_custom_text('msg.features.owner_dashboard.capture_owner_message.5a4437a3b7', '⚠️ Group ရွေးချယ်မှုဖွင့်မရသေးပါ။ /owner နဲ့ ပြန်ဖွင့်ပါ။', {}))
         return ContinueHandling()
+
+    from features.news_owner import register as register_news_owner
+    register_news_owner(bot,owner_replace_card,clear_owner_draft)
 
     from features.owner_controls import register as register_owner_controls
     register_owner_controls(app,bot,owner_replace_card,owner_back_button,clear_owner_draft)

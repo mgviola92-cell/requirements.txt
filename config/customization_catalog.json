@@ -8604,7 +8604,7 @@
     "kind": "message",
     "category": "Myanmar News",
     "label": "Myanmar News · status",
-    "default": "📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nAuto ပို့ရန် သတင်းတစ်ပုဒ်ကို မတူသော သတင်းဌာနအုပ်စု အနည်းဆုံး {minimum} ခုက ဆင်တူဖော်ပြထားရမည်။ Telegram Group အရေအတွက်ကို ဆိုလိုခြင်းမဟုတ်ပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။",
+    "default": "📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nOwner ရွေးထားသော သတင်းဌာန တစ်ခုခုက သတင်းအသစ်ရလျှင် ပို့မည်။ မီဒီယာနှစ်ခု တူညီဖော်ပြရန် မလိုပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။",
     "fields": [
       "enabled",
       "minutes",
@@ -8739,7 +8739,8 @@
       "dw",
       "reuters",
       "ap"
-    ]
+    ],
+    "allow_empty": true
   },
   "cfg.features.news.refresh_minutes": {
     "kind": "setting",
@@ -8774,16 +8775,16 @@
   "cfg.features.news.interval_minutes": {
     "kind": "setting",
     "category": "Myanmar News",
-    "label": "Myanmar News · interval_minutes",
-    "default": 180,
+    "label": "News · ယခင် interval (ယခု refresh_minutes ကိုသုံးသည်)",
+    "default": 30,
     "minimum": 30,
     "maximum": 1440
   },
   "cfg.features.news.auto_min_sources": {
     "kind": "setting",
     "category": "Myanmar News",
-    "label": "Myanmar News · auto_min_sources",
-    "default": 2,
+    "label": "News · ယခင် source minimum (ယခု ၁ ဌာနဖြင့်ပို့သည်)",
+    "default": 1,
     "minimum": 1,
     "maximum": 5
   },

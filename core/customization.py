@@ -152,7 +152,7 @@ def validate(key,value):
         elif isinstance(d,str):
             if not isinstance(v,str) or len(v)>3500:raise ValueError('Invalid text value')
         elif isinstance(d,list):
-            if not isinstance(v,list) or not v or len(v)>entry.get("max_items",500):raise ValueError('Use a nonempty JSON list')
+            if not isinstance(v,list) or (not v and not entry.get('allow_empty')) or len(v)>entry.get("max_items",500):raise ValueError('Use a nonempty JSON list')
             if entry.get('fixed_length') and len(v)!=len(d):raise ValueError('Keep the same number of entries')
             for i,item in enumerate(v):check(item,d[min(i,len(d)-1)])
         elif isinstance(d,dict):
@@ -207,6 +207,9 @@ def save(scope,key,value,owner_id,reset=False):
         cur.execute('''INSERT INTO owner_customization_log(owner_id,scope,key,previous,value,action)
             VALUES(%s,%s,%s,%s::jsonb,%s::jsonb,%s)''',
             (owner_id,scope,key,json.dumps(old),json.dumps(None if reset else value),'reset' if reset else 'save'))
+        if scope==0 and key=='cfg.features.news.source_ids':
+            from database.news_preferences import sync_sources
+            sync_sources(cur,CATALOG[key]['default'] if reset else value)
     with _lock:
         if reset:_values.pop((scope,key),None)
         else:_values[(scope,key)]=value
