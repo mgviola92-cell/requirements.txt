@@ -100,7 +100,7 @@
 <li>Command ပို့ပါ။</li>
 <li>1–100 random number နှင့် reaction ပြမည်။</li>
 </ol><p class="note">ဤ handler တွင် custom min/max argument မဖတ်ပါ။</p><a href="#top">↑ စာရင်းသို့</a></article>
-<article id="daily"><h3>Daily Challenge ကြည့်ရန်</h3><p>/daily ၊ /dailychallenge</p><p>Group | Member</p><ol><li>/daily ပို့၊ ကိုယ့် personal mission card ကိုကြည့်ပါ။</li><li>Main pinned group card တွင် group objectives ကိုကြည့်ပါ။</li><li>မိမိ mission ပြည့်လျှင် /dailyclaim 1–3၊ group mission/contribution ပြည့်လျှင် /dailygroupclaim 1–3 သုံးပါ။</li></ol><p class="note">Main card နှင့် personal temporary card မတူ။ /daily သည် main card ကိုအစားမထိုး၊ temporary card ကိုအချိန်ကြာမှဖျက်သည်။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။</p></article>
+
 <h2 id="category-game_control">🛑 ဂိမ်းအကူနှင့် ရပ်ရန်</h2>
 <article id="drawrules"><h3>Draw စည်းမျဉ်း</h3><p><code>/drawrules</code></p><p class="meta">နေရာ: Group • သုံးခွင့်: Member</p><p><b>ပုံစံ</b> <code>/drawrules</code></p><ol>
 <li>Group မှ command ပို့ပြီး စည်းမျဉ်းကိုဖတ်ပါ။</li>
@@ -142,14 +142,8 @@
 <li>မိမိနှင့်ပစ်မှတ်အကြား သံတမန်ခွင့်ရထားမှ command သုံးပါ။</li>
 <li>ပစ်မှတ်၏မျက်နှာဖုံးနံပါတ်ကို သုံး၊ Telegram user ID မသုံးပါ။</li>
 </ol><p class="note">ခွင့်သည် နောက်ညအစတွင်ကုန်သည်။</p><a href="#top">↑ စာရင်းသို့</a></article>
-<article id="dailyclaim"><h3>Personal Daily reward</h3><p><code>/dailyclaim</code></p><p class="meta">နေရာ: Group • သုံးခွင့်: Member</p><p><b>ပုံစံ</b> <code>/dailyclaim 1</code></p><ol>
-<li>/daily ဖြင့်မိမိ mission ကြည့်ပါ။</li>
-<li>Mission ပြည့်ပြီးလျှင် 1၊ 2 သို့မဟုတ် 3 နှင့် claim လုပ်ပါ။</li>
-</ol><p class="note">Group objective claim နှင့်မတူ။ တစ်မစ်ရှင်တစ်ကြိမ်၊ မပြည့်သေးလျှင် locked ဖြစ်မည်။</p><a href="#top">↑ စာရင်းသို့</a></article>
-<article id="dailygroupclaim"><h3>Group Daily reward</h3><p><code>/dailygroupclaim</code></p><p class="meta">နေရာ: Group • သုံးခွင့်: Member</p><p><b>ပုံစံ</b> <code>/dailygroupclaim 1</code></p><ol>
-<li>Main group card မှ group mission ကိုကြည့်ပါ။</li>
-<li>Group target နှင့် မိမိ contribution နှစ်ခုလုံးပြည့်မှ 1–3 နှင့် claim လုပ်ပါ။</li>
-</ol><p class="note">တစ်မစ်ရှင်တစ်ကြိမ်။ တချို့နေ့တွင် double reward ဖြစ်နိုင်သည်။</p><a href="#top">↑ စာရင်းသို့</a></article>
+
+
 <h2 id="category-studio">🗂️ Capsule / အသံ / အမှတ်တရ / Commands</h2>
 <article id="studio"><h3>Group Studio အကူအညီ</h3><p><code>/studio</code></p><p class="meta">နေရာ: Group / Private • သုံးခွင့်: Member</p><p><b>ပုံစံ</b> <code>/studio</code></p><ol>
 <li>Command ပို့ပြီး Capsule / အသံ / အမှတ်တရ / Custom Commands အသုံးပြုနည်းဖတ်ပါ။</li>
@@ -329,11 +323,7 @@
 <li>Activity အလိုက် A/B poll ပေါ်နိုင်သည်။</li>
 <li>Poll အချိန်ပြည့်မှ result ပြမည်။</li>
 </ol><p class="note">default threshold18–40၊ chance70%၊ quiet6–12 မိနစ်။ Auto poll ကို /wyrstop မရပ်နိုင်။</p><a href="#top">↑ စာရင်းသို့</a></article>
-<article id="auto_daily"><h3>Daily main card / mission refresh</h3><p><code>Command မဟုတ်သော စနစ်</code></p><p class="meta">နေရာ: Group • သုံးခွင့်: အလိုအလျောက် / Owner settings</p><p><b>ပုံစံ</b> <code>/cmd auto</code></p><ol>
-<li>မြန်မာနေ့၏မနက်ပိုင်း random minute တွင် main group card တင်ရန်စီစဉ်သည်။</li>
-<li>Group activity/mission events မှ progress ကို update လုပ်သည်။</li>
-<li>Main pinned card နှင့် /daily personal temporary card ကိုခွဲသုံးသည်။</li>
-</ol><p class="note">Scheduled minute သည် group/day အလိုက်တည်ငြိမ်သည်။ Bot offline ဖြစ်လျှင်နောက်မှတင်နိုင်။ လက်ရှိ pin သည် silent ဖြစ်သည်၊ notification အမြဲထွက်မည်ဟုမယူဆပါနှင့်။</p><a href="#top">↑ စာရင်းသို့</a></article>
+
 <article id="auto_members"><h3>Member registry / welcome</h3><p><code>Command မဟုတ်သော စနစ်</code></p><p class="meta">နေရာ: Group • သုံးခွင့်: အလိုအလျောက် / Owner settings</p><p><b>ပုံစံ</b> <code>/cmd auto</code></p><ol>
 <li>Bot မြင်ဖူးသော Group member အချက်အလက်ကို mention အတွက်သိမ်းသည်။</li>
 <li>Members ဝင်လာလျှင် welcome စာနှင့် mention ပြ၊ သတ်မှတ်အချိန်နောက်ဖျက်နိုင်သည်။</li>

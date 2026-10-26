@@ -24,20 +24,10 @@ MESSAGES = {
  'personal_play':'Group ဂိမ်းတွင် {n} ကြိမ် ပါဝင်ပါ',
  'personal_correct':'ဂိမ်းမေးခွန်း {n} ခု မှန်အောင်ဖြေပါ',
  'personal_win':'ဂိမ်း {n} ပွဲ အနိုင်ရပါ',
- 'personal_math':'Math Battle အဖြေ {n} ခု မှန်အောင်ဖြေပါ',
- 'personal_word':'Word Chain တွင် စကားလုံး {n} လုံး ဆက်ပါ',
  'word_row':'{rank}. {name} · {words} လုံး · {reward}',
  'rank_row':'{medal} {name}\n    ⭐ {points} · 🏆 {wins} · 🎮 {games}',
  'next_rank':'{bar} {percent}%\nနောက်တစ်ဆင့် {rank} အတွက် {remaining} မှတ်လိုသည်။',
  'max_rank':'💫 အမြင့်ဆုံး Rank ရောက်ရှိပြီးပါပြီ။',
- 'daily':'🎯 DAILY CHALLENGE\n━━━━━━━━━━━━━━\n📅 {day} · {mode}{double}\n\n{missions}\n\n{claim}',
- 'personal':'ကိုယ်ပိုင်မစ်ရှင်များ', 'group':'Group မစ်ရှင်များ', 'double':' · ✨ ဆုနှစ်ဆနေ့',
- 'daily_mission':'{number}. {description}\n{bar} {progress}/{needed}\n🎁 {lo}–{hi} points · {status}',
- 'daily_group_mission':'{number}. {description}\n{bar} {progress}/{needed}\n👥 {users}/{unique} ယောက် · ကိုယ်တိုင် {mine}/{personal}\n🎁 {lo}–{hi} points{status}',
- 'claimed':'✅ ဆုယူပြီး', 'ready':'✅ ဆုယူနိုင်ပြီ', 'ongoing':'⏳ ဆက်လုပ်ရန်',
- 'claim_personal':'ဆုယူရန် /dailyclaim 1–3', 'claim_group':'ဆုယူရန် /dailygroupclaim 1–3',
- 'message':'အဓိပ္ပါယ်ရှိပြီး မတူညီသောစာများ ပို့ပါ', 'play':'Group ဂိမ်းများ ပါဝင်ကစားပါ',
- 'correct':'ဂိမ်းမေးခွန်းများ မှန်အောင်ဖြေပါ', 'win':'Group ဂိမ်းများ အနိုင်ရပါ',
  'reward':' +{points} points', 'reward_error':'ဆုသိမ်းမရသေး',
 }
 
@@ -112,24 +102,3 @@ def leaderboard(players,**kwargs):
     rows=[text('rank_row',medal=medals[i] if i<3 else str(i+1)+'.',name=str(p['name'])[:80],points=p['points'],wins=p['wins'],games=p['games']) for i,p in enumerate(players[:10])]
     return text('rank',leaders='\n\n'.join(rows) or text('empty'))
 
-def daily(stats):
-    import hashlib
-    from database.daily_challenge import missions_for,game_progress,mission_state
-    double=int(hashlib.sha256(f"{stats.get('chat_id')}:{stats['day']}:double".encode()).hexdigest(),16)%7==0
-    multiplier=2 if double else 1;rows=[]
-    if stats.get('personal'):
-        for mission,progress in stats['missions']:
-            i,kind,game,need,lo,hi=mission
-            desc=text('personal_math' if game=='math_battle' else 'personal_word' if game=='word_chain' else 'personal_'+kind,n=need)
-            status=text('claimed' if i in stats.get('claimed',set()) else 'ready' if progress>=need else 'ongoing')
-            rows.append(text('daily_mission',number=i,description=desc,bar=bar(progress/max(1,need)),progress=min(progress,need),needed=need,lo=lo*multiplier,hi=hi*multiplier,status=status))
-    else:
-        for i,mission in enumerate(missions_for(stats['chat_id'],stats['day']),1):
-            kind,need,unique,personal,(lo,hi)=mission
-            total,users,_=(stats['total'],stats['users'],0) if kind=='message' else game_progress(stats['chat_id'],stats['day'],kind)
-            viewer=stats.get('viewer_id');mine=0;status=''
-            if viewer is not None:
-                _,_,mine=mission_state(stats['chat_id'],viewer,mission,stats['day'])
-                status=' · '+text('claimed' if i in stats.get('claimed',set()) else 'ready' if total>=need and users>=unique and mine>=personal else 'ongoing')
-            rows.append(text('daily_group_mission',number=i,description=text(kind),bar=bar(min(total/max(1,need),users/max(1,unique))),progress=min(total,need),needed=need,users=min(users,unique),unique=unique,mine=min(mine,personal) if viewer is not None else '—',personal=personal,lo=lo*multiplier,hi=hi*multiplier,status=status))
-    return text('daily',day=stats['day'],mode=text('personal' if stats.get('personal') else 'group'),double=text('double') if double else '',missions='\n\n'.join(rows),claim=text('claim_personal' if stats.get('personal') else 'claim_group'))

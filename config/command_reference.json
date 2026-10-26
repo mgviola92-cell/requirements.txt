@@ -306,24 +306,6 @@
       "notes": "ဤ handler တွင် custom min/max argument မဖတ်ပါ။"
     },
     {
-      "id": "daily",
-      "aliases": [
-        "daily",
-        "dailychallenge"
-      ],
-      "title": "Daily Challenge ကြည့်ရန်",
-      "category": "games",
-      "where": "Group",
-      "who": "Member",
-      "usage": "/daily",
-      "steps": [
-        "/daily ပို့၊ ကိုယ့် personal mission card ကိုကြည့်ပါ။",
-        "Main pinned group card တွင် group objectives ကိုကြည့်ပါ။",
-        "မိမိ mission ပြည့်လျှင် /dailyclaim 1–3၊ group mission/contribution ပြည့်လျှင် /dailygroupclaim 1–3 သုံးပါ။"
-      ],
-      "notes": "Main card နှင့် personal temporary card မတူ။ /daily သည် main card ကိုအစားမထိုး၊ temporary card ကိုအချိန်ကြာမှဖျက်သည်။ စာကတ်နှင့် emoji ဖြင့်ပြသည်။ ပုံ upload မလုပ်ပါ။"
-    },
-    {
       "id": "drawrules",
       "aliases": [
         "drawrules"
@@ -498,38 +480,6 @@
         "ပစ်မှတ်၏မျက်နှာဖုံးနံပါတ်ကို သုံး၊ Telegram user ID မသုံးပါ။"
       ],
       "notes": "ခွင့်သည် နောက်ညအစတွင်ကုန်သည်။"
-    },
-    {
-      "id": "dailyclaim",
-      "aliases": [
-        "dailyclaim"
-      ],
-      "title": "Personal Daily reward",
-      "category": "game_control",
-      "where": "Group",
-      "who": "Member",
-      "usage": "/dailyclaim 1",
-      "steps": [
-        "/daily ဖြင့်မိမိ mission ကြည့်ပါ။",
-        "Mission ပြည့်ပြီးလျှင် 1၊ 2 သို့မဟုတ် 3 နှင့် claim လုပ်ပါ။"
-      ],
-      "notes": "Group objective claim နှင့်မတူ။ တစ်မစ်ရှင်တစ်ကြိမ်၊ မပြည့်သေးလျှင် locked ဖြစ်မည်။"
-    },
-    {
-      "id": "dailygroupclaim",
-      "aliases": [
-        "dailygroupclaim"
-      ],
-      "title": "Group Daily reward",
-      "category": "game_control",
-      "where": "Group",
-      "who": "Member",
-      "usage": "/dailygroupclaim 1",
-      "steps": [
-        "Main group card မှ group mission ကိုကြည့်ပါ။",
-        "Group target နှင့် မိမိ contribution နှစ်ခုလုံးပြည့်မှ 1–3 နှင့် claim လုပ်ပါ။"
-      ],
-      "notes": "တစ်မစ်ရှင်တစ်ကြိမ်။ တချို့နေ့တွင် double reward ဖြစ်နိုင်သည်။"
     },
     {
       "id": "studio",
@@ -1276,21 +1226,6 @@
         "Poll အချိန်ပြည့်မှ result ပြမည်။"
       ],
       "notes": "default threshold18–40၊ chance70%၊ quiet6–12 မိနစ်။ Auto poll ကို /wyrstop မရပ်နိုင်။"
-    },
-    {
-      "id": "auto_daily",
-      "aliases": [],
-      "title": "Daily main card / mission refresh",
-      "category": "auto",
-      "where": "Group",
-      "who": "အလိုအလျောက် / Owner settings",
-      "usage": "/cmd auto",
-      "steps": [
-        "မြန်မာနေ့၏မနက်ပိုင်း random minute တွင် main group card တင်ရန်စီစဉ်သည်။",
-        "Group activity/mission events မှ progress ကို update လုပ်သည်။",
-        "Main pinned card နှင့် /daily personal temporary card ကိုခွဲသုံးသည်။"
-      ],
-      "notes": "Scheduled minute သည် group/day အလိုက်တည်ငြိမ်သည်။ Bot offline ဖြစ်လျှင်နောက်မှတင်နိုင်။ လက်ရှိ pin သည် silent ဖြစ်သည်၊ notification အမြဲထွက်မည်ဟုမယူဆပါနှင့်။"
     },
     {
       "id": "auto_members",

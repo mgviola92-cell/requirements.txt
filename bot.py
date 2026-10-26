@@ -22,7 +22,6 @@ import json
 import html
 import urllib.request
 import urllib.parse
-from features.daily_challenge import register_daily_challenge
 from telebot.types import ChatPermissions
 from telebot.handler_backends import ContinueHandling
 from config.ranks import RANKS, get_rank_data, get_rank_title, get_rank_progress
@@ -260,7 +259,6 @@ register_news(bot)
 from features.draw_guess import register as register_draw_guess
 register_draw_guess(app,bot)
 
-register_daily_challenge(bot)
 from features.would_you_rather import register as register_would_you_rather
 register_would_you_rather(bot)
 from features.imposter import register as register_imposter

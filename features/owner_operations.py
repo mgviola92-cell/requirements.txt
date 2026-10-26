@@ -27,11 +27,11 @@ GAME_LABELS={
     'dice':'🎲 Dice','slot':'🎰 Slot','eight_ball':'🎱 Magic 8 Ball',
     'love':'❤️ Love Calculator','random':'🎲 Random Number',
     'emoji_guess':'😀 Emoji Guess','speed_tap':'⚡ Speed Tap','word_chain':'🔗 Word Chain',
-    'math_battle':'🧮 Math Battle','daily_challenge':'📅 Daily Challenge',
+    'math_battle':'🧮 Math Battle',
 
     'would_you_rather':'🤔 Would You Rather','imposter':'🎭 Imposter','nan_yate':'🏯 နန်းရိပ်','draw_guess':'🎨 Draw & Guess'}
 GAME_COMMANDS={'coin':'/coin','trivia':'/trivia','guess':'/guess','dice':'/dice','slot':'/slot',
-    'eight_ball':'/8ball','love':'/love','random':'/random','daily_challenge':'/daily',
+    'eight_ball':'/8ball','love':'/love','random':'/random',
     'math_battle':'/mathbattle',
     'imposter':'/imposter','word_chain':'/wordchain',
     'emoji_guess':'/emoji','speed_tap':'/speedtap','would_you_rather':'/wyr','nan_yate':'/nanyate','draw_guess':'/draw'}
@@ -41,7 +41,7 @@ GAME_HANDLERS={k:'enabled.bot.'+fn for k,fn in {
     'math_battle':'math_battle_command',
     'word_chain':'word_chain_command',
     'emoji_guess':'emoji_guess_command','speed_tap':'speed_tap_command'}.items()}
-GAME_HANDLERS.update(draw_guess='enabled.features.draw_guess.command',nan_yate='enabled.features.nan_yate.command',imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command',daily_challenge='enabled.features.daily_challenge.daily_command')
+GAME_HANDLERS.update(draw_guess='enabled.features.draw_guess.command',nan_yate='enabled.features.nan_yate.command',imposter='enabled.features.imposter.command',would_you_rather='enabled.features.would_you_rather.wyr_command')
 COMMAND_GAMES.update({command.lstrip('/'):kind for kind,command in GAME_COMMANDS.items()})
 COMMAND_GAMES['drawguess']='draw_guess'
 

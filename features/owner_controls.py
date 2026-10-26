@@ -21,7 +21,7 @@ KEYS=sorted(CATALOG,key=catalog_order)
 CATEGORIES=sorted({e['category'] for e in CATALOG.values()})
 LABELS={'bot':'Commands & Group Management','system':'System Messages','core.rewards':'Game Rewards',
         'core.keyboards':'Buttons','wyr_auto':'WYR Auto Spawn',
-        'config.ranks':'Rank Tiers','database.daily_challenge':'Daily Missions & Rewards'}
+        'config.ranks':'Rank Tiers'}
 
 def category_label(category):
     return LABELS.get(category,category.split('.')[-1].replace('_',' ').title())

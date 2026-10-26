@@ -183,8 +183,8 @@ class OwnerOperationsTests(unittest.TestCase):
     def test_game_menu_has_all_existing_games_newest_first(self):
         kinds=[kind for kind,_ in ops.ordered_games()]
         self.assertEqual(kinds[:4],['draw_guess','nan_yate','imposter','would_you_rather'])
-        self.assertEqual(len(kinds),17)
-        self.assertTrue({'coin','trivia','guess','dice','slot','eight_ball','love','random','daily_challenge'}<=set(kinds))
+        self.assertEqual(len(kinds),16)
+        self.assertTrue({'coin','trivia','guess','dice','slot','eight_ball','love','random'}<=set(kinds))
         self.assertEqual(set(ops.GAME_HANDLERS),set(kinds))
         self.assertEqual(set(ops.GAME_COMMANDS),set(kinds))
         from core.customization import CATALOG
@@ -204,18 +204,3 @@ class OwnerOperationsTests(unittest.TestCase):
                             seen.append(b.callback_data.split(':')[2]);self.assertNotIn('🆕',b.text)
         self.assertEqual(seen,[kind for kind,_ in ops.ordered_games()])
 
-    def test_daily_auto_respects_test_scope_and_keeps_existing_card_updates(self):
-        import ast
-        import threading
-        from pathlib import Path
-        source=ast.parse(Path('features/daily_challenge.py').read_text())
-        function=next(n for n in ast.walk(source) if isinstance(n,ast.FunctionDef) and n.name=='publish')
-        bot=MagicMock();overview=Mock(return_value={})
-        env={'_ready':True,'today':lambda:'today','time':time,'_lock':threading.RLock(),
-             '_last_refresh':{},'get_card_id':Mock(return_value=None),'overview':overview,
-             'card':lambda snapshot:'card','edit_card':__import__('ui.text_cards',fromlist=['edit_card']).edit_card,'TextCard':__import__('ui.text_cards',fromlist=['TextCard']).TextCard,'bot':bot,'delivery_ready':lambda cid:True}
-        exec(compile(ast.fix_missing_locations(ast.Module(body=[function],type_ignores=[])),'daily-publish','exec'),env)
-        with patch.object(ops,'feature_allowed',return_value=False):
-            self.assertFalse(env['publish'](-101,force=True));overview.assert_not_called();bot.send_photo.assert_not_called()
-            env['get_card_id'].return_value=123
-            self.assertTrue(env['publish'](-101,force=True));bot.edit_message_text.assert_called_once()
