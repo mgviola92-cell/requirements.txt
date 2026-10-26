@@ -57,6 +57,19 @@ def register(bot,replace_card,clear_draft):
         try:
             with LOCK:
                 uid=q.from_user.id
+                if q.data=='nws:home':
+                    bot.answer_callback_query(q.id)
+                    clear_draft(uid)
+                    kb=types.InlineKeyboardMarkup()
+                    kb.add(types.InlineKeyboardButton('🗞️ သတင်းဌာနရွေးရန်',callback_data='nws:open'))
+                    kb.add(types.InlineKeyboardButton('↩️ Owner Panel',callback_data='own:menu'))
+                    body=('📰 သတင်းထိန်းချုပ်မှု\n\n'
+                          f"လက်ရှိရွေးထားသောဌာန — {len(news.sources_for(0))} ခု\n"
+                          f"သတင်းစစ်နှုန်း — {news.cfg('refresh_minutes',0)} မိနစ်\n\n"
+                          'ရွေးထားသည့်ဌာနတစ်ခုခုမှ သတင်းအသစ်ရလျှင် Group များသို့ စုပို့မည်။ '
+                          'Group Admin သည် /newsoff နှင့် /newson ကို ဆက်အသုံးပြုနိုင်သည်။')
+                    replace_card(uid,uid,body,kb)
+                    return
                 if q.data=='nws:open':
                     bot.answer_callback_query(q.id);open_picker(uid);return
                 parts=q.data.split(':');draft=DRAFTS.get(uid)
