@@ -142,8 +142,8 @@ def register(app,bot,replace_card,back_button,clear_draft):
         card(uid,'⚙️ GROUP CONTROL\n\nDefault သို့မဟုတ် ပြင်ချင်တဲ့ Group ကို ရွေးပါ။',kb)
     def menu(uid,scope):
         kb=types.InlineKeyboardMarkup(row_width=1)
-        kb.add(button('💌 ချော့စာ ဆက်တင်',f'ctl:list:{scope}:setting:{CATEGORIES.index('ချော့စာ')}:0'),
-               button('📖 ချော့စာများ ကြည့် / ပြင်',f'ctl:list:{scope}:message:{CATEGORIES.index('ချော့စာ စာတိုဘဏ်')}:0'))
+        kb.add(button('💌 ချော့စာ ဆက်တင်',f'ctl:list:{scope}:setting:{CATEGORIES.index("ချော့စာ")}:0'),
+               button('📖 ချော့စာများ ကြည့် / ပြင်',f'ctl:list:{scope}:message:{CATEGORIES.index("ချော့စာ စာတိုဘဏ်")}:0'))
         kb.add(button('💬 Bot Messages',f'ctl:cats:{scope}:message'),button('⚙️ Settings & Functions',f'ctl:cats:{scope}:setting'),button('⬅️ Groups','ctl:home:0'))
         card(uid,f"⚙️ {'All Groups · Default' if scope==0 else 'Group '+str(scope)}\n\nပြင်ချင်တဲ့အပိုင်းကို ရွေးပါ။",kb)
     def categories(uid,scope,kind):
