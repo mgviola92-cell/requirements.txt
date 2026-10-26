@@ -531,7 +531,7 @@ def register_owner_dashboard(app,bot):
 
     def owner_buttons():
         kb=types.InlineKeyboardMarkup(row_width=2)
-        kb.add(types.InlineKeyboardButton("📰 သတင်းဌာနရွေးရန်",callback_data="nws:open"))
+        kb.add(types.InlineKeyboardButton("📰 သတင်းထိန်းချုပ်မှု",callback_data="nws:home"))
         kb.add(types.InlineKeyboardButton("⚙️ Group Control & Messages",callback_data="ctl:home:0"))
         kb.add(types.InlineKeyboardButton("🛠️ Owner Tools",callback_data="ops:home"))
         from features.draw_guess import base_url
