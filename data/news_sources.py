@@ -8,7 +8,7 @@ SOURCES=[
  ('mizzima','Mizzima','https://bur.mizzima.com/feed/','mizzima',True),
  ('bbc_burmese','BBC မြန်မာ','https://feeds.bbci.co.uk/burmese/rss.xml','bbc',True),
  ('rfa','RFA မြန်မာ','https://www.rfa.org/burmese/rss2.xml','rfa',True),
- ('voa','VOA မြန်မာ','https://burmese.voanews.com/api/zgqmyei__pp','voa',True),
+ ('voa','VOA မြန်မာ','https://burmese.voanews.com/api/zb_u_l-vomx-tpeqrjy','voa',True),
  ('frontier','Frontier Myanmar','https://www.frontiermyanmar.net/en/feed/','frontier',True),
  ('frontier_mm','Frontier မြန်မာ','https://www.frontiermyanmar.net/mm/feed/','frontier',True),
  ('kachin','Kachin News Group','https://burmese.kachinnews.com/feed/','kachin',True),
