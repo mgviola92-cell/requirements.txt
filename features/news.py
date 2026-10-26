@@ -24,7 +24,7 @@ MESSAGES={
  'warming':'သတင်း cache ကို ပြင်ဆင်နေပါသည်။ ခဏနေရင် /news ပြန်သုံးပါ။',
  'group':'Auto news ကို Group ထဲတွင် /newson သို့မဟုတ် /newsoff ဖြင့်ထိန်းပါ။',
  'admin':'Group Admin သို့မဟုတ် Bot Owner သာ ပြင်နိုင်သည်။',
- 'on':'✅ ဒီ Group အတွက် auto news ဖွင့်ပြီးပြီ။ Source များတွင်သတင်းအသစ်ရှိပြီး သတ်မှတ်ချက်ပြည့်မှ ပို့မည်။',
+ 'on':'✅ ဒီ Group အတွက် auto news ဖွင့်ပြီးပြီ။ Owner ရွေးထားသောဌာန တစ်ခုခုမှ သတင်းအသစ်ရလျှင် စုပို့မည်။',
  'off':'⏸ ဒီ Group အတွက် auto news ပိတ်ပြီးပြီ။ /news နဲ့ ဆက်ဖတ်နိုင်သည်။',
  'status':'📰 သတင်းစနစ် အခြေအနေ\n\nအလိုအလျောက်ပို့ခြင်း: {enabled}\nပို့ချိန်အကွာအဝေး: {minutes} မိနစ်\nဖတ်နိုင်သည့်သတင်း: နောက်ဆုံး {hours} နာရီအတွင်း\nရွေးထားသော feed: {sources} ခု\n\nOwner ရွေးထားသော သတင်းဌာန တစ်ခုခုက သတင်းအသစ်ရလျှင် ပို့မည်။ မီဒီယာနှစ်ခု တူညီဖော်ပြရန် မလိုပါ။\n\nခလုတ်မနှိပ်ဘဲ ၅ မိနစ်ကြာလျှင် ဒီစာကို အလိုအလျောက်ဖျက်မည်။',
  'error':'သတင်းစနစ်ကို ခေတ္တမသုံးနိုင်သေးပါ။ ပြန်စမ်းပါ။',
@@ -215,7 +215,7 @@ def auto(bot):
                         # Only explicitly edited briefs / publisher corrections trigger updates.
                         if not any((a.get('brief') or a['correction']) and sent.get(a['key'])!=a['revision'] for a in group):continue
                     eligible.append(group)
-                body,items,_=render(cid,eligible,health)
+                body,items,_=render(cid,eligible[:5],health)
                 if items:
                     send(bot,cid,body,parse_mode='HTML',disable_web_page_preview=True)
                     with get_db_connection() as con,con.cursor() as cur:
@@ -264,7 +264,7 @@ def register(bot):
             command=m.text.split()[0].split('@')[0].lstrip('/')
             if command=='newsstatus':
                 with get_db_connection() as con,con.cursor() as cur:cur.execute('SELECT enabled FROM news_groups WHERE chat_id=%s',(m.chat.id,));row=cur.fetchone()
-                reply(bot,m,text('status',enabled='ဖွင့်ထားသည် ✅' if enabled(m.chat.id,row[0] if row else None) else 'ပိတ်ထားသည် ⏸',minutes=cfg('interval_minutes',m.chat.id),hours=cfg('max_age_hours',m.chat.id),minimum=cfg('auto_min_sources',m.chat.id),sources=len(sources_for(m.chat.id))));return
+                reply(bot,m,text('status',enabled='ဖွင့်ထားသည် ✅' if enabled(m.chat.id,row[0] if row else None) else 'ပိတ်ထားသည် ⏸',minutes=cfg('refresh_minutes',0),hours=cfg('max_age_hours',m.chat.id),minimum=cfg('auto_min_sources',m.chat.id),sources=len(sources_for(m.chat.id))));return
             if not manage(m):reply(bot,m,text('admin'));return
             with get_db_connection() as con,con.cursor() as cur:
                 cur.execute('INSERT INTO news_groups(chat_id,enabled,next_due,retry_after) VALUES(%s,%s,NOW(),NULL) ON CONFLICT(chat_id) DO UPDATE SET enabled=EXCLUDED.enabled,next_due=NOW(),retry_after=NULL',(m.chat.id,command=='newson'))
