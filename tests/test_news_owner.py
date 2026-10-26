@@ -20,6 +20,13 @@ class SourcePickerTests(unittest.TestCase):
         self.auth.stop();self.panel.stop();self.refresh.stop();self.sources.stop();news_owner.DRAFTS.clear()
     def q(self,uid=1,data='nws:open',kind='private',mid=10):return NS(id='q',data=data,from_user=NS(id=uid),message=NS(chat=NS(type=kind,id=uid),message_id=mid))
     def tap(self,q):self.callbacks[0](q)
+    def test_owner_news_control_submenu(self):
+        self.tap(self.q(data='nws:home'))
+        self.replace.assert_called_once()
+        self.assertIn('သတင်းထိန်းချုပ်မှု',self.replace.call_args.args[2])
+        buttons=self.replace.call_args.args[3].keyboard
+        self.assertTrue(any(b.callback_data=='nws:open' for row in buttons for b in row))
+
     def test_unauthorized_or_group_never_opens(self):
         self.tap(self.q(uid=2));self.tap(self.q(kind='group'));self.replace.assert_not_called()
     def test_toggle_is_draft_until_save_and_empty_is_valid(self):
@@ -80,6 +87,16 @@ class AutomaticNewsTests(unittest.TestCase):
     def test_startup_gate_does_not_advance_cursor(self):
         send,cur=self.run_auto(60,500,300,gate=False);send.assert_not_called()
         self.assertFalse(any('INSERT INTO news_auto_state' in c.args[0] for c in cur.execute.call_args_list))
+    def test_news_status_uses_active_refresh_interval(self):
+        import inspect
+        source=inspect.getsource(news.register)
+        self.assertIn("minutes=cfg('refresh_minutes',0)",source)
+
+    def test_digest_never_exceeds_five_stories(self):
+        import inspect
+        source=inspect.getsource(news.auto)
+        self.assertIn('render(cid,eligible[:5],health)',source)
+
     def test_source_choice_is_global(self):
         with patch.object(news,'cfg',return_value=['dvb']) as cfg:self.assertEqual(news.sources_for(-123),['dvb'])
         cfg.assert_called_once_with('source_ids',0)
