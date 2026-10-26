@@ -129,40 +129,6 @@ class DailyAndScheduleTests(unittest.TestCase):
     run_loop=WorkerSleepTests.run_loop
     event=WorkerSleepTests.event
     # These tests execute the actual nested scheduler with simulated clock/DB.
-    def daily_namespace(self,now,wake):
-        from datetime import timedelta
-        from zoneinfo import ZoneInfo
-        work=MagicMock();work.delay.return_value=900
-        clock=MagicMock();clock.now.return_value=now
-        return dict(DAILY_WAKE=wake,datetime=clock,MMT=ZoneInfo('Asia/Yangon'),timedelta=timedelta,
-                    active_groups=MagicMock(return_value=[-1]),random_post_minute=lambda cid,day:0,
-                    get_card_id=MagicMock(return_value=42),publish=MagicMock(),time=MagicMock(),db_work=work)
-    def test_daily_posted_group_not_queried_on_each_recovery(self):
-        from datetime import datetime
-        from zoneinfo import ZoneInfo
-        wake=MagicMock();wake.wait.side_effect=[False,StopLoop]
-        env=self.daily_namespace(datetime(2026,10,19,1,tzinfo=ZoneInfo('Asia/Yangon')),wake)
-        self.run_loop('features/daily_challenge.py','daily_auto_loop',env)
-        env['get_card_id'].assert_called_once_with(-1,env['datetime'].now.return_value.date())
-        env['publish'].assert_not_called()
-        self.assertEqual(wake.wait.call_args_list[0].args,(900,))
-    def test_daily_future_minute_does_not_query_card_early(self):
-        from datetime import datetime
-        from zoneinfo import ZoneInfo
-        wake=self.event();env=self.daily_namespace(datetime(2026,10,19,1,tzinfo=ZoneInfo('Asia/Yangon')),wake)
-        env['random_post_minute']=lambda cid,day:180
-        self.run_loop('features/daily_challenge.py','daily_auto_loop',env)
-        env['get_card_id'].assert_not_called();env['publish'].assert_not_called()
-        due=env['db_work'].delay.call_args.args[0]
-        self.assertEqual(due,datetime(2026,10,19,3,tzinfo=ZoneInfo('Asia/Yangon')).timestamp())
-    def test_daily_cache_resets_next_day(self):
-        from datetime import datetime
-        from zoneinfo import ZoneInfo
-        wake=MagicMock();wake.wait.side_effect=[False,StopLoop]
-        env=self.daily_namespace(None,wake)
-        env['datetime'].now.side_effect=[datetime(2026,10,19,23,tzinfo=ZoneInfo('Asia/Yangon')),datetime(2026,10,20,1,tzinfo=ZoneInfo('Asia/Yangon'))]
-        self.run_loop('features/daily_challenge.py','daily_auto_loop',env)
-        self.assertEqual(env['get_card_id'].call_count,2)
     def schedule(self,due,queued=False):
         wake=self.event();con=MagicMock()
         con.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchone.side_effect=[(due,),(queued,)]

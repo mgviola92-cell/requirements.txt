@@ -196,7 +196,7 @@ class OwnerOperationsTests(unittest.TestCase):
         q=NS(id='q',data='ops:features:0',from_user=NS(id=42),message=NS(message_id=7,chat=NS(id=42,type='private')))
         seen=[]
         with patch.object(owner,'_load_panel_state',return_value=(42,7,None)),patch.object(ops,'get_db_connection',return_value=conn),patch.object(ops,'draft'),patch.object(ops,'refresh'):
-            for page in range(3):
+            for page in range((len(ops.ordered_games()) + 7)//8):
                 q.data=f'ops:features:{page}';handlers['owner_tools_action'](q)
                 for row in replace.call_args.args[3].keyboard:
                     for b in row:
