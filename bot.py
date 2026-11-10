@@ -232,7 +232,7 @@ def get_next_emoji_question(chat_id):
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 from core.traffic_meter import install_telegram
 install_telegram()
-from core.startup_safety import FreshUpdatesBot
+from core.startup_safety import FreshUpdatesBot, POLLING_ALLOWED_UPDATES
 bot = FreshUpdatesBot(BOT_TOKEN)
 from core.customization import initialize as initialize_customization, install_handler_controls
 initialize_customization()
@@ -6198,6 +6198,7 @@ def run_bot():
             bot.infinity_polling(
                 timeout=30,
                 long_polling_timeout=30,
+                allowed_updates=POLLING_ALLOWED_UPDATES,
                 skip_pending=True
             )
         except Exception as e:
