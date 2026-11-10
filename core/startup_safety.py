@@ -4,6 +4,23 @@ import threading
 import time
 from telebot import TeleBot
 
+# Telegram keeps the previous allowed_updates selection when a later
+# getUpdates call omits the parameter. Always subscribe to the update types
+# used by this bot so an old polling/webhook selection cannot silently filter
+# out normal messages or inline-button callbacks.
+POLLING_ALLOWED_UPDATES = [
+    "message",
+    "edited_message",
+    "channel_post",
+    "edited_channel_post",
+    "callback_query",
+    "poll_answer",
+    "my_chat_member",
+    "chat_member",
+    "chat_join_request",
+]
+
+
 class FreshUpdatesBot(TeleBot):
     def __init__(self, *args, **kwargs):
         self.started_at = int(time.time())
@@ -21,11 +38,20 @@ class FreshUpdatesBot(TeleBot):
             # old menus usable; startup polling separately clears queued clicks.
             if message is not None:
                 date = getattr(message, 'edit_date', None) or getattr(message, 'date', None)
-                if isinstance(date, (int, float)) and date < max(self.started_at, now - 120):
+                stale = (isinstance(date, (int, float))
+                         and date < max(self.started_at, now - 120))
+                command_text = getattr(message, 'text', None)
+                if isinstance(command_text, str) and command_text.lstrip().startswith('/'):
+                    command = command_text.strip().split(maxsplit=1)[0].split('@', 1)[0][:32]
+                    chat = getattr(message, 'chat', None)
+                    chat_type = getattr(chat, 'type', 'unknown')
+                    print(f"[TG UPDATE TRACE] command={command} chat_type={chat_type} status={'stale_drop' if stale else 'accepted'}")
+                if stale:
                     continue
             fresh.append(update)
         if fresh:
             return super().process_new_updates(fresh)
+
 
 class AutoPostGate:
     """Startup jitter plus a bounded batch per minute, shared by auto feeds."""
@@ -48,6 +74,7 @@ class AutoPostGate:
                 return False
             self.count += 1
             return True
+
 
 AUTO_POSTS = AutoPostGate()
 
