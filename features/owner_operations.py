@@ -15,7 +15,8 @@ from telebot.handler_backends import ContinueHandling
 from database.db import get_db_connection
 from core.batched_writes import BatchWriter
 
-_USAGE=BatchWriter("INSERT INTO owner_usage_events(chat_id,kind,label,event_key,created_at) VALUES(%s,%s,%s,%s,%s) ON CONFLICT(event_key) DO NOTHING")
+# Activity metadata is noncritical; batch once per minute to reduce DB wakeups.
+_USAGE=BatchWriter("INSERT INTO owner_usage_events(chat_id,kind,label,event_key,created_at) VALUES(%s,%s,%s,%s,%s) ON CONFLICT(event_key) DO NOTHING",interval=60)
 
 SCHEDULE_WAKE=db_work.signal('owner_schedules','owner_broadcasts')
 MMT=ZoneInfo('Asia/Yangon')
