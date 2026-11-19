@@ -100,3 +100,41 @@ class AutomaticNewsTests(unittest.TestCase):
     def test_source_choice_is_global(self):
         with patch.object(news,'cfg',return_value=['dvb']) as cfg:self.assertEqual(news.sources_for(-123),['dvb'])
         cfg.assert_called_once_with('source_ids',0)
+
+class NewsCleanupTests(unittest.TestCase):
+    def run_cleanup(self,error=None):
+        con=MagicMock();con.__enter__.return_value=con
+        cur=con.cursor.return_value.__enter__.return_value
+        cur.fetchall.return_value=[(-100123,456)]
+        bot=MagicMock()
+        if error:bot.delete_message.side_effect=error
+        with patch.object(news,'get_db_connection',return_value=con):
+            news.cleanup(bot)
+        return cur,bot
+
+    def sql_calls(self,cur):
+        return [call.args[0] for call in cur.execute.call_args_list]
+
+    def test_permanent_migrated_group_error_drops_tracking_row(self):
+        error=Exception('Bad Request: group chat was upgraded to a supergroup chat')
+        error.error_code=400;error.description='Bad Request: group chat was upgraded to a supergroup chat'
+        cur,bot=self.run_cleanup(error)
+        calls=self.sql_calls(cur)
+        self.assertTrue(any(q.startswith('DELETE FROM news_messages') for q in calls))
+        self.assertFalse(any(q.startswith('UPDATE news_messages') for q in calls))
+        bot.delete_message.assert_called_once_with(-100123,456)
+
+    def test_transient_error_is_retried(self):
+        error=Exception('Too Many Requests: retry later')
+        error.error_code=429;error.description='Too Many Requests: retry later'
+        cur,bot=self.run_cleanup(error)
+        calls=self.sql_calls(cur)
+        self.assertTrue(any(q.startswith('UPDATE news_messages') for q in calls))
+        self.assertFalse(any(q.startswith('DELETE FROM news_messages') for q in calls))
+
+    def test_successful_delete_removes_tracking_row(self):
+        cur,bot=self.run_cleanup()
+        calls=self.sql_calls(cur)
+        bot.delete_message.assert_called_once_with(-100123,456)
+        self.assertTrue(any(q.startswith('DELETE FROM news_messages') for q in calls))
+
