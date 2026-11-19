@@ -87,10 +87,21 @@ def cleanup(bot):
         for cid,mid in cur.fetchall():
             try:bot.delete_message(cid,mid)
             except Exception as exc:
-                reason=str(exc).lower()
-                if 'message to delete not found' not in reason:
-                    cur.execute("UPDATE news_messages SET expires_at=NOW()+INTERVAL '1 minute' WHERE chat_id=%s AND message_id=%s",(cid,mid))
-                    LOG.warning('News cleanup retry: %s',type(exc).__name__);continue
+                error_code=getattr(exc,'error_code',None)
+                reason=str(getattr(exc,'description',None) or exc).lower()
+                # Telegram 400/403/404 failures are permanent for this message.
+                # Old group IDs after a group->supergroup migration cannot be
+                # used to delete the message, so drop the expired tracking row.
+                permanent=(error_code in (400,403,404) or
+                    'message to delete not found' in reason or
+                    'group chat was upgraded to a supergroup chat' in reason or
+                    'chat not found' in reason or 'message can\'t be deleted' in reason)
+                if permanent:
+                    cur.execute('DELETE FROM news_messages WHERE chat_id=%s AND message_id=%s',(cid,mid))
+                    LOG.warning('News cleanup dropped expired message after permanent Telegram error (%s)',error_code or 'permanent')
+                    continue
+                cur.execute("UPDATE news_messages SET expires_at=NOW()+INTERVAL '1 minute' WHERE chat_id=%s AND message_id=%s",(cid,mid))
+                LOG.warning('News cleanup retry: %s',type(exc).__name__);continue
             cur.execute('DELETE FROM news_messages WHERE chat_id=%s AND message_id=%s',(cid,mid))
 
 def ingest(source,now):
